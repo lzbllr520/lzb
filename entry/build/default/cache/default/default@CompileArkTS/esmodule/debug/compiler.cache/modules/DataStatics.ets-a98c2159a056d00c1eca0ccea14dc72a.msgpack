@@ -1,0 +1,1083 @@
+Ôr@Ÿªassertions¤code´customTransformCache¬dependencies¢id¤meta±moduleSideEffects¬originalCode±originalSourcemap«resolvedIds®sourcemapChainµsyntheticNamedExportsµtransformDependencies®transformFiles¨cacheAstÔrAÚŠ4if (!("finalizeConstruction" in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+}
+import { LvMarkdownIn, lvText, lvTitle, lvLink, lvCode, lvQuote } from '@luvi/lv-markdown-in';
+class KnowledgeCard extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.__info = new SynchedPropertyObjectOneWayPU(params.info, this, "info");
+        this.onCardClick = () => { };
+        this.__isPressed = new ObservedPropertySimplePU(false, this, "isPressed");
+        this.setInitiallyProvidedValue(params);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params) {
+        if (params.onCardClick !== undefined) {
+            this.onCardClick = params.onCardClick;
+        }
+        if (params.isPressed !== undefined) {
+            this.isPressed = params.isPressed;
+        }
+    }
+    updateStateVars(params) {
+        this.__info.reset(params.info);
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__info.purgeDependencyOnElmtId(rmElmtId);
+        this.__isPressed.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.__info.aboutToBeDeleted();
+        this.__isPressed.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    get info() {
+        return this.__info.get();
+    }
+    set info(newValue) {
+        this.__info.set(newValue);
+    }
+    get isPressed() {
+        return this.__isPressed.get();
+    }
+    set isPressed(newValue) {
+        this.__isPressed.set(newValue);
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create({ space: 12 });
+            Context.animation({ duration: 150, curve: Curve.EaseInOut });
+            Column.padding(20);
+            Column.width('100%');
+            Column.height(160);
+            Column.alignItems(HorizontalAlign.Start);
+            Column.justifyContent(FlexAlign.Start);
+            Column.borderRadius(16);
+            Column.backgroundColor('rgba(10, 10, 15, 0.3)');
+            Column.backdropBlur(12);
+            Column.backgroundColor('rgba(10, 10, 15, 0.3)');
+            Column.borderRadius(16);
+            Column.border({
+                width: 1.5,
+                color: 'rgba(255, 255, 255, 0.15)'
+            });
+            Column.shadow({
+                radius: 30,
+                color: 'rgba(173, 216, 230, 0.2)',
+                offsetX: 0,
+                offsetY: 0
+            });
+            Column.clip(true);
+            Column.scale({ x: this.isPressed ? 0.97 : 1.0, y: this.isPressed ? 0.97 : 1.0 });
+            Context.animation(null);
+            Column.onClick(() => {
+                this.onCardClick(ObservedObject.GetRawObject(this.info));
+            });
+            Column.onTouch((event) => {
+                if (event.type === TouchType.Down) {
+                    this.isPressed = true;
+                }
+                if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+                    this.isPressed = false;
+                }
+            });
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(this.info.title);
+            Text.fontSize(20);
+            Text.fontWeight(FontWeight.Bold);
+            Text.fontColor(Color.White);
+            Text.width('100%');
+            Text.textAlign(TextAlign.Start);
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.maxLines(2);
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(this.info.description);
+            Text.fontSize(14);
+            Text.fontColor('rgba(255, 255, 255, 0.75)');
+            Text.width('100%');
+            Text.textAlign(TextAlign.Start);
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.maxLines(3);
+            Text.lineHeight(20);
+        }, Text);
+        Text.pop();
+        Column.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+class KnowledgeDetailDialog extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.__item = new SynchedPropertyObjectTwoWayPU(params.item, this, "item");
+        this.controller = undefined;
+        this.setInitiallyProvidedValue(params);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params) {
+        if (params.controller !== undefined) {
+            this.controller = params.controller;
+        }
+    }
+    updateStateVars(params) {
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__item.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.__item.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    get item() {
+        return this.__item.get();
+    }
+    set item(newValue) {
+        this.__item.set(newValue);
+    }
+    setController(ctr) {
+        this.controller = ctr;
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create({ space: 15 });
+            Column.padding(24);
+            Column.width('80%');
+            Column.height('70%');
+            Column.borderRadius(24);
+            Column.backgroundColor('rgba(30, 30, 40, 1.00)');
+            Column.backdropBlur(20);
+            Column.border({ width: 1.5, color: 'rgba(255, 255, 255, 0.2)' });
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(this.item?.title);
+            Text.fontSize(22);
+            Text.fontWeight(FontWeight.Bold);
+            Text.fontColor(Color.White);
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Divider.create();
+            Divider.color('rgba(255, 255, 255, 0.2)');
+        }, Divider);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Scroll.create();
+            Scroll.scrollBar(BarState.Auto);
+            Scroll.layoutWeight(1);
+        }, Scroll);
+        {
+            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                if (isInitialRender) {
+                    let componentCall = new LvMarkdownIn(this, { text: this.item?.fullDescription ?? '' }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DataStatics.ets", line: 90, col: 9 });
+                    ViewPU.create(componentCall);
+                    let paramsLambda = () => {
+                        return {
+                            text: this.item?.fullDescription ?? ''
+                        };
+                    };
+                    componentCall.paramsGenerator_ = paramsLambda;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(elmtId, {
+                        text: this.item?.fullDescription ?? ''
+                    });
+                }
+            }, { name: "LvMarkdownIn" });
+        }
+        Scroll.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Button.createWithLabel('å…³é—­');
+            Button.width('100%');
+            Button.height(45);
+            Button.type(ButtonType.Capsule);
+            Button.backgroundColor('rgba(255, 255, 255, 0.2)');
+            Button.onClick(() => {
+                this.controller.close();
+            });
+        }, Button);
+        Button.pop();
+        Column.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+export class DataStatics extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.__knowledgeItems = new ObservedPropertyObjectPU([
+            {
+                id: 1,
+                image: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                title: 'èƒ½æ•ˆæ ‡ç­¾ç­‰çº§è¯¦è§£',
+                description: 'äº†è§£ä¸åŒèƒ½æ•ˆç­‰çº§çš„å«ä¹‰ã€ä¿¡æ¯åŒºå†…å®¹ä»¥åŠå®ƒä»¬å¦‚ä½•å½±å“äº§å“åˆ†ç±»ã€‚',
+                fullDescription: 'èƒ½æ•ˆæ ‡ç­¾ï¼Œåˆç§°èƒ½æºæ•ˆç‡æ ‡è¯†ï¼Œæ˜¯é™„åœ¨è€—èƒ½äº§å“æˆ–å…¶æœ€å°åŒ…è£…ç‰©ä¸Šçš„ä¸€ç§ä¿¡æ¯æ ‡ç­¾ï¼Œç”¨äºè¡¨ç¤ºäº§å“èƒ½æºæ•ˆç‡ç­‰çº§ç­‰æ€§èƒ½æŒ‡æ ‡ã€‚æˆ‘å›½çš„èƒ½æ•ˆæ ‡è¯†å°†èƒ½æ•ˆåˆ†ä¸º1ã€2ã€3ã€4ã€5å…±äº”ä¸ªç­‰çº§ã€‚\n\n- **ç­‰çº§1**ï¼šè¡¨ç¤ºäº§å“è¾¾åˆ°å›½é™…å…ˆè¿›æ°´å¹³ï¼Œæœ€èŠ‚ç”µï¼Œå³è€—èƒ½æœ€ä½ã€‚\n- **ç­‰çº§2**ï¼šè¡¨ç¤ºæ¯”è¾ƒèŠ‚ç”µã€‚\n- **ç­‰çº§3**ï¼šè¡¨ç¤ºäº§å“çš„èƒ½æºæ•ˆç‡ä¸ºæˆ‘å›½å¸‚åœºçš„å¹³å‡æ°´å¹³ã€‚\n- **ç­‰çº§4**ï¼šè¡¨ç¤ºäº§å“èƒ½æºæ•ˆç‡ä½äºå¸‚åœºå¹³å‡æ°´å¹³ã€‚\n- **ç­‰çº§5**ï¼šæ˜¯å¸‚åœºå‡†å…¥æŒ‡æ ‡ï¼Œä½äºè¯¥ç­‰çº§è¦æ±‚çš„äº§å“ä¸å…è®¸ç”Ÿäº§å’Œé”€å”®ã€‚'
+            },
+            {
+                id: 2,
+                image: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                title: 'äº§çº¿å®‰å…¨æ“ä½œè§„ç¨‹',
+                description: 'æŸ¥çœ‹æœºæ¢°è‡‚ã€ä¼ é€å¸¦çš„æ ‡å‡†æ“ä½œæµç¨‹å’Œç´§æ€¥æƒ…å†µå¤„ç†é¢„æ¡ˆï¼Œç¡®ä¿äººå‘˜ä¸è®¾å¤‡å®‰å…¨ã€‚',
+                fullDescription: '1. **å¼€æœºå‰æ£€æŸ¥**ï¼šç¡®è®¤æ‰€æœ‰å®‰å…¨é—¨å·²å…³é—­ï¼Œæ€¥åœæŒ‰é’®å¤„äºå¤ä½çŠ¶æ€ï¼Œæœºæ¢°è‡‚å·¥ä½œèŒƒå›´å†…æ— æ‚ç‰©å’Œäººå‘˜ã€‚\n2. **è¿è¡Œä¸­ç›‘æ§**ï¼šä¸¥ç¦åœ¨è®¾å¤‡è¿è¡Œæ—¶å°†æ‰‹æˆ–èº«ä½“ä»»ä½•éƒ¨åˆ†ä¼¸å…¥å·¥ä½œåŒºåŸŸã€‚å¦‚é‡å¼‚å¸¸ï¼Œç«‹å³æŒ‰ä¸‹æœ€è¿‘çš„æ€¥åœæŒ‰é’®ã€‚\n3. **ç´§æ€¥å¤„ç†**ï¼šå‘ç”Ÿç´§æ€¥æƒ…å†µï¼ˆå¦‚å¡æ–™ã€ç¢°æ’ï¼‰æ—¶ï¼Œå¿…é¡»å…ˆåˆ‡æ–­ä¸»ç”µæºï¼Œå†è¿›è¡Œå¤„ç†ã€‚\n4. **å…³æœºæµç¨‹**ï¼šå¾…æ‰€æœ‰ä»»åŠ¡å®Œæˆåï¼Œå°†æœºæ¢°è‡‚å¤ä½åˆ°åŸç‚¹ï¼ˆHomeï¼‰ï¼Œç„¶åå…³é—­æ§åˆ¶å™¨ç”µæºï¼Œæœ€åå…³é—­ä¸»ç”µæºã€‚'
+            },
+            {
+                id: 3,
+                image: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                title: 'å¸¸è§æ•…éšœæ’æŸ¥æŒ‡å—',
+                description: 'å­¦ä¹ å¦‚ä½•å¿«é€Ÿè¯Šæ–­å’Œå¤„ç†æ ‡ç­¾è¯†åˆ«å¤±è´¥ã€æœºæ¢°è‡‚æŠ“å–å¼‚å¸¸ç­‰å¸¸è§é—®é¢˜ã€‚',
+                fullDescription: 'å½“äº§çº¿å‡ºç°é—®é¢˜æ—¶ï¼Œè¯·å‚ç…§ä»¥ä¸‹æ­¥éª¤æ’æŸ¥ï¼š\n\n- **æ•…éšœç°è±¡ï¼šæ ‡ç­¾æ— æ³•è¯†åˆ«**\n  - **å¯èƒ½åŸå› 1**ï¼šæ‘„åƒå¤´è„æ±¡æˆ–ä½ç½®åç§»ã€‚\n  - **æ’æŸ¥æ–¹æ³•**ï¼šæ¸…æ´æ‘„åƒå¤´é•œå¤´ï¼Œæ£€æŸ¥å¹¶é‡æ–°æ ¡å‡†æ‘„åƒå¤´ä½ç½®ã€‚\n\n- **æ•…éšœç°è±¡ï¼šæœºæ¢°è‡‚æŠ“å–å¤±è´¥**\n  - **å¯èƒ½åŸå› 1**ï¼šæŠ“å–åæ ‡åç§»ã€‚\n  - **æ’æŸ¥æ–¹æ³•**ï¼šè¿›å…¥ç³»ç»Ÿè®¾ç½®ï¼Œé‡æ–°æ ¡å‡†æœºæ¢°è‡‚çš„æŠ“å–ç‚¹ä½ã€‚\n  - **å¯èƒ½åŸå› 2**ï¼šæ‰‹çˆªæ°”å‹ä¸è¶³æˆ–æ•…éšœã€‚\n  - **æ’æŸ¥æ–¹æ³•**ï¼šæ£€æŸ¥æ°”æºå‹åŠ›ï¼Œæ£€æŸ¥æ‰‹çˆªç”µç£é˜€æ˜¯å¦æ­£å¸¸å·¥ä½œã€‚'
+            },
+            {
+                id: 4,
+                image: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                title: 'æœºæ¢°è‡‚æ—¥å¸¸ç»´æŠ¤ä¸ä¿å…»',
+                description: 'å®šæœŸå¯¹æœºæ¢°è‡‚è¿›è¡Œæ£€æŸ¥ã€æ¸…æ´å’Œæ¶¦æ»‘ï¼Œæ˜¯å»¶é•¿å…¶ä½¿ç”¨å¯¿å‘½å’Œä¿è¯ç²¾åº¦çš„å…³é”®ã€‚',
+                fullDescription: 'ä¸ºç¡®ä¿æœºæ¢°è‡‚é•¿æœŸç¨³å®šè¿è¡Œï¼Œè¯·éµå¾ªä»¥ä¸‹ä¿å…»å‘¨æœŸï¼š\n\n- **æ¯æ—¥æ£€æŸ¥**ï¼š\n  - æ£€æŸ¥å„è½´è¿åŠ¨æ˜¯å¦å¹³ç¨³ï¼Œæœ‰æ— å¼‚å¸¸å™ªéŸ³ã€‚\n  - ç¡®è®¤æ‰‹çˆªï¼ˆæœ«ç«¯æ‰§è¡Œå™¨ï¼‰çŠ¶æ€æ˜¯å¦æ­£å¸¸ã€‚\n\n- **æ¯å‘¨æ£€æŸ¥**ï¼š\n  - æ¸…æ´æœºæ¢°è‡‚æœ¬ä½“åŠæ§åˆ¶æŸœçš„ç°å°˜ã€‚\n  - æ£€æŸ¥æ‰€æœ‰å¤–éƒ¨ç”µç¼†æœ‰æ— ç£¨æŸæˆ–æŸåã€‚\n  - æ£€æŸ¥å¹¶ç´§å›ºæ‰€æœ‰å¯è§çš„èºä¸ã€‚\n\n- **æ¯å­£åº¦æ£€æŸ¥**ï¼š\n  - æ£€æŸ¥å„å…³èŠ‚çš„æ¶¦æ»‘æƒ…å†µï¼ŒæŒ‰éœ€æ·»åŠ æŒ‡å®šå‹å·çš„æ¶¦æ»‘è„‚ã€‚\n  - æ£€æŸ¥ç”µæ± ï¼ˆå¦‚æœ‰ï¼‰å¹¶æŒ‰éœ€æ›´æ¢ã€‚'
+            },
+            {
+                id: 5,
+                image: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                title: 'è§†è§‰ç³»ç»Ÿæ ¡å‡†æ–¹æ³•',
+                description: 'å½“è¯†åˆ«ç²¾åº¦ä¸‹é™æ—¶ï¼Œéœ€è¦é‡æ–°æ ¡å‡†æ‘„åƒå¤´ã€‚æœ¬æ–‡ä»‹ç»è¯¦ç»†çš„æ ¡å‡†æ­¥éª¤ã€‚',
+                fullDescription: 'åœ¨ä»¥ä¸‹æƒ…å†µå‘ç”Ÿæ—¶ï¼Œå»ºè®®é‡æ–°æ ¡å‡†è§†è§‰ç³»ç»Ÿï¼š\n1. æ›´æ¢æˆ–ç§»åŠ¨è¿‡æ‘„åƒå¤´ã€‚\n2. äº§çº¿å‡ºç°è¿ç»­ã€è§„å¾‹æ€§çš„è¯†åˆ«é”™è¯¯ã€‚\n3. æ›´æ¢äº†æ–°çš„ç…§æ˜å…‰æºã€‚\n\n**æ ¡å‡†æµç¨‹**ï¼š\n1. ä»å·¥å…·ç®±ä¸­å–å‡ºä¸“ç”¨çš„æ ¡å‡†æ¿ã€‚\n2. å°†äº§çº¿æš‚åœï¼Œå¹¶å°†æ ¡å‡†æ¿æ”¾ç½®åœ¨ä¼ é€å¸¦çš„æŒ‡å®šæ ¡å‡†åŒºåŸŸã€‚\n3. åœ¨ä¸­æ§å¹³å°çš„â€œç³»ç»Ÿè®¾ç½®â€ -> â€œæ‘„åƒå¤´è®¾ç½®â€ä¸­ï¼Œç‚¹å‡»â€œå¼€å§‹æ ¡å‡†â€æŒ‰é’®ã€‚\n4. ç³»ç»Ÿä¼šè‡ªåŠ¨æ‹æ‘„æ ¡å‡†æ¿å›¾åƒå¹¶è®¡ç®—æ–°çš„æ˜ å°„å…³ç³»ã€‚è¯·å‹¿ç§»åŠ¨æ ¡å‡†æ¿ç›´è‡³ç³»ç»Ÿæç¤ºâ€œæ ¡å‡†æˆåŠŸâ€ã€‚\n5. ç§»èµ°æ ¡å‡†æ¿ï¼Œæ¢å¤äº§çº¿è¿è¡Œå¹¶è§‚å¯Ÿè¯†åˆ«æ•ˆæœã€‚'
+            },
+            {
+                id: 6,
+                image: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                title: 'ä¼ é€å¸¦é€Ÿåº¦ä¸è¯†åˆ«ç‡å…³ç³»',
+                description: 'æ¢è®¨ä¼ é€å¸¦é€Ÿåº¦å¯¹èƒ½æ•ˆæ ‡ç­¾è¯†åˆ«æˆåŠŸç‡çš„å½±å“ï¼Œæ‰¾åˆ°ç”Ÿäº§æ•ˆç‡ä¸å‡†ç¡®ç‡çš„æœ€ä½³å¹³è¡¡ç‚¹ã€‚',
+                fullDescription: 'ä¼ é€å¸¦é€Ÿåº¦æ˜¯å½±å“äº§çº¿æ•ˆç‡å’Œè¯†åˆ«å‡†ç¡®ç‡çš„å…³é”®å‚æ•°ã€‚ä¸¤è€…å…³ç³»å¦‚ä¸‹ï¼š\n\n- **é€Ÿåº¦è¿‡å¿«**ï¼š\n  - **ä¼˜ç‚¹**ï¼šå•ä½æ—¶é—´å†…å¤„ç†é‡å¤§ï¼Œäº§çº¿æ•ˆç‡é«˜ã€‚\n  - **ç¼ºç‚¹**ï¼šå¯èƒ½å¯¼è‡´å›¾åƒè¿åŠ¨æ¨¡ç³Šï¼Œé™ä½è¯†åˆ«æˆåŠŸç‡ï¼›å¯¹æœºæ¢°è‡‚çš„ååº”é€Ÿåº¦è¦æ±‚æ›´é«˜ã€‚\n\n- **é€Ÿåº¦è¿‡æ…¢**ï¼š\n  - **ä¼˜ç‚¹**ï¼šå›¾åƒæ¸…æ™°ï¼Œè¯†åˆ«å‡†ç¡®ç‡é«˜ï¼Œæœºæ¢°è‡‚æŠ“å–æ›´ç¨³å®šã€‚\n  - **ç¼ºç‚¹**ï¼šäº§çº¿æ•´ä½“æ•ˆç‡é™ä½ã€‚\n\n**å»ºè®®**ï¼šåœ¨â€œç³»ç»Ÿè®¾ç½®â€ä¸­ï¼Œé€šå¸¸å»ºè®®å°†é€Ÿåº¦ç»´æŒåœ¨ç³»ç»Ÿæ¨èå€¼ï¼ˆä¾‹å¦‚ 0.5m/sï¼‰ã€‚åªæœ‰åœ¨å¤„ç†è¡¨é¢åå…‰ä¸¥é‡æˆ–æ ‡ç­¾å°åˆ·è´¨é‡è¾ƒå·®çš„äº§å“æ—¶ï¼Œå¯é€‚å½“é™ä½é€Ÿåº¦ä»¥ä¿è¯å‡†ç¡®ç‡ã€‚'
+            },
+            {
+                id: 7,
+                image: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                title: 'æ–°äº§å“å‹å·å½•å…¥æµç¨‹',
+                description: 'ä»‹ç»å¦‚ä½•å°†æ–°çš„å®¶ç”µå‹å·æ·»åŠ åˆ°è¯†åˆ«å’Œåˆ†æ‹£ç³»ç»Ÿä¸­ï¼Œç¡®ä¿ç³»ç»Ÿèƒ½æ­£ç¡®å¤„ç†ã€‚',
+                fullDescription: 'å½“éœ€è¦å¤„ç†æ–°çš„å®¶ç”µäº§å“æ—¶ï¼Œè¯·æŒ‰ä»¥ä¸‹æ­¥éª¤å°†å…¶ä¿¡æ¯å½•å…¥ç³»ç»Ÿï¼š\n1. åœ¨ä¸­æ§å¹³å°ä¸»èœå•è¿›å…¥â€œç³»ç»Ÿè®¾ç½®â€ -> â€œäº§å“ç®¡ç†â€ã€‚\n2. ç‚¹å‡»â€œæ·»åŠ æ–°å‹å·â€æŒ‰é’®ã€‚\n3. åœ¨å¼¹å‡ºçš„çª—å£ä¸­è¾“å…¥æ–°äº§å“çš„åç§°ã€å‹å·ã€å°ºå¯¸ç­‰åŸºæœ¬ä¿¡æ¯ã€‚\n4. å°†æ–°äº§å“æ”¾ç½®åœ¨ä¼ é€å¸¦çš„èµ·å§‹ä½ç½®ï¼Œç‚¹å‡»â€œæ ‡ç­¾å­¦ä¹ â€ã€‚æ‘„åƒå¤´ä¼šè‡ªåŠ¨å®šä½å¹¶åˆ†æèƒ½æ•ˆæ ‡ç­¾çš„ç‰¹å¾å’Œä½ç½®ã€‚\n5. åœ¨â€œåˆ†æ‹£è§„åˆ™â€ä¸­ï¼Œä¸ºè¯¥æ–°å‹å·æˆ–å…¶èƒ½æ•ˆç­‰çº§æŒ‡å®šä¸€ä¸ªåˆ†æ‹£ç›®æ ‡ï¼ˆä¾‹å¦‚ï¼Œ1å·æœºæ¢°è‡‚ï¼‰ã€‚\n6. ä¿å­˜è®¾ç½®ã€‚å»ºè®®å…ˆè®©å°‘é‡æ–°äº§å“é€šè¿‡äº§çº¿è¿›è¡Œæµ‹è¯•ï¼Œç¡®è®¤æ— è¯¯åå†è¿›è¡Œå¤§è§„æ¨¡ç”Ÿäº§ã€‚'
+            },
+            {
+                id: 8,
+                image: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                title: 'æ—¥å¿—ç³»ç»Ÿä½¿ç”¨æŒ‡å—',
+                description: 'å­¦ä¹ å¦‚ä½•æŸ¥çœ‹ã€ç­›é€‰å’Œå¯¼å‡ºæ“ä½œæ—¥å¿—ä¸å¼‚å¸¸æ—¥å¿—ï¼Œç”¨äºè¿½æº¯é—®é¢˜å’Œåˆ†æäº§çº¿æ•ˆç‡ã€‚',
+                fullDescription: 'æœ¬ç³»ç»Ÿæä¾›ä¸¤ç§æ ¸å¿ƒæ—¥å¿—ï¼Œå‡å¯åœ¨â€œä»»åŠ¡æ—¥å¿—â€é¡µé¢è®¿é—®ï¼š\n\n- **æ“ä½œæ—¥å¿—**ï¼šè®°å½•æ¯ä¸€æ¬¡æˆåŠŸçš„åˆ†æ‹£æ“ä½œï¼ŒåŒ…æ‹¬æ—¶é—´ã€äº§å“å‹å·ã€è¯†åˆ«å‡ºçš„èƒ½æ•ˆç­‰çº§ä»¥åŠç”±å“ªå°æœºæ¢°è‡‚å¤„ç†ã€‚å¯ç”¨äºç”Ÿäº§ç»Ÿè®¡å’Œè¿½æº¯ã€‚\n\n- **å¼‚å¸¸æ—¥å¿—**ï¼šè®°å½•æ‰€æœ‰å¤±è´¥æˆ–å¼‚å¸¸çš„äº‹ä»¶ï¼Œä¾‹å¦‚â€œæ— æ³•è¯†åˆ«æ ‡ç­¾â€ã€â€œæœºæ¢°è‡‚æŠ“å–å¤±è´¥â€ã€â€œè®¾å¤‡ç¦»çº¿â€ç­‰ã€‚è¿™æ˜¯æ’æŸ¥æ•…éšœæœ€é‡è¦çš„ä¾æ®ã€‚\n\n**ä½¿ç”¨æŠ€å·§**ï¼š\n- ä½¿ç”¨é¡¶éƒ¨çš„æ—¥æœŸå’Œå…³é”®è¯ç­›é€‰å™¨å¯ä»¥å¿«é€Ÿå®šä½ç‰¹å®šæ—¶é—´çš„æ—¥å¿—ã€‚\n- å¯¹äºé‡è¦æˆ–é¢‘ç¹å‡ºç°çš„å¼‚å¸¸ï¼Œå»ºè®®å®šæœŸâ€œå¯¼å‡ºæ—¥å¿—â€ï¼Œä»¥ä¾¿è¿›è¡Œç¦»çº¿åˆ†æã€‚'
+            },
+            {
+                id: 9,
+                image: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                title: 'å¤‡ä»¶æ›´æ¢å‘¨æœŸè¡¨',
+                description: 'å…³é”®å¤‡ä»¶çš„å»ºè®®æ›´æ¢å‘¨æœŸå’Œåº“å­˜ç®¡ç†æŒ‡å—ï¼Œé¿å…å› å¤‡ä»¶çŸ­ç¼ºå¯¼è‡´äº§çº¿åœæœºã€‚',
+                fullDescription: 'ä¸ºä¿è¯äº§çº¿é«˜å¯ç”¨æ€§ï¼Œå»ºè®®æ ¹æ®ä»¥ä¸‹å‘¨æœŸå‡†å¤‡å’Œæ›´æ¢å…³é”®å¤‡ä»¶ï¼š\n\n- **æœºæ¢°è‡‚æ‰‹çˆªå¸ç›˜/å¤¹çˆªå«**ï¼š\n  - å»ºè®®æ›´æ¢å‘¨æœŸï¼šæ¯6ä¸ªæœˆæˆ–20ä¸‡æ¬¡æŠ“å–åã€‚\n  - å»ºè®®åº“å­˜ï¼š2å¥—ã€‚\n\n- **ä¼ é€å¸¦**ï¼š\n  - å»ºè®®æ›´æ¢å‘¨æœŸï¼šæ¯2å¹´æˆ–å‡ºç°æ˜æ˜¾ç£¨æŸã€è£‚ç—•æ—¶ã€‚\n  - å»ºè®®åº“å­˜ï¼š1æ¡ã€‚\n\n- **æ‘„åƒå¤´LEDå…‰æº**ï¼š\n  - å»ºè®®æ›´æ¢å‘¨æœŸï¼šçº¦20000å°æ—¶ä½¿ç”¨å¯¿å‘½åæˆ–äº®åº¦æ˜æ˜¾è¡°å‡æ—¶ã€‚\n  - å»ºè®®åº“å­˜ï¼š1å¥—ã€‚\n\n- **å„è®¾å¤‡ä¿é™©ä¸**ï¼š\n  - å»ºè®®æ›´æ¢å‘¨æœŸï¼šç†”æ–­åç«‹å³æ›´æ¢ã€‚\n  - å»ºè®®åº“å­˜ï¼šæ¯ç§è§„æ ¼5ä¸ªã€‚'
+            },
+            {
+                id: 10,
+                image: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                title: 'ç½‘ç»œè¿æ¥æ•…éšœæ’æŸ¥',
+                description: 'å½“ä¸­æ§å¹³å°æ˜¾ç¤ºè®¾å¤‡ç¦»çº¿æ—¶ï¼Œå¦‚ä½•ç³»ç»Ÿåœ°æ£€æŸ¥å’Œè§£å†³ç½‘ç»œè¿æ¥é—®é¢˜ã€‚',
+                fullDescription: 'å¦‚æœâ€œè®¾å¤‡ç®¡ç†â€é¡µé¢æ˜¾ç¤ºæŸä¸ªè®¾å¤‡ï¼ˆå¦‚æœºæ¢°è‡‚ã€æ‘„åƒå¤´ï¼‰å¤„äºç¦»çº¿çŠ¶æ€ï¼Œè¯·æŒ‰ä»¥ä¸‹é¡ºåºæ’æŸ¥ï¼š\n1. **ç‰©ç†è¿æ¥æ£€æŸ¥**ï¼šæ£€æŸ¥è¯¥è®¾å¤‡çš„ç½‘çº¿æ˜¯å¦ç‰¢å›ºåœ°æ’å…¥è®¾å¤‡ç«¯å’Œç½‘ç»œäº¤æ¢æœºç«¯å£ã€‚\n2. **ç”µæºæ£€æŸ¥**ï¼šç¡®è®¤è¯¥è®¾å¤‡çš„ç”µæºå·²å¼€å¯ï¼ŒçŠ¶æ€æŒ‡ç¤ºç¯æ­£å¸¸ã€‚\n3. **ç½‘ç»œäº¤æ¢æœºæ£€æŸ¥**ï¼šæŸ¥çœ‹äº¤æ¢æœºä¸Šå¯¹åº”ç«¯å£çš„æŒ‡ç¤ºç¯æ˜¯å¦åœ¨é—ªçƒï¼Œè¡¨ç¤ºæœ‰æ•°æ®é€šä¿¡ã€‚\n4. **IPåœ°å€æ£€æŸ¥**ï¼šåœ¨ä¸­æ§å¹³å°çš„è®¾å¤‡è®¾ç½®ä¸­ï¼Œç¡®è®¤è¯¥è®¾å¤‡çš„IPåœ°å€æœªå‘ç”Ÿæ”¹å˜ï¼Œä¸”ä¸ä¸­æ§å¹³å°å¤„äºåŒä¸€ç½‘æ®µã€‚\n5. **é‡å¯è®¾å¤‡**ï¼šå°è¯•é‡å¯ç¦»çº¿çš„ç¡¬ä»¶è®¾å¤‡ï¼Œç­‰å¾…2åˆ†é’Ÿåå†æŸ¥çœ‹å…¶çŠ¶æ€ã€‚\n6. **é‡å¯ä¸­æ§å¹³å°**ï¼šå¦‚æœä»¥ä¸Šæ­¥éª¤å‡æ— æ•ˆï¼Œå°è¯•é‡å¯ä¸­æ§å°å¹³æ¿ã€‚'
+            },
+            {
+                id: 11,
+                image: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                title: 'å›ºä»¶ç‰ˆæœ¬æ›´æ–°è¯´æ˜',
+                description: 'ä¸­æ§ç³»ç»ŸåŠå„è®¾å¤‡å›ºä»¶ç‰ˆæœ¬æ›´æ–°æ—¥å¿—ï¼Œäº†è§£æ–°åŠŸèƒ½å’Œå·²ä¿®å¤çš„é—®é¢˜ã€‚',
+                fullDescription: '**ä¸­æ§å¹³å° V1.2.0 (2025-07-15)**\n\n- **ã€æ–°åŠŸèƒ½ã€‘** æ–°å¢å¯¹äºŒç»´ç å¼èƒ½æ•ˆæ ‡ç­¾çš„è¯†åˆ«æ”¯æŒã€‚\n- **ã€ä¼˜åŒ–ã€‘** ä¼˜åŒ–äº†æœºæ¢°è‡‚è¿åŠ¨è·¯å¾„ç®—æ³•ï¼Œå¹³å‡åˆ†æ‹£å‘¨æœŸç¼©çŸ­5%ã€‚\n- **ã€ä¿®å¤ã€‘** ä¿®å¤äº†åœ¨å¤„ç†é«˜åå…‰æ ‡ç­¾æ—¶ï¼Œå¶å‘æ€§è¯†åˆ«é”™è¯¯çš„é—®é¢˜ã€‚\n- **ã€ä¿®å¤ã€‘** è§£å†³äº†å½“ç½‘ç»œè½»å¾®æŠ–åŠ¨æ—¶ï¼Œè®¾å¤‡çŠ¶æ€å¯èƒ½é”™è¯¯åœ°æ˜¾ç¤ºä¸ºâ€œç¦»çº¿â€çš„é—®é¢˜ã€‚\n\n*æ›´æ–°å»ºè®®ï¼šè¯·åœ¨äº§çº¿ç©ºé—²æ—¶è¿›è¡Œæ›´æ–°æ“ä½œï¼Œæ›´æ–°è¿‡ç¨‹å¤§çº¦éœ€è¦5åˆ†é’Ÿã€‚*'
+            },
+            {
+                id: 12,
+                image: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                title: 'èƒ½è€—æ•°æ®åˆ†æå…¥é—¨',
+                description: 'å­¦ä¹ å¦‚ä½•è§£è¯»ä¸­æ§å°è®°å½•çš„èƒ½è€—æ•°æ®ï¼Œå‘ç°èŠ‚èƒ½æ½œåŠ›ï¼Œä¼˜åŒ–ç”Ÿäº§ç­–ç•¥ã€‚',
+                fullDescription: 'æœ¬ç³»ç»Ÿä¼šè®°å½•äº§çº¿çš„æ•´ä½“ç”¨ç”µæƒ…å†µï¼Œæ•°æ®å¯åœ¨â€œæ•°æ®ç»Ÿè®¡â€é¡µé¢æŸ¥çœ‹ã€‚æ‚¨å¯ä»¥å…³æ³¨ä»¥ä¸‹å‡ ç‚¹ï¼š\n\n- **å³°å€¼åŠŸè€—**ï¼šè§‚å¯Ÿä¸€å¤©ä¸­å“ªä¸ªæ—¶é—´æ®µçš„ç”¨ç”µé‡æœ€é«˜ï¼Œæ˜¯å¦ä¸ç”Ÿäº§é«˜å³°åŒ¹é…ã€‚\n- **å¾…æœºåŠŸè€—**ï¼šåœ¨äº§çº¿åœæ­¢ä½†æœªæ–­ç”µæ—¶ï¼Œè®°å½•å¾…æœºåŠŸè€—ã€‚å¦‚æœå¾…æœºåŠŸè€—è¿‡é«˜ï¼Œå¯ä»¥è€ƒè™‘åœ¨é•¿æ—¶é—´ä¸ä½¿ç”¨æ—¶å…³é—­ä¸»ç”µæºã€‚\n- **å•ä½äº§å“èƒ½è€—**ï¼šé€šè¿‡ï¼ˆæ€»èƒ½è€— / æ€»äº§é‡ï¼‰è®¡ç®—å‡ºç”Ÿäº§å•ä»¶äº§å“æ‰€éœ€çš„ç”µé‡ã€‚é€šè¿‡ä¼˜åŒ–æµç¨‹ï¼ˆå¦‚è°ƒæ•´ä¼ é€å¸¦é€Ÿåº¦ï¼‰æ¥è§‚å¯Ÿè¯¥æŒ‡æ ‡çš„å˜åŒ–ï¼Œæ˜¯å®ç°èŠ‚èƒ½é™æœ¬çš„æœ‰æ•ˆé€”å¾„ã€‚'
+            },
+            // --- [æ–°å¢] ä»¥ä¸‹æ˜¯é’ˆå¯¹å°è½¦ã€æœºæ¢°è‡‚ã€ä¼ é€å¸¦çš„ä¸“å±çŸ¥è¯† ---
+            {
+                id: 13,
+                image: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                title: 'ã€å°è½¦ã€‘ç”µæ± ä¿å…»ä¸å……ç”µè§„èŒƒ',
+                description: 'æ™ºèƒ½å°è½¦ï¼ˆAGVï¼‰çš„ç”µæ± æ˜¯å…¶æ ¸å¿ƒéƒ¨ä»¶ï¼Œæ­£ç¡®çš„ä¿å…»å’Œå……ç”µèƒ½æ˜¾è‘—å»¶é•¿å…¶å¯¿å‘½ã€‚',
+                fullDescription: 'ä¸ºä¿éšœæ™ºèƒ½å°è½¦ï¼ˆAGVï¼‰çš„ç»­èˆªå’Œå®‰å…¨ï¼Œè¯·éµå¾ªä»¥ä¸‹ç”µæ± ä½¿ç”¨è§„èŒƒï¼š\n\n1. **æ—¥å¸¸å……ç”µ**ï¼šå½“å°è½¦ç”µé‡ä½äº20%æ—¶ï¼Œç³»ç»Ÿä¼šè‡ªåŠ¨æç¤ºæˆ–æ´¾å…¶è¿”å›å……ç”µæ¡©ã€‚è¯·ç¡®ä¿å……ç”µæ¡©ç”µæºç¨³å®šï¼Œæ¥å£æ— å¼‚ç‰©ã€‚\n2. **é¿å…è¿‡æ”¾**ï¼šä¸¥ç¦å°†ç”µæ± ç”µé‡è€—å°½å†å……ç”µï¼Œè¿™ä¼šå¯¹é”‚ç”µæ± é€ æˆæ°¸ä¹…æ€§æŸä¼¤ã€‚\n3. **å®šæœŸæ·±å¾ªç¯**ï¼šå»ºè®®æ¯ä¸‰ä¸ªæœˆè¿›è¡Œä¸€æ¬¡å®Œæ•´çš„â€œç”¨å°½-å……æ»¡â€å¾ªç¯ï¼ˆåœ¨å®‰å…¨ç”µé‡ä¸‹é™ä¹‹ä¸Šï¼‰ï¼Œä»¥æ ¡å‡†ç”µé‡è®¡ï¼Œä¿æŒç”µæ± æ´»æ€§ã€‚\n4. **æ¸…æ´ä¸æ£€æŸ¥**ï¼šæ¯æœˆæ¸…æ´ç”µæ± å……ç”µè§¦ç‚¹ï¼Œæ£€æŸ¥æœ‰æ— è…èš€æˆ–æ¾åŠ¨ã€‚'
+            },
+            {
+                id: 14,
+                image: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                title: 'ã€å°è½¦ã€‘è·¯å¾„å—é˜»ä¸è„±å›°æ–¹æ³•',
+                description: 'å½“å°è½¦åœ¨è¿è¾“é€”ä¸­è¢«éšœç¢ç‰©é˜»æŒ¡æˆ–åç¦»è½¨é“æ—¶ï¼Œåº”å¦‚ä½•å®‰å…¨åœ°è¿›è¡Œäººå·¥å¹²é¢„ã€‚',
+                fullDescription: 'å°è½¦é…å¤‡äº†æ¿€å…‰é›·è¾¾å’Œç¢°æ’ä¼ æ„Ÿå™¨ä»¥å®ç°é¿éšœï¼Œä½†ä»å¯èƒ½é‡åˆ°æ„å¤–æƒ…å†µã€‚\n\n- **æƒ…å†µä¸€ï¼šä¸´æ—¶éšœç¢ç‰©**\n  - **ç°è±¡**ï¼šå°è½¦åœ¨éšœç¢ç‰©å‰åœæ­¢å¹¶é¸£ç¬›å‘Šè­¦ã€‚\n  - **å¤„ç†**ï¼šç§»é™¤éšœç¢ç‰©åï¼Œå°è½¦é€šå¸¸ä¼šè‡ªåŠ¨æ¢å¤ä»»åŠ¡ã€‚å¦‚æœæœªè‡ªåŠ¨æ¢å¤ï¼Œå¯åœ¨ä¸­æ§å°ç‚¹å‡»â€œç»§ç»­ä»»åŠ¡â€ã€‚\n\n- **æƒ…å†µäºŒï¼šå°è½¦è„±è½¨æˆ–è¢«å›°**\n  - **å¤„ç†**ï¼š\n    1. åœ¨ä¸­æ§å°å°†è¯¥å°è½¦çŠ¶æ€è®¾ä¸ºâ€œç»´æŠ¤æ¨¡å¼â€ï¼Œæš‚åœå…¶æ‰€æœ‰ä»»åŠ¡ã€‚\n    2. æ‰‹åŠ¨å°†å°è½¦æ¨ç¦»å—å›°åŒºåŸŸï¼Œå¹¶æ”¾å›ä¸»è·¯å¾„çš„ä»»æ„ä½ç½®ã€‚\n    3. åœ¨ä¸­æ§å°ç‚¹å‡»â€œé‡æ–°å®šä½â€ï¼Œå°è½¦ä¼šè‡ªåŠ¨æ‰«æç¯å¢ƒå¹¶æ¢å¤å…¶åœ¨åœ°å›¾ä¸Šçš„ä½ç½®ã€‚\n    4. ç¡®è®¤å®šä½æ— è¯¯åï¼Œæ”¹å›â€œè‡ªåŠ¨æ¨¡å¼â€å³å¯ã€‚'
+            },
+            {
+                id: 15,
+                image: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                title: 'ã€æœºæ¢°è‡‚ã€‘æ€¥åœï¼ˆE-Stopï¼‰æ¢å¤æµç¨‹',
+                description: 'åœ¨æŒ‰ä¸‹ç´§æ€¥åœæ­¢æŒ‰é’®åï¼Œå¦‚ä½•å®‰å…¨ã€æ­£ç¡®åœ°ä½¿æœºæ¢°è‡‚ä»æ€¥åœçŠ¶æ€ä¸­æ¢å¤ã€‚',
+                fullDescription: 'ç´§æ€¥åœæ­¢ï¼ˆE-Stopï¼‰ä¼šç«‹å³åˆ‡æ–­æœºæ¢°è‡‚æ‰€æœ‰ä¼ºæœç”µæœºçš„ç”µæºã€‚æ¢å¤æ“ä½œå¿…é¡»è°¨æ…ï¼š\n1. **ç¡®è®¤å®‰å…¨**ï¼šé¦–å…ˆï¼Œå¿…é¡»ç¡®è®¤è§¦å‘æ€¥åœçš„å±é™©æƒ…å†µå·²ç»å®Œå…¨æ’é™¤ã€‚\n2. **å¤ä½æ€¥åœæŒ‰é’®**ï¼šå°†ç‰©ç†çš„æ€¥åœæŒ‰é’®æ—‹è½¬æˆ–æ‹‰å‡ºï¼Œä½¿å…¶å¤ä½ã€‚\n3. **æ¸…é™¤å‘Šè­¦**ï¼šåœ¨ä¸­æ§å°çš„â€œè®¾å¤‡ç®¡ç†â€é¡µé¢ï¼Œæ‰¾åˆ°å¯¹åº”çš„æœºæ¢°è‡‚ï¼Œç‚¹å‡»â€œæ¸…é™¤å‘Šè­¦â€æˆ–â€œå¤ä½â€æŒ‰é’®ã€‚\n4. **é‡æ–°ä¸Šç”µ**ï¼šç³»ç»Ÿä¼šæç¤ºä¸ºæœºæ¢°è‡‚ä¼ºæœç³»ç»Ÿé‡æ–°ä¸Šç”µï¼Œç‚¹å‡»ç¡®è®¤ã€‚\n5. **å›åŸç‚¹ï¼ˆHomingï¼‰**ï¼šä¸Šç”µæˆåŠŸåï¼Œæœºæ¢°è‡‚å¤„äºéç¡®å®šä½ç½®ã€‚å¿…é¡»æ‰§è¡Œâ€œå›åŸç‚¹â€æ“ä½œï¼Œè®©æœºæ¢°è‡‚çš„æ‰€æœ‰å…³èŠ‚å›åˆ°é¢„è®¾çš„é›¶ç‚¹ä½ç½®ã€‚\n6. **æ¢å¤ä»»åŠ¡**ï¼šå›åŸç‚¹æ“ä½œå®Œæˆåï¼Œæœºæ¢°è‡‚çŠ¶æ€å˜ä¸ºâ€œå¾…å‘½ä¸­â€ï¼Œæ­¤æ—¶æ‰å¯ä»¥é‡æ–°å¯åŠ¨è‡ªåŠ¨è¿è¡Œä»»åŠ¡ã€‚'
+            },
+            {
+                id: 16,
+                image: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                title: 'ã€æœºæ¢°è‡‚ã€‘æœ«ç«¯æ‰§è¡Œå™¨æ›´æ¢ä¸TCPæ ¡å‡†',
+                description: 'å½“éœ€è¦å¤„ç†ä¸åŒå°ºå¯¸æˆ–æè´¨çš„å®¶ç”µæ—¶ï¼Œå¯èƒ½éœ€è¦æ›´æ¢æ‰‹çˆªï¼Œå¹¶å¿…é¡»é‡æ–°æ ¡å‡†å·¥å…·ä¸­å¿ƒç‚¹(TCP)ã€‚',
+                fullDescription: 'å·¥å…·ä¸­å¿ƒç‚¹ï¼ˆTool Center Point, TCPï¼‰æ˜¯æœºæ¢°è‡‚æ‰‹çˆªçš„ç²¾ç¡®å·¥ä½œç‚¹ã€‚æ›´æ¢æ‰‹çˆªåï¼Œæ­¤ç‚¹ä¼šæ”¹å˜ï¼Œå¿…é¡»æ ¡å‡†ã€‚\n\n**æ›´æ¢æµç¨‹**ï¼š\n1. å°†æœºæ¢°è‡‚ç§»åŠ¨åˆ°å®‰å…¨ã€æ–¹ä¾¿æ“ä½œçš„ä½ç½®ã€‚\n2. å…³é—­æœºæ¢°è‡‚ç”µæºå’Œæ°”æºã€‚\n3. æŒ‰ç…§æ‰‹å†ŒæŒ‡å¼•ï¼Œæ‹†ä¸‹æ—§çš„æ‰‹çˆªï¼ˆæœ«ç«¯æ‰§è¡Œå™¨ï¼‰ï¼Œå®‰è£…æ–°çš„æ‰‹çˆªã€‚\n4. æ¢å¤ç”µæºå’Œæ°”æºã€‚\n\n**TCPæ ¡å‡†ï¼ˆå››ç‚¹æ³•ï¼‰**ï¼š\n1. åœ¨â€œç³»ç»Ÿè®¾ç½®â€ -> â€œæœºæ¢°è‡‚è®¾ç½®â€ä¸­ï¼Œé€‰æ‹©â€œTCPæ ¡å‡†â€ã€‚\n2. æ‰‹åŠ¨æ§åˆ¶æœºæ¢°è‡‚ï¼Œè®©æ–°å®‰è£…çš„æ‰‹çˆªå°–ç«¯ä»å››ä¸ª**ä¸åŒ**çš„å§¿æ€ï¼ˆè§’åº¦ï¼‰å»ç²¾ç¡®è§¦ç¢°ç©ºé—´ä¸­çš„åŒä¸€ä¸ªå›ºå®šç‚¹ï¼ˆä¾‹å¦‚ä¸€ä¸ªå›ºå®šçš„é¡¶é’ˆï¼‰ã€‚\n3. æ¯è§¦ç¢°ä¸€æ¬¡ï¼Œç‚¹å‡»ä¸€æ¬¡â€œè®°å½•è¯¥ç‚¹â€ã€‚\n4. è®°å½•å››æ¬¡åï¼Œç‚¹å‡»â€œè®¡ç®—TCPâ€ã€‚ç³»ç»Ÿä¼šè‡ªåŠ¨è®¡ç®—å‡ºæ–°çš„å·¥å…·ä¸­å¿ƒç‚¹åæ ‡å¹¶ä¿å­˜ã€‚'
+            },
+            {
+                id: 17,
+                image: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                title: 'ã€ä¼ é€å¸¦ã€‘è·‘åä¸å¼ åŠ›è°ƒæ•´',
+                description: 'ä¼ é€å¸¦è·‘åæ˜¯å¸¸è§é—®é¢˜ï¼Œå­¦ä¼šå¦‚ä½•æ­£ç¡®è°ƒæ•´å¼ ç´§è£…ç½®ï¼Œç¡®ä¿ä¼ é€å¸¦å±…ä¸­ç¨³å®šè¿è¡Œã€‚',
+                fullDescription: 'ä¼ é€å¸¦é•¿æ—¶é—´è¿è¡Œåï¼Œå¯èƒ½ä¼šå‡ºç°å‘ä¸€ä¾§åç§»ï¼ˆè·‘åï¼‰çš„ç°è±¡ï¼Œå½±å“äº§å“å®šä½ã€‚\n\n**åˆ¤æ–­ä¸è°ƒæ•´**ï¼š\n- **åˆ¤æ–­åŸåˆ™**ï¼šå¸¦å­å¾€å“ªè¾¹åï¼Œå°±å¼ ç´§å“ªä¸€è¾¹çš„è°ƒèŠ‚èºæ “ï¼›æˆ–è€…æ”¾æ¾å¦ä¸€è¾¹çš„è°ƒèŠ‚èºæ “ã€‚è¿™ä¸ªåŸåˆ™è¢«ç§°ä¸ºâ€œç´§åä¸ç´§å‰â€ã€‚\n- **è°ƒæ•´æ­¥éª¤**ï¼š\n  1. æš‚åœäº§çº¿ï¼Œä½†ä¿æŒä¼ é€å¸¦ä½é€Ÿè¿è¡Œä»¥ä¾¿è§‚å¯Ÿã€‚\n  2. æ‰¾åˆ°ä¼ é€å¸¦ä¸¤ç«¯çš„å¼ ç´§è°ƒèŠ‚èºæ “ã€‚\n  3. æ¯æ¬¡åªå¾®è°ƒèºæ “ï¼ˆä¾‹å¦‚æ—‹è½¬1/4åœˆï¼‰ï¼Œç„¶åè§‚å¯Ÿä¼ é€å¸¦åœ¨è¿è¡Œå‡ åœˆåçš„å˜åŒ–ã€‚\n  4. é‡å¤å¾®è°ƒï¼Œç›´åˆ°ä¼ é€å¸¦ç¨³å®šåœ¨æ»šç­’ä¸­å¿ƒä½ç½®è¿è¡Œã€‚\n\n**æ³¨æ„**ï¼šè¿‡åº¦å¼ ç´§ä¼šå¢åŠ ç”µæœºè´Ÿè·å’Œä¼ é€å¸¦ç£¨æŸï¼Œè°ƒæ•´æ—¶åº”ä»¥èƒ½é©±åŠ¨è´Ÿè½½è€Œä¸æ‰“æ»‘çš„æœ€å°å¼ åŠ›ä¸ºå®œã€‚'
+            },
+            {
+                id: 18,
+                image: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                title: 'ã€ä¼ é€å¸¦ã€‘å…‰ç”µä¼ æ„Ÿå™¨ç»´æŠ¤',
+                description: 'ç”¨äºæ£€æµ‹äº§å“ä½ç½®çš„å…‰ç”µä¼ æ„Ÿå™¨æ˜¯å®ç°è‡ªåŠ¨è§¦å‘æ‹ç…§çš„å…³é”®ï¼Œå¿…é¡»ä¿æŒå…¶æ¸…æ´ä¸åŠŸèƒ½æ­£å¸¸ã€‚',
+                fullDescription: 'ä¼ é€å¸¦ä¸Šç”¨äºå®šä½äº§å“çš„å…‰ç”µä¼ æ„Ÿå™¨ï¼ˆé€šå¸¸å®‰è£…åœ¨ä¾§é¢ï¼‰éœ€è¦å®šæœŸç»´æŠ¤ï¼š\n\n1. **æ¸…æ´**ï¼šæ¯ç­æ¬¡åº”ç”¨å¹²å‡€çš„è½¯å¸ƒæˆ–æ£‰ç­¾ï¼Œæ“¦æ‹­ä¼ æ„Ÿå™¨çš„å‘å°„ç«¯å’Œæ¥æ”¶ç«¯é•œå¤´ï¼Œå»é™¤ç°å°˜å’Œæ²¹æ±¡ã€‚\n2. **å¯¹å‡†æ£€æŸ¥**ï¼šå¯¹äºå¯¹å°„å¼ä¼ æ„Ÿå™¨ï¼Œè¦ç¡®ä¿å‘å°„å™¨å’Œæ¥æ”¶å™¨ä¸¥æ ¼å¯¹å‡†ã€‚å¯ä»¥è§‚å¯Ÿä¼ æ„Ÿå™¨ä¸Šçš„çŠ¶æ€æŒ‡ç¤ºç¯ï¼Œåœ¨æ²¡æœ‰ç‰©ä½“é®æŒ¡æ—¶ï¼ŒæŒ‡ç¤ºç¯åº”å¤„äºç¨³å®šç‚¹äº®ï¼ˆæˆ–ç†„ç­ï¼‰çŠ¶æ€ã€‚\n3. **çµæ•åº¦è°ƒèŠ‚**ï¼šéƒ¨åˆ†ä¼ æ„Ÿå™¨é…æœ‰çµæ•åº¦è°ƒèŠ‚æ—‹é’®ã€‚å½“å‡ºç°è¯¯è§¦å‘æˆ–ä¸è§¦å‘çš„æƒ…å†µæ—¶ï¼Œå¯åœ¨æœ‰/æ— äº§å“é®æŒ¡æ—¶ï¼Œå¾®è°ƒè¯¥æ—‹é’®ï¼Œç›´åˆ°è§¦å‘ç¨³å®šå¯é ã€‚éä¸“ä¸šäººå‘˜è¯·å‹¿éšæ„å¤§å¹…è°ƒæ•´ã€‚'
+            }
+        ], this, "knowledgeItems");
+        this.__selectedItem = new ObservedPropertyObjectPU(null, this, "selectedItem");
+        this.dialogController = new CustomDialogController({
+            builder: () => {
+                let jsDialog = new KnowledgeDetailDialog(this, {
+                    item: this.__selectedItem, // ä½¿ç”¨ $ ç¬¦å·ä¼ é€’ @Link å˜é‡
+                }, undefined, -1, () => { }, { page: "entry/src/main/ets/view/DataStatics.ets", line: 251, col: 14 });
+                jsDialog.setController(this.dialogController);
+                ViewPU.create(jsDialog);
+                let paramsLambda = () => {
+                    return {
+                        item: this.__selectedItem
+                    };
+                };
+                jsDialog.paramsGenerator_ = paramsLambda;
+            },
+            autoCancel: true,
+            alignment: DialogAlignment.Center,
+            customStyle: true
+        }, this);
+        this.setInitiallyProvidedValue(params);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params) {
+        if (params.knowledgeItems !== undefined) {
+            this.knowledgeItems = params.knowledgeItems;
+        }
+        if (params.selectedItem !== undefined) {
+            this.selectedItem = params.selectedItem;
+        }
+        if (params.dialogController !== undefined) {
+            this.dialogController = params.dialogController;
+        }
+    }
+    updateStateVars(params) {
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__knowledgeItems.purgeDependencyOnElmtId(rmElmtId);
+        this.__selectedItem.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.__knowledgeItems.aboutToBeDeleted();
+        this.__selectedItem.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    get knowledgeItems() {
+        return this.__knowledgeItems.get();
+    }
+    set knowledgeItems(newValue) {
+        this.__knowledgeItems.set(newValue);
+    }
+    get selectedItem() {
+        return this.__selectedItem.get();
+    }
+    set selectedItem(newValue) {
+        this.__selectedItem.set(newValue);
+    }
+    aboutToAppear() {
+        // é…ç½®æ ·å¼ä»¥åŒ¹é…æ·±è‰²ä¸»é¢˜
+        // 1. é…ç½®æ™®é€šæ–‡æœ¬æ ·å¼
+        lvText.setTextColor('rgba(255, 255, 255, 0.9)'); // è®¾ç½®æ–‡æœ¬ä¸ºè¿‘ä¹ç™½è‰²
+        lvText.setTextLineHeight('24'); // è®¾ç½®åˆé€‚çš„è¡Œé«˜
+        // 2. é…ç½®æ ‡é¢˜æ ·å¼
+        lvTitle.setLevelTitleColor('#ffffff'); // æ‰€æœ‰çº§åˆ«çš„æ ‡é¢˜éƒ½ä¸ºç™½è‰²
+        // 3. é…ç½®é“¾æ¥æ ·å¼
+        lvLink.setTextColor('#5cdbd3'); // è®¾ç½®é“¾æ¥ä¸ºäº®çœ¼çš„é’è‰²
+        lvLink.setTextUnderline(true); // ä¸ºé“¾æ¥æ·»åŠ ä¸‹åˆ’çº¿ï¼Œæ›´æ˜“è¯†åˆ«
+        // 4. é…ç½®ä»£ç å—æ ·å¼
+        lvCode.setTheme("dark"); // ä½¿ç”¨æš—è‰²ä¸»é¢˜ï¼Œä¸èƒŒæ™¯åè°ƒ
+        lvCode.setIndexState(true); // æ˜¾ç¤ºè¡Œå·
+        // 5. é…ç½®å¼•ç”¨å—æ ·å¼
+        lvQuote.setBackgroundColor('rgba(255, 255, 255, 0.1)'); // è®¾ç½®ä¸ºåŠé€æ˜çš„èƒŒæ™¯
+        lvQuote.setBorderColor('#69c0ff'); // è®¾ç½®å·¦è¾¹æ¡†ä¸ºè“è‰²
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Scroll.create();
+            Scroll.width('100%');
+            Scroll.height('100%');
+            Scroll.scrollable(ScrollDirection.Vertical);
+            Scroll.scrollBar(BarState.On);
+            Scroll.scrollBarColor('#888888');
+            Scroll.scrollBarWidth(8);
+            Scroll.edgeEffect(EdgeEffect.Spring);
+        }, Scroll);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+            Column.padding(24);
+            Column.width('100%');
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Grid.create();
+            Grid.columnsTemplate('1fr 1fr 1fr');
+            Grid.columnsGap(20);
+            Grid.rowsGap(20);
+            Grid.width('100%');
+        }, Grid);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            ForEach.create();
+            const forEachItemGenFunction = _item => {
+                const item = _item;
+                {
+                    const itemCreation2 = (elmtId, isInitialRender) => {
+                        GridItem.create(() => { }, false);
+                    };
+                    const observedDeepRender = () => {
+                        this.observeComponentCreation2(itemCreation2, GridItem);
+                        {
+                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                if (isInitialRender) {
+                                    let componentCall = new KnowledgeCard(this, {
+                                        info: item,
+                                        onCardClick: (clickedInfo) => {
+                                            // [ä¿®æ”¹] äº¤äº’é€»è¾‘æ›´ç®€å•ï¼Œåªéœ€æ›´æ–°çŠ¶æ€ï¼Œå¼¹çª—ä¼šè‡ªåŠ¨è·å–æœ€æ–°æ•°æ®
+                                            this.selectedItem = clickedInfo;
+                                            this.dialogController.open();
+                                        }
+                                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DataStatics.ets", line: 289, col: 17 });
+                                    ViewPU.create(componentCall);
+                                    let paramsLambda = () => {
+                                        return {
+                                            info: item,
+                                            onCardClick: (clickedInfo) => {
+                                                // [ä¿®æ”¹] äº¤äº’é€»è¾‘æ›´ç®€å•ï¼Œåªéœ€æ›´æ–°çŠ¶æ€ï¼Œå¼¹çª—ä¼šè‡ªåŠ¨è·å–æœ€æ–°æ•°æ®
+                                                this.selectedItem = clickedInfo;
+                                                this.dialogController.open();
+                                            }
+                                        };
+                                    };
+                                    componentCall.paramsGenerator_ = paramsLambda;
+                                }
+                                else {
+                                    this.updateStateVarsOfChildByElmtId(elmtId, {
+                                        info: item
+                                    });
+                                }
+                            }, { name: "KnowledgeCard" });
+                        }
+                        GridItem.pop();
+                    };
+                    observedDeepRender();
+                }
+            };
+            this.forEachUpdateFunction(elmtId, this.knowledgeItems, forEachItemGenFunction, (item) => item.id.toString(), false, false);
+        }, ForEach);
+        ForEach.pop();
+        Grid.pop();
+        Column.pop();
+        Scroll.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+//# sourceMappingURL=DataStatics.js.mapÂ‘ÙpD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\Index.jsÙBD:\apps\deveco\tzb2025jbgs\entry\src\main\ets\view\DataStatics.etsÔrB›ªmoduleName±isLocalDependency¯isNodeEntryFile§pkgPath±belongProjectPath§pkgNameªpkgVersion±dependencyPkgInfo¯hostModulesInfo°belongModulePath¬shouldEmitJs¥entryÃÂÙ D:\apps\deveco\tzb2025jbgs\entryºD:\apps\deveco\tzb2025jbgs¥entry¥1.0.0Ô  ‘ÔrC’²hostDependencyName®hostModuleName³../view/DataStatics¥entryÙ D:\apps\deveco\tzb2025jbgs\entryÃÃÚW
+import { LvMarkdownIn, lvText, lvTitle, lvLink, lvCode, lvQuote } from '@luvi/lv-markdown-in';
+
+interface KnowledgeInfo {
+  id: number;
+  image: Resource;
+  title: string;
+  description: string;
+  fullDescription: string;
+}
+
+@Component
+struct KnowledgeCard {
+  // è®©çˆ¶ç»„ä»¶å¯ä»¥ä¼ å…¥æ•°æ®
+  @Prop info: KnowledgeInfo;
+  onCardClick: (info: KnowledgeInfo) => void = () => {};
+
+  @State private isPressed: boolean = false;
+
+  build() {
+    Column({ space: 12 }) {
+      Text(this.info.title)
+        .fontSize(20)
+        .fontWeight(FontWeight.Bold)
+        .fontColor(Color.White)
+        .width('100%')
+        .textAlign(TextAlign.Start)
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .maxLines(2)
+
+      Text(this.info.description)
+        .fontSize(14)
+        .fontColor('rgba(255, 255, 255, 0.75)')
+        .width('100%')
+        .textAlign(TextAlign.Start)
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .maxLines(3)
+        .lineHeight(20)
+    }
+    .padding(20)
+    .width('100%')
+    .height(160)
+    .alignItems(HorizontalAlign.Start)
+    .justifyContent(FlexAlign.Start)
+    .borderRadius(16)
+    .backgroundColor('rgba(10, 10, 15, 0.3)')
+    .backdropBlur(12)
+    .backgroundColor('rgba(10, 10, 15, 0.3)')
+    .borderRadius(16)
+    //æ·»åŠ æ¸…æ™°çš„è½®å»“çº¿
+    .border({
+      width: 1.5,
+      color: 'rgba(255, 255, 255, 0.15)'
+    })
+    //æ·»åŠ æŸ”å’Œçš„èƒŒæ™¯å…‰æ™•
+    .shadow({
+      radius: 30,
+      color: 'rgba(173, 216, 230, 0.2)',
+      offsetX: 0,
+      offsetY: 0
+    })
+    .clip(true)
+    .scale({ x: this.isPressed ? 0.97 : 1.0, y: this.isPressed ? 0.97 : 1.0 })
+    .animation({ duration: 150, curve: Curve.EaseInOut })
+    .onClick(() => {
+      this.onCardClick(this.info);
+    })
+    .onTouch((event: TouchEvent) => {
+      if (event.type === TouchType.Down) { this.isPressed = true; }
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) { this.isPressed = false; }
+    })
+  }
+}
+
+@CustomDialog
+struct KnowledgeDetailDialog {
+  @Link item: KnowledgeInfo | null;
+  controller: CustomDialogController;
+
+  build() {
+    Column({ space: 15 }) {
+      Text(this.item?.title)
+        .fontSize(22)
+        .fontWeight(FontWeight.Bold)
+        .fontColor(Color.White)
+
+      Divider().color('rgba(255, 255, 255, 0.2)')
+
+      Scroll() {
+        LvMarkdownIn({ text: this.item?.fullDescription ?? '' })
+      }
+      .scrollBar(BarState.Auto)
+      .layoutWeight(1)
+
+      Button('å…³é—­')
+        .width('100%')
+        .height(45)
+        .type(ButtonType.Capsule)
+        .backgroundColor('rgba(255, 255, 255, 0.2)')
+        .onClick(() => {
+          this.controller.close();
+        })
+    }
+    .padding(24)
+    .width('80%')
+    .height('70%')
+    .borderRadius(24)
+    .backgroundColor('rgba(30, 30, 40, 1.00)')
+    .backdropBlur(20)
+    .border({ width: 1.5, color: 'rgba(255, 255, 255, 0.2)' })
+  }
+}
+
+
+@Component
+export struct DataStatics {
+  @State private knowledgeItems: KnowledgeInfo[] = [
+    {
+      id: 1,
+      image: $r('app.media.zb'),
+      title: 'èƒ½æ•ˆæ ‡ç­¾ç­‰çº§è¯¦è§£',
+      description: 'äº†è§£ä¸åŒèƒ½æ•ˆç­‰çº§çš„å«ä¹‰ã€ä¿¡æ¯åŒºå†…å®¹ä»¥åŠå®ƒä»¬å¦‚ä½•å½±å“äº§å“åˆ†ç±»ã€‚',
+      fullDescription: 'èƒ½æ•ˆæ ‡ç­¾ï¼Œåˆç§°èƒ½æºæ•ˆç‡æ ‡è¯†ï¼Œæ˜¯é™„åœ¨è€—èƒ½äº§å“æˆ–å…¶æœ€å°åŒ…è£…ç‰©ä¸Šçš„ä¸€ç§ä¿¡æ¯æ ‡ç­¾ï¼Œç”¨äºè¡¨ç¤ºäº§å“èƒ½æºæ•ˆç‡ç­‰çº§ç­‰æ€§èƒ½æŒ‡æ ‡ã€‚æˆ‘å›½çš„èƒ½æ•ˆæ ‡è¯†å°†èƒ½æ•ˆåˆ†ä¸º1ã€2ã€3ã€4ã€5å…±äº”ä¸ªç­‰çº§ã€‚\n\n- **ç­‰çº§1**ï¼šè¡¨ç¤ºäº§å“è¾¾åˆ°å›½é™…å…ˆè¿›æ°´å¹³ï¼Œæœ€èŠ‚ç”µï¼Œå³è€—èƒ½æœ€ä½ã€‚\n- **ç­‰çº§2**ï¼šè¡¨ç¤ºæ¯”è¾ƒèŠ‚ç”µã€‚\n- **ç­‰çº§3**ï¼šè¡¨ç¤ºäº§å“çš„èƒ½æºæ•ˆç‡ä¸ºæˆ‘å›½å¸‚åœºçš„å¹³å‡æ°´å¹³ã€‚\n- **ç­‰çº§4**ï¼šè¡¨ç¤ºäº§å“èƒ½æºæ•ˆç‡ä½äºå¸‚åœºå¹³å‡æ°´å¹³ã€‚\n- **ç­‰çº§5**ï¼šæ˜¯å¸‚åœºå‡†å…¥æŒ‡æ ‡ï¼Œä½äºè¯¥ç­‰çº§è¦æ±‚çš„äº§å“ä¸å…è®¸ç”Ÿäº§å’Œé”€å”®ã€‚'
+    },
+    {
+      id: 2,
+      image: $r('app.media.zb'),
+      title: 'äº§çº¿å®‰å…¨æ“ä½œè§„ç¨‹',
+      description: 'æŸ¥çœ‹æœºæ¢°è‡‚ã€ä¼ é€å¸¦çš„æ ‡å‡†æ“ä½œæµç¨‹å’Œç´§æ€¥æƒ…å†µå¤„ç†é¢„æ¡ˆï¼Œç¡®ä¿äººå‘˜ä¸è®¾å¤‡å®‰å…¨ã€‚',
+      fullDescription: '1. **å¼€æœºå‰æ£€æŸ¥**ï¼šç¡®è®¤æ‰€æœ‰å®‰å…¨é—¨å·²å…³é—­ï¼Œæ€¥åœæŒ‰é’®å¤„äºå¤ä½çŠ¶æ€ï¼Œæœºæ¢°è‡‚å·¥ä½œèŒƒå›´å†…æ— æ‚ç‰©å’Œäººå‘˜ã€‚\n2. **è¿è¡Œä¸­ç›‘æ§**ï¼šä¸¥ç¦åœ¨è®¾å¤‡è¿è¡Œæ—¶å°†æ‰‹æˆ–èº«ä½“ä»»ä½•éƒ¨åˆ†ä¼¸å…¥å·¥ä½œåŒºåŸŸã€‚å¦‚é‡å¼‚å¸¸ï¼Œç«‹å³æŒ‰ä¸‹æœ€è¿‘çš„æ€¥åœæŒ‰é’®ã€‚\n3. **ç´§æ€¥å¤„ç†**ï¼šå‘ç”Ÿç´§æ€¥æƒ…å†µï¼ˆå¦‚å¡æ–™ã€ç¢°æ’ï¼‰æ—¶ï¼Œå¿…é¡»å…ˆåˆ‡æ–­ä¸»ç”µæºï¼Œå†è¿›è¡Œå¤„ç†ã€‚\n4. **å…³æœºæµç¨‹**ï¼šå¾…æ‰€æœ‰ä»»åŠ¡å®Œæˆåï¼Œå°†æœºæ¢°è‡‚å¤ä½åˆ°åŸç‚¹ï¼ˆHomeï¼‰ï¼Œç„¶åå…³é—­æ§åˆ¶å™¨ç”µæºï¼Œæœ€åå…³é—­ä¸»ç”µæºã€‚'
+    },
+    {
+      id: 3,
+      image: $r('app.media.zb'),
+      title: 'å¸¸è§æ•…éšœæ’æŸ¥æŒ‡å—',
+      description: 'å­¦ä¹ å¦‚ä½•å¿«é€Ÿè¯Šæ–­å’Œå¤„ç†æ ‡ç­¾è¯†åˆ«å¤±è´¥ã€æœºæ¢°è‡‚æŠ“å–å¼‚å¸¸ç­‰å¸¸è§é—®é¢˜ã€‚',
+      fullDescription: 'å½“äº§çº¿å‡ºç°é—®é¢˜æ—¶ï¼Œè¯·å‚ç…§ä»¥ä¸‹æ­¥éª¤æ’æŸ¥ï¼š\n\n- **æ•…éšœç°è±¡ï¼šæ ‡ç­¾æ— æ³•è¯†åˆ«**\n  - **å¯èƒ½åŸå› 1**ï¼šæ‘„åƒå¤´è„æ±¡æˆ–ä½ç½®åç§»ã€‚\n  - **æ’æŸ¥æ–¹æ³•**ï¼šæ¸…æ´æ‘„åƒå¤´é•œå¤´ï¼Œæ£€æŸ¥å¹¶é‡æ–°æ ¡å‡†æ‘„åƒå¤´ä½ç½®ã€‚\n\n- **æ•…éšœç°è±¡ï¼šæœºæ¢°è‡‚æŠ“å–å¤±è´¥**\n  - **å¯èƒ½åŸå› 1**ï¼šæŠ“å–åæ ‡åç§»ã€‚\n  - **æ’æŸ¥æ–¹æ³•**ï¼šè¿›å…¥ç³»ç»Ÿè®¾ç½®ï¼Œé‡æ–°æ ¡å‡†æœºæ¢°è‡‚çš„æŠ“å–ç‚¹ä½ã€‚\n  - **å¯èƒ½åŸå› 2**ï¼šæ‰‹çˆªæ°”å‹ä¸è¶³æˆ–æ•…éšœã€‚\n  - **æ’æŸ¥æ–¹æ³•**ï¼šæ£€æŸ¥æ°”æºå‹åŠ›ï¼Œæ£€æŸ¥æ‰‹çˆªç”µç£é˜€æ˜¯å¦æ­£å¸¸å·¥ä½œã€‚'
+    },
+    {
+      id: 4,
+      image: $r('app.media.zb'),
+      title: 'æœºæ¢°è‡‚æ—¥å¸¸ç»´æŠ¤ä¸ä¿å…»',
+      description: 'å®šæœŸå¯¹æœºæ¢°è‡‚è¿›è¡Œæ£€æŸ¥ã€æ¸…æ´å’Œæ¶¦æ»‘ï¼Œæ˜¯å»¶é•¿å…¶ä½¿ç”¨å¯¿å‘½å’Œä¿è¯ç²¾åº¦çš„å…³é”®ã€‚',
+      fullDescription: 'ä¸ºç¡®ä¿æœºæ¢°è‡‚é•¿æœŸç¨³å®šè¿è¡Œï¼Œè¯·éµå¾ªä»¥ä¸‹ä¿å…»å‘¨æœŸï¼š\n\n- **æ¯æ—¥æ£€æŸ¥**ï¼š\n  - æ£€æŸ¥å„è½´è¿åŠ¨æ˜¯å¦å¹³ç¨³ï¼Œæœ‰æ— å¼‚å¸¸å™ªéŸ³ã€‚\n  - ç¡®è®¤æ‰‹çˆªï¼ˆæœ«ç«¯æ‰§è¡Œå™¨ï¼‰çŠ¶æ€æ˜¯å¦æ­£å¸¸ã€‚\n\n- **æ¯å‘¨æ£€æŸ¥**ï¼š\n  - æ¸…æ´æœºæ¢°è‡‚æœ¬ä½“åŠæ§åˆ¶æŸœçš„ç°å°˜ã€‚\n  - æ£€æŸ¥æ‰€æœ‰å¤–éƒ¨ç”µç¼†æœ‰æ— ç£¨æŸæˆ–æŸåã€‚\n  - æ£€æŸ¥å¹¶ç´§å›ºæ‰€æœ‰å¯è§çš„èºä¸ã€‚\n\n- **æ¯å­£åº¦æ£€æŸ¥**ï¼š\n  - æ£€æŸ¥å„å…³èŠ‚çš„æ¶¦æ»‘æƒ…å†µï¼ŒæŒ‰éœ€æ·»åŠ æŒ‡å®šå‹å·çš„æ¶¦æ»‘è„‚ã€‚\n  - æ£€æŸ¥ç”µæ± ï¼ˆå¦‚æœ‰ï¼‰å¹¶æŒ‰éœ€æ›´æ¢ã€‚'
+    },
+    {
+      id: 5,
+      image: $r('app.media.zb'),
+      title: 'è§†è§‰ç³»ç»Ÿæ ¡å‡†æ–¹æ³•',
+      description: 'å½“è¯†åˆ«ç²¾åº¦ä¸‹é™æ—¶ï¼Œéœ€è¦é‡æ–°æ ¡å‡†æ‘„åƒå¤´ã€‚æœ¬æ–‡ä»‹ç»è¯¦ç»†çš„æ ¡å‡†æ­¥éª¤ã€‚',
+      fullDescription: 'åœ¨ä»¥ä¸‹æƒ…å†µå‘ç”Ÿæ—¶ï¼Œå»ºè®®é‡æ–°æ ¡å‡†è§†è§‰ç³»ç»Ÿï¼š\n1. æ›´æ¢æˆ–ç§»åŠ¨è¿‡æ‘„åƒå¤´ã€‚\n2. äº§çº¿å‡ºç°è¿ç»­ã€è§„å¾‹æ€§çš„è¯†åˆ«é”™è¯¯ã€‚\n3. æ›´æ¢äº†æ–°çš„ç…§æ˜å…‰æºã€‚\n\n**æ ¡å‡†æµç¨‹**ï¼š\n1. ä»å·¥å…·ç®±ä¸­å–å‡ºä¸“ç”¨çš„æ ¡å‡†æ¿ã€‚\n2. å°†äº§çº¿æš‚åœï¼Œå¹¶å°†æ ¡å‡†æ¿æ”¾ç½®åœ¨ä¼ é€å¸¦çš„æŒ‡å®šæ ¡å‡†åŒºåŸŸã€‚\n3. åœ¨ä¸­æ§å¹³å°çš„â€œç³»ç»Ÿè®¾ç½®â€ -> â€œæ‘„åƒå¤´è®¾ç½®â€ä¸­ï¼Œç‚¹å‡»â€œå¼€å§‹æ ¡å‡†â€æŒ‰é’®ã€‚\n4. ç³»ç»Ÿä¼šè‡ªåŠ¨æ‹æ‘„æ ¡å‡†æ¿å›¾åƒå¹¶è®¡ç®—æ–°çš„æ˜ å°„å…³ç³»ã€‚è¯·å‹¿ç§»åŠ¨æ ¡å‡†æ¿ç›´è‡³ç³»ç»Ÿæç¤ºâ€œæ ¡å‡†æˆåŠŸâ€ã€‚\n5. ç§»èµ°æ ¡å‡†æ¿ï¼Œæ¢å¤äº§çº¿è¿è¡Œå¹¶è§‚å¯Ÿè¯†åˆ«æ•ˆæœã€‚'
+    },
+    {
+      id: 6,
+      image: $r('app.media.zb'),
+      title: 'ä¼ é€å¸¦é€Ÿåº¦ä¸è¯†åˆ«ç‡å…³ç³»',
+      description: 'æ¢è®¨ä¼ é€å¸¦é€Ÿåº¦å¯¹èƒ½æ•ˆæ ‡ç­¾è¯†åˆ«æˆåŠŸç‡çš„å½±å“ï¼Œæ‰¾åˆ°ç”Ÿäº§æ•ˆç‡ä¸å‡†ç¡®ç‡çš„æœ€ä½³å¹³è¡¡ç‚¹ã€‚',
+      fullDescription: 'ä¼ é€å¸¦é€Ÿåº¦æ˜¯å½±å“äº§çº¿æ•ˆç‡å’Œè¯†åˆ«å‡†ç¡®ç‡çš„å…³é”®å‚æ•°ã€‚ä¸¤è€…å…³ç³»å¦‚ä¸‹ï¼š\n\n- **é€Ÿåº¦è¿‡å¿«**ï¼š\n  - **ä¼˜ç‚¹**ï¼šå•ä½æ—¶é—´å†…å¤„ç†é‡å¤§ï¼Œäº§çº¿æ•ˆç‡é«˜ã€‚\n  - **ç¼ºç‚¹**ï¼šå¯èƒ½å¯¼è‡´å›¾åƒè¿åŠ¨æ¨¡ç³Šï¼Œé™ä½è¯†åˆ«æˆåŠŸç‡ï¼›å¯¹æœºæ¢°è‡‚çš„ååº”é€Ÿåº¦è¦æ±‚æ›´é«˜ã€‚\n\n- **é€Ÿåº¦è¿‡æ…¢**ï¼š\n  - **ä¼˜ç‚¹**ï¼šå›¾åƒæ¸…æ™°ï¼Œè¯†åˆ«å‡†ç¡®ç‡é«˜ï¼Œæœºæ¢°è‡‚æŠ“å–æ›´ç¨³å®šã€‚\n  - **ç¼ºç‚¹**ï¼šäº§çº¿æ•´ä½“æ•ˆç‡é™ä½ã€‚\n\n**å»ºè®®**ï¼šåœ¨â€œç³»ç»Ÿè®¾ç½®â€ä¸­ï¼Œé€šå¸¸å»ºè®®å°†é€Ÿåº¦ç»´æŒåœ¨ç³»ç»Ÿæ¨èå€¼ï¼ˆä¾‹å¦‚ 0.5m/sï¼‰ã€‚åªæœ‰åœ¨å¤„ç†è¡¨é¢åå…‰ä¸¥é‡æˆ–æ ‡ç­¾å°åˆ·è´¨é‡è¾ƒå·®çš„äº§å“æ—¶ï¼Œå¯é€‚å½“é™ä½é€Ÿåº¦ä»¥ä¿è¯å‡†ç¡®ç‡ã€‚'
+    },
+    {
+      id: 7,
+      image: $r('app.media.zb'),
+      title: 'æ–°äº§å“å‹å·å½•å…¥æµç¨‹',
+      description: 'ä»‹ç»å¦‚ä½•å°†æ–°çš„å®¶ç”µå‹å·æ·»åŠ åˆ°è¯†åˆ«å’Œåˆ†æ‹£ç³»ç»Ÿä¸­ï¼Œç¡®ä¿ç³»ç»Ÿèƒ½æ­£ç¡®å¤„ç†ã€‚',
+      fullDescription: 'å½“éœ€è¦å¤„ç†æ–°çš„å®¶ç”µäº§å“æ—¶ï¼Œè¯·æŒ‰ä»¥ä¸‹æ­¥éª¤å°†å…¶ä¿¡æ¯å½•å…¥ç³»ç»Ÿï¼š\n1. åœ¨ä¸­æ§å¹³å°ä¸»èœå•è¿›å…¥â€œç³»ç»Ÿè®¾ç½®â€ -> â€œäº§å“ç®¡ç†â€ã€‚\n2. ç‚¹å‡»â€œæ·»åŠ æ–°å‹å·â€æŒ‰é’®ã€‚\n3. åœ¨å¼¹å‡ºçš„çª—å£ä¸­è¾“å…¥æ–°äº§å“çš„åç§°ã€å‹å·ã€å°ºå¯¸ç­‰åŸºæœ¬ä¿¡æ¯ã€‚\n4. å°†æ–°äº§å“æ”¾ç½®åœ¨ä¼ é€å¸¦çš„èµ·å§‹ä½ç½®ï¼Œç‚¹å‡»â€œæ ‡ç­¾å­¦ä¹ â€ã€‚æ‘„åƒå¤´ä¼šè‡ªåŠ¨å®šä½å¹¶åˆ†æèƒ½æ•ˆæ ‡ç­¾çš„ç‰¹å¾å’Œä½ç½®ã€‚\n5. åœ¨â€œåˆ†æ‹£è§„åˆ™â€ä¸­ï¼Œä¸ºè¯¥æ–°å‹å·æˆ–å…¶èƒ½æ•ˆç­‰çº§æŒ‡å®šä¸€ä¸ªåˆ†æ‹£ç›®æ ‡ï¼ˆä¾‹å¦‚ï¼Œ1å·æœºæ¢°è‡‚ï¼‰ã€‚\n6. ä¿å­˜è®¾ç½®ã€‚å»ºè®®å…ˆè®©å°‘é‡æ–°äº§å“é€šè¿‡äº§çº¿è¿›è¡Œæµ‹è¯•ï¼Œç¡®è®¤æ— è¯¯åå†è¿›è¡Œå¤§è§„æ¨¡ç”Ÿäº§ã€‚'
+    },
+    {
+      id: 8,
+      image: $r('app.media.zb'),
+      title: 'æ—¥å¿—ç³»ç»Ÿä½¿ç”¨æŒ‡å—',
+      description: 'å­¦ä¹ å¦‚ä½•æŸ¥çœ‹ã€ç­›é€‰å’Œå¯¼å‡ºæ“ä½œæ—¥å¿—ä¸å¼‚å¸¸æ—¥å¿—ï¼Œç”¨äºè¿½æº¯é—®é¢˜å’Œåˆ†æäº§çº¿æ•ˆç‡ã€‚',
+      fullDescription: 'æœ¬ç³»ç»Ÿæä¾›ä¸¤ç§æ ¸å¿ƒæ—¥å¿—ï¼Œå‡å¯åœ¨â€œä»»åŠ¡æ—¥å¿—â€é¡µé¢è®¿é—®ï¼š\n\n- **æ“ä½œæ—¥å¿—**ï¼šè®°å½•æ¯ä¸€æ¬¡æˆåŠŸçš„åˆ†æ‹£æ“ä½œï¼ŒåŒ…æ‹¬æ—¶é—´ã€äº§å“å‹å·ã€è¯†åˆ«å‡ºçš„èƒ½æ•ˆç­‰çº§ä»¥åŠç”±å“ªå°æœºæ¢°è‡‚å¤„ç†ã€‚å¯ç”¨äºç”Ÿäº§ç»Ÿè®¡å’Œè¿½æº¯ã€‚\n\n- **å¼‚å¸¸æ—¥å¿—**ï¼šè®°å½•æ‰€æœ‰å¤±è´¥æˆ–å¼‚å¸¸çš„äº‹ä»¶ï¼Œä¾‹å¦‚â€œæ— æ³•è¯†åˆ«æ ‡ç­¾â€ã€â€œæœºæ¢°è‡‚æŠ“å–å¤±è´¥â€ã€â€œè®¾å¤‡ç¦»çº¿â€ç­‰ã€‚è¿™æ˜¯æ’æŸ¥æ•…éšœæœ€é‡è¦çš„ä¾æ®ã€‚\n\n**ä½¿ç”¨æŠ€å·§**ï¼š\n- ä½¿ç”¨é¡¶éƒ¨çš„æ—¥æœŸå’Œå…³é”®è¯ç­›é€‰å™¨å¯ä»¥å¿«é€Ÿå®šä½ç‰¹å®šæ—¶é—´çš„æ—¥å¿—ã€‚\n- å¯¹äºé‡è¦æˆ–é¢‘ç¹å‡ºç°çš„å¼‚å¸¸ï¼Œå»ºè®®å®šæœŸâ€œå¯¼å‡ºæ—¥å¿—â€ï¼Œä»¥ä¾¿è¿›è¡Œç¦»çº¿åˆ†æã€‚'
+    },
+    {
+      id: 9,
+      image: $r('app.media.zb'),
+      title: 'å¤‡ä»¶æ›´æ¢å‘¨æœŸè¡¨',
+      description: 'å…³é”®å¤‡ä»¶çš„å»ºè®®æ›´æ¢å‘¨æœŸå’Œåº“å­˜ç®¡ç†æŒ‡å—ï¼Œé¿å…å› å¤‡ä»¶çŸ­ç¼ºå¯¼è‡´äº§çº¿åœæœºã€‚',
+      fullDescription: 'ä¸ºä¿è¯äº§çº¿é«˜å¯ç”¨æ€§ï¼Œå»ºè®®æ ¹æ®ä»¥ä¸‹å‘¨æœŸå‡†å¤‡å’Œæ›´æ¢å…³é”®å¤‡ä»¶ï¼š\n\n- **æœºæ¢°è‡‚æ‰‹çˆªå¸ç›˜/å¤¹çˆªå«**ï¼š\n  - å»ºè®®æ›´æ¢å‘¨æœŸï¼šæ¯6ä¸ªæœˆæˆ–20ä¸‡æ¬¡æŠ“å–åã€‚\n  - å»ºè®®åº“å­˜ï¼š2å¥—ã€‚\n\n- **ä¼ é€å¸¦**ï¼š\n  - å»ºè®®æ›´æ¢å‘¨æœŸï¼šæ¯2å¹´æˆ–å‡ºç°æ˜æ˜¾ç£¨æŸã€è£‚ç—•æ—¶ã€‚\n  - å»ºè®®åº“å­˜ï¼š1æ¡ã€‚\n\n- **æ‘„åƒå¤´LEDå…‰æº**ï¼š\n  - å»ºè®®æ›´æ¢å‘¨æœŸï¼šçº¦20000å°æ—¶ä½¿ç”¨å¯¿å‘½åæˆ–äº®åº¦æ˜æ˜¾è¡°å‡æ—¶ã€‚\n  - å»ºè®®åº“å­˜ï¼š1å¥—ã€‚\n\n- **å„è®¾å¤‡ä¿é™©ä¸**ï¼š\n  - å»ºè®®æ›´æ¢å‘¨æœŸï¼šç†”æ–­åç«‹å³æ›´æ¢ã€‚\n  - å»ºè®®åº“å­˜ï¼šæ¯ç§è§„æ ¼5ä¸ªã€‚'
+    },
+    {
+      id: 10,
+      image: $r('app.media.zb'),
+      title: 'ç½‘ç»œè¿æ¥æ•…éšœæ’æŸ¥',
+      description: 'å½“ä¸­æ§å¹³å°æ˜¾ç¤ºè®¾å¤‡ç¦»çº¿æ—¶ï¼Œå¦‚ä½•ç³»ç»Ÿåœ°æ£€æŸ¥å’Œè§£å†³ç½‘ç»œè¿æ¥é—®é¢˜ã€‚',
+      fullDescription: 'å¦‚æœâ€œè®¾å¤‡ç®¡ç†â€é¡µé¢æ˜¾ç¤ºæŸä¸ªè®¾å¤‡ï¼ˆå¦‚æœºæ¢°è‡‚ã€æ‘„åƒå¤´ï¼‰å¤„äºç¦»çº¿çŠ¶æ€ï¼Œè¯·æŒ‰ä»¥ä¸‹é¡ºåºæ’æŸ¥ï¼š\n1. **ç‰©ç†è¿æ¥æ£€æŸ¥**ï¼šæ£€æŸ¥è¯¥è®¾å¤‡çš„ç½‘çº¿æ˜¯å¦ç‰¢å›ºåœ°æ’å…¥è®¾å¤‡ç«¯å’Œç½‘ç»œäº¤æ¢æœºç«¯å£ã€‚\n2. **ç”µæºæ£€æŸ¥**ï¼šç¡®è®¤è¯¥è®¾å¤‡çš„ç”µæºå·²å¼€å¯ï¼ŒçŠ¶æ€æŒ‡ç¤ºç¯æ­£å¸¸ã€‚\n3. **ç½‘ç»œäº¤æ¢æœºæ£€æŸ¥**ï¼šæŸ¥çœ‹äº¤æ¢æœºä¸Šå¯¹åº”ç«¯å£çš„æŒ‡ç¤ºç¯æ˜¯å¦åœ¨é—ªçƒï¼Œè¡¨ç¤ºæœ‰æ•°æ®é€šä¿¡ã€‚\n4. **IPåœ°å€æ£€æŸ¥**ï¼šåœ¨ä¸­æ§å¹³å°çš„è®¾å¤‡è®¾ç½®ä¸­ï¼Œç¡®è®¤è¯¥è®¾å¤‡çš„IPåœ°å€æœªå‘ç”Ÿæ”¹å˜ï¼Œä¸”ä¸ä¸­æ§å¹³å°å¤„äºåŒä¸€ç½‘æ®µã€‚\n5. **é‡å¯è®¾å¤‡**ï¼šå°è¯•é‡å¯ç¦»çº¿çš„ç¡¬ä»¶è®¾å¤‡ï¼Œç­‰å¾…2åˆ†é’Ÿåå†æŸ¥çœ‹å…¶çŠ¶æ€ã€‚\n6. **é‡å¯ä¸­æ§å¹³å°**ï¼šå¦‚æœä»¥ä¸Šæ­¥éª¤å‡æ— æ•ˆï¼Œå°è¯•é‡å¯ä¸­æ§å°å¹³æ¿ã€‚'
+    },
+    {
+      id: 11,
+      image: $r('app.media.zb'),
+      title: 'å›ºä»¶ç‰ˆæœ¬æ›´æ–°è¯´æ˜',
+      description: 'ä¸­æ§ç³»ç»ŸåŠå„è®¾å¤‡å›ºä»¶ç‰ˆæœ¬æ›´æ–°æ—¥å¿—ï¼Œäº†è§£æ–°åŠŸèƒ½å’Œå·²ä¿®å¤çš„é—®é¢˜ã€‚',
+      fullDescription: '**ä¸­æ§å¹³å° V1.2.0 (2025-07-15)**\n\n- **ã€æ–°åŠŸèƒ½ã€‘** æ–°å¢å¯¹äºŒç»´ç å¼èƒ½æ•ˆæ ‡ç­¾çš„è¯†åˆ«æ”¯æŒã€‚\n- **ã€ä¼˜åŒ–ã€‘** ä¼˜åŒ–äº†æœºæ¢°è‡‚è¿åŠ¨è·¯å¾„ç®—æ³•ï¼Œå¹³å‡åˆ†æ‹£å‘¨æœŸç¼©çŸ­5%ã€‚\n- **ã€ä¿®å¤ã€‘** ä¿®å¤äº†åœ¨å¤„ç†é«˜åå…‰æ ‡ç­¾æ—¶ï¼Œå¶å‘æ€§è¯†åˆ«é”™è¯¯çš„é—®é¢˜ã€‚\n- **ã€ä¿®å¤ã€‘** è§£å†³äº†å½“ç½‘ç»œè½»å¾®æŠ–åŠ¨æ—¶ï¼Œè®¾å¤‡çŠ¶æ€å¯èƒ½é”™è¯¯åœ°æ˜¾ç¤ºä¸ºâ€œç¦»çº¿â€çš„é—®é¢˜ã€‚\n\n*æ›´æ–°å»ºè®®ï¼šè¯·åœ¨äº§çº¿ç©ºé—²æ—¶è¿›è¡Œæ›´æ–°æ“ä½œï¼Œæ›´æ–°è¿‡ç¨‹å¤§çº¦éœ€è¦5åˆ†é’Ÿã€‚*'
+    },
+    {
+      id: 12,
+      image: $r('app.media.zb'),
+      title: 'èƒ½è€—æ•°æ®åˆ†æå…¥é—¨',
+      description: 'å­¦ä¹ å¦‚ä½•è§£è¯»ä¸­æ§å°è®°å½•çš„èƒ½è€—æ•°æ®ï¼Œå‘ç°èŠ‚èƒ½æ½œåŠ›ï¼Œä¼˜åŒ–ç”Ÿäº§ç­–ç•¥ã€‚',
+      fullDescription: 'æœ¬ç³»ç»Ÿä¼šè®°å½•äº§çº¿çš„æ•´ä½“ç”¨ç”µæƒ…å†µï¼Œæ•°æ®å¯åœ¨â€œæ•°æ®ç»Ÿè®¡â€é¡µé¢æŸ¥çœ‹ã€‚æ‚¨å¯ä»¥å…³æ³¨ä»¥ä¸‹å‡ ç‚¹ï¼š\n\n- **å³°å€¼åŠŸè€—**ï¼šè§‚å¯Ÿä¸€å¤©ä¸­å“ªä¸ªæ—¶é—´æ®µçš„ç”¨ç”µé‡æœ€é«˜ï¼Œæ˜¯å¦ä¸ç”Ÿäº§é«˜å³°åŒ¹é…ã€‚\n- **å¾…æœºåŠŸè€—**ï¼šåœ¨äº§çº¿åœæ­¢ä½†æœªæ–­ç”µæ—¶ï¼Œè®°å½•å¾…æœºåŠŸè€—ã€‚å¦‚æœå¾…æœºåŠŸè€—è¿‡é«˜ï¼Œå¯ä»¥è€ƒè™‘åœ¨é•¿æ—¶é—´ä¸ä½¿ç”¨æ—¶å…³é—­ä¸»ç”µæºã€‚\n- **å•ä½äº§å“èƒ½è€—**ï¼šé€šè¿‡ï¼ˆæ€»èƒ½è€— / æ€»äº§é‡ï¼‰è®¡ç®—å‡ºç”Ÿäº§å•ä»¶äº§å“æ‰€éœ€çš„ç”µé‡ã€‚é€šè¿‡ä¼˜åŒ–æµç¨‹ï¼ˆå¦‚è°ƒæ•´ä¼ é€å¸¦é€Ÿåº¦ï¼‰æ¥è§‚å¯Ÿè¯¥æŒ‡æ ‡çš„å˜åŒ–ï¼Œæ˜¯å®ç°èŠ‚èƒ½é™æœ¬çš„æœ‰æ•ˆé€”å¾„ã€‚'
+    },
+
+    // --- [æ–°å¢] ä»¥ä¸‹æ˜¯é’ˆå¯¹å°è½¦ã€æœºæ¢°è‡‚ã€ä¼ é€å¸¦çš„ä¸“å±çŸ¥è¯† ---
+    {
+      id: 13,
+      image: $r('app.media.zb'),
+      title: 'ã€å°è½¦ã€‘ç”µæ± ä¿å…»ä¸å……ç”µè§„èŒƒ',
+      description: 'æ™ºèƒ½å°è½¦ï¼ˆAGVï¼‰çš„ç”µæ± æ˜¯å…¶æ ¸å¿ƒéƒ¨ä»¶ï¼Œæ­£ç¡®çš„ä¿å…»å’Œå……ç”µèƒ½æ˜¾è‘—å»¶é•¿å…¶å¯¿å‘½ã€‚',
+      fullDescription: 'ä¸ºä¿éšœæ™ºèƒ½å°è½¦ï¼ˆAGVï¼‰çš„ç»­èˆªå’Œå®‰å…¨ï¼Œè¯·éµå¾ªä»¥ä¸‹ç”µæ± ä½¿ç”¨è§„èŒƒï¼š\n\n1. **æ—¥å¸¸å……ç”µ**ï¼šå½“å°è½¦ç”µé‡ä½äº20%æ—¶ï¼Œç³»ç»Ÿä¼šè‡ªåŠ¨æç¤ºæˆ–æ´¾å…¶è¿”å›å……ç”µæ¡©ã€‚è¯·ç¡®ä¿å……ç”µæ¡©ç”µæºç¨³å®šï¼Œæ¥å£æ— å¼‚ç‰©ã€‚\n2. **é¿å…è¿‡æ”¾**ï¼šä¸¥ç¦å°†ç”µæ± ç”µé‡è€—å°½å†å……ç”µï¼Œè¿™ä¼šå¯¹é”‚ç”µæ± é€ æˆæ°¸ä¹…æ€§æŸä¼¤ã€‚\n3. **å®šæœŸæ·±å¾ªç¯**ï¼šå»ºè®®æ¯ä¸‰ä¸ªæœˆè¿›è¡Œä¸€æ¬¡å®Œæ•´çš„â€œç”¨å°½-å……æ»¡â€å¾ªç¯ï¼ˆåœ¨å®‰å…¨ç”µé‡ä¸‹é™ä¹‹ä¸Šï¼‰ï¼Œä»¥æ ¡å‡†ç”µé‡è®¡ï¼Œä¿æŒç”µæ± æ´»æ€§ã€‚\n4. **æ¸…æ´ä¸æ£€æŸ¥**ï¼šæ¯æœˆæ¸…æ´ç”µæ± å……ç”µè§¦ç‚¹ï¼Œæ£€æŸ¥æœ‰æ— è…èš€æˆ–æ¾åŠ¨ã€‚'
+    },
+    {
+      id: 14,
+      image: $r('app.media.zb'),
+      title: 'ã€å°è½¦ã€‘è·¯å¾„å—é˜»ä¸è„±å›°æ–¹æ³•',
+      description: 'å½“å°è½¦åœ¨è¿è¾“é€”ä¸­è¢«éšœç¢ç‰©é˜»æŒ¡æˆ–åç¦»è½¨é“æ—¶ï¼Œåº”å¦‚ä½•å®‰å…¨åœ°è¿›è¡Œäººå·¥å¹²é¢„ã€‚',
+      fullDescription: 'å°è½¦é…å¤‡äº†æ¿€å…‰é›·è¾¾å’Œç¢°æ’ä¼ æ„Ÿå™¨ä»¥å®ç°é¿éšœï¼Œä½†ä»å¯èƒ½é‡åˆ°æ„å¤–æƒ…å†µã€‚\n\n- **æƒ…å†µä¸€ï¼šä¸´æ—¶éšœç¢ç‰©**\n  - **ç°è±¡**ï¼šå°è½¦åœ¨éšœç¢ç‰©å‰åœæ­¢å¹¶é¸£ç¬›å‘Šè­¦ã€‚\n  - **å¤„ç†**ï¼šç§»é™¤éšœç¢ç‰©åï¼Œå°è½¦é€šå¸¸ä¼šè‡ªåŠ¨æ¢å¤ä»»åŠ¡ã€‚å¦‚æœæœªè‡ªåŠ¨æ¢å¤ï¼Œå¯åœ¨ä¸­æ§å°ç‚¹å‡»â€œç»§ç»­ä»»åŠ¡â€ã€‚\n\n- **æƒ…å†µäºŒï¼šå°è½¦è„±è½¨æˆ–è¢«å›°**\n  - **å¤„ç†**ï¼š\n    1. åœ¨ä¸­æ§å°å°†è¯¥å°è½¦çŠ¶æ€è®¾ä¸ºâ€œç»´æŠ¤æ¨¡å¼â€ï¼Œæš‚åœå…¶æ‰€æœ‰ä»»åŠ¡ã€‚\n    2. æ‰‹åŠ¨å°†å°è½¦æ¨ç¦»å—å›°åŒºåŸŸï¼Œå¹¶æ”¾å›ä¸»è·¯å¾„çš„ä»»æ„ä½ç½®ã€‚\n    3. åœ¨ä¸­æ§å°ç‚¹å‡»â€œé‡æ–°å®šä½â€ï¼Œå°è½¦ä¼šè‡ªåŠ¨æ‰«æç¯å¢ƒå¹¶æ¢å¤å…¶åœ¨åœ°å›¾ä¸Šçš„ä½ç½®ã€‚\n    4. ç¡®è®¤å®šä½æ— è¯¯åï¼Œæ”¹å›â€œè‡ªåŠ¨æ¨¡å¼â€å³å¯ã€‚'
+    },
+    {
+      id: 15,
+      image: $r('app.media.zb'),
+      title: 'ã€æœºæ¢°è‡‚ã€‘æ€¥åœï¼ˆE-Stopï¼‰æ¢å¤æµç¨‹',
+      description: 'åœ¨æŒ‰ä¸‹ç´§æ€¥åœæ­¢æŒ‰é’®åï¼Œå¦‚ä½•å®‰å…¨ã€æ­£ç¡®åœ°ä½¿æœºæ¢°è‡‚ä»æ€¥åœçŠ¶æ€ä¸­æ¢å¤ã€‚',
+      fullDescription: 'ç´§æ€¥åœæ­¢ï¼ˆE-Stopï¼‰ä¼šç«‹å³åˆ‡æ–­æœºæ¢°è‡‚æ‰€æœ‰ä¼ºæœç”µæœºçš„ç”µæºã€‚æ¢å¤æ“ä½œå¿…é¡»è°¨æ…ï¼š\n1. **ç¡®è®¤å®‰å…¨**ï¼šé¦–å…ˆï¼Œå¿…é¡»ç¡®è®¤è§¦å‘æ€¥åœçš„å±é™©æƒ…å†µå·²ç»å®Œå…¨æ’é™¤ã€‚\n2. **å¤ä½æ€¥åœæŒ‰é’®**ï¼šå°†ç‰©ç†çš„æ€¥åœæŒ‰é’®æ—‹è½¬æˆ–æ‹‰å‡ºï¼Œä½¿å…¶å¤ä½ã€‚\n3. **æ¸…é™¤å‘Šè­¦**ï¼šåœ¨ä¸­æ§å°çš„â€œè®¾å¤‡ç®¡ç†â€é¡µé¢ï¼Œæ‰¾åˆ°å¯¹åº”çš„æœºæ¢°è‡‚ï¼Œç‚¹å‡»â€œæ¸…é™¤å‘Šè­¦â€æˆ–â€œå¤ä½â€æŒ‰é’®ã€‚\n4. **é‡æ–°ä¸Šç”µ**ï¼šç³»ç»Ÿä¼šæç¤ºä¸ºæœºæ¢°è‡‚ä¼ºæœç³»ç»Ÿé‡æ–°ä¸Šç”µï¼Œç‚¹å‡»ç¡®è®¤ã€‚\n5. **å›åŸç‚¹ï¼ˆHomingï¼‰**ï¼šä¸Šç”µæˆåŠŸåï¼Œæœºæ¢°è‡‚å¤„äºéç¡®å®šä½ç½®ã€‚å¿…é¡»æ‰§è¡Œâ€œå›åŸç‚¹â€æ“ä½œï¼Œè®©æœºæ¢°è‡‚çš„æ‰€æœ‰å…³èŠ‚å›åˆ°é¢„è®¾çš„é›¶ç‚¹ä½ç½®ã€‚\n6. **æ¢å¤ä»»åŠ¡**ï¼šå›åŸç‚¹æ“ä½œå®Œæˆåï¼Œæœºæ¢°è‡‚çŠ¶æ€å˜ä¸ºâ€œå¾…å‘½ä¸­â€ï¼Œæ­¤æ—¶æ‰å¯ä»¥é‡æ–°å¯åŠ¨è‡ªåŠ¨è¿è¡Œä»»åŠ¡ã€‚'
+    },
+    {
+      id: 16,
+      image: $r('app.media.zb'),
+      title: 'ã€æœºæ¢°è‡‚ã€‘æœ«ç«¯æ‰§è¡Œå™¨æ›´æ¢ä¸TCPæ ¡å‡†',
+      description: 'å½“éœ€è¦å¤„ç†ä¸åŒå°ºå¯¸æˆ–æè´¨çš„å®¶ç”µæ—¶ï¼Œå¯èƒ½éœ€è¦æ›´æ¢æ‰‹çˆªï¼Œå¹¶å¿…é¡»é‡æ–°æ ¡å‡†å·¥å…·ä¸­å¿ƒç‚¹(TCP)ã€‚',
+      fullDescription: 'å·¥å…·ä¸­å¿ƒç‚¹ï¼ˆTool Center Point, TCPï¼‰æ˜¯æœºæ¢°è‡‚æ‰‹çˆªçš„ç²¾ç¡®å·¥ä½œç‚¹ã€‚æ›´æ¢æ‰‹çˆªåï¼Œæ­¤ç‚¹ä¼šæ”¹å˜ï¼Œå¿…é¡»æ ¡å‡†ã€‚\n\n**æ›´æ¢æµç¨‹**ï¼š\n1. å°†æœºæ¢°è‡‚ç§»åŠ¨åˆ°å®‰å…¨ã€æ–¹ä¾¿æ“ä½œçš„ä½ç½®ã€‚\n2. å…³é—­æœºæ¢°è‡‚ç”µæºå’Œæ°”æºã€‚\n3. æŒ‰ç…§æ‰‹å†ŒæŒ‡å¼•ï¼Œæ‹†ä¸‹æ—§çš„æ‰‹çˆªï¼ˆæœ«ç«¯æ‰§è¡Œå™¨ï¼‰ï¼Œå®‰è£…æ–°çš„æ‰‹çˆªã€‚\n4. æ¢å¤ç”µæºå’Œæ°”æºã€‚\n\n**TCPæ ¡å‡†ï¼ˆå››ç‚¹æ³•ï¼‰**ï¼š\n1. åœ¨â€œç³»ç»Ÿè®¾ç½®â€ -> â€œæœºæ¢°è‡‚è®¾ç½®â€ä¸­ï¼Œé€‰æ‹©â€œTCPæ ¡å‡†â€ã€‚\n2. æ‰‹åŠ¨æ§åˆ¶æœºæ¢°è‡‚ï¼Œè®©æ–°å®‰è£…çš„æ‰‹çˆªå°–ç«¯ä»å››ä¸ª**ä¸åŒ**çš„å§¿æ€ï¼ˆè§’åº¦ï¼‰å»ç²¾ç¡®è§¦ç¢°ç©ºé—´ä¸­çš„åŒä¸€ä¸ªå›ºå®šç‚¹ï¼ˆä¾‹å¦‚ä¸€ä¸ªå›ºå®šçš„é¡¶é’ˆï¼‰ã€‚\n3. æ¯è§¦ç¢°ä¸€æ¬¡ï¼Œç‚¹å‡»ä¸€æ¬¡â€œè®°å½•è¯¥ç‚¹â€ã€‚\n4. è®°å½•å››æ¬¡åï¼Œç‚¹å‡»â€œè®¡ç®—TCPâ€ã€‚ç³»ç»Ÿä¼šè‡ªåŠ¨è®¡ç®—å‡ºæ–°çš„å·¥å…·ä¸­å¿ƒç‚¹åæ ‡å¹¶ä¿å­˜ã€‚'
+    },
+    {
+      id: 17,
+      image: $r('app.media.zb'),
+      title: 'ã€ä¼ é€å¸¦ã€‘è·‘åä¸å¼ åŠ›è°ƒæ•´',
+      description: 'ä¼ é€å¸¦è·‘åæ˜¯å¸¸è§é—®é¢˜ï¼Œå­¦ä¼šå¦‚ä½•æ­£ç¡®è°ƒæ•´å¼ ç´§è£…ç½®ï¼Œç¡®ä¿ä¼ é€å¸¦å±…ä¸­ç¨³å®šè¿è¡Œã€‚',
+      fullDescription: 'ä¼ é€å¸¦é•¿æ—¶é—´è¿è¡Œåï¼Œå¯èƒ½ä¼šå‡ºç°å‘ä¸€ä¾§åç§»ï¼ˆè·‘åï¼‰çš„ç°è±¡ï¼Œå½±å“äº§å“å®šä½ã€‚\n\n**åˆ¤æ–­ä¸è°ƒæ•´**ï¼š\n- **åˆ¤æ–­åŸåˆ™**ï¼šå¸¦å­å¾€å“ªè¾¹åï¼Œå°±å¼ ç´§å“ªä¸€è¾¹çš„è°ƒèŠ‚èºæ “ï¼›æˆ–è€…æ”¾æ¾å¦ä¸€è¾¹çš„è°ƒèŠ‚èºæ “ã€‚è¿™ä¸ªåŸåˆ™è¢«ç§°ä¸ºâ€œç´§åä¸ç´§å‰â€ã€‚\n- **è°ƒæ•´æ­¥éª¤**ï¼š\n  1. æš‚åœäº§çº¿ï¼Œä½†ä¿æŒä¼ é€å¸¦ä½é€Ÿè¿è¡Œä»¥ä¾¿è§‚å¯Ÿã€‚\n  2. æ‰¾åˆ°ä¼ é€å¸¦ä¸¤ç«¯çš„å¼ ç´§è°ƒèŠ‚èºæ “ã€‚\n  3. æ¯æ¬¡åªå¾®è°ƒèºæ “ï¼ˆä¾‹å¦‚æ—‹è½¬1/4åœˆï¼‰ï¼Œç„¶åè§‚å¯Ÿä¼ é€å¸¦åœ¨è¿è¡Œå‡ åœˆåçš„å˜åŒ–ã€‚\n  4. é‡å¤å¾®è°ƒï¼Œç›´åˆ°ä¼ é€å¸¦ç¨³å®šåœ¨æ»šç­’ä¸­å¿ƒä½ç½®è¿è¡Œã€‚\n\n**æ³¨æ„**ï¼šè¿‡åº¦å¼ ç´§ä¼šå¢åŠ ç”µæœºè´Ÿè·å’Œä¼ é€å¸¦ç£¨æŸï¼Œè°ƒæ•´æ—¶åº”ä»¥èƒ½é©±åŠ¨è´Ÿè½½è€Œä¸æ‰“æ»‘çš„æœ€å°å¼ åŠ›ä¸ºå®œã€‚'
+    },
+    {
+      id: 18,
+      image: $r('app.media.zb'),
+      title: 'ã€ä¼ é€å¸¦ã€‘å…‰ç”µä¼ æ„Ÿå™¨ç»´æŠ¤',
+      description: 'ç”¨äºæ£€æµ‹äº§å“ä½ç½®çš„å…‰ç”µä¼ æ„Ÿå™¨æ˜¯å®ç°è‡ªåŠ¨è§¦å‘æ‹ç…§çš„å…³é”®ï¼Œå¿…é¡»ä¿æŒå…¶æ¸…æ´ä¸åŠŸèƒ½æ­£å¸¸ã€‚',
+      fullDescription: 'ä¼ é€å¸¦ä¸Šç”¨äºå®šä½äº§å“çš„å…‰ç”µä¼ æ„Ÿå™¨ï¼ˆé€šå¸¸å®‰è£…åœ¨ä¾§é¢ï¼‰éœ€è¦å®šæœŸç»´æŠ¤ï¼š\n\n1. **æ¸…æ´**ï¼šæ¯ç­æ¬¡åº”ç”¨å¹²å‡€çš„è½¯å¸ƒæˆ–æ£‰ç­¾ï¼Œæ“¦æ‹­ä¼ æ„Ÿå™¨çš„å‘å°„ç«¯å’Œæ¥æ”¶ç«¯é•œå¤´ï¼Œå»é™¤ç°å°˜å’Œæ²¹æ±¡ã€‚\n2. **å¯¹å‡†æ£€æŸ¥**ï¼šå¯¹äºå¯¹å°„å¼ä¼ æ„Ÿå™¨ï¼Œè¦ç¡®ä¿å‘å°„å™¨å’Œæ¥æ”¶å™¨ä¸¥æ ¼å¯¹å‡†ã€‚å¯ä»¥è§‚å¯Ÿä¼ æ„Ÿå™¨ä¸Šçš„çŠ¶æ€æŒ‡ç¤ºç¯ï¼Œåœ¨æ²¡æœ‰ç‰©ä½“é®æŒ¡æ—¶ï¼ŒæŒ‡ç¤ºç¯åº”å¤„äºç¨³å®šç‚¹äº®ï¼ˆæˆ–ç†„ç­ï¼‰çŠ¶æ€ã€‚\n3. **çµæ•åº¦è°ƒèŠ‚**ï¼šéƒ¨åˆ†ä¼ æ„Ÿå™¨é…æœ‰çµæ•åº¦è°ƒèŠ‚æ—‹é’®ã€‚å½“å‡ºç°è¯¯è§¦å‘æˆ–ä¸è§¦å‘çš„æƒ…å†µæ—¶ï¼Œå¯åœ¨æœ‰/æ— äº§å“é®æŒ¡æ—¶ï¼Œå¾®è°ƒè¯¥æ—‹é’®ï¼Œç›´åˆ°è§¦å‘ç¨³å®šå¯é ã€‚éä¸“ä¸šäººå‘˜è¯·å‹¿éšæ„å¤§å¹…è°ƒæ•´ã€‚'
+    }
+  ];
+
+  @State private selectedItem: KnowledgeInfo | null = null;
+  // [ä¿®æ”¹] å¼¹çª—æ§åˆ¶å™¨åˆå§‹åŒ–æ–¹å¼ï¼Œé€šè¿‡ $selectedItem ä¼ é€’ç»‘å®š
+  private dialogController: CustomDialogController = new CustomDialogController({
+    builder: KnowledgeDetailDialog({
+      item: $selectedItem, // ä½¿ç”¨ $ ç¬¦å·ä¼ é€’ @Link å˜é‡
+    }),
+    autoCancel: true,
+    alignment: DialogAlignment.Center,
+    customStyle: true
+  });
+
+  aboutToAppear() {
+    // é…ç½®æ ·å¼ä»¥åŒ¹é…æ·±è‰²ä¸»é¢˜
+    // 1. é…ç½®æ™®é€šæ–‡æœ¬æ ·å¼
+    lvText.setTextColor('rgba(255, 255, 255, 0.9)'); // è®¾ç½®æ–‡æœ¬ä¸ºè¿‘ä¹ç™½è‰²
+    lvText.setTextLineHeight('24'); // è®¾ç½®åˆé€‚çš„è¡Œé«˜
+
+    // 2. é…ç½®æ ‡é¢˜æ ·å¼
+    lvTitle.setLevelTitleColor('#ffffff'); // æ‰€æœ‰çº§åˆ«çš„æ ‡é¢˜éƒ½ä¸ºç™½è‰²
+
+    // 3. é…ç½®é“¾æ¥æ ·å¼
+    lvLink.setTextColor('#5cdbd3'); // è®¾ç½®é“¾æ¥ä¸ºäº®çœ¼çš„é’è‰²
+    lvLink.setTextUnderline(true); // ä¸ºé“¾æ¥æ·»åŠ ä¸‹åˆ’çº¿ï¼Œæ›´æ˜“è¯†åˆ«
+
+    // 4. é…ç½®ä»£ç å—æ ·å¼
+    lvCode.setTheme("dark"); // ä½¿ç”¨æš—è‰²ä¸»é¢˜ï¼Œä¸èƒŒæ™¯åè°ƒ
+    lvCode.setIndexState(true); // æ˜¾ç¤ºè¡Œå·
+
+    // 5. é…ç½®å¼•ç”¨å—æ ·å¼
+    lvQuote.setBackgroundColor('rgba(255, 255, 255, 0.1)'); // è®¾ç½®ä¸ºåŠé€æ˜çš„èƒŒæ™¯
+    lvQuote.setBorderColor('#69c0ff'); // è®¾ç½®å·¦è¾¹æ¡†ä¸ºè“è‰²
+  }
+
+  build() {
+    Scroll() {
+      Column() {
+        Grid() {
+          ForEach(
+            this.knowledgeItems,
+            (item: KnowledgeInfo) => {
+              GridItem() {
+                KnowledgeCard({
+                  info: item,
+                  onCardClick: (clickedInfo) => {
+                    // [ä¿®æ”¹] äº¤äº’é€»è¾‘æ›´ç®€å•ï¼Œåªéœ€æ›´æ–°çŠ¶æ€ï¼Œå¼¹çª—ä¼šè‡ªåŠ¨è·å–æœ€æ–°æ•°æ®
+                    this.selectedItem = clickedInfo;
+                    this.dialogController.open();
+                  }
+                })
+              }
+            },
+            (item: KnowledgeInfo) => item.id.toString()
+          )
+        }
+        .columnsTemplate('1fr 1fr 1fr')
+        .columnsGap(20)
+        .rowsGap(20)
+        .width('100%')
+      }
+      .padding(24)
+      .width('100%')
+    }
+    .width('100%')
+    .height('100%')
+    .scrollable(ScrollDirection.Vertical)  // å¯ç”¨å‚ç›´æ»šåŠ¨
+    .scrollBar(BarState.On)                // æ˜¾ç¤ºæ»šåŠ¨æ¡
+    .scrollBarColor('#888888')             // æ›´æ˜æ˜¾çš„æ»šåŠ¨æ¡é¢œè‰²
+    .scrollBarWidth(8)                    // é€‚å½“å®½åº¦
+    .edgeEffect(EdgeEffect.Spring)         // æ»‘åŠ¨è¾¹ç¼˜æ•ˆæœ
+  }
+}ÀÔrD‘´@luvi/lv-markdown-inÔrE—ªassertions¨external¢id¤meta±moduleSideEffectsªresolvedByµsyntheticNamedExportsAÂÙpD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\Index.jsAÃªoh-resolveÂ“ÔrF–§version¤fileªsourceRoot§sources¥names¨mappings®DataStatics.js ‘¯DataStatics.etsÜôÜ ”   ” ”	 	” ” ” ” ”& &”( (”. .”0 0”6 6”8 8”? ?”ÌA ÌA”ÌG ÌG”Ì] Ì]”Ì^ Ì^’” ” ‘”  •” /” 2”  4”# 6”$ 7’”8 &”= +‘” 	’”! ”% ’” ” ’” ” ’” ” ’” ” ‘” ˜” ” 
+” ” ”! ”# ”% ”' ” ?” ?” ?”  ?”( ?”* ?”- ?”/ ? ”4 ?%”6 ?'”; ?,”< ?-”ÌE ?6”ÌG ?8–” ” 
+” '” '” '” '–” ” 
+” (” (
+” (” (–” ” 
+” )” )” )” )˜” ” 
+” *” *” *”- *”. * ”3 *%˜” ” 
+” +”! +”" +”+ +”, +”1 +#–” ” 
+” ,” ,”  ,”" ,–” ” 
+” -”" -”# -”: -,–” ” 
+” .” .”  .”" .–” ” 
+” /”" /”# /”: /,–” ” 
+” 0” 0”  0”" 0•” ” 
+” 2” 2” 2”” 3” 3” 3” 3”” 4” 4” 4”2 4(‘” 5•” ” 
+” 7” 7” 7”” 8” 8” 8” 8”” 9” 9” 9”1 9'”” :” :” :” :”” ;” ;” ;” ;‘” <–” ” 
+” =” =	” =
+” =Ü "” ” 
+” >” >
+” >” >” >” >”" >”# >”, >”- >”. > ”/ >!”3 >%”4 >&”5 >'”6 >(”9 >+”; >-”< >.”> >0”ÌB >4”ÌC >5”ÌL >>”ÌM >?”ÌN >Ì@”ÌO >ÌA”ÌS >ÌE”ÌT >ÌF”ÌU >ÌG”ÌV >ÌH”ÌY >ÌK”Ì[ >ÌM’” ?” ?—” ” 
+” Ì@” Ì@” Ì@” Ì@”  Ì@š” ÌA” ÌA
+” ÌA”  ÌA”= ÌA”ÌA ÌA”ÌB ÌA”ÌF ÌA ”ÌH ÌA!”ÌI ÌA"’” ÌB” ÌB™” ” 
+” ÌC” ÌC” ÌC” ÌC”! ÌC”# ÌC!”% ÌC#š” ÌD” ÌD
+” ÌD” ÌD” ÌD”# ÌD”, ÌD"”- ÌD#”1 ÌD'”3 ÌD)—” ÌD+” ÌD/” ÌD0”" ÌD9”% ÌD<”) ÌDÌ@”* ÌDÌA‘” ÌDÌCÜ ” ÌE” ÌE
+” ÌE” ÌE” ÌE”# ÌE”, ÌE"”- ÌE#”/ ÌE%”3 ÌE)”8 ÌE.”9 ÌE/”= ÌE3”ÌB ÌE8”ÌK ÌEÌA”ÌL ÌEÌB”ÌR ÌEÌH”ÌT ÌEÌJ—” ÌEÌL” ÌEÌP” ÌEÌQ”" ÌEÌZ”% ÌEÌ]”* ÌEÌb”+ ÌEÌc‘” ÌEÌe’” ÌF” ÌF˜” ” 
+” ” ” ”! ”" ”' –” ” 
+” 	” ” ” ˜” ” 
+” 	” ” ”& ”' ”+ #˜” ” 
+” 	” ” ”  ”! ”& –” ” 
+” 	” ” ” ˜” ” 
+” 	” ” ”$ ”% ”* "œ” ” 
+” 	” ” ”  ”(  ”* "”6 .”7 /”? 7”ÌA 9–” ” 
+” 	” ” ” ’” ” 
+˜” ” 
+” ” ” ”! ”" ”-  –” ” 
+” 	” ” ” –” ” 
+”  	”  ”  ”6  .–” ” 
+” !	” !” !” !˜” ” 
+” "	” "” "”$ "”% "”* ""œ” ” 
+” #	” #” #”  #”( # ”* #"”6 #.”7 #/”? #7”ÌA #9–” ” 
+” $	” $” $” $–” ” 
+” %	” %” %” %’” ” 
+’” ” 
+‘” ÌG’” ÌK” ÌK‘” ÌJ ‘” ÌH’” ÌL” ÌL’” ÌL” ÌL’” ÌM” ÌM‘” ÌO˜” ÌP” ÌP
+” ÌP” ÌP”! ÌP”# ÌP”% ÌP”' ÌP–” ÌP” ÌP
+” Ìg” Ìg” Ìg” Ìg–” ÌP” ÌP
+” Ìh” Ìh
+” Ìh” Ìh–” ÌP” ÌP
+” Ìi” Ìi” Ìi” Ìi–” ÌP” ÌP
+” Ìj” Ìj”  Ìj”" Ìj–” ÌP” ÌP
+” Ìk”" Ìk”# Ìk”; Ìk-–” ÌP” ÌP
+” Ìl” Ìl”  Ìl”" Ìl” ÌP” ÌP
+” Ìm” Ìm” Ìm” Ìm”! Ìm”# Ìm”& Ìm”( Ìm”- Ìm”/ Ìm!”ÌI Ìm;”ÌK Ìm=˜” ÌQ” ÌQ
+” ÌQ” ÌQ” ÌQ”! ÌQ”# ÌQ”( ÌQ–” ÌQ” ÌQ
+” ÌR	” ÌR” ÌR” ÌR˜” ÌQ” ÌQ
+” ÌS	” ÌS” ÌS”& ÌS”' ÌS”+ ÌS#˜” ÌQ” ÌQ
+” ÌT	” ÌT” ÌT”  ÌT”! ÌT”& ÌT’” ÌQ” ÌQ
+’” ÌV” ÌV–” ÌV” ÌV” ÌV” ÌV” ÌV”4 ÌV0’” ÌX” ÌX˜” ÌX” ÌX” Ì[” Ì[” Ì[”% Ì[”& Ì[”* Ì[–” ÌX” ÌX” Ì\” Ì\”  Ì\”! Ì\”, ÌY”8 ÌY”? ÌY”ÌA ÌY”ÌE ÌY”ÌG ÌY”ÌK ÌY!”ÌL ÌY"”ÌP ÌY&”ÌR ÌY(”Ìa ÌY7”Ìe ÌY;”Ìg ÌY=”Ìi ÌY?š” ÌY”  ÌY”" ÌY”& ÌY!”' ÌY"”+ ÌY&”- ÌY(”< ÌY7”Ì@ ÌY;”ÌB ÌY=š” ÌY” ÌY” ÌY”" ÌY!”# ÌY"”' ÌY&”) ÌY(”8 ÌY7”< ÌY;”> ÌY=’” ÌX” ÌX”” Ì^” Ì^”# Ì^”' Ì^–” Ì^” Ì^” Ì_	” Ì_” Ì_” Ì_–” Ì^” Ì^” Ì`	” Ì`” Ì`” Ì`˜” Ì^” Ì^” Ìa	” Ìa” Ìa”" Ìa”# Ìa”* Ìa –” Ì^” Ì^” Ìb	”" Ìb”# Ìb”= Ìb3—” Ì^” Ì^” Ìc	” Ìc” Ìc” Ìc”  Ìc˜” Ìd
+” Ìd” Ìd” Ìd”  Ìd”% Ìd”' Ìd!”( Ìd"’” Ìe” Ìe	’” Ì^” Ì^’” ÌP” ÌP
+‘” Ìn””  Ìs ” Ìs” Ìs” Ìs‘” Ìr ‘”= Ìt3‘” Ìu”” Ìv” Ìv” Ìv
+” Ìv“” Ìw” Ìw”Ì Ìw”” Ìx” Ìx” Ìx”! Ìx”” Ìy” Ìy” Ìy”= Ìy3”” Ìz” Ìz”! Ìz”Í ÌzÍ‘” Ì{‘” Ì|”” Ì}” Ì}” Ì}
+” Ì}“” Ì~” Ì~”Ì Ì~”” Ì” Ì” Ì”! Ì”” Ì€” Ì€” Ì€”ÌC Ì€9”” Ì” Ì”! Ì”Ìó ÌÌé‘” Ì‚‘” Ìƒ”” Ì„” Ì„” Ì„
+” Ì„“” Ì…” Ì…”Ì Ì…”” Ì†” Ì†” Ì†”! Ì†”” Ì‡” Ì‡” Ì‡”> Ì‡4”” Ìˆ” Ìˆ”! Ìˆ”Í ÌˆÍ‘” Ì‰‘” ÌŠ”” Ì‹” Ì‹” Ì‹
+” Ì‹“” ÌŒ” ÌŒ”Ì ÌŒ”” Ì” Ì” Ì”# Ì”” Ì” Ì” Ì”ÌA Ì7”” Ì” Ì”! Ì”Í ÌÌş‘” Ì‘” Ì‘”” Ì’” Ì’” Ì’
+” Ì’“” Ì“” Ì“”Ì Ì“”” Ì”” Ì”” Ì””! Ì””” Ì•” Ì•” Ì•”> Ì•4”” Ì–” Ì–”! Ì–”Í Ì–Í‘” Ì—‘” Ì˜”” Ì™” Ì™” Ì™
+” Ì™“” Ìš” Ìš”Ì Ìš”” Ì›” Ì›” Ì›”$ Ì›”” Ìœ” Ìœ” Ìœ”ÌE Ìœ;”” Ì” Ì”! Ì”Í9 ÌÍ/‘” Ì‘” ÌŸ”” Ì ” Ì ” Ì 
+” Ì “” Ì¡” Ì¡”Ì Ì¡”” Ì¢” Ì¢” Ì¢”" Ì¢”” Ì£” Ì£” Ì£”Ì@ Ì£6”” Ì¤” Ì¤”! Ì¤”Í Ì¤Í‘” Ì¥‘” Ì¦”” Ì§” Ì§” Ì§
+” Ì§“” Ì¨” Ì¨”Ì Ì¨”” Ì©” Ì©” Ì©”! Ì©”” Ìª” Ìª” Ìª”ÌC Ìª9”” Ì«” Ì«”! Ì«”Í Ì«Í‘” Ì¬‘” Ì­”” Ì®” Ì®” Ì®
+” Ì®“” Ì¯” Ì¯”Ì Ì¯”” Ì°” Ì°” Ì°”  Ì°”” Ì±” Ì±” Ì±”Ì@ Ì±6”” Ì²” Ì²”! Ì²”Í1 Ì²Í'‘” Ì³‘” Ì´”” Ìµ” Ìµ” Ìµ
+” Ìµ“” Ì¶” Ì¶”Ì Ì¶”” Ì·” Ì·” Ì·”! Ì·”” Ì¸” Ì¸” Ì¸”= Ì¸3”” Ì¹” Ì¹”! Ì¹”ÍK Ì¹ÍA‘” Ìº‘” Ì»”” Ì¼” Ì¼” Ì¼
+” Ì¼“” Ì½” Ì½”Ì Ì½”” Ì¾” Ì¾” Ì¾”! Ì¾”” Ì¿” Ì¿” Ì¿”= Ì¿3”” ÌÀ” ÌÀ”! ÌÀ”Ìü ÌÀÌò‘” ÌÁ‘” ÌÂ”” ÌÃ” ÌÃ” ÌÃ
+” ÌÃ“” ÌÄ” ÌÄ”Ì ÌÄ”” ÌÅ” ÌÅ” ÌÅ”! ÌÅ”” ÌÆ” ÌÆ” ÌÆ”> ÌÆ4”” ÌÇ” ÌÇ”! ÌÇ”Í ÌÇÌø‘” ÌÈ’” ÌÊ”0 ÌÊ(‘” ÌË”” ÌÌ” ÌÌ” ÌÌ
+” ÌÌ“” ÌÍ” ÌÍ”Ì ÌÍ”” ÌÎ” ÌÎ” ÌÎ”& ÌÎ”” ÌÏ” ÌÏ” ÌÏ”ÌC ÌÏ9”” ÌĞ” ÌĞ”! ÌĞ”Í ÌĞÍ‘” ÌÑ‘” ÌÒ”” ÌÓ” ÌÓ” ÌÓ
+” ÌÓ“” ÌÔ” ÌÔ”Ì ÌÔ”” ÌÕ” ÌÕ” ÌÕ”& ÌÕ”” ÌÖ” ÌÖ” ÌÖ”ÌA ÌÖ7”” Ì×” Ì×”! Ì×”ÍV Ì×ÍL‘” ÌØ‘” ÌÙ”” ÌÚ” ÌÚ” ÌÚ
+” ÌÚ“” ÌÛ” ÌÛ”Ì ÌÛ”” ÌÜ” ÌÜ” ÌÜ”, ÌÜ"”” Ìİ” Ìİ” Ìİ”? Ìİ5”” ÌŞ” ÌŞ”! ÌŞ”Íe ÌŞÍ[‘” Ìß‘” Ìà”” Ìá” Ìá” Ìá
+” Ìá“” Ìâ” Ìâ”Ì Ìâ”” Ìã” Ìã” Ìã”+ Ìã!”” Ìä” Ìä” Ìä”ÌK ÌäÌA”” Ìå” Ìå”! Ìå”Íw ÌåÍm‘” Ìæ‘” Ìç”” Ìè” Ìè” Ìè
+” Ìè“” Ìé” Ìé”Ì Ìé”” Ìê” Ìê” Ìê”% Ìê”” Ìë” Ìë” Ìë”ÌC Ìë9”” Ìì” Ìì”! Ìì”ÍH ÌìÍ>‘” Ìí‘” Ìî”” Ìï” Ìï” Ìï
+” Ìï“” Ìğ” Ìğ”Ì Ìğ”” Ìñ” Ìñ” Ìñ”% Ìñ”” Ìò” Ìò” Ìò”ÌG Ìò=”” Ìó” Ìó”! Ìó”Í ÌóÍ‘” Ìô‘”	 Ìõ’”; Ì÷6”? Ì÷:’”$ Ìù9”: ÌùÌO’” Ìú” Ìú“”# Ìú”8 Ìú"”? Ìú#•” Ìû” Ìû
+”- Ìû”/ Ìû”ÌD Ìû0‘” Ìü’”, Ìù
+”< Ìù’” Ìû” Ìû
+‘” Ìü”” Ìı” Ìı” Ìı” Ìı–” Ìş” Ìş” Ìş”& Ìş”' Ìş”- Ìş%”” Ìÿ” Ìÿ” Ìÿ” Ìÿ‘” Ìo’” Ìt” Ìt’” Ìt” Ìt’” Ì÷” Ì÷’” Ì÷” Ì÷’” Í” Í’” Í” Í’” Í” Íš” Í” Í
+” Í” Í” Í”6 Í2”7 Í3”8 Í4”9 Í5”ÌE ÍÌAš” Í” Í
+” Í”  Í”! Í”% Í!”& Í"”' Í#”( Í$”2 Í.’” Í” Íš” Í	” Í	” Í	”" Í	”# Í	”, Í	(”- Í	)”. Í	*”/ Í	+”= Í	9’” Í” Íš” Í” Í
+” Í” Í” Í”% Í!”& Í"”' Í#”( Í$”5 Í1š” Í” Í
+” Í” Í”  Í”$ Í ”% Í!”& Í"”' Í#”7 Í3’” Í” Íš” Í” Í
+” Í” Í” Í” Í” Í”  Í”! Í”0 Í,š” Í” Í
+” Í” Í” Í”! Í”" Í”# Í”$ Í ”+ Í'’” Í” Íš” Í” Í” Í”" Í”# Í”= Í9”> Í:”? Í;”Ì@ Í<”ÌL ÍÌHš” Í” Í” Í” Í” Í”( Í$”) Í%”* Í&”+ Í'”6 Í2’” Í” Í‘” Í’” Í” Í
+–” Í” Í
+” Í5” Í5
+” Í5” Í5–” Í” Í
+” Í6” Í6” Í6”  Í6˜” Í” Í
+” Í7” Í7” Í7”- Í7”. Í7 ”6 Í7(˜” Í” Í
+” Í8” Í8” Í8”% Í8”& Í8”( Í8–” Í” Í
+” Í9”! Í9”" Í9”+ Í9–” Í” Í
+” Í:”! Í:”" Í:”# Í:˜” Í” Í
+” Í;” Í;” Í;”( Í;”) Í;”/ Í;!’” Í” Í–” Í” Í” Í2” Í2” Í2” Í2–” Í” Í” Í3” Í3” Í3” Í3’” Í” Í–” Í” Í” Í-	”  Í-”! Í-”. Í-&–” Í” Í” Í.	” Í.” Í.” Í.–” Í” Í” Í/	” Í/” Í/” Í/–” Í” Í” Í0	” Í0” Í0” Í0’” Í
+” Í“”< Í ”ÌI Í ”ÌP Í ””( Í!”, Í!”. Í!”2 Í!—”( Í"”3 Í"”5 Í"”6 Í" ”ÌA Í"+”ÌC Í"-”ÌE Í"/’”, Í#”ÌN Í#6—”, Í$”0 Í$”1 Í$”= Í$%”Ì@ Í$(”ÌK Í$3”ÌL Í$4˜”, Í%”0 Í%”1 Í%”ÌA Í%)”ÌB Í%*”ÌF Í%.”ÌH Í%0”ÌI Í%1’”( Í&”) Í&‘”% Í'””, Í!”0 Í!”2 Í!”6 Í!—”, Í"”7 Í"”9 Í"”: Í" ”ÌE Í"+”ÌG Í"-”ÌI Í"/’”0 Í#”ÌR Í#6—”0 Í$”4 Í$”5 Í$”ÌA Í$%”ÌD Í$(”ÌO Í$3”ÌP Í$4˜”0 Í%”4 Í%”5 Í%”ÌE Í%)”ÌF Í%*”ÌJ Í%.”ÌL Í%0”ÌM Í%1’”, Í&”- Í&””( Í!”, Í!”. Í!”2 Í!’” Í”  ÍÜ ”/ Í”3 Í”4 Í”ÌB Í”Ì\ Í*”Ì] Í*”Ìa Í* ”Ìc Í*"”Ìe Í*$”Ìf Í*%”Ìj Í*)”Ìk Í**”Ìm Í*,”Ìn Í*-”Ìv Í*5”Ìx Í*7’” Í
+” Í’” Í” Í’” Í” Í’” Í” Í
+‘” Í<ÔrG–§version¤file§sources®sourcesContent¥names¨mappingsÀ‘À‘ÀÜù‘”    ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”  	 ‘”  
+ ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”    ‘”  ! ‘”  " ‘”  # ‘”  $ ‘”  % ‘”  & ‘”  ' ‘”  ( ‘”  ) ‘”  * ‘”  + ‘”  , ‘”  - ‘”  . ‘”  / ‘”  0 ‘”  1 ‘”  2 ‘”  3 ‘”  4 ‘”  5 ‘”  6 ‘”  7 ‘”  8 ‘”  9 ‘”  : ‘”  ; ‘”  < ‘”  = ‘”  > ‘”  ? ‘”  Ì@ ‘”  ÌA ‘”  ÌB ‘”  ÌC ‘”  ÌD ‘”  ÌE ‘”  ÌF ‘”  ÌG ‘”  ÌH ‘”  ÌI ‘”  ÌJ ‘”  ÌK ‘”  ÌL ‘”  ÌM ‘”  ÌN ‘”  ÌO ‘”  ÌP ‘”  ÌQ ‘”  ÌR ‘”  ÌS ‘”  ÌT ‘”  ÌU ‘”  ÌV ‘”  ÌW ‘”  ÌX ‘”  ÌY ‘”  ÌZ ‘”  Ì[ ‘”  Ì\ ‘”  Ì] ‘”  Ì^ ‘”  Ì_ ‘”  Ì` ‘”  Ìa ‘”  Ìb ‘”  Ìc ‘”  Ìd ‘”  Ìe ‘”  Ìf ‘”  Ìg ‘”  Ìh ‘”  Ìi ‘”  Ìj ‘”  Ìk ‘”  Ìl ‘”  Ìm ‘”  Ìn ‘”  Ìo ‘”  Ìp ‘”  Ìq ‘”  Ìr ‘”  Ìs ‘”  Ìt ‘”  Ìu ‘”  Ìv ‘”  Ìw ‘”  Ìx ‘”  Ìy ‘”  Ìz ‘”  Ì{ ‘”  Ì| ‘”  Ì} ‘”  Ì~ ‘”  Ì ‘”  Ì€ ‘”  Ì ‘”  Ì‚ ‘”  Ìƒ ‘”  Ì„ ‘”  Ì… ‘”  Ì† ‘”  Ì‡ ‘”  Ìˆ ‘”  Ì‰ ‘”  ÌŠ ‘”  Ì‹ ‘”  ÌŒ ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì‘ ‘”  Ì’ ‘”  Ì“ ‘”  Ì” ‘”  Ì• ‘”  Ì– ‘”  Ì— ‘”  Ì˜ ‘”  Ì™ ‘”  Ìš ‘”  Ì› ‘”  Ìœ ‘”  Ì ‘”  Ì ‘”  ÌŸ ‘”  Ì  ‘”  Ì¡ ‘”  Ì¢ ‘”  Ì£ ‘”  Ì¤ ‘”  Ì¥ ‘”  Ì¦ ‘”  Ì§ ‘”  Ì¨ ‘”  Ì© ‘”  Ìª ‘”  Ì« ‘”  Ì¬ ‘”  Ì­ ‘”  Ì® ‘”  Ì¯ ‘”  Ì° ‘”  Ì± ‘”  Ì² ‘”  Ì³ ‘”  Ì´ ‘”  Ìµ ‘”  Ì¶ ‘”  Ì· ‘”  Ì¸ ‘”  Ì¹ ‘”  Ìº ‘”  Ì» ‘”  Ì¼ ‘”  Ì½ ‘”  Ì¾ ‘”  Ì¿ ‘”  ÌÀ ‘”  ÌÁ ‘”  ÌÂ ‘”  ÌÃ ‘”  ÌÄ ‘”  ÌÅ ‘”  ÌÆ ‘”  ÌÇ ‘”  ÌÈ ‘”  ÌÉ ‘”  ÌÊ ‘”  ÌË ‘”  ÌÌ ‘”  ÌÍ ‘”  ÌÎ ‘”  ÌÏ ‘”  ÌĞ ‘”  ÌÑ ‘”  ÌÒ ‘”  ÌÓ ‘”  ÌÔ ‘”  ÌÕ ‘”  ÌÖ ‘”  Ì× ‘”  ÌØ ‘”  ÌÙ ‘”  ÌÚ ‘”  ÌÛ ‘”  ÌÜ ‘”  Ìİ ‘”  ÌŞ ‘”  Ìß ‘”  Ìà ‘”  Ìá ‘”  Ìâ ‘”  Ìã ‘”  Ìä ‘”  Ìå ‘”  Ìæ ‘”  Ìç ‘”  Ìè ‘”  Ìé ‘”  Ìê ‘”  Ìë ‘”  Ìì ‘”  Ìí ‘”  Ìî ‘”  Ìï ‘”  Ìğ ‘”  Ìñ ‘”  Ìò ‘”  Ìó ‘”  Ìô ‘”  Ìõ ‘”  Ìö ‘”  Ì÷ ‘”  Ìø ‘”  Ìù ‘”  Ìú ‘”  Ìû ‘”  Ìü ‘”  Ìı ‘”  Ìş ‘”  Ìÿ ‘”  Í  ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í	 ‘”  Í
+ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í  ‘”  Í! ‘”  Í" ‘”  Í# ‘”  Í$ ‘”  Í% ‘”  Í& ‘”  Í' ‘”  Í( ‘”  Í) ‘”  Í* ‘”  Í+ ‘”  Í, ‘”  Í- ‘”  Í. ‘”  Í/ ‘”  Í0 ‘”  Í1 ‘”  Í2 ‘”  Í3 ‘”  Í4 ‘”  Í5 ‘”  Í6 ‘”  Í7 ‘”  Í8 ‘”  Í9 ‘”  Í: ‘”  Í; ‘”  Í< ‘”  Í= ‘”  Í> ‘”  Í? ‘”  Í@ ‘”  ÍA ‘”  ÍB ‘”  ÍC ‘”  ÍD ‘”  ÍE ‘”  ÍF ‘”  ÍG ‘”  ÍH ‘”  ÍI ‘”  ÍJ ‘”  ÍK ‘”  ÍL ‘”  ÍM ‘”  ÍN ‘”  ÍO ‘”  ÍP ‘”  ÍQ ‘”  ÍR ‘”  ÍS ‘”  ÍT ‘”  ÍU ‘”  ÍV ‘”  ÍW ‘”  ÍX ‘”  ÍY ‘”  ÍZ ‘”  Í[ ‘”  Í\ ‘”  Í] ‘”  Í^ ‘”  Í_ ‘”  Í` ‘”  Ía ‘”  Íb ‘”  Íc ‘”  Íd ‘”  Íe ‘”  Íf ‘”  Íg ‘”  Íh ‘”  Íi ‘”  Íj ‘”  Ík ‘”  Íl ‘”  Ím ‘”  Ín ‘”  Ío ‘”  Íp ‘”  Íq ‘”  Ír ‘”  Ís ‘”  Ít ‘”  Íu ‘”  Ív ‘”  Íw ‘”  Íx ‘”  Íy ‘”  Íz ‘”  Í{ ‘”  Í| ‘”  Í} ‘”  Í~ ‘”  Í ‘”  Í€ ‘”  Í ‘”  Í‚ ‘”  Íƒ ‘”  Í„ ‘”  Í… ‘”  Í† ‘”  Í‡ ‘”  Íˆ ‘”  Í‰ ‘”  ÍŠ ‘”  Í‹ ‘”  ÍŒ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í‘ ‘”  Í’ ‘”  Í“ ‘”  Í” ‘”  Í• ‘”  Í– ‘”  Í— ‘”  Í˜ ‘”  Í™ ‘”  Íš ‘”  Í› ‘”  Íœ ‘”  Í ‘”  Í ‘”  ÍŸ ‘”  Í  ‘”  Í¡ ‘”  Í¢ ‘”  Í£ ‘”  Í¤ ‘”  Í¥ ‘”  Í¦ ‘”  Í§ ‘”  Í¨ ‘”  Í© ‘”  Íª ‘”  Í« ‘”  Í¬ ‘”  Í­ ‘”  Í® ‘”  Í¯ ‘”  Í° ‘”  Í± ‘”  Í² ‘”  Í³ ‘”  Í´ ‘”  Íµ ‘”  Í¶ ‘”  Í· ‘”  Í¸ ‘”  Í¹ ‘”  Íº ‘”  Í» ‘”  Í¼ ‘”  Í½ ‘”  Í¾ ‘”  Í¿ ‘”  ÍÀ ‘”  ÍÁ ‘”  ÍÂ ‘”  ÍÃ ‘”  ÍÄ ‘”  ÍÅ ‘”  ÍÆ ‘”  ÍÇ ‘”  ÍÈ ‘”  ÍÉ ‘”  ÍÊ ‘”  ÍË ‘”  ÍÌ ‘”  ÍÍ ‘”  ÍÎ ‘”  ÍÏ ‘”  ÍĞ ‘”  ÍÑ ‘”  ÍÒ ‘”  ÍÓ ‘”  ÍÔ ‘”  ÍÕ ‘”  ÍÖ ‘”  Í× ‘”  ÍØ ‘”  ÍÙ ‘”  ÍÚ ‘”  ÍÛ ‘”  ÍÜ ‘”  Íİ ‘”  ÍŞ ‘”  Íß ‘”  Íà ‘”  Íá ‘”  Íâ ‘”  Íã ‘”  Íä ‘”  Íå ‘”  Íæ ‘”  Íç ‘”  Íè ‘”  Íé ‘”  Íê ‘”  Íë ‘”  Íì ‘”  Íí ‘”  Íî ‘”  Íï ‘”  Íğ ‘”  Íñ ‘”  Íò ‘”  Íó ‘”  Íô ‘”  Íõ ‘”  Íö ‘”  Í÷ ‘”  Íø ÔrH’§missing¦pluginÃ¦genAbcÂÔ  ÔrI”²dynamicImportCache¹exportAllDeclarationCache»exportNamedDeclarationCache«importCache‘ÔrJ–¤type¥start£end«declarationªspecifiers¦source¶ExportNamedDeclarationÍ kÍf#ÔrK–¤type¥start£end¢idªsuperClass¤body°ClassDeclarationÍ rÍf#ÔrL”¤type¥start£end¤nameªIdentifierÍ xÍ ƒ«DataStaticsLªIdentifierÍ ŒÍ ’¦ViewPUÔrM”¤type¥start£end¤body©ClassBodyÍ “Íf#œÔrN˜¤type¥start£end¦static¨computed£key¤kind¥value°MethodDefinitionÍ šÍOÃÂÂLªIdentifierÍ šÍ ¥«constructor«constructorÔrO™¤type¥start£end¢idªexpression©generator¥async¦params¤body²FunctionExpressionÍ ¥ÍOÃÀÂÂÂ–LªIdentifierÍ ¦Í ¬¦parentLªIdentifierÍ ®Í ´¦paramsLªIdentifierÍ ¶Í Ä®__localStorageÔrP•¤type¥start£end¤left¥right±AssignmentPatternÍ ÆÍ ÑLªIdentifierÍ ÆÍ Ì¦elmtIdÔrQ–¤type¥start£end¨operator¦prefix¨argument¯UnaryExpressionÍ ÏÍ Ñ¡-ÃÔrR•¤type¥start£end¥value£raw§LiteralÍ ĞÍ Ñ¡1P±AssignmentPatternÍ ÓÍ ëLªIdentifierÍ ÓÍ ß¬paramsLambdaLªIdentifierÍ âÍ ë©undefinedLªIdentifierÍ íÍ ö©extraInfoM®BlockStatementÍ øÍOÃ—ÔrS”¤type¥start£endªexpression³ExpressionStatementÍ!Í!4ÔrT–¤type¥start£end¦callee©arguments¨optional®CallExpressionÍ!Í!3ÔrU“¤type¥start£end¥SuperÍ!Í!”LªIdentifierÍ!	Í!¦parentLªIdentifierÍ!Í!®__localStorageLªIdentifierÍ!!Í!'¦elmtIdLªIdentifierÍ!)Í!2©extraInfoÂÔrV–¤type¥start£end¤testªconsequent©alternate«IfStatementÍ!>Í!¥ÔrW–¤type¥start£end¤left¨operator¥right°BinaryExpressionÍ!BÍ!dQ¯UnaryExpressionÍ!BÍ!U¦typeofÃLªIdentifierÍ!IÍ!U¬paramsLambda£===R§LiteralÍ!ZÍ!d¨functionª"function"M®BlockStatementÍ!fÍ!¥‘S³ExpressionStatementÍ!uÍ!šÔrX–¤type¥start£end¨operator¤left¥right´AssignmentExpressionÍ!uÍ!™¡=ÔrY—¤type¥start£end¦object¨property¨computed¨optional°MemberExpressionÍ!uÍ!ŠU®ThisExpressionÍ!uÍ!yLªIdentifierÍ!zÍ!Š°paramsGenerator_ÂÂLªIdentifierÍ!Í!™¬paramsLambdaÀS³ExpressionStatementÍ!¯ÍKÑX´AssignmentExpressionÍ!¯ÍKĞ¡=Y°MemberExpressionÍ!¯Í!ÄU®ThisExpressionÍ!¯Í!³LªIdentifierÍ!´Í!Ä°__knowledgeItemsÂÂÔrZ•¤type¥start£end¦callee©arguments­NewExpressionÍ!ÇÍKĞLªIdentifierÍ!ËÍ!ã¸ObservedPropertyObjectPU“Ôr[”¤type¥start£end¨elements¯ArrayExpressionÍ!äÍK·Ü Ôr\”¤type¥start£endªproperties°ObjectExpressionÍ!óÍ$•Ôr]™¤type¥start£end¦method©shorthand¨computed£key¥value¤kind¨PropertyÍ"Í"ÂÂÂLªIdentifierÍ"Í"¢idR§LiteralÍ"
+Í"¡1¤init]¨PropertyÍ"Í"ÂÂÂLªIdentifierÍ"Í"#¥image\°ObjectExpressionÍ"%Í"•]¨PropertyÍ"'Í"5ÂÂÂR§LiteralÍ"'Í"+¢id¤"id"R§LiteralÍ"-Í"5Î  7¨16777271¤init]¨PropertyÍ"7Í"DÂÂÂR§LiteralÍ"7Í"=¤type¦"type"R§LiteralÍ"?Í"DÍN ¥20000¤init]¨PropertyÍ"FÍ"PÂÂÂLªIdentifierÍ"FÍ"L¦params[¯ArrayExpressionÍ"NÍ"P¤init]¨PropertyÍ"RÍ"vÂÂÂR§LiteralÍ"RÍ"^ªbundleName¬"bundleName"R§LiteralÍ"`Í"v´com.my.myapplication¶"com.my.myapplication"¤init]¨PropertyÍ"xÍ"ÂÂÂR§LiteralÍ"xÍ"„ªmoduleName¬"moduleName"R§LiteralÍ"†Í"¥entry§"entry"¤init¤init]¨PropertyÍ"¢Í"³ÂÂÂLªIdentifierÍ"¢Í"§¥titleR§LiteralÍ"©Í"³¸èƒ½æ•ˆæ ‡ç­¾ç­‰çº§è¯¦è§£º'èƒ½æ•ˆæ ‡ç­¾ç­‰çº§è¯¦è§£'¤init]¨PropertyÍ"ÆÍ"óÂÂÂLªIdentifierÍ"ÆÍ"Ñ«descriptionR§LiteralÍ"ÓÍ"óÙZäº†è§£ä¸åŒèƒ½æ•ˆç­‰çº§çš„å«ä¹‰ã€ä¿¡æ¯åŒºå†…å®¹ä»¥åŠå®ƒä»¬å¦‚ä½•å½±å“äº§å“åˆ†ç±»ã€‚Ù\'äº†è§£ä¸åŒèƒ½æ•ˆç­‰çº§çš„å«ä¹‰ã€ä¿¡æ¯åŒºå†…å®¹ä»¥åŠå®ƒä»¬å¦‚ä½•å½±å“äº§å“åˆ†ç±»ã€‚'¤init]¨PropertyÍ#Í$ÂÂÂLªIdentifierÍ#Í#¯fullDescriptionR§LiteralÍ#Í$Ú\èƒ½æ•ˆæ ‡ç­¾ï¼Œåˆç§°èƒ½æºæ•ˆç‡æ ‡è¯†ï¼Œæ˜¯é™„åœ¨è€—èƒ½äº§å“æˆ–å…¶æœ€å°åŒ…è£…ç‰©ä¸Šçš„ä¸€ç§ä¿¡æ¯æ ‡ç­¾ï¼Œç”¨äºè¡¨ç¤ºäº§å“èƒ½æºæ•ˆç‡ç­‰çº§ç­‰æ€§èƒ½æŒ‡æ ‡ã€‚æˆ‘å›½çš„èƒ½æ•ˆæ ‡è¯†å°†èƒ½æ•ˆåˆ†ä¸º1ã€2ã€3ã€4ã€5å…±äº”ä¸ªç­‰çº§ã€‚
+
+- **ç­‰çº§1**ï¼šè¡¨ç¤ºäº§å“è¾¾åˆ°å›½é™…å…ˆè¿›æ°´å¹³ï¼Œæœ€èŠ‚ç”µï¼Œå³è€—èƒ½æœ€ä½ã€‚
+- **ç­‰çº§2**ï¼šè¡¨ç¤ºæ¯”è¾ƒèŠ‚ç”µã€‚
+- **ç­‰çº§3**ï¼šè¡¨ç¤ºäº§å“çš„èƒ½æºæ•ˆç‡ä¸ºæˆ‘å›½å¸‚åœºçš„å¹³å‡æ°´å¹³ã€‚
+- **ç­‰çº§4**ï¼šè¡¨ç¤ºäº§å“èƒ½æºæ•ˆç‡ä½äºå¸‚åœºå¹³å‡æ°´å¹³ã€‚
+- **ç­‰çº§5**ï¼šæ˜¯å¸‚åœºå‡†å…¥æŒ‡æ ‡ï¼Œä½äºè¯¥ç­‰çº§è¦æ±‚çš„äº§å“ä¸å…è®¸ç”Ÿäº§å’Œé”€å”®ã€‚Úd'èƒ½æ•ˆæ ‡ç­¾ï¼Œåˆç§°èƒ½æºæ•ˆç‡æ ‡è¯†ï¼Œæ˜¯é™„åœ¨è€—èƒ½äº§å“æˆ–å…¶æœ€å°åŒ…è£…ç‰©ä¸Šçš„ä¸€ç§ä¿¡æ¯æ ‡ç­¾ï¼Œç”¨äºè¡¨ç¤ºäº§å“èƒ½æºæ•ˆç‡ç­‰çº§ç­‰æ€§èƒ½æŒ‡æ ‡ã€‚æˆ‘å›½çš„èƒ½æ•ˆæ ‡è¯†å°†èƒ½æ•ˆåˆ†ä¸º1ã€2ã€3ã€4ã€5å…±äº”ä¸ªç­‰çº§ã€‚\n\n- **ç­‰çº§1**ï¼šè¡¨ç¤ºäº§å“è¾¾åˆ°å›½é™…å…ˆè¿›æ°´å¹³ï¼Œæœ€èŠ‚ç”µï¼Œå³è€—èƒ½æœ€ä½ã€‚\n- **ç­‰çº§2**ï¼šè¡¨ç¤ºæ¯”è¾ƒèŠ‚ç”µã€‚\n- **ç­‰çº§3**ï¼šè¡¨ç¤ºäº§å“çš„èƒ½æºæ•ˆç‡ä¸ºæˆ‘å›½å¸‚åœºçš„å¹³å‡æ°´å¹³ã€‚\n- **ç­‰çº§4**ï¼šè¡¨ç¤ºäº§å“èƒ½æºæ•ˆç‡ä½äºå¸‚åœºå¹³å‡æ°´å¹³ã€‚\n- **ç­‰çº§5**ï¼šæ˜¯å¸‚åœºå‡†å…¥æŒ‡æ ‡ï¼Œä½äºè¯¥ç­‰çº§è¦æ±‚çš„äº§å“ä¸å…è®¸ç”Ÿäº§å’Œé”€å”®ã€‚'¤init\°ObjectExpressionÍ$%Í&0•]¨PropertyÍ$8Í$=ÂÂÂLªIdentifierÍ$8Í$:¢idR§LiteralÍ$<Í$=¡2¤init]¨PropertyÍ$PÍ$ÁÂÂÂLªIdentifierÍ$PÍ$U¥image\°ObjectExpressionÍ$WÍ$Á•]¨PropertyÍ$YÍ$gÂÂÂR§LiteralÍ$YÍ$]¢id¤"id"R§LiteralÍ$_Í$gÎ  7¨16777271¤init]¨PropertyÍ$iÍ$vÂÂÂR§LiteralÍ$iÍ$o¤type¦"type"R§LiteralÍ$qÍ$vÍN ¥20000¤init]¨PropertyÍ$xÍ$‚ÂÂÂLªIdentifierÍ$xÍ$~¦params[¯ArrayExpressionÍ$€Í$‚¤init]¨PropertyÍ$„Í$¨ÂÂÂR§LiteralÍ$„Í$ªbundleName¬"bundleName"R§LiteralÍ$’Í$¨´com.my.myapplication¶"com.my.myapplication"¤init]¨PropertyÍ$ªÍ$¿ÂÂÂR§LiteralÍ$ªÍ$¶ªmoduleName¬"moduleName"R§LiteralÍ$¸Í$¿¥entry§"entry"¤init¤init]¨PropertyÍ$ÔÍ$åÂÂÂLªIdentifierÍ$ÔÍ$Ù¥titleR§LiteralÍ$ÛÍ$å¸äº§çº¿å®‰å…¨æ“ä½œè§„ç¨‹º'äº§çº¿å®‰å…¨æ“ä½œè§„ç¨‹'¤init]¨PropertyÍ$øÍ%+ÂÂÂLªIdentifierÍ$øÍ%«descriptionR§LiteralÍ%Í%+ÙlæŸ¥çœ‹æœºæ¢°è‡‚ã€ä¼ é€å¸¦çš„æ ‡å‡†æ“ä½œæµç¨‹å’Œç´§æ€¥æƒ…å†µå¤„ç†é¢„æ¡ˆï¼Œç¡®ä¿äººå‘˜ä¸è®¾å¤‡å®‰å…¨ã€‚Ùn'æŸ¥çœ‹æœºæ¢°è‡‚ã€ä¼ é€å¸¦çš„æ ‡å‡†æ“ä½œæµç¨‹å’Œç´§æ€¥æƒ…å†µå¤„ç†é¢„æ¡ˆï¼Œç¡®ä¿äººå‘˜ä¸è®¾å¤‡å®‰å…¨ã€‚'¤init]¨PropertyÍ%>Í&!ÂÂÂLªIdentifierÍ%>Í%M¯fullDescriptionR§LiteralÍ%OÍ&!Ú!1. **å¼€æœºå‰æ£€æŸ¥**ï¼šç¡®è®¤æ‰€æœ‰å®‰å…¨é—¨å·²å…³é—­ï¼Œæ€¥åœæŒ‰é’®å¤„äºå¤ä½çŠ¶æ€ï¼Œæœºæ¢°è‡‚å·¥ä½œèŒƒå›´å†…æ— æ‚ç‰©å’Œäººå‘˜ã€‚
+2. **è¿è¡Œä¸­ç›‘æ§**ï¼šä¸¥ç¦åœ¨è®¾å¤‡è¿è¡Œæ—¶å°†æ‰‹æˆ–èº«ä½“ä»»ä½•éƒ¨åˆ†ä¼¸å…¥å·¥ä½œåŒºåŸŸã€‚å¦‚é‡å¼‚å¸¸ï¼Œç«‹å³æŒ‰ä¸‹æœ€è¿‘çš„æ€¥åœæŒ‰é’®ã€‚
+3. **ç´§æ€¥å¤„ç†**ï¼šå‘ç”Ÿç´§æ€¥æƒ…å†µï¼ˆå¦‚å¡æ–™ã€ç¢°æ’ï¼‰æ—¶ï¼Œå¿…é¡»å…ˆåˆ‡æ–­ä¸»ç”µæºï¼Œå†è¿›è¡Œå¤„ç†ã€‚
+4. **å…³æœºæµç¨‹**ï¼šå¾…æ‰€æœ‰ä»»åŠ¡å®Œæˆåï¼Œå°†æœºæ¢°è‡‚å¤ä½åˆ°åŸç‚¹ï¼ˆHomeï¼‰ï¼Œç„¶åå…³é—­æ§åˆ¶å™¨ç”µæºï¼Œæœ€åå…³é—­ä¸»ç”µæºã€‚Ú&'1. **å¼€æœºå‰æ£€æŸ¥**ï¼šç¡®è®¤æ‰€æœ‰å®‰å…¨é—¨å·²å…³é—­ï¼Œæ€¥åœæŒ‰é’®å¤„äºå¤ä½çŠ¶æ€ï¼Œæœºæ¢°è‡‚å·¥ä½œèŒƒå›´å†…æ— æ‚ç‰©å’Œäººå‘˜ã€‚\n2. **è¿è¡Œä¸­ç›‘æ§**ï¼šä¸¥ç¦åœ¨è®¾å¤‡è¿è¡Œæ—¶å°†æ‰‹æˆ–èº«ä½“ä»»ä½•éƒ¨åˆ†ä¼¸å…¥å·¥ä½œåŒºåŸŸã€‚å¦‚é‡å¼‚å¸¸ï¼Œç«‹å³æŒ‰ä¸‹æœ€è¿‘çš„æ€¥åœæŒ‰é’®ã€‚\n3. **ç´§æ€¥å¤„ç†**ï¼šå‘ç”Ÿç´§æ€¥æƒ…å†µï¼ˆå¦‚å¡æ–™ã€ç¢°æ’ï¼‰æ—¶ï¼Œå¿…é¡»å…ˆåˆ‡æ–­ä¸»ç”µæºï¼Œå†è¿›è¡Œå¤„ç†ã€‚\n4. **å…³æœºæµç¨‹**ï¼šå¾…æ‰€æœ‰ä»»åŠ¡å®Œæˆåï¼Œå°†æœºæ¢°è‡‚å¤ä½åˆ°åŸç‚¹ï¼ˆHomeï¼‰ï¼Œç„¶åå…³é—­æ§åˆ¶å™¨ç”µæºï¼Œæœ€åå…³é—­ä¸»ç”µæºã€‚'¤init\°ObjectExpressionÍ&?Í(j•]¨PropertyÍ&RÍ&WÂÂÂLªIdentifierÍ&RÍ&T¢idR§LiteralÍ&VÍ&W¡3¤init]¨PropertyÍ&jÍ&ÛÂÂÂLªIdentifierÍ&jÍ&o¥image\°ObjectExpressionÍ&qÍ&Û•]¨PropertyÍ&sÍ&ÂÂÂR§LiteralÍ&sÍ&w¢id¤"id"R§LiteralÍ&yÍ&Î  7¨16777271¤init]¨PropertyÍ&ƒÍ&ÂÂÂR§LiteralÍ&ƒÍ&‰¤type¦"type"R§LiteralÍ&‹Í&ÍN ¥20000¤init]¨PropertyÍ&’Í&œÂÂÂLªIdentifierÍ&’Í&˜¦params[¯ArrayExpressionÍ&šÍ&œ¤init]¨PropertyÍ&Í&ÂÂÂÂR§LiteralÍ&Í&ªªbundleName¬"bundleName"R§LiteralÍ&¬Í&Â´com.my.myapplication¶"com.my.myapplication"¤init]¨PropertyÍ&ÄÍ&ÙÂÂÂR§LiteralÍ&ÄÍ&ĞªmoduleName¬"moduleName"R§LiteralÍ&ÒÍ&Ù¥entry§"entry"¤init¤init]¨PropertyÍ&îÍ&ÿÂÂÂLªIdentifierÍ&îÍ&ó¥titleR§LiteralÍ&õÍ&ÿ¸å¸¸è§æ•…éšœæ’æŸ¥æŒ‡å—º'å¸¸è§æ•…éšœæ’æŸ¥æŒ‡å—'¤init]¨PropertyÍ'Í'@ÂÂÂLªIdentifierÍ'Í'«descriptionR§LiteralÍ'Í'@Ù]å­¦ä¹ å¦‚ä½•å¿«é€Ÿè¯Šæ–­å’Œå¤„ç†æ ‡ç­¾è¯†åˆ«å¤±è´¥ã€æœºæ¢°è‡‚æŠ“å–å¼‚å¸¸ç­‰å¸¸è§é—®é¢˜ã€‚Ù_'å­¦ä¹ å¦‚ä½•å¿«é€Ÿè¯Šæ–­å’Œå¤„ç†æ ‡ç­¾è¯†åˆ«å¤±è´¥ã€æœºæ¢°è‡‚æŠ“å–å¼‚å¸¸ç­‰å¸¸è§é—®é¢˜ã€‚'¤init]¨PropertyÍ'SÍ([ÂÂÂLªIdentifierÍ'SÍ'b¯fullDescriptionR§LiteralÍ'dÍ([Ú/å½“äº§çº¿å‡ºç°é—®é¢˜æ—¶ï¼Œè¯·å‚ç…§ä»¥ä¸‹æ­¥éª¤æ’æŸ¥ï¼š
+
+- **æ•…éšœç°è±¡ï¼šæ ‡ç­¾æ— æ³•è¯†åˆ«**
+  - **å¯èƒ½åŸå› 1**ï¼šæ‘„åƒå¤´è„æ±¡æˆ–ä½ç½®åç§»ã€‚
+  - **æ’æŸ¥æ–¹æ³•**ï¼šæ¸…æ´æ‘„åƒå¤´é•œå¤´ï¼Œæ£€æŸ¥å¹¶é‡æ–°æ ¡å‡†æ‘„åƒå¤´ä½ç½®ã€‚
+
+- **æ•…éšœç°è±¡ï¼šæœºæ¢°è‡‚æŠ“å–å¤±è´¥**
+  - **å¯èƒ½åŸå› 1**ï¼šæŠ“å–åæ ‡åç§»ã€‚
+  - **æ’æŸ¥æ–¹æ³•**ï¼šè¿›å…¥ç³»ç»Ÿè®¾ç½®ï¼Œé‡æ–°æ ¡å‡†æœºæ¢°è‡‚çš„æŠ“å–ç‚¹ä½ã€‚
+  - **å¯èƒ½åŸå› 2**ï¼šæ‰‹çˆªæ°”å‹ä¸è¶³æˆ–æ•…éšœã€‚
+  - **æ’æŸ¥æ–¹æ³•**ï¼šæ£€æŸ¥æ°”æºå‹åŠ›ï¼Œæ£€æŸ¥æ‰‹çˆªç”µç£é˜€æ˜¯å¦æ­£å¸¸å·¥ä½œã€‚Ú;'å½“äº§çº¿å‡ºç°é—®é¢˜æ—¶ï¼Œè¯·å‚ç…§ä»¥ä¸‹æ­¥éª¤æ’æŸ¥ï¼š\n\n- **æ•…éšœç°è±¡ï¼šæ ‡ç­¾æ— æ³•è¯†åˆ«**\n  - **å¯èƒ½åŸå› 1**ï¼šæ‘„åƒå¤´è„æ±¡æˆ–ä½ç½®åç§»ã€‚\n  - **æ’æŸ¥æ–¹æ³•**ï¼šæ¸…æ´æ‘„åƒå¤´é•œå¤´ï¼Œæ£€æŸ¥å¹¶é‡æ–°æ ¡å‡†æ‘„åƒå¤´ä½ç½®ã€‚\n\n- **æ•…éšœç°è±¡ï¼šæœºæ¢°è‡‚æŠ“å–å¤±è´¥**\n  - **å¯èƒ½åŸå› 1**ï¼šæŠ“å–åæ ‡åç§»ã€‚\n  - **æ’æŸ¥æ–¹æ³•**ï¼šè¿›å…¥ç³»ç»Ÿè®¾ç½®ï¼Œé‡æ–°æ ¡å‡†æœºæ¢°è‡‚çš„æŠ“å–ç‚¹ä½ã€‚\n  - **å¯èƒ½åŸå› 2**ï¼šæ‰‹çˆªæ°”å‹ä¸è¶³æˆ–æ•…éšœã€‚\n  - **æ’æŸ¥æ–¹æ³•**ï¼šæ£€æŸ¥æ°”æºå‹åŠ›ï¼Œæ£€æŸ¥æ‰‹çˆªç”µç£é˜€æ˜¯å¦æ­£å¸¸å·¥ä½œã€‚'¤init\°ObjectExpressionÍ(yÍ*™•]¨PropertyÍ(ŒÍ(‘ÂÂÂLªIdentifierÍ(ŒÍ(¢idR§LiteralÍ(Í(‘¡4¤init]¨PropertyÍ(¤Í)ÂÂÂLªIdentifierÍ(¤Í(©¥image\°ObjectExpressionÍ(«Í)•]¨PropertyÍ(­Í(»ÂÂÂR§LiteralÍ(­Í(±¢id¤"id"R§LiteralÍ(³Í(»Î  7¨16777271¤init]¨PropertyÍ(½Í(ÊÂÂÂR§LiteralÍ(½Í(Ã¤type¦"type"R§LiteralÍ(ÅÍ(ÊÍN ¥20000¤init]¨PropertyÍ(ÌÍ(ÖÂÂÂLªIdentifierÍ(ÌÍ(Ò¦params[¯ArrayExpressionÍ(ÔÍ(Ö¤init]¨PropertyÍ(ØÍ(üÂÂÂR§LiteralÍ(ØÍ(äªbundleName¬"bundleName"R§LiteralÍ(æÍ(ü´com.my.myapplication¶"com.my.myapplication"¤init]¨PropertyÍ(şÍ)ÂÂÂR§LiteralÍ(şÍ)
+ªmoduleName¬"moduleName"R§LiteralÍ)Í)¥entry§"entry"¤init¤init]¨PropertyÍ)(Í);ÂÂÂLªIdentifierÍ)(Í)-¥titleR§LiteralÍ)/Í);¾æœºæ¢°è‡‚æ—¥å¸¸ç»´æŠ¤ä¸ä¿å…»Ù 'æœºæ¢°è‡‚æ—¥å¸¸ç»´æŠ¤ä¸ä¿å…»'¤init]¨PropertyÍ)NÍ)ÂÂÂLªIdentifierÍ)NÍ)Y«descriptionR§LiteralÍ)[Í)Ùfå®šæœŸå¯¹æœºæ¢°è‡‚è¿›è¡Œæ£€æŸ¥ã€æ¸…æ´å’Œæ¶¦æ»‘ï¼Œæ˜¯å»¶é•¿å…¶ä½¿ç”¨å¯¿å‘½å’Œä¿è¯ç²¾åº¦çš„å…³é”®ã€‚Ùh'å®šæœŸå¯¹æœºæ¢°è‡‚è¿›è¡Œæ£€æŸ¥ã€æ¸…æ´å’Œæ¶¦æ»‘ï¼Œæ˜¯å»¶é•¿å…¶ä½¿ç”¨å¯¿å‘½å’Œä¿è¯ç²¾åº¦çš„å…³é”®ã€‚'¤init]¨PropertyÍ)’Í*ŠÂÂÂLªIdentifierÍ)’Í)¡¯fullDescriptionR§LiteralÍ)£Í*ŠÚä¸ºç¡®ä¿æœºæ¢°è‡‚é•¿æœŸç¨³å®šè¿è¡Œï¼Œè¯·éµå¾ªä»¥ä¸‹ä¿å…»å‘¨æœŸï¼š
+
+- **æ¯æ—¥æ£€æŸ¥**ï¼š
+  - æ£€æŸ¥å„è½´è¿åŠ¨æ˜¯å¦å¹³ç¨³ï¼Œæœ‰æ— å¼‚å¸¸å™ªéŸ³ã€‚
+  - ç¡®è®¤æ‰‹çˆªï¼ˆæœ«ç«¯æ‰§è¡Œå™¨ï¼‰çŠ¶æ€æ˜¯å¦æ­£å¸¸ã€‚
+
+- **æ¯å‘¨æ£€æŸ¥**ï¼š
+  - æ¸…æ´æœºæ¢°è‡‚æœ¬ä½“åŠæ§åˆ¶æŸœçš„ç°å°˜ã€‚
+  - æ£€æŸ¥æ‰€æœ‰å¤–éƒ¨ç”µç¼†æœ‰æ— ç£¨æŸæˆ–æŸåã€‚
+  - æ£€æŸ¥å¹¶ç´§å›ºæ‰€æœ‰å¯è§çš„èºä¸ã€‚
+
+- **æ¯å­£åº¦æ£€æŸ¥**ï¼š
+  - æ£€æŸ¥å„å…³èŠ‚çš„æ¶¦æ»‘æƒ…å†µï¼ŒæŒ‰éœ€æ·»åŠ æŒ‡å®šå‹å·çš„æ¶¦æ»‘è„‚ã€‚
+  - æ£€æŸ¥ç”µæ± ï¼ˆå¦‚æœ‰ï¼‰å¹¶æŒ‰éœ€æ›´æ¢ã€‚Ú!'ä¸ºç¡®ä¿æœºæ¢°è‡‚é•¿æœŸç¨³å®šè¿è¡Œï¼Œè¯·éµå¾ªä»¥ä¸‹ä¿å…»å‘¨æœŸï¼š\n\n- **æ¯æ—¥æ£€æŸ¥**ï¼š\n  - æ£€æŸ¥å„è½´è¿åŠ¨æ˜¯å¦å¹³ç¨³ï¼Œæœ‰æ— å¼‚å¸¸å™ªéŸ³ã€‚\n  - ç¡®è®¤æ‰‹çˆªï¼ˆæœ«ç«¯æ‰§è¡Œå™¨ï¼‰çŠ¶æ€æ˜¯å¦æ­£å¸¸ã€‚\n\n- **æ¯å‘¨æ£€æŸ¥**ï¼š\n  - æ¸…æ´æœºæ¢°è‡‚æœ¬ä½“åŠæ§åˆ¶æŸœçš„ç°å°˜ã€‚\n  - æ£€æŸ¥æ‰€æœ‰å¤–éƒ¨ç”µç¼†æœ‰æ— ç£¨æŸæˆ–æŸåã€‚\n  - æ£€æŸ¥å¹¶ç´§å›ºæ‰€æœ‰å¯è§çš„èºä¸ã€‚\n\n- **æ¯å­£åº¦æ£€æŸ¥**ï¼š\n  - æ£€æŸ¥å„å…³èŠ‚çš„æ¶¦æ»‘æƒ…å†µï¼ŒæŒ‰éœ€æ·»åŠ æŒ‡å®šå‹å·çš„æ¶¦æ»‘è„‚ã€‚\n  - æ£€æŸ¥ç”µæ± ï¼ˆå¦‚æœ‰ï¼‰å¹¶æŒ‰éœ€æ›´æ¢ã€‚'¤init\°ObjectExpressionÍ*¨Í,Ô•]¨PropertyÍ*»Í*ÀÂÂÂLªIdentifierÍ*»Í*½¢idR§LiteralÍ*¿Í*À¡5¤init]¨PropertyÍ*ÓÍ+DÂÂÂLªIdentifierÍ*ÓÍ*Ø¥image\°ObjectExpressionÍ*ÚÍ+D•]¨PropertyÍ*ÜÍ*êÂÂÂR§LiteralÍ*ÜÍ*à¢id¤"id"R§LiteralÍ*âÍ*êÎ  7¨16777271¤init]¨PropertyÍ*ìÍ*ùÂÂÂR§LiteralÍ*ìÍ*ò¤type¦"type"R§LiteralÍ*ôÍ*ùÍN ¥20000¤init]¨PropertyÍ*ûÍ+ÂÂÂLªIdentifierÍ*ûÍ+¦params[¯ArrayExpressionÍ+Í+¤init]¨PropertyÍ+Í++ÂÂÂR§LiteralÍ+Í+ªbundleName¬"bundleName"R§LiteralÍ+Í++´com.my.myapplication¶"com.my.myapplication"¤init]¨PropertyÍ+-Í+BÂÂÂR§LiteralÍ+-Í+9ªmoduleName¬"moduleName"R§LiteralÍ+;Í+B¥entry§"entry"¤init¤init]¨PropertyÍ+WÍ+hÂÂÂLªIdentifierÍ+WÍ+\¥titleR§LiteralÍ+^Í+h¸è§†è§‰ç³»ç»Ÿæ ¡å‡†æ–¹æ³•º'è§†è§‰ç³»ç»Ÿæ ¡å‡†æ–¹æ³•'¤init]¨PropertyÍ+{Í+©ÂÂÂLªIdentifierÍ+{Í+†«descriptionR§LiteralÍ+ˆÍ+©Ù]å½“è¯†åˆ«ç²¾åº¦ä¸‹é™æ—¶ï¼Œéœ€è¦é‡æ–°æ ¡å‡†æ‘„åƒå¤´ã€‚æœ¬æ–‡ä»‹ç»è¯¦ç»†çš„æ ¡å‡†æ­¥éª¤ã€‚Ù_'å½“è¯†åˆ«ç²¾åº¦ä¸‹é™æ—¶ï¼Œéœ€è¦é‡æ–°æ ¡å‡†æ‘„åƒå¤´ã€‚æœ¬æ–‡ä»‹ç»è¯¦ç»†çš„æ ¡å‡†æ­¥éª¤ã€‚'¤init]¨PropertyÍ+¼Í,ÅÂÂÂLªIdentifierÍ+¼Í+Ë¯fullDescriptionR§LiteralÍ+ÍÍ,ÅÚpåœ¨ä»¥ä¸‹æƒ…å†µå‘ç”Ÿæ—¶ï¼Œå»ºè®®é‡æ–°æ ¡å‡†è§†è§‰ç³»ç»Ÿï¼š
+1. æ›´æ¢æˆ–ç§»åŠ¨è¿‡æ‘„åƒå¤´ã€‚
+2. äº§çº¿å‡ºç°è¿ç»­ã€è§„å¾‹æ€§çš„è¯†åˆ«é”™è¯¯ã€‚
+3. æ›´æ¢äº†æ–°çš„ç…§æ˜å…‰æºã€‚
+
+**æ ¡å‡†æµç¨‹**ï¼š
+1. ä»å·¥å…·ç®±ä¸­å–å‡ºä¸“ç”¨çš„æ ¡å‡†æ¿ã€‚
+2. å°†äº§çº¿æš‚åœï¼Œå¹¶å°†æ ¡å‡†æ¿æ”¾ç½®åœ¨ä¼ é€å¸¦çš„æŒ‡å®šæ ¡å‡†åŒºåŸŸã€‚
+3. åœ¨ä¸­æ§å¹³å°çš„â€œç³»ç»Ÿè®¾ç½®â€ -> â€œæ‘„åƒå¤´è®¾ç½®â€ä¸­ï¼Œç‚¹å‡»â€œå¼€å§‹æ ¡å‡†â€æŒ‰é’®ã€‚
+4. ç³»ç»Ÿä¼šè‡ªåŠ¨æ‹æ‘„æ ¡å‡†æ¿å›¾åƒå¹¶è®¡ç®—æ–°çš„æ˜ å°„å…³ç³»ã€‚è¯·å‹¿ç§»åŠ¨æ ¡å‡†æ¿ç›´è‡³ç³»ç»Ÿæç¤ºâ€œæ ¡å‡†æˆåŠŸâ€ã€‚
+5. ç§»èµ°æ ¡å‡†æ¿ï¼Œæ¢å¤äº§çº¿è¿è¡Œå¹¶è§‚å¯Ÿè¯†åˆ«æ•ˆæœã€‚Ú|'åœ¨ä»¥ä¸‹æƒ…å†µå‘ç”Ÿæ—¶ï¼Œå»ºè®®é‡æ–°æ ¡å‡†è§†è§‰ç³»ç»Ÿï¼š\n1. æ›´æ¢æˆ–ç§»åŠ¨è¿‡æ‘„åƒå¤´ã€‚\n2. äº§çº¿å‡ºç°è¿ç»­ã€è§„å¾‹æ€§çš„è¯†åˆ«é”™è¯¯ã€‚\n3. æ›´æ¢äº†æ–°çš„ç…§æ˜å…‰æºã€‚\n\n**æ ¡å‡†æµç¨‹**ï¼š\n1. ä»å·¥å…·ç®±ä¸­å–å‡ºä¸“ç”¨çš„æ ¡å‡†æ¿ã€‚\n2. å°†äº§çº¿æš‚åœï¼Œå¹¶å°†æ ¡å‡†æ¿æ”¾ç½®åœ¨ä¼ é€å¸¦çš„æŒ‡å®šæ ¡å‡†åŒºåŸŸã€‚\n3. åœ¨ä¸­æ§å¹³å°çš„â€œç³»ç»Ÿè®¾ç½®â€ -> â€œæ‘„åƒå¤´è®¾ç½®â€ä¸­ï¼Œç‚¹å‡»â€œå¼€å§‹æ ¡å‡†â€æŒ‰é’®ã€‚\n4. ç³»ç»Ÿä¼šè‡ªåŠ¨æ‹æ‘„æ ¡å‡†æ¿å›¾åƒå¹¶è®¡ç®—æ–°çš„æ˜ å°„å…³ç³»ã€‚è¯·å‹¿ç§»åŠ¨æ ¡å‡†æ¿ç›´è‡³ç³»ç»Ÿæç¤ºâ€œæ ¡å‡†æˆåŠŸâ€ã€‚\n5. ç§»èµ°æ ¡å‡†æ¿ï¼Œæ¢å¤äº§çº¿è¿è¡Œå¹¶è§‚å¯Ÿè¯†åˆ«æ•ˆæœã€‚'¤init\°ObjectExpressionÍ,ãÍ/9•]¨PropertyÍ,öÍ,ûÂÂÂLªIdentifierÍ,öÍ,ø¢idR§LiteralÍ,úÍ,û¡6¤init]¨PropertyÍ-Í-ÂÂÂLªIdentifierÍ-Í-¥image\°ObjectExpressionÍ-Í-•]¨PropertyÍ-Í-%ÂÂÂR§LiteralÍ-Í-¢id¤"id"R§LiteralÍ-Í-%Î  7¨16777271¤init]¨PropertyÍ-'Í-4ÂÂÂR§LiteralÍ-'Í--¤type¦"type"R§LiteralÍ-/Í-4ÍN ¥20000¤init]¨PropertyÍ-6Í-@ÂÂÂLªIdentifierÍ-6Í-<¦params[¯ArrayExpressionÍ->Í-@¤init]¨PropertyÍ-BÍ-fÂÂÂR§LiteralÍ-BÍ-NªbundleName¬"bundleName"R§LiteralÍ-PÍ-f´com.my.myapplication¶"com.my.myapplication"¤init]¨PropertyÍ-hÍ-}ÂÂÂR§LiteralÍ-hÍ-tªmoduleName¬"moduleName"R§LiteralÍ-vÍ-}¥entry§"entry"¤init¤init]¨PropertyÍ-’Í-¦ÂÂÂLªIdentifierÍ-’Í-—¥titleR§LiteralÍ-™Í-¦Ù!ä¼ é€å¸¦é€Ÿåº¦ä¸è¯†åˆ«ç‡å…³ç³»Ù#'ä¼ é€å¸¦é€Ÿåº¦ä¸è¯†åˆ«ç‡å…³ç³»'¤init]¨PropertyÍ-¹Í-îÂÂÂLªIdentifierÍ-¹Í-Ä«descriptionR§LiteralÍ-ÆÍ-îÙræ¢è®¨ä¼ é€å¸¦é€Ÿåº¦å¯¹èƒ½æ•ˆæ ‡ç­¾è¯†åˆ«æˆåŠŸç‡çš„å½±å“ï¼Œæ‰¾åˆ°ç”Ÿäº§æ•ˆç‡ä¸å‡†ç¡®ç‡çš„æœ€ä½³å¹³è¡¡ç‚¹ã€‚Ùt'æ¢è®¨ä¼ é€å¸¦é€Ÿåº¦å¯¹èƒ½æ•ˆæ ‡ç­¾è¯†åˆ«æˆåŠŸç‡çš„å½±å“ï¼Œæ‰¾åˆ°ç”Ÿäº§æ•ˆç‡ä¸å‡†ç¡®ç‡çš„æœ€ä½³å¹³è¡¡ç‚¹ã€‚'¤init]¨PropertyÍ.Í/*ÂÂÂLªIdentifierÍ.Í.¯fullDescriptionR§LiteralÍ.Í/*Ú¢ä¼ é€å¸¦é€Ÿåº¦æ˜¯å½±å“äº§çº¿æ•ˆç‡å’Œè¯†åˆ«å‡†ç¡®ç‡çš„å…³é”®å‚æ•°ã€‚ä¸¤è€…å…³ç³»å¦‚ä¸‹ï¼š
+
+- **é€Ÿåº¦è¿‡å¿«**ï¼š
+  - **ä¼˜ç‚¹**ï¼šå•ä½æ—¶é—´å†…å¤„ç†é‡å¤§ï¼Œäº§çº¿æ•ˆç‡é«˜ã€‚
+  - **ç¼ºç‚¹**ï¼šå¯èƒ½å¯¼è‡´å›¾åƒè¿åŠ¨æ¨¡ç³Šï¼Œé™ä½è¯†åˆ«æˆåŠŸç‡ï¼›å¯¹æœºæ¢°è‡‚çš„ååº”é€Ÿåº¦è¦æ±‚æ›´é«˜ã€‚
+
+- **é€Ÿåº¦è¿‡æ…¢**ï¼š
+  - **ä¼˜ç‚¹**ï¼šå›¾åƒæ¸…æ™°ï¼Œè¯†åˆ«å‡†ç¡®ç‡é«˜ï¼Œæœºæ¢°è‡‚æŠ“å–æ›´ç¨³å®šã€‚
+  - **ç¼ºç‚¹**ï¼šäº§çº¿æ•´ä½“æ•ˆç‡é™ä½ã€‚
+
+**å»ºè®®**ï¼šåœ¨â€œç³»ç»Ÿè®¾ç½®â€ä¸­ï¼Œé€šå¸¸å»ºè®®å°†é€Ÿåº¦ç»´æŒåœ¨ç³»ç»Ÿæ¨èå€¼ï¼ˆä¾‹å¦‚ 0.5m/sï¼‰ã€‚åªæœ‰åœ¨å¤„ç†è¡¨é¢åå…‰ä¸¥é‡æˆ–æ ‡ç­¾å°åˆ·è´¨é‡è¾ƒå·®çš„äº§å“æ—¶ï¼Œå¯é€‚å½“é™ä½é€Ÿåº¦ä»¥ä¿è¯å‡†ç¡®ç‡ã€‚Ú®'ä¼ é€å¸¦é€Ÿåº¦æ˜¯å½±å“äº§çº¿æ•ˆç‡å’Œè¯†åˆ«å‡†ç¡®ç‡çš„å…³é”®å‚æ•°ã€‚ä¸¤è€…å…³ç³»å¦‚ä¸‹ï¼š\n\n- **é€Ÿåº¦è¿‡å¿«**ï¼š\n  - **ä¼˜ç‚¹**ï¼šå•ä½æ—¶é—´å†…å¤„ç†é‡å¤§ï¼Œäº§çº¿æ•ˆç‡é«˜ã€‚\n  - **ç¼ºç‚¹**ï¼šå¯èƒ½å¯¼è‡´å›¾åƒè¿åŠ¨æ¨¡ç³Šï¼Œé™ä½è¯†åˆ«æˆåŠŸç‡ï¼›å¯¹æœºæ¢°è‡‚çš„ååº”é€Ÿåº¦è¦æ±‚æ›´é«˜ã€‚\n\n- **é€Ÿåº¦è¿‡æ…¢**ï¼š\n  - **ä¼˜ç‚¹**ï¼šå›¾åƒæ¸…æ™°ï¼Œè¯†åˆ«å‡†ç¡®ç‡é«˜ï¼Œæœºæ¢°è‡‚æŠ“å–æ›´ç¨³å®šã€‚\n  - **ç¼ºç‚¹**ï¼šäº§çº¿æ•´ä½“æ•ˆç‡é™ä½ã€‚\n\n**å»ºè®®**ï¼šåœ¨â€œç³»ç»Ÿè®¾ç½®â€ä¸­ï¼Œé€šå¸¸å»ºè®®å°†é€Ÿåº¦ç»´æŒåœ¨ç³»ç»Ÿæ¨èå€¼ï¼ˆä¾‹å¦‚ 0.5m/sï¼‰ã€‚åªæœ‰åœ¨å¤„ç†è¡¨é¢åå…‰ä¸¥é‡æˆ–æ ‡ç­¾å°åˆ·è´¨é‡è¾ƒå·®çš„äº§å“æ—¶ï¼Œå¯é€‚å½“é™ä½é€Ÿåº¦ä»¥ä¿è¯å‡†ç¡®ç‡ã€‚'¤init\°ObjectExpressionÍ/HÍ1x•]¨PropertyÍ/[Í/`ÂÂÂLªIdentifierÍ/[Í/]¢idR§LiteralÍ/_Í/`¡7¤init]¨PropertyÍ/sÍ/äÂÂÂLªIdentifierÍ/sÍ/x¥image\°ObjectExpressionÍ/zÍ/ä•]¨PropertyÍ/|Í/ŠÂÂÂR§LiteralÍ/|Í/€¢id¤"id"R§LiteralÍ/‚Í/ŠÎ  7¨16777271¤init]¨PropertyÍ/ŒÍ/™ÂÂÂR§LiteralÍ/ŒÍ/’¤type¦"type"R§LiteralÍ/”Í/™ÍN ¥20000¤init]¨PropertyÍ/›Í/¥ÂÂÂLªIdentifierÍ/›Í/¡¦params[¯ArrayExpressionÍ/£Í/¥¤init]¨PropertyÍ/§Í/ËÂÂÂR§LiteralÍ/§Í/³ªbundleName¬"bundleName"R§LiteralÍ/µÍ/Ë´com.my.myapplication¶"com.my.myapplication"¤init]¨PropertyÍ/ÍÍ/âÂÂÂR§LiteralÍ/ÍÍ/ÙªmoduleName¬"moduleName"R§LiteralÍ/ÛÍ/â¥entry§"entry"¤init¤init]¨PropertyÍ/÷Í0	ÂÂÂLªIdentifierÍ/÷Í/ü¥titleR§LiteralÍ/şÍ0	»æ–°äº§å“å‹å·å½•å…¥æµç¨‹½'æ–°äº§å“å‹å·å½•å…¥æµç¨‹'¤init]¨PropertyÍ0Í0LÂÂÂLªIdentifierÍ0Í0'«descriptionR§LiteralÍ0)Í0LÙcä»‹ç»å¦‚ä½•å°†æ–°çš„å®¶ç”µå‹å·æ·»åŠ åˆ°è¯†åˆ«å’Œåˆ†æ‹£ç³»ç»Ÿä¸­ï¼Œç¡®ä¿ç³»ç»Ÿèƒ½æ­£ç¡®å¤„ç†ã€‚Ùe'ä»‹ç»å¦‚ä½•å°†æ–°çš„å®¶ç”µå‹å·æ·»åŠ åˆ°è¯†åˆ«å’Œåˆ†æ‹£ç³»ç»Ÿä¸­ï¼Œç¡®ä¿ç³»ç»Ÿèƒ½æ­£ç¡®å¤„ç†ã€‚'¤init]¨PropertyÍ0_Í1iÂÂÂLªIdentifierÍ0_Í0n¯fullDescriptionR§LiteralÍ0pÍ1iÚ™å½“éœ€è¦å¤„ç†æ–°çš„å®¶ç”µäº§å“æ—¶ï¼Œè¯·æŒ‰ä»¥ä¸‹æ­¥éª¤å°†å…¶ä¿¡æ¯å½•å…¥ç³»ç»Ÿï¼š
+1. åœ¨ä¸­æ§å¹³å°ä¸»èœå•è¿›å…¥â€œç³»ç»Ÿè®¾ç½®â€ -> â€œäº§å“ç®¡ç†â€ã€‚
+2. ç‚¹å‡»â€œæ·»åŠ æ–°å‹å·â€æŒ‰é’®ã€‚
+3. åœ¨å¼¹å‡ºçš„çª—å£ä¸­è¾“å…¥æ–°äº§å“çš„åç§°ã€å‹å·ã€å°ºå¯¸ç­‰åŸºæœ¬ä¿¡æ¯ã€‚
+4. å°†æ–°äº§å“æ”¾ç½®åœ¨ä¼ é€å¸¦çš„èµ·å§‹ä½ç½®ï¼Œç‚¹å‡»â€œæ ‡ç­¾å­¦ä¹ â€ã€‚æ‘„åƒå¤´ä¼šè‡ªåŠ¨å®šä½å¹¶åˆ†æèƒ½æ•ˆæ ‡ç­¾çš„ç‰¹å¾å’Œä½ç½®ã€‚
+5. åœ¨â€œåˆ†æ‹£è§„åˆ™â€ä¸­ï¼Œä¸ºè¯¥æ–°å‹å·æˆ–å…¶èƒ½æ•ˆç­‰çº§æŒ‡å®šä¸€ä¸ªåˆ†æ‹£ç›®æ ‡ï¼ˆä¾‹å¦‚ï¼Œ1å·æœºæ¢°è‡‚ï¼‰ã€‚
+6. ä¿å­˜è®¾ç½®ã€‚å»ºè®®å…ˆè®©å°‘é‡æ–°äº§å“é€šè¿‡äº§çº¿è¿›è¡Œæµ‹è¯•ï¼Œç¡®è®¤æ— è¯¯åå†è¿›è¡Œå¤§è§„æ¨¡ç”Ÿäº§ã€‚Ú¡'å½“éœ€è¦å¤„ç†æ–°çš„å®¶ç”µäº§å“æ—¶ï¼Œè¯·æŒ‰ä»¥ä¸‹æ­¥éª¤å°†å…¶ä¿¡æ¯å½•å…¥ç³»ç»Ÿï¼š\n1. åœ¨ä¸­æ§å¹³å°ä¸»èœå•è¿›å…¥â€œç³»ç»Ÿè®¾ç½®â€ -> â€œäº§å“ç®¡ç†â€ã€‚\n2. ç‚¹å‡»â€œæ·»åŠ æ–°å‹å·â€æŒ‰é’®ã€‚\n3. åœ¨å¼¹å‡ºçš„çª—å£ä¸­è¾“å…¥æ–°äº§å“çš„åç§°ã€å‹å·ã€å°ºå¯¸ç­‰åŸºæœ¬ä¿¡æ¯ã€‚\n4. å°†æ–°äº§å“æ”¾ç½®åœ¨ä¼ é€å¸¦çš„èµ·å§‹ä½ç½®ï¼Œç‚¹å‡»â€œæ ‡ç­¾å­¦ä¹ â€ã€‚æ‘„åƒå¤´ä¼šè‡ªåŠ¨å®šä½å¹¶åˆ†æèƒ½æ•ˆæ ‡ç­¾çš„ç‰¹å¾å’Œä½ç½®ã€‚\n5. åœ¨â€œåˆ†æ‹£è§„åˆ™â€ä¸­ï¼Œä¸ºè¯¥æ–°å‹å·æˆ–å…¶èƒ½æ•ˆç­‰çº§æŒ‡å®šä¸€ä¸ªåˆ†æ‹£ç›®æ ‡ï¼ˆä¾‹å¦‚ï¼Œ1å·æœºæ¢°è‡‚ï¼‰ã€‚\n6. ä¿å­˜è®¾ç½®ã€‚å»ºè®®å…ˆè®©å°‘é‡æ–°äº§å“é€šè¿‡äº§çº¿è¿›è¡Œæµ‹è¯•ï¼Œç¡®è®¤æ— è¯¯åå†è¿›è¡Œå¤§è§„æ¨¡ç”Ÿäº§ã€‚'¤init\°ObjectExpressionÍ1‡Í3¸•]¨PropertyÍ1šÍ1ŸÂÂÂLªIdentifierÍ1šÍ1œ¢idR§LiteralÍ1Í1Ÿ¡8¤init]¨PropertyÍ1²Í2#ÂÂÂLªIdentifierÍ1²Í1·¥image\°ObjectExpressionÍ1¹Í2#•]¨PropertyÍ1»Í1ÉÂÂÂR§LiteralÍ1»Í1¿¢id¤"id"R§LiteralÍ1ÁÍ1ÉÎ  7¨16777271¤init]¨PropertyÍ1ËÍ1ØÂÂÂR§LiteralÍ1ËÍ1Ñ¤type¦"type"R§LiteralÍ1ÓÍ1ØÍN ¥20000¤init]¨PropertyÍ1ÚÍ1äÂÂÂLªIdentifierÍ1ÚÍ1à¦params[¯ArrayExpressionÍ1âÍ1ä¤init]¨PropertyÍ1æÍ2
+ÂÂÂR§LiteralÍ1æÍ1òªbundleName¬"bundleName"R§LiteralÍ1ôÍ2
+´com.my.myapplication¶"com.my.myapplication"¤init]¨PropertyÍ2Í2!ÂÂÂR§LiteralÍ2Í2ªmoduleName¬"moduleName"R§LiteralÍ2Í2!¥entry§"entry"¤init¤init]¨PropertyÍ26Í2GÂÂÂLªIdentifierÍ26Í2;¥titleR§LiteralÍ2=Í2G¸æ—¥å¿—ç³»ç»Ÿä½¿ç”¨æŒ‡å—º'æ—¥å¿—ç³»ç»Ÿä½¿ç”¨æŒ‡å—'¤init]¨PropertyÍ2ZÍ2ÂÂÂLªIdentifierÍ2ZÍ2e«descriptionR§LiteralÍ2gÍ2Ùlå­¦ä¹ å¦‚ä½•æŸ¥çœ‹ã€ç­›é€‰å’Œå¯¼å‡ºæ“ä½œæ—¥å¿—ä¸å¼‚å¸¸æ—¥å¿—ï¼Œç”¨äºè¿½æº¯é—®é¢˜å’Œåˆ†æäº§çº¿æ•ˆç‡ã€‚Ùn'å­¦ä¹ å¦‚ä½•æŸ¥çœ‹ã€ç­›é€‰å’Œå¯¼å‡ºæ“ä½œæ—¥å¿—ä¸å¼‚å¸¸æ—¥å¿—ï¼Œç”¨äºè¿½æº¯é—®é¢˜å’Œåˆ†æäº§çº¿æ•ˆç‡ã€‚'¤init]¨PropertyÍ2 Í3©ÂÂÂLªIdentifierÍ2 Í2¯¯fullDescriptionR§LiteralÍ2±Í3©Ú’æœ¬ç³»ç»Ÿæä¾›ä¸¤ç§æ ¸å¿ƒæ—¥å¿—ï¼Œå‡å¯åœ¨â€œä»»åŠ¡æ—¥å¿—â€é¡µé¢è®¿é—®ï¼š
+
+- **æ“ä½œæ—¥å¿—**ï¼šè®°å½•æ¯ä¸€æ¬¡æˆåŠŸçš„åˆ†æ‹£æ“ä½œï¼ŒåŒ…æ‹¬æ—¶é—´ã€äº§å“å‹å·ã€è¯†åˆ«å‡ºçš„èƒ½æ•ˆç­‰çº§ä»¥åŠç”±å“ªå°æœºæ¢°è‡‚å¤„ç†ã€‚å¯ç”¨äºç”Ÿäº§ç»Ÿè®¡å’Œè¿½æº¯ã€‚
+
+- **å¼‚å¸¸æ—¥å¿—**ï¼šè®°å½•æ‰€æœ‰å¤±è´¥æˆ–å¼‚å¸¸çš„äº‹ä»¶ï¼Œä¾‹å¦‚â€œæ— æ³•è¯†åˆ«æ ‡ç­¾â€ã€â€œæœºæ¢°è‡‚æŠ“å–å¤±è´¥â€ã€â€œè®¾å¤‡ç¦»çº¿â€ç­‰ã€‚è¿™æ˜¯æ’æŸ¥æ•…éšœæœ€é‡è¦çš„ä¾æ®ã€‚
+
+**ä½¿ç”¨æŠ€å·§**ï¼š
+- ä½¿ç”¨é¡¶éƒ¨çš„æ—¥æœŸå’Œå…³é”®è¯ç­›é€‰å™¨å¯ä»¥å¿«é€Ÿå®šä½ç‰¹å®šæ—¶é—´çš„æ—¥å¿—ã€‚
+- å¯¹äºé‡è¦æˆ–é¢‘ç¹å‡ºç°çš„å¼‚å¸¸ï¼Œå»ºè®®å®šæœŸâ€œå¯¼å‡ºæ—¥å¿—â€ï¼Œä»¥ä¾¿è¿›è¡Œç¦»çº¿åˆ†æã€‚Úœ'æœ¬ç³»ç»Ÿæä¾›ä¸¤ç§æ ¸å¿ƒæ—¥å¿—ï¼Œå‡å¯åœ¨â€œä»»åŠ¡æ—¥å¿—â€é¡µé¢è®¿é—®ï¼š\n\n- **æ“ä½œæ—¥å¿—**ï¼šè®°å½•æ¯ä¸€æ¬¡æˆåŠŸçš„åˆ†æ‹£æ“ä½œï¼ŒåŒ…æ‹¬æ—¶é—´ã€äº§å“å‹å·ã€è¯†åˆ«å‡ºçš„èƒ½æ•ˆç­‰çº§ä»¥åŠç”±å“ªå°æœºæ¢°è‡‚å¤„ç†ã€‚å¯ç”¨äºç”Ÿäº§ç»Ÿè®¡å’Œè¿½æº¯ã€‚\n\n- **å¼‚å¸¸æ—¥å¿—**ï¼šè®°å½•æ‰€æœ‰å¤±è´¥æˆ–å¼‚å¸¸çš„äº‹ä»¶ï¼Œä¾‹å¦‚â€œæ— æ³•è¯†åˆ«æ ‡ç­¾â€ã€â€œæœºæ¢°è‡‚æŠ“å–å¤±è´¥â€ã€â€œè®¾å¤‡ç¦»çº¿â€ç­‰ã€‚è¿™æ˜¯æ’æŸ¥æ•…éšœæœ€é‡è¦çš„ä¾æ®ã€‚\n\n**ä½¿ç”¨æŠ€å·§**ï¼š\n- ä½¿ç”¨é¡¶éƒ¨çš„æ—¥æœŸå’Œå…³é”®è¯ç­›é€‰å™¨å¯ä»¥å¿«é€Ÿå®šä½ç‰¹å®šæ—¶é—´çš„æ—¥å¿—ã€‚\n- å¯¹äºé‡è¦æˆ–é¢‘ç¹å‡ºç°çš„å¼‚å¸¸ï¼Œå»ºè®®å®šæœŸâ€œå¯¼å‡ºæ—¥å¿—â€ï¼Œä»¥ä¾¿è¿›è¡Œç¦»çº¿åˆ†æã€‚'¤init\°ObjectExpressionÍ3ÇÍ6•]¨PropertyÍ3ÚÍ3ßÂÂÂLªIdentifierÍ3ÚÍ3Ü¢idR§LiteralÍ3ŞÍ3ß	¡9¤init]¨PropertyÍ3òÍ4cÂÂÂLªIdentifierÍ3òÍ3÷¥image\°ObjectExpressionÍ3ùÍ4c•]¨PropertyÍ3ûÍ4	ÂÂÂR§LiteralÍ3ûÍ3ÿ¢id¤"id"R§LiteralÍ4Í4	Î  7¨16777271¤init]¨PropertyÍ4Í4ÂÂÂR§LiteralÍ4Í4¤type¦"type"R§LiteralÍ4Í4ÍN ¥20000¤init]¨PropertyÍ4Í4$ÂÂÂLªIdentifierÍ4Í4 ¦params[¯ArrayExpressionÍ4"Í4$¤init]¨PropertyÍ4&Í4JÂÂÂR§LiteralÍ4&Í42ªbundleName¬"bundleName"R§LiteralÍ44Í4J´com.my.myapplication¶"com.my.myapplication"¤init]¨PropertyÍ4LÍ4aÂÂÂR§LiteralÍ4LÍ4XªmoduleName¬"moduleName"R§LiteralÍ4ZÍ4a¥entry§"entry"¤init¤init]¨PropertyÍ4vÍ4†ÂÂÂLªIdentifierÍ4vÍ4{¥titleR§LiteralÍ4}Í4†µå¤‡ä»¶æ›´æ¢å‘¨æœŸè¡¨·'å¤‡ä»¶æ›´æ¢å‘¨æœŸè¡¨'¤init]¨PropertyÍ4™Í4ÉÂÂÂLªIdentifierÍ4™Í4¤«descriptionR§LiteralÍ4¦Í4ÉÙcå…³é”®å¤‡ä»¶çš„å»ºè®®æ›´æ¢å‘¨æœŸå’Œåº“å­˜ç®¡ç†æŒ‡å—ï¼Œé¿å…å› å¤‡ä»¶çŸ­ç¼ºå¯¼è‡´äº§çº¿åœæœºã€‚Ùe'å…³é”®å¤‡ä»¶çš„å»ºè®®æ›´æ¢å‘¨æœŸå’Œåº“å­˜ç®¡ç†æŒ‡å—ï¼Œé¿å…å› å¤‡ä»¶çŸ­ç¼ºå¯¼è‡´äº§çº¿åœæœºã€‚'¤init]¨PropertyÍ4ÜÍ5ıÂÂÂLªIdentifierÍ4ÜÍ4ë¯fullDescriptionR§LiteralÍ4íÍ5ıÚHä¸ºä¿è¯äº§çº¿é«˜å¯ç”¨æ€§ï¼Œå»ºè®®æ ¹æ®ä»¥ä¸‹å‘¨æœŸå‡†å¤‡å’Œæ›´æ¢å…³é”®å¤‡ä»¶ï¼š
+
+- **æœºæ¢°è‡‚æ‰‹çˆªå¸ç›˜/å¤¹çˆªå«**ï¼š
+  - å»ºè®®æ›´æ¢å‘¨æœŸï¼šæ¯6ä¸ªæœˆæˆ–20ä¸‡æ¬¡æŠ“å–åã€‚
+  - å»ºè®®åº“å­˜ï¼š2å¥—ã€‚
+
+- **ä¼ é€å¸¦**ï¼š
+  - å»ºè®®æ›´æ¢å‘¨æœŸï¼šæ¯2å¹´æˆ–å‡ºç°æ˜æ˜¾ç£¨æŸã€è£‚ç—•æ—¶ã€‚
+  - å»ºè®®åº“å­˜ï¼š1æ¡ã€‚
+
+- **æ‘„åƒå¤´LEDå…‰æº**ï¼š
+  - å»ºè®®æ›´æ¢å‘¨æœŸï¼šçº¦20000å°æ—¶ä½¿ç”¨å¯¿å‘½åæˆ–äº®åº¦æ˜æ˜¾è¡°å‡æ—¶ã€‚
+  - å»ºè®®åº“å­˜ï¼š1å¥—ã€‚
+
+- **å„è®¾å¤‡ä¿é™©ä¸**ï¼š
+  - å»ºè®®æ›´æ¢å‘¨æœŸï¼šç†”æ–­åç«‹å³æ›´æ¢ã€‚
+  - å»ºè®®åº“å­˜ï¼šæ¯ç§è§„æ ¼5ä¸ªã€‚ÚZ'ä¸ºä¿è¯äº§çº¿é«˜å¯ç”¨æ€§ï¼Œå»ºè®®æ ¹æ®ä»¥ä¸‹å‘¨æœŸå‡†å¤‡å’Œæ›´æ¢å…³é”®å¤‡ä»¶ï¼š\n\n- **æœºæ¢°è‡‚æ‰‹çˆªå¸ç›˜/å¤¹çˆªå«**ï¼š\n  - å»ºè®®æ›´æ¢å‘¨æœŸï¼šæ¯6ä¸ªæœˆæˆ–20ä¸‡æ¬¡æŠ“å–åã€‚\n  - å»ºè®®åº“å­˜ï¼š2å¥—ã€‚\n\n- **ä¼ é€å¸¦**ï¼š\n  - å»ºè®®æ›´æ¢å‘¨æœŸï¼šæ¯2å¹´æˆ–å‡ºç°æ˜æ˜¾ç£¨æŸã€è£‚ç—•æ—¶ã€‚\n  - å»ºè®®åº“å­˜ï¼š1æ¡ã€‚\n\n- **æ‘„åƒå¤´LEDå…‰æº**ï¼š\n  - å»ºè®®æ›´æ¢å‘¨æœŸï¼šçº¦20000å°æ—¶ä½¿ç”¨å¯¿å‘½åæˆ–äº®åº¦æ˜æ˜¾è¡°å‡æ—¶ã€‚\n  - å»ºè®®åº“å­˜ï¼š1å¥—ã€‚\n\n- **å„è®¾å¤‡ä¿é™©ä¸**ï¼š\n  - å»ºè®®æ›´æ¢å‘¨æœŸï¼šç†”æ–­åç«‹å³æ›´æ¢ã€‚\n  - å»ºè®®åº“å­˜ï¼šæ¯ç§è§„æ ¼5ä¸ªã€‚'¤init\°ObjectExpressionÍ6Í8y•]¨PropertyÍ6.Í64ÂÂÂLªIdentifierÍ6.Í60¢idR§LiteralÍ62Í64
+¢10¤init]¨PropertyÍ6GÍ6¸ÂÂÂLªIdentifierÍ6GÍ6L¥image\°ObjectExpressionÍ6NÍ6¸•]¨PropertyÍ6PÍ6^ÂÂÂR§LiteralÍ6PÍ6T¢id¤"id"R§LiteralÍ6VÍ6^Î  7¨16777271¤init]¨PropertyÍ6`Í6mÂÂÂR§LiteralÍ6`Í6f¤type¦"type"R§LiteralÍ6hÍ6mÍN ¥20000¤init]¨PropertyÍ6oÍ6yÂÂÂLªIdentifierÍ6oÍ6u¦params[¯ArrayExpressionÍ6wÍ6y¤init]¨PropertyÍ6{Í6ŸÂÂÂR§LiteralÍ6{Í6‡ªbundleName¬"bundleName"R§LiteralÍ6‰Í6Ÿ´com.my.myapplication¶"com.my.myapplication"¤init]¨PropertyÍ6¡Í6¶ÂÂÂR§LiteralÍ6¡Í6­ªmoduleName¬"moduleName"R§LiteralÍ6¯Í6¶¥entry§"entry"¤init¤init]¨PropertyÍ6ËÍ6ÜÂÂÂLªIdentifierÍ6ËÍ6Ğ¥titleR§LiteralÍ6ÒÍ6Ü¸ç½‘ç»œè¿æ¥æ•…éšœæ’æŸ¥º'ç½‘ç»œè¿æ¥æ•…éšœæ’æŸ¥'¤init]¨PropertyÍ6ïÍ7ÂÂÂLªIdentifierÍ6ïÍ6ú«descriptionR§LiteralÍ6üÍ7ÙZå½“ä¸­æ§å¹³å°æ˜¾ç¤ºè®¾å¤‡ç¦»çº¿æ—¶ï¼Œå¦‚ä½•ç³»ç»Ÿåœ°æ£€æŸ¥å’Œè§£å†³ç½‘ç»œè¿æ¥é—®é¢˜ã€‚Ù\'å½“ä¸­æ§å¹³å°æ˜¾ç¤ºè®¾å¤‡ç¦»çº¿æ—¶ï¼Œå¦‚ä½•ç³»ç»Ÿåœ°æ£€æŸ¥å’Œè§£å†³ç½‘ç»œè¿æ¥é—®é¢˜ã€‚'¤init]¨PropertyÍ7/Í8jÂÂÂLªIdentifierÍ7/Í7>¯fullDescriptionR§LiteralÍ7@Í8jÚüå¦‚æœâ€œè®¾å¤‡ç®¡ç†â€é¡µé¢æ˜¾ç¤ºæŸä¸ªè®¾å¤‡ï¼ˆå¦‚æœºæ¢°è‡‚ã€æ‘„åƒå¤´ï¼‰å¤„äºç¦»çº¿çŠ¶æ€ï¼Œè¯·æŒ‰ä»¥ä¸‹é¡ºåºæ’æŸ¥ï¼š
+1. **ç‰©ç†è¿æ¥æ£€æŸ¥**ï¼šæ£€æŸ¥è¯¥è®¾å¤‡çš„ç½‘çº¿æ˜¯å¦ç‰¢å›ºåœ°æ’å…¥è®¾å¤‡ç«¯å’Œç½‘ç»œäº¤æ¢æœºç«¯å£ã€‚
+2. **ç”µæºæ£€æŸ¥**ï¼šç¡®è®¤è¯¥è®¾å¤‡çš„ç”µæºå·²å¼€å¯ï¼ŒçŠ¶æ€æŒ‡ç¤ºç¯æ­£å¸¸ã€‚
+3. **ç½‘ç»œäº¤æ¢æœºæ£€æŸ¥**ï¼šæŸ¥çœ‹äº¤æ¢æœºä¸Šå¯¹åº”ç«¯å£çš„æŒ‡ç¤ºç¯æ˜¯å¦åœ¨é—ªçƒï¼Œè¡¨ç¤ºæœ‰æ•°æ®é€šä¿¡ã€‚
+4. **IPåœ°å€æ£€æŸ¥**ï¼šåœ¨ä¸­æ§å¹³å°çš„è®¾å¤‡è®¾ç½®ä¸­ï¼Œç¡®è®¤è¯¥è®¾å¤‡çš„IPåœ°å€æœªå‘ç”Ÿæ”¹å˜ï¼Œä¸”ä¸ä¸­æ§å¹³å°å¤„äºåŒä¸€ç½‘æ®µã€‚
+5. **é‡å¯è®¾å¤‡**ï¼šå°è¯•é‡å¯ç¦»çº¿çš„ç¡¬ä»¶è®¾å¤‡ï¼Œç­‰å¾…2åˆ†é’Ÿåå†æŸ¥çœ‹å…¶çŠ¶æ€ã€‚
+6. **é‡å¯ä¸­æ§å¹³å°**ï¼šå¦‚æœä»¥ä¸Šæ­¥éª¤å‡æ— æ•ˆï¼Œå°è¯•é‡å¯ä¸­æ§å°å¹³æ¿ã€‚Ú'å¦‚æœâ€œè®¾å¤‡ç®¡ç†â€é¡µé¢æ˜¾ç¤ºæŸä¸ªè®¾å¤‡ï¼ˆå¦‚æœºæ¢°è‡‚ã€æ‘„åƒå¤´ï¼‰å¤„äºç¦»çº¿çŠ¶æ€ï¼Œè¯·æŒ‰ä»¥ä¸‹é¡ºåºæ’æŸ¥ï¼š\n1. **ç‰©ç†è¿æ¥æ£€æŸ¥**ï¼šæ£€æŸ¥è¯¥è®¾å¤‡çš„ç½‘çº¿æ˜¯å¦ç‰¢å›ºåœ°æ’å…¥è®¾å¤‡ç«¯å’Œç½‘ç»œäº¤æ¢æœºç«¯å£ã€‚\n2. **ç”µæºæ£€æŸ¥**ï¼šç¡®è®¤è¯¥è®¾å¤‡çš„ç”µæºå·²å¼€å¯ï¼ŒçŠ¶æ€æŒ‡ç¤ºç¯æ­£å¸¸ã€‚\n3. **ç½‘ç»œäº¤æ¢æœºæ£€æŸ¥**ï¼šæŸ¥çœ‹äº¤æ¢æœºä¸Šå¯¹åº”ç«¯å£çš„æŒ‡ç¤ºç¯æ˜¯å¦åœ¨é—ªçƒï¼Œè¡¨ç¤ºæœ‰æ•°æ®é€šä¿¡ã€‚\n4. **IPåœ°å€æ£€æŸ¥**ï¼šåœ¨ä¸­æ§å¹³å°çš„è®¾å¤‡è®¾ç½®ä¸­ï¼Œç¡®è®¤è¯¥è®¾å¤‡çš„IPåœ°å€æœªå‘ç”Ÿæ”¹å˜ï¼Œä¸”ä¸ä¸­æ§å¹³å°å¤„äºåŒä¸€ç½‘æ®µã€‚\n5. **é‡å¯è®¾å¤‡**ï¼šå°è¯•é‡å¯ç¦»çº¿çš„ç¡¬ä»¶è®¾å¤‡ï¼Œç­‰å¾…2åˆ†é’Ÿåå†æŸ¥çœ‹å…¶çŠ¶æ€ã€‚\n6. **é‡å¯ä¸­æ§å¹³å°**ï¼šå¦‚æœä»¥ä¸Šæ­¥éª¤å‡æ— æ•ˆï¼Œå°è¯•é‡å¯ä¸­æ§å°å¹³æ¿ã€‚'¤init\°ObjectExpressionÍ8ˆÍ:—•]¨PropertyÍ8›Í8¡ÂÂÂLªIdentifierÍ8›Í8¢idR§LiteralÍ8ŸÍ8¡¢11¤init]¨PropertyÍ8´Í9%ÂÂÂLªIdentifierÍ8´Í8¹¥image\°ObjectExpressionÍ8»Í9%•]¨PropertyÍ8½Í8ËÂÂÂR§LiteralÍ8½Í8Á¢id¤"id"R§LiteralÍ8ÃÍ8ËÎ  7¨16777271¤init]¨PropertyÍ8ÍÍ8ÚÂÂÂR§LiteralÍ8ÍÍ8Ó¤type¦"type"R§LiteralÍ8ÕÍ8ÚÍN ¥20000¤init]¨PropertyÍ8ÜÍ8æÂÂÂLªIdentifierÍ8ÜÍ8â¦params[¯ArrayExpressionÍ8äÍ8æ¤init]¨PropertyÍ8èÍ9ÂÂÂR§LiteralÍ8èÍ8ôªbundleName¬"bundleName"R§LiteralÍ8öÍ9´com.my.myapplication¶"com.my.myapplication"¤init]¨PropertyÍ9Í9#ÂÂÂR§LiteralÍ9Í9ªmoduleName¬"moduleName"R§LiteralÍ9Í9#¥entry§"entry"¤init¤init]¨PropertyÍ98Í9IÂÂÂLªIdentifierÍ98Í9=¥titleR§LiteralÍ9?Í9I¸å›ºä»¶ç‰ˆæœ¬æ›´æ–°è¯´æ˜º'å›ºä»¶ç‰ˆæœ¬æ›´æ–°è¯´æ˜'¤init]¨PropertyÍ9\Í9‰ÂÂÂLªIdentifierÍ9\Í9g«descriptionR§LiteralÍ9iÍ9‰ÙZä¸­æ§ç³»ç»ŸåŠå„è®¾å¤‡å›ºä»¶ç‰ˆæœ¬æ›´æ–°æ—¥å¿—ï¼Œäº†è§£æ–°åŠŸèƒ½å’Œå·²ä¿®å¤çš„é—®é¢˜ã€‚Ù\'ä¸­æ§ç³»ç»ŸåŠå„è®¾å¤‡å›ºä»¶ç‰ˆæœ¬æ›´æ–°æ—¥å¿—ï¼Œäº†è§£æ–°åŠŸèƒ½å’Œå·²ä¿®å¤çš„é—®é¢˜ã€‚'¤init]¨PropertyÍ9œÍ:ˆÂÂÂLªIdentifierÍ9œÍ9«¯fullDescriptionR§LiteralÍ9­Í:ˆÚö**ä¸­æ§å¹³å° V1.2.0 (2025-07-15)**
+
+- **ã€æ–°åŠŸèƒ½ã€‘** æ–°å¢å¯¹äºŒç»´ç å¼èƒ½æ•ˆæ ‡ç­¾çš„è¯†åˆ«æ”¯æŒã€‚
+- **ã€ä¼˜åŒ–ã€‘** ä¼˜åŒ–äº†æœºæ¢°è‡‚è¿åŠ¨è·¯å¾„ç®—æ³•ï¼Œå¹³å‡åˆ†æ‹£å‘¨æœŸç¼©çŸ­5%ã€‚
+- **ã€ä¿®å¤ã€‘** ä¿®å¤äº†åœ¨å¤„ç†é«˜åå…‰æ ‡ç­¾æ—¶ï¼Œå¶å‘æ€§è¯†åˆ«é”™è¯¯çš„é—®é¢˜ã€‚
+- **ã€ä¿®å¤ã€‘** è§£å†³äº†å½“ç½‘ç»œè½»å¾®æŠ–åŠ¨æ—¶ï¼Œè®¾å¤‡çŠ¶æ€å¯èƒ½é”™è¯¯åœ°æ˜¾ç¤ºä¸ºâ€œç¦»çº¿â€çš„é—®é¢˜ã€‚
+
+*æ›´æ–°å»ºè®®ï¼šè¯·åœ¨äº§çº¿ç©ºé—²æ—¶è¿›è¡Œæ›´æ–°æ“ä½œï¼Œæ›´æ–°è¿‡ç¨‹å¤§çº¦éœ€è¦5åˆ†é’Ÿã€‚*Úÿ'**ä¸­æ§å¹³å° V1.2.0 (2025-07-15)**\n\n- **ã€æ–°åŠŸèƒ½ã€‘** æ–°å¢å¯¹äºŒç»´ç å¼èƒ½æ•ˆæ ‡ç­¾çš„è¯†åˆ«æ”¯æŒã€‚\n- **ã€ä¼˜åŒ–ã€‘** ä¼˜åŒ–äº†æœºæ¢°è‡‚è¿åŠ¨è·¯å¾„ç®—æ³•ï¼Œå¹³å‡åˆ†æ‹£å‘¨æœŸç¼©çŸ­5%ã€‚\n- **ã€ä¿®å¤ã€‘** ä¿®å¤äº†åœ¨å¤„ç†é«˜åå…‰æ ‡ç­¾æ—¶ï¼Œå¶å‘æ€§è¯†åˆ«é”™è¯¯çš„é—®é¢˜ã€‚\n- **ã€ä¿®å¤ã€‘** è§£å†³äº†å½“ç½‘ç»œè½»å¾®æŠ–åŠ¨æ—¶ï¼Œè®¾å¤‡çŠ¶æ€å¯èƒ½é”™è¯¯åœ°æ˜¾ç¤ºä¸ºâ€œç¦»çº¿â€çš„é—®é¢˜ã€‚\n\n*æ›´æ–°å»ºè®®ï¼šè¯·åœ¨äº§çº¿ç©ºé—²æ—¶è¿›è¡Œæ›´æ–°æ“ä½œï¼Œæ›´æ–°è¿‡ç¨‹å¤§çº¦éœ€è¦5åˆ†é’Ÿã€‚*'¤init\°ObjectExpressionÍ:¦Í<¼•]¨PropertyÍ:¹Í:¿ÂÂÂLªIdentifierÍ:¹Í:»¢idR§LiteralÍ:½Í:¿¢12¤init]¨PropertyÍ:ÒÍ;CÂÂÂLªIdentifierÍ:ÒÍ:×¥image\°ObjectExpressionÍ:ÙÍ;C•]¨PropertyÍ:ÛÍ:éÂÂÂR§LiteralÍ:ÛÍ:ß¢id¤"id"R§LiteralÍ:áÍ:éÎ  7¨16777271¤init]¨PropertyÍ:ëÍ:øÂÂÂR§LiteralÍ:ëÍ:ñ¤type¦"type"R§LiteralÍ:óÍ:øÍN ¥20000¤init]¨PropertyÍ:úÍ;ÂÂÂLªIdentifierÍ:úÍ; ¦params[¯ArrayExpressionÍ;Í;¤init]¨PropertyÍ;Í;*ÂÂÂR§LiteralÍ;Í;ªbundleName¬"bundleName"R§LiteralÍ;Í;*´com.my.myapplication¶"com.my.myapplication"¤init]¨PropertyÍ;,Í;AÂÂÂR§LiteralÍ;,Í;8ªmoduleName¬"moduleName"R§LiteralÍ;:Í;A¥entry§"entry"¤init¤init]¨PropertyÍ;VÍ;gÂÂÂLªIdentifierÍ;VÍ;[¥titleR§LiteralÍ;]Í;g¸èƒ½è€—æ•°æ®åˆ†æå…¥é—¨º'èƒ½è€—æ•°æ®åˆ†æå…¥é—¨'¤init]¨PropertyÍ;zÍ;¨ÂÂÂLªIdentifierÍ;zÍ;…«descriptionR§LiteralÍ;‡Í;¨Ù]å­¦ä¹ å¦‚ä½•è§£è¯»ä¸­æ§å°è®°å½•çš„èƒ½è€—æ•°æ®ï¼Œå‘ç°èŠ‚èƒ½æ½œåŠ›ï¼Œä¼˜åŒ–ç”Ÿäº§ç­–ç•¥ã€‚Ù_'å­¦ä¹ å¦‚ä½•è§£è¯»ä¸­æ§å°è®°å½•çš„èƒ½è€—æ•°æ®ï¼Œå‘ç°èŠ‚èƒ½æ½œåŠ›ï¼Œä¼˜åŒ–ç”Ÿäº§ç­–ç•¥ã€‚'¤init]¨PropertyÍ;»Í<­ÂÂÂLªIdentifierÍ;»Í;Ê¯fullDescriptionR§LiteralÍ;ÌÍ<­Ú_æœ¬ç³»ç»Ÿä¼šè®°å½•äº§çº¿çš„æ•´ä½“ç”¨ç”µæƒ…å†µï¼Œæ•°æ®å¯åœ¨â€œæ•°æ®ç»Ÿè®¡â€é¡µé¢æŸ¥çœ‹ã€‚æ‚¨å¯ä»¥å…³æ³¨ä»¥ä¸‹å‡ ç‚¹ï¼š
+
+- **å³°å€¼åŠŸè€—**ï¼šè§‚å¯Ÿä¸€å¤©ä¸­å“ªä¸ªæ—¶é—´æ®µçš„ç”¨ç”µé‡æœ€é«˜ï¼Œæ˜¯å¦ä¸ç”Ÿäº§é«˜å³°åŒ¹é…ã€‚
+- **å¾…æœºåŠŸè€—**ï¼šåœ¨äº§çº¿åœæ­¢ä½†æœªæ–­ç”µæ—¶ï¼Œè®°å½•å¾…æœºåŠŸè€—ã€‚å¦‚æœå¾…æœºåŠŸè€—è¿‡é«˜ï¼Œå¯ä»¥è€ƒè™‘åœ¨é•¿æ—¶é—´ä¸ä½¿ç”¨æ—¶å…³é—­ä¸»ç”µæºã€‚
+- **å•ä½äº§å“èƒ½è€—**ï¼šé€šè¿‡ï¼ˆæ€»èƒ½è€— / æ€»äº§é‡ï¼‰è®¡ç®—å‡ºç”Ÿäº§å•ä»¶äº§å“æ‰€éœ€çš„ç”µé‡ã€‚é€šè¿‡ä¼˜åŒ–æµç¨‹ï¼ˆå¦‚è°ƒæ•´ä¼ é€å¸¦é€Ÿåº¦ï¼‰æ¥è§‚å¯Ÿè¯¥æŒ‡æ ‡çš„å˜åŒ–ï¼Œæ˜¯å®ç°èŠ‚èƒ½é™æœ¬çš„æœ‰æ•ˆé€”å¾„ã€‚Úe'æœ¬ç³»ç»Ÿä¼šè®°å½•äº§çº¿çš„æ•´ä½“ç”¨ç”µæƒ…å†µï¼Œæ•°æ®å¯åœ¨â€œæ•°æ®ç»Ÿè®¡â€é¡µé¢æŸ¥çœ‹ã€‚æ‚¨å¯ä»¥å…³æ³¨ä»¥ä¸‹å‡ ç‚¹ï¼š\n\n- **å³°å€¼åŠŸè€—**ï¼šè§‚å¯Ÿä¸€å¤©ä¸­å“ªä¸ªæ—¶é—´æ®µçš„ç”¨ç”µé‡æœ€é«˜ï¼Œæ˜¯å¦ä¸ç”Ÿäº§é«˜å³°åŒ¹é…ã€‚\n- **å¾…æœºåŠŸè€—**ï¼šåœ¨äº§çº¿åœæ­¢ä½†æœªæ–­ç”µæ—¶ï¼Œè®°å½•å¾…æœºåŠŸè€—ã€‚å¦‚æœå¾…æœºåŠŸè€—è¿‡é«˜ï¼Œå¯ä»¥è€ƒè™‘åœ¨é•¿æ—¶é—´ä¸ä½¿ç”¨æ—¶å…³é—­ä¸»ç”µæºã€‚\n- **å•ä½äº§å“èƒ½è€—**ï¼šé€šè¿‡ï¼ˆæ€»èƒ½è€— / æ€»äº§é‡ï¼‰è®¡ç®—å‡ºç”Ÿäº§å•ä»¶äº§å“æ‰€éœ€çš„ç”µé‡ã€‚é€šè¿‡ä¼˜åŒ–æµç¨‹ï¼ˆå¦‚è°ƒæ•´ä¼ é€å¸¦é€Ÿåº¦ï¼‰æ¥è§‚å¯Ÿè¯¥æŒ‡æ ‡çš„å˜åŒ–ï¼Œæ˜¯å®ç°èŠ‚èƒ½é™æœ¬çš„æœ‰æ•ˆé€”å¾„ã€‚'¤init\°ObjectExpressionÍ<ıÍ?&•]¨PropertyÍ=Í=ÂÂÂLªIdentifierÍ=Í=¢idR§LiteralÍ=Í=¢13¤init]¨PropertyÍ=)Í=šÂÂÂLªIdentifierÍ=)Í=.¥image\°ObjectExpressionÍ=0Í=š•]¨PropertyÍ=2Í=@ÂÂÂR§LiteralÍ=2Í=6¢id¤"id"R§LiteralÍ=8Í=@Î  7¨16777271¤init]¨PropertyÍ=BÍ=OÂÂÂR§LiteralÍ=BÍ=H¤type¦"type"R§LiteralÍ=JÍ=OÍN ¥20000¤init]¨PropertyÍ=QÍ=[ÂÂÂLªIdentifierÍ=QÍ=W¦params[¯ArrayExpressionÍ=YÍ=[¤init]¨PropertyÍ=]Í=ÂÂÂR§LiteralÍ=]Í=iªbundleName¬"bundleName"R§LiteralÍ=kÍ=´com.my.myapplication¶"com.my.myapplication"¤init]¨PropertyÍ=ƒÍ=˜ÂÂÂR§LiteralÍ=ƒÍ=ªmoduleName¬"moduleName"R§LiteralÍ=‘Í=˜¥entry§"entry"¤init¤init]¨PropertyÍ=­Í=ÃÂÂÂLªIdentifierÍ=­Í=²¥titleR§LiteralÍ=´Í=ÃÙ'ã€å°è½¦ã€‘ç”µæ± ä¿å…»ä¸å……ç”µè§„èŒƒÙ)'ã€å°è½¦ã€‘ç”µæ± ä¿å…»ä¸å……ç”µè§„èŒƒ'¤init]¨PropertyÍ=ÖÍ>	ÂÂÂLªIdentifierÍ=ÖÍ=á«descriptionR§LiteralÍ=ãÍ>	Ùfæ™ºèƒ½å°è½¦ï¼ˆAGVï¼‰çš„ç”µæ± æ˜¯å…¶æ ¸å¿ƒéƒ¨ä»¶ï¼Œæ­£ç¡®çš„ä¿å…»å’Œå……ç”µèƒ½æ˜¾è‘—å»¶é•¿å…¶å¯¿å‘½ã€‚Ùh'æ™ºèƒ½å°è½¦ï¼ˆAGVï¼‰çš„ç”µæ± æ˜¯å…¶æ ¸å¿ƒéƒ¨ä»¶ï¼Œæ­£ç¡®çš„ä¿å…»å’Œå……ç”µèƒ½æ˜¾è‘—å»¶é•¿å…¶å¯¿å‘½ã€‚'¤init]¨PropertyÍ>Í?ÂÂÂLªIdentifierÍ>Í>+¯fullDescriptionR§LiteralÍ>-Í?ÚYä¸ºä¿éšœæ™ºèƒ½å°è½¦ï¼ˆAGVï¼‰çš„ç»­èˆªå’Œå®‰å…¨ï¼Œè¯·éµå¾ªä»¥ä¸‹ç”µæ± ä½¿ç”¨è§„èŒƒï¼š
+
+1. **æ—¥å¸¸å……ç”µ**ï¼šå½“å°è½¦ç”µé‡ä½äº20%æ—¶ï¼Œç³»ç»Ÿä¼šè‡ªåŠ¨æç¤ºæˆ–æ´¾å…¶è¿”å›å……ç”µæ¡©ã€‚è¯·ç¡®ä¿å……ç”µæ¡©ç”µæºç¨³å®šï¼Œæ¥å£æ— å¼‚ç‰©ã€‚
+2. **é¿å…è¿‡æ”¾**ï¼šä¸¥ç¦å°†ç”µæ± ç”µé‡è€—å°½å†å……ç”µï¼Œè¿™ä¼šå¯¹é”‚ç”µæ± é€ æˆæ°¸ä¹…æ€§æŸä¼¤ã€‚
+3. **å®šæœŸæ·±å¾ªç¯**ï¼šå»ºè®®æ¯ä¸‰ä¸ªæœˆè¿›è¡Œä¸€æ¬¡å®Œæ•´çš„â€œç”¨å°½-å……æ»¡â€å¾ªç¯ï¼ˆåœ¨å®‰å…¨ç”µé‡ä¸‹é™ä¹‹ä¸Šï¼‰ï¼Œä»¥æ ¡å‡†ç”µé‡è®¡ï¼Œä¿æŒç”µæ± æ´»æ€§ã€‚
+4. **æ¸…æ´ä¸æ£€æŸ¥**ï¼šæ¯æœˆæ¸…æ´ç”µæ± å……ç”µè§¦ç‚¹ï¼Œæ£€æŸ¥æœ‰æ— è…èš€æˆ–æ¾åŠ¨ã€‚Ú`'ä¸ºä¿éšœæ™ºèƒ½å°è½¦ï¼ˆAGVï¼‰çš„ç»­èˆªå’Œå®‰å…¨ï¼Œè¯·éµå¾ªä»¥ä¸‹ç”µæ± ä½¿ç”¨è§„èŒƒï¼š\n\n1. **æ—¥å¸¸å……ç”µ**ï¼šå½“å°è½¦ç”µé‡ä½äº20%æ—¶ï¼Œç³»ç»Ÿä¼šè‡ªåŠ¨æç¤ºæˆ–æ´¾å…¶è¿”å›å……ç”µæ¡©ã€‚è¯·ç¡®ä¿å……ç”µæ¡©ç”µæºç¨³å®šï¼Œæ¥å£æ— å¼‚ç‰©ã€‚\n2. **é¿å…è¿‡æ”¾**ï¼šä¸¥ç¦å°†ç”µæ± ç”µé‡è€—å°½å†å……ç”µï¼Œè¿™ä¼šå¯¹é”‚ç”µæ± é€ æˆæ°¸ä¹…æ€§æŸä¼¤ã€‚\n3. **å®šæœŸæ·±å¾ªç¯**ï¼šå»ºè®®æ¯ä¸‰ä¸ªæœˆè¿›è¡Œä¸€æ¬¡å®Œæ•´çš„â€œç”¨å°½-å……æ»¡â€å¾ªç¯ï¼ˆåœ¨å®‰å…¨ç”µé‡ä¸‹é™ä¹‹ä¸Šï¼‰ï¼Œä»¥æ ¡å‡†ç”µé‡è®¡ï¼Œä¿æŒç”µæ± æ´»æ€§ã€‚\n4. **æ¸…æ´ä¸æ£€æŸ¥**ï¼šæ¯æœˆæ¸…æ´ç”µæ± å……ç”µè§¦ç‚¹ï¼Œæ£€æŸ¥æœ‰æ— è…èš€æˆ–æ¾åŠ¨ã€‚'¤init\°ObjectExpressionÍ?5ÍA§•]¨PropertyÍ?HÍ?NÂÂÂLªIdentifierÍ?HÍ?J¢idR§LiteralÍ?LÍ?N¢14¤init]¨PropertyÍ?aÍ?ÒÂÂÂLªIdentifierÍ?aÍ?f¥image\°ObjectExpressionÍ?hÍ?Ò•]¨PropertyÍ?jÍ?xÂÂÂR§LiteralÍ?jÍ?n¢id¤"id"R§LiteralÍ?pÍ?xÎ  7¨16777271¤init]¨PropertyÍ?zÍ?‡ÂÂÂR§LiteralÍ?zÍ?€¤type¦"type"R§LiteralÍ?‚Í?‡ÍN ¥20000¤init]¨PropertyÍ?‰Í?“ÂÂÂLªIdentifierÍ?‰Í?¦params[¯ArrayExpressionÍ?‘Í?“¤init]¨PropertyÍ?•Í?¹ÂÂÂR§LiteralÍ?•Í?¡ªbundleName¬"bundleName"R§LiteralÍ?£Í?¹´com.my.myapplication¶"com.my.myapplication"¤init]¨PropertyÍ?»Í?ĞÂÂÂR§LiteralÍ?»Í?ÇªmoduleName¬"moduleName"R§LiteralÍ?ÉÍ?Ğ¥entry§"entry"¤init¤init]¨PropertyÍ?åÍ?ûÂÂÂLªIdentifierÍ?åÍ?ê¥titleR§LiteralÍ?ìÍ?ûÙ'ã€å°è½¦ã€‘è·¯å¾„å—é˜»ä¸è„±å›°æ–¹æ³•Ù)'ã€å°è½¦ã€‘è·¯å¾„å—é˜»ä¸è„±å›°æ–¹æ³•'¤init]¨PropertyÍ@Í@?ÂÂÂLªIdentifierÍ@Í@«descriptionR§LiteralÍ@Í@?Ùfå½“å°è½¦åœ¨è¿è¾“é€”ä¸­è¢«éšœç¢ç‰©é˜»æŒ¡æˆ–åç¦»è½¨é“æ—¶ï¼Œåº”å¦‚ä½•å®‰å…¨åœ°è¿›è¡Œäººå·¥å¹²é¢„ã€‚Ùh'å½“å°è½¦åœ¨è¿è¾“é€”ä¸­è¢«éšœç¢ç‰©é˜»æŒ¡æˆ–åç¦»è½¨é“æ—¶ï¼Œåº”å¦‚ä½•å®‰å…¨åœ°è¿›è¡Œäººå·¥å¹²é¢„ã€‚'¤init]¨PropertyÍ@RÍA˜ÂÂÂLªIdentifierÍ@RÍ@a¯fullDescriptionR§LiteralÍ@cÍA˜Úâå°è½¦é…å¤‡äº†æ¿€å…‰é›·è¾¾å’Œç¢°æ’ä¼ æ„Ÿå™¨ä»¥å®ç°é¿éšœï¼Œä½†ä»å¯èƒ½é‡åˆ°æ„å¤–æƒ…å†µã€‚
+
+- **æƒ…å†µä¸€ï¼šä¸´æ—¶éšœç¢ç‰©**
+  - **ç°è±¡**ï¼šå°è½¦åœ¨éšœç¢ç‰©å‰åœæ­¢å¹¶é¸£ç¬›å‘Šè­¦ã€‚
+  - **å¤„ç†**ï¼šç§»é™¤éšœç¢ç‰©åï¼Œå°è½¦é€šå¸¸ä¼šè‡ªåŠ¨æ¢å¤ä»»åŠ¡ã€‚å¦‚æœæœªè‡ªåŠ¨æ¢å¤ï¼Œå¯åœ¨ä¸­æ§å°ç‚¹å‡»â€œç»§ç»­ä»»åŠ¡â€ã€‚
+
+- **æƒ…å†µäºŒï¼šå°è½¦è„±è½¨æˆ–è¢«å›°**
+  - **å¤„ç†**ï¼š
+    1. åœ¨ä¸­æ§å°å°†è¯¥å°è½¦çŠ¶æ€è®¾ä¸ºâ€œç»´æŠ¤æ¨¡å¼â€ï¼Œæš‚åœå…¶æ‰€æœ‰ä»»åŠ¡ã€‚
+    2. æ‰‹åŠ¨å°†å°è½¦æ¨ç¦»å—å›°åŒºåŸŸï¼Œå¹¶æ”¾å›ä¸»è·¯å¾„çš„ä»»æ„ä½ç½®ã€‚
+    3. åœ¨ä¸­æ§å°ç‚¹å‡»â€œé‡æ–°å®šä½â€ï¼Œå°è½¦ä¼šè‡ªåŠ¨æ‰«æç¯å¢ƒå¹¶æ¢å¤å…¶åœ¨åœ°å›¾ä¸Šçš„ä½ç½®ã€‚
+    4. ç¡®è®¤å®šä½æ— è¯¯åï¼Œæ”¹å›â€œè‡ªåŠ¨æ¨¡å¼â€å³å¯ã€‚Úï'å°è½¦é…å¤‡äº†æ¿€å…‰é›·è¾¾å’Œç¢°æ’ä¼ æ„Ÿå™¨ä»¥å®ç°é¿éšœï¼Œä½†ä»å¯èƒ½é‡åˆ°æ„å¤–æƒ…å†µã€‚\n\n- **æƒ…å†µä¸€ï¼šä¸´æ—¶éšœç¢ç‰©**\n  - **ç°è±¡**ï¼šå°è½¦åœ¨éšœç¢ç‰©å‰åœæ­¢å¹¶é¸£ç¬›å‘Šè­¦ã€‚\n  - **å¤„ç†**ï¼šç§»é™¤éšœç¢ç‰©åï¼Œå°è½¦é€šå¸¸ä¼šè‡ªåŠ¨æ¢å¤ä»»åŠ¡ã€‚å¦‚æœæœªè‡ªåŠ¨æ¢å¤ï¼Œå¯åœ¨ä¸­æ§å°ç‚¹å‡»â€œç»§ç»­ä»»åŠ¡â€ã€‚\n\n- **æƒ…å†µäºŒï¼šå°è½¦è„±è½¨æˆ–è¢«å›°**\n  - **å¤„ç†**ï¼š\n    1. åœ¨ä¸­æ§å°å°†è¯¥å°è½¦çŠ¶æ€è®¾ä¸ºâ€œç»´æŠ¤æ¨¡å¼â€ï¼Œæš‚åœå…¶æ‰€æœ‰ä»»åŠ¡ã€‚\n    2. æ‰‹åŠ¨å°†å°è½¦æ¨ç¦»å—å›°åŒºåŸŸï¼Œå¹¶æ”¾å›ä¸»è·¯å¾„çš„ä»»æ„ä½ç½®ã€‚\n    3. åœ¨ä¸­æ§å°ç‚¹å‡»â€œé‡æ–°å®šä½â€ï¼Œå°è½¦ä¼šè‡ªåŠ¨æ‰«æç¯å¢ƒå¹¶æ¢å¤å…¶åœ¨åœ°å›¾ä¸Šçš„ä½ç½®ã€‚\n    4. ç¡®è®¤å®šä½æ— è¯¯åï¼Œæ”¹å›â€œè‡ªåŠ¨æ¨¡å¼â€å³å¯ã€‚'¤init\°ObjectExpressionÍA¶ÍD;•]¨PropertyÍAÉÍAÏÂÂÂLªIdentifierÍAÉÍAË¢idR§LiteralÍAÍÍAÏ¢15¤init]¨PropertyÍAâÍBSÂÂÂLªIdentifierÍAâÍAç¥image\°ObjectExpressionÍAéÍBS•]¨PropertyÍAëÍAùÂÂÂR§LiteralÍAëÍAï¢id¤"id"R§LiteralÍAñÍAùÎ  7¨16777271¤init]¨PropertyÍAûÍBÂÂÂR§LiteralÍAûÍB¤type¦"type"R§LiteralÍBÍBÍN ¥20000¤init]¨PropertyÍB
+ÍBÂÂÂLªIdentifierÍB
+ÍB¦params[¯ArrayExpressionÍBÍB¤init]¨PropertyÍBÍB:ÂÂÂR§LiteralÍBÍB"ªbundleName¬"bundleName"R§LiteralÍB$ÍB:´com.my.myapplication¶"com.my.myapplication"¤init]¨PropertyÍB<ÍBQÂÂÂR§LiteralÍB<ÍBHªmoduleName¬"moduleName"R§LiteralÍBJÍBQ¥entry§"entry"¤init¤init]¨PropertyÍBfÍB‚ÂÂÂLªIdentifierÍBfÍBk¥titleR§LiteralÍBmÍB‚Ù-ã€æœºæ¢°è‡‚ã€‘æ€¥åœï¼ˆE-Stopï¼‰æ¢å¤æµç¨‹Ù/'ã€æœºæ¢°è‡‚ã€‘æ€¥åœï¼ˆE-Stopï¼‰æ¢å¤æµç¨‹'¤init]¨PropertyÍB•ÍBÄÂÂÂLªIdentifierÍB•ÍB «descriptionR§LiteralÍB¢ÍBÄÙ`åœ¨æŒ‰ä¸‹ç´§æ€¥åœæ­¢æŒ‰é’®åï¼Œå¦‚ä½•å®‰å…¨ã€æ­£ç¡®åœ°ä½¿æœºæ¢°è‡‚ä»æ€¥åœçŠ¶æ€ä¸­æ¢å¤ã€‚Ùb'åœ¨æŒ‰ä¸‹ç´§æ€¥åœæ­¢æŒ‰é’®åï¼Œå¦‚ä½•å®‰å…¨ã€æ­£ç¡®åœ°ä½¿æœºæ¢°è‡‚ä»æ€¥åœçŠ¶æ€ä¸­æ¢å¤ã€‚'¤init]¨PropertyÍB×ÍD,ÂÂÂLªIdentifierÍB×ÍBæ¯fullDescriptionR§LiteralÍBèÍD,Ú<ç´§æ€¥åœæ­¢ï¼ˆE-Stopï¼‰ä¼šç«‹å³åˆ‡æ–­æœºæ¢°è‡‚æ‰€æœ‰ä¼ºæœç”µæœºçš„ç”µæºã€‚æ¢å¤æ“ä½œå¿…é¡»è°¨æ…ï¼š
+1. **ç¡®è®¤å®‰å…¨**ï¼šé¦–å…ˆï¼Œå¿…é¡»ç¡®è®¤è§¦å‘æ€¥åœçš„å±é™©æƒ…å†µå·²ç»å®Œå…¨æ’é™¤ã€‚
+2. **å¤ä½æ€¥åœæŒ‰é’®**ï¼šå°†ç‰©ç†çš„æ€¥åœæŒ‰é’®æ—‹è½¬æˆ–æ‹‰å‡ºï¼Œä½¿å…¶å¤ä½ã€‚
+3. **æ¸…é™¤å‘Šè­¦**ï¼šåœ¨ä¸­æ§å°çš„â€œè®¾å¤‡ç®¡ç†â€é¡µé¢ï¼Œæ‰¾åˆ°å¯¹åº”çš„æœºæ¢°è‡‚ï¼Œç‚¹å‡»â€œæ¸…é™¤å‘Šè­¦â€æˆ–â€œå¤ä½â€æŒ‰é’®ã€‚
+4. **é‡æ–°ä¸Šç”µ**ï¼šç³»ç»Ÿä¼šæç¤ºä¸ºæœºæ¢°è‡‚ä¼ºæœç³»ç»Ÿé‡æ–°ä¸Šç”µï¼Œç‚¹å‡»ç¡®è®¤ã€‚
+5. **å›åŸç‚¹ï¼ˆHomingï¼‰**ï¼šä¸Šç”µæˆåŠŸåï¼Œæœºæ¢°è‡‚å¤„äºéç¡®å®šä½ç½®ã€‚å¿…é¡»æ‰§è¡Œâ€œå›åŸç‚¹â€æ“ä½œï¼Œè®©æœºæ¢°è‡‚çš„æ‰€æœ‰å…³èŠ‚å›åˆ°é¢„è®¾çš„é›¶ç‚¹ä½ç½®ã€‚
+6. **æ¢å¤ä»»åŠ¡**ï¼šå›åŸç‚¹æ“ä½œå®Œæˆåï¼Œæœºæ¢°è‡‚çŠ¶æ€å˜ä¸ºâ€œå¾…å‘½ä¸­â€ï¼Œæ­¤æ—¶æ‰å¯ä»¥é‡æ–°å¯åŠ¨è‡ªåŠ¨è¿è¡Œä»»åŠ¡ã€‚ÚD'ç´§æ€¥åœæ­¢ï¼ˆE-Stopï¼‰ä¼šç«‹å³åˆ‡æ–­æœºæ¢°è‡‚æ‰€æœ‰ä¼ºæœç”µæœºçš„ç”µæºã€‚æ¢å¤æ“ä½œå¿…é¡»è°¨æ…ï¼š\n1. **ç¡®è®¤å®‰å…¨**ï¼šé¦–å…ˆï¼Œå¿…é¡»ç¡®è®¤è§¦å‘æ€¥åœçš„å±é™©æƒ…å†µå·²ç»å®Œå…¨æ’é™¤ã€‚\n2. **å¤ä½æ€¥åœæŒ‰é’®**ï¼šå°†ç‰©ç†çš„æ€¥åœæŒ‰é’®æ—‹è½¬æˆ–æ‹‰å‡ºï¼Œä½¿å…¶å¤ä½ã€‚\n3. **æ¸…é™¤å‘Šè­¦**ï¼šåœ¨ä¸­æ§å°çš„â€œè®¾å¤‡ç®¡ç†â€é¡µé¢ï¼Œæ‰¾åˆ°å¯¹åº”çš„æœºæ¢°è‡‚ï¼Œç‚¹å‡»â€œæ¸…é™¤å‘Šè­¦â€æˆ–â€œå¤ä½â€æŒ‰é’®ã€‚\n4. **é‡æ–°ä¸Šç”µ**ï¼šç³»ç»Ÿä¼šæç¤ºä¸ºæœºæ¢°è‡‚ä¼ºæœç³»ç»Ÿé‡æ–°ä¸Šç”µï¼Œç‚¹å‡»ç¡®è®¤ã€‚\n5. **å›åŸç‚¹ï¼ˆHomingï¼‰**ï¼šä¸Šç”µæˆåŠŸåï¼Œæœºæ¢°è‡‚å¤„äºéç¡®å®šä½ç½®ã€‚å¿…é¡»æ‰§è¡Œâ€œå›åŸç‚¹â€æ“ä½œï¼Œè®©æœºæ¢°è‡‚çš„æ‰€æœ‰å…³èŠ‚å›åˆ°é¢„è®¾çš„é›¶ç‚¹ä½ç½®ã€‚\n6. **æ¢å¤ä»»åŠ¡**ï¼šå›åŸç‚¹æ“ä½œå®Œæˆåï¼Œæœºæ¢°è‡‚çŠ¶æ€å˜ä¸ºâ€œå¾…å‘½ä¸­â€ï¼Œæ­¤æ—¶æ‰å¯ä»¥é‡æ–°å¯åŠ¨è‡ªåŠ¨è¿è¡Œä»»åŠ¡ã€‚'¤init\°ObjectExpressionÍDJÍFì•]¨PropertyÍD]ÍDcÂÂÂLªIdentifierÍD]ÍD_¢idR§LiteralÍDaÍDc¢16¤init]¨PropertyÍDvÍDçÂÂÂLªIdentifierÍDvÍD{¥image\°ObjectExpressionÍD}ÍDç•]¨PropertyÍDÍDÂÂÂR§LiteralÍDÍDƒ¢id¤"id"R§LiteralÍD…ÍDÎ  7¨16777271¤init]¨PropertyÍDÍDœÂÂÂR§LiteralÍDÍD•¤type¦"type"R§LiteralÍD—ÍDœÍN ¥20000¤init]¨PropertyÍDÍD¨ÂÂÂLªIdentifierÍDÍD¤¦params[¯ArrayExpressionÍD¦ÍD¨¤init]¨PropertyÍDªÍDÎÂÂÂR§LiteralÍDªÍD¶ªbundleName¬"bundleName"R§LiteralÍD¸ÍDÎ´com.my.myapplication¶"com.my.myapplication"¤init]¨PropertyÍDĞÍDåÂÂÂR§LiteralÍDĞÍDÜªmoduleName¬"moduleName"R§LiteralÍDŞÍDå¥entry§"entry"¤init¤init]¨PropertyÍDúÍEÂÂÂLªIdentifierÍDúÍDÿ¥titleR§LiteralÍEÍEÙ0ã€æœºæ¢°è‡‚ã€‘æœ«ç«¯æ‰§è¡Œå™¨æ›´æ¢ä¸TCPæ ¡å‡†Ù2'ã€æœºæ¢°è‡‚ã€‘æœ«ç«¯æ‰§è¡Œå™¨æ›´æ¢ä¸TCPæ ¡å‡†'¤init]¨PropertyÍE(ÍEcÂÂÂLªIdentifierÍE(ÍE3«descriptionR§LiteralÍE5ÍEcÙzå½“éœ€è¦å¤„ç†ä¸åŒå°ºå¯¸æˆ–æè´¨çš„å®¶ç”µæ—¶ï¼Œå¯èƒ½éœ€è¦æ›´æ¢æ‰‹çˆªï¼Œå¹¶å¿…é¡»é‡æ–°æ ¡å‡†å·¥å…·ä¸­å¿ƒç‚¹(TCP)ã€‚Ù|'å½“éœ€è¦å¤„ç†ä¸åŒå°ºå¯¸æˆ–æè´¨çš„å®¶ç”µæ—¶ï¼Œå¯èƒ½éœ€è¦æ›´æ¢æ‰‹çˆªï¼Œå¹¶å¿…é¡»é‡æ–°æ ¡å‡†å·¥å…·ä¸­å¿ƒç‚¹(TCP)ã€‚'¤init]¨PropertyÍEvÍFİÂÂÂLªIdentifierÍEvÍE…¯fullDescriptionR§LiteralÍE‡ÍFİÚ2å·¥å…·ä¸­å¿ƒç‚¹ï¼ˆTool Center Point, TCPï¼‰æ˜¯æœºæ¢°è‡‚æ‰‹çˆªçš„ç²¾ç¡®å·¥ä½œç‚¹ã€‚æ›´æ¢æ‰‹çˆªåï¼Œæ­¤ç‚¹ä¼šæ”¹å˜ï¼Œå¿…é¡»æ ¡å‡†ã€‚
+
+**æ›´æ¢æµç¨‹**ï¼š
+1. å°†æœºæ¢°è‡‚ç§»åŠ¨åˆ°å®‰å…¨ã€æ–¹ä¾¿æ“ä½œçš„ä½ç½®ã€‚
+2. å…³é—­æœºæ¢°è‡‚ç”µæºå’Œæ°”æºã€‚
+3. æŒ‰ç…§æ‰‹å†ŒæŒ‡å¼•ï¼Œæ‹†ä¸‹æ—§çš„æ‰‹çˆªï¼ˆæœ«ç«¯æ‰§è¡Œå™¨ï¼‰ï¼Œå®‰è£…æ–°çš„æ‰‹çˆªã€‚
+4. æ¢å¤ç”µæºå’Œæ°”æºã€‚
+
+**TCPæ ¡å‡†ï¼ˆå››ç‚¹æ³•ï¼‰**ï¼š
+1. åœ¨â€œç³»ç»Ÿè®¾ç½®â€ -> â€œæœºæ¢°è‡‚è®¾ç½®â€ä¸­ï¼Œé€‰æ‹©â€œTCPæ ¡å‡†â€ã€‚
+2. æ‰‹åŠ¨æ§åˆ¶æœºæ¢°è‡‚ï¼Œè®©æ–°å®‰è£…çš„æ‰‹çˆªå°–ç«¯ä»å››ä¸ª**ä¸åŒ**çš„å§¿æ€ï¼ˆè§’åº¦ï¼‰å»ç²¾ç¡®è§¦ç¢°ç©ºé—´ä¸­çš„åŒä¸€ä¸ªå›ºå®šç‚¹ï¼ˆä¾‹å¦‚ä¸€ä¸ªå›ºå®šçš„é¡¶é’ˆï¼‰ã€‚
+3. æ¯è§¦ç¢°ä¸€æ¬¡ï¼Œç‚¹å‡»ä¸€æ¬¡â€œè®°å½•è¯¥ç‚¹â€ã€‚
+4. è®°å½•å››æ¬¡åï¼Œç‚¹å‡»â€œè®¡ç®—TCPâ€ã€‚ç³»ç»Ÿä¼šè‡ªåŠ¨è®¡ç®—å‡ºæ–°çš„å·¥å…·ä¸­å¿ƒç‚¹åæ ‡å¹¶ä¿å­˜ã€‚Ú@'å·¥å…·ä¸­å¿ƒç‚¹ï¼ˆTool Center Point, TCPï¼‰æ˜¯æœºæ¢°è‡‚æ‰‹çˆªçš„ç²¾ç¡®å·¥ä½œç‚¹ã€‚æ›´æ¢æ‰‹çˆªåï¼Œæ­¤ç‚¹ä¼šæ”¹å˜ï¼Œå¿…é¡»æ ¡å‡†ã€‚\n\n**æ›´æ¢æµç¨‹**ï¼š\n1. å°†æœºæ¢°è‡‚ç§»åŠ¨åˆ°å®‰å…¨ã€æ–¹ä¾¿æ“ä½œçš„ä½ç½®ã€‚\n2. å…³é—­æœºæ¢°è‡‚ç”µæºå’Œæ°”æºã€‚\n3. æŒ‰ç…§æ‰‹å†ŒæŒ‡å¼•ï¼Œæ‹†ä¸‹æ—§çš„æ‰‹çˆªï¼ˆæœ«ç«¯æ‰§è¡Œå™¨ï¼‰ï¼Œå®‰è£…æ–°çš„æ‰‹çˆªã€‚\n4. æ¢å¤ç”µæºå’Œæ°”æºã€‚\n\n**TCPæ ¡å‡†ï¼ˆå››ç‚¹æ³•ï¼‰**ï¼š\n1. åœ¨â€œç³»ç»Ÿè®¾ç½®â€ -> â€œæœºæ¢°è‡‚è®¾ç½®â€ä¸­ï¼Œé€‰æ‹©â€œTCPæ ¡å‡†â€ã€‚\n2. æ‰‹åŠ¨æ§åˆ¶æœºæ¢°è‡‚ï¼Œè®©æ–°å®‰è£…çš„æ‰‹çˆªå°–ç«¯ä»å››ä¸ª**ä¸åŒ**çš„å§¿æ€ï¼ˆè§’åº¦ï¼‰å»ç²¾ç¡®è§¦ç¢°ç©ºé—´ä¸­çš„åŒä¸€ä¸ªå›ºå®šç‚¹ï¼ˆä¾‹å¦‚ä¸€ä¸ªå›ºå®šçš„é¡¶é’ˆï¼‰ã€‚\n3. æ¯è§¦ç¢°ä¸€æ¬¡ï¼Œç‚¹å‡»ä¸€æ¬¡â€œè®°å½•è¯¥ç‚¹â€ã€‚\n4. è®°å½•å››æ¬¡åï¼Œç‚¹å‡»â€œè®¡ç®—TCPâ€ã€‚ç³»ç»Ÿä¼šè‡ªåŠ¨è®¡ç®—å‡ºæ–°çš„å·¥å…·ä¸­å¿ƒç‚¹åæ ‡å¹¶ä¿å­˜ã€‚'¤init\°ObjectExpressionÍFûÍI`•]¨PropertyÍGÍGÂÂÂLªIdentifierÍGÍG¢idR§LiteralÍGÍG¢17¤init]¨PropertyÍG'ÍG˜ÂÂÂLªIdentifierÍG'ÍG,¥image\°ObjectExpressionÍG.ÍG˜•]¨PropertyÍG0ÍG>ÂÂÂR§LiteralÍG0ÍG4¢id¤"id"R§LiteralÍG6ÍG>Î  7¨16777271¤init]¨PropertyÍG@ÍGMÂÂÂR§LiteralÍG@ÍGF¤type¦"type"R§LiteralÍGHÍGMÍN ¥20000¤init]¨PropertyÍGOÍGYÂÂÂLªIdentifierÍGOÍGU¦params[¯ArrayExpressionÍGWÍGY¤init]¨PropertyÍG[ÍGÂÂÂR§LiteralÍG[ÍGgªbundleName¬"bundleName"R§LiteralÍGiÍG´com.my.myapplication¶"com.my.myapplication"¤init]¨PropertyÍGÍG–ÂÂÂR§LiteralÍGÍGªmoduleName¬"moduleName"R§LiteralÍGÍG–¥entry§"entry"¤init¤init]¨PropertyÍG«ÍGÀÂÂÂLªIdentifierÍG«ÍG°¥titleR§LiteralÍG²ÍGÀÙ$ã€ä¼ é€å¸¦ã€‘è·‘åä¸å¼ åŠ›è°ƒæ•´Ù&'ã€ä¼ é€å¸¦ã€‘è·‘åä¸å¼ åŠ›è°ƒæ•´'¤init]¨PropertyÍGÓÍHÂÂÂLªIdentifierÍGÓÍGŞ«descriptionR§LiteralÍGàÍHÙlä¼ é€å¸¦è·‘åæ˜¯å¸¸è§é—®é¢˜ï¼Œå­¦ä¼šå¦‚ä½•æ­£ç¡®è°ƒæ•´å¼ ç´§è£…ç½®ï¼Œç¡®ä¿ä¼ é€å¸¦å±…ä¸­ç¨³å®šè¿è¡Œã€‚Ùn'ä¼ é€å¸¦è·‘åæ˜¯å¸¸è§é—®é¢˜ï¼Œå­¦ä¼šå¦‚ä½•æ­£ç¡®è°ƒæ•´å¼ ç´§è£…ç½®ï¼Œç¡®ä¿ä¼ é€å¸¦å±…ä¸­ç¨³å®šè¿è¡Œã€‚'¤init]¨PropertyÍHÍIQÂÂÂLªIdentifierÍHÍH(¯fullDescriptionR§LiteralÍH*ÍIQÚçä¼ é€å¸¦é•¿æ—¶é—´è¿è¡Œåï¼Œå¯èƒ½ä¼šå‡ºç°å‘ä¸€ä¾§åç§»ï¼ˆè·‘åï¼‰çš„ç°è±¡ï¼Œå½±å“äº§å“å®šä½ã€‚
+
+**åˆ¤æ–­ä¸è°ƒæ•´**ï¼š
+- **åˆ¤æ–­åŸåˆ™**ï¼šå¸¦å­å¾€å“ªè¾¹åï¼Œå°±å¼ ç´§å“ªä¸€è¾¹çš„è°ƒèŠ‚èºæ “ï¼›æˆ–è€…æ”¾æ¾å¦ä¸€è¾¹çš„è°ƒèŠ‚èºæ “ã€‚è¿™ä¸ªåŸåˆ™è¢«ç§°ä¸ºâ€œç´§åä¸ç´§å‰â€ã€‚
+- **è°ƒæ•´æ­¥éª¤**ï¼š
+  1. æš‚åœäº§çº¿ï¼Œä½†ä¿æŒä¼ é€å¸¦ä½é€Ÿè¿è¡Œä»¥ä¾¿è§‚å¯Ÿã€‚
+  2. æ‰¾åˆ°ä¼ é€å¸¦ä¸¤ç«¯çš„å¼ ç´§è°ƒèŠ‚èºæ “ã€‚
+  3. æ¯æ¬¡åªå¾®è°ƒèºæ “ï¼ˆä¾‹å¦‚æ—‹è½¬1/4åœˆï¼‰ï¼Œç„¶åè§‚å¯Ÿä¼ é€å¸¦åœ¨è¿è¡Œå‡ åœˆåçš„å˜åŒ–ã€‚
+  4. é‡å¤å¾®è°ƒï¼Œç›´åˆ°ä¼ é€å¸¦ç¨³å®šåœ¨æ»šç­’ä¸­å¿ƒä½ç½®è¿è¡Œã€‚
+
+**æ³¨æ„**ï¼šè¿‡åº¦å¼ ç´§ä¼šå¢åŠ ç”µæœºè´Ÿè·å’Œä¼ é€å¸¦ç£¨æŸï¼Œè°ƒæ•´æ—¶åº”ä»¥èƒ½é©±åŠ¨è´Ÿè½½è€Œä¸æ‰“æ»‘çš„æœ€å°å¼ åŠ›ä¸ºå®œã€‚Úó'ä¼ é€å¸¦é•¿æ—¶é—´è¿è¡Œåï¼Œå¯èƒ½ä¼šå‡ºç°å‘ä¸€ä¾§åç§»ï¼ˆè·‘åï¼‰çš„ç°è±¡ï¼Œå½±å“äº§å“å®šä½ã€‚\n\n**åˆ¤æ–­ä¸è°ƒæ•´**ï¼š\n- **åˆ¤æ–­åŸåˆ™**ï¼šå¸¦å­å¾€å“ªè¾¹åï¼Œå°±å¼ ç´§å“ªä¸€è¾¹çš„è°ƒèŠ‚èºæ “ï¼›æˆ–è€…æ”¾æ¾å¦ä¸€è¾¹çš„è°ƒèŠ‚èºæ “ã€‚è¿™ä¸ªåŸåˆ™è¢«ç§°ä¸ºâ€œç´§åä¸ç´§å‰â€ã€‚\n- **è°ƒæ•´æ­¥éª¤**ï¼š\n  1. æš‚åœäº§çº¿ï¼Œä½†ä¿æŒä¼ é€å¸¦ä½é€Ÿè¿è¡Œä»¥ä¾¿è§‚å¯Ÿã€‚\n  2. æ‰¾åˆ°ä¼ é€å¸¦ä¸¤ç«¯çš„å¼ ç´§è°ƒèŠ‚èºæ “ã€‚\n  3. æ¯æ¬¡åªå¾®è°ƒèºæ “ï¼ˆä¾‹å¦‚æ—‹è½¬1/4åœˆï¼‰ï¼Œç„¶åè§‚å¯Ÿä¼ é€å¸¦åœ¨è¿è¡Œå‡ åœˆåçš„å˜åŒ–ã€‚\n  4. é‡å¤å¾®è°ƒï¼Œç›´åˆ°ä¼ é€å¸¦ç¨³å®šåœ¨æ»šç­’ä¸­å¿ƒä½ç½®è¿è¡Œã€‚\n\n**æ³¨æ„**ï¼šè¿‡åº¦å¼ ç´§ä¼šå¢åŠ ç”µæœºè´Ÿè·å’Œä¼ é€å¸¦ç£¨æŸï¼Œè°ƒæ•´æ—¶åº”ä»¥èƒ½é©±åŠ¨è´Ÿè½½è€Œä¸æ‰“æ»‘çš„æœ€å°å¼ åŠ›ä¸ºå®œã€‚'¤init\°ObjectExpressionÍIoÍK¬•]¨PropertyÍI‚ÍIˆÂÂÂLªIdentifierÍI‚ÍI„¢idR§LiteralÍI†ÍIˆ¢18¤init]¨PropertyÍI›ÍJÂÂÂLªIdentifierÍI›ÍI ¥image\°ObjectExpressionÍI¢ÍJ•]¨PropertyÍI¤ÍI²ÂÂÂR§LiteralÍI¤ÍI¨¢id¤"id"R§LiteralÍIªÍI²Î  7¨16777271¤init]¨PropertyÍI´ÍIÁÂÂÂR§LiteralÍI´ÍIº¤type¦"type"R§LiteralÍI¼ÍIÁÍN ¥20000¤init]¨PropertyÍIÃÍIÍÂÂÂLªIdentifierÍIÃÍIÉ¦params[¯ArrayExpressionÍIËÍIÍ¤init]¨PropertyÍIÏÍIóÂÂÂR§LiteralÍIÏÍIÛªbundleName¬"bundleName"R§LiteralÍIİÍIó´com.my.myapplication¶"com.my.myapplication"¤init]¨PropertyÍIõÍJ
+ÂÂÂR§LiteralÍIõÍJªmoduleName¬"moduleName"R§LiteralÍJÍJ
+¥entry§"entry"¤init¤init]¨PropertyÍJÍJ4ÂÂÂLªIdentifierÍJÍJ$¥titleR§LiteralÍJ&ÍJ4Ù$ã€ä¼ é€å¸¦ã€‘å…‰ç”µä¼ æ„Ÿå™¨ç»´æŠ¤Ù&'ã€ä¼ é€å¸¦ã€‘å…‰ç”µä¼ æ„Ÿå™¨ç»´æŠ¤'¤init]¨PropertyÍJGÍJ~ÂÂÂLªIdentifierÍJGÍJR«descriptionR§LiteralÍJTÍJ~Ùxç”¨äºæ£€æµ‹äº§å“ä½ç½®çš„å…‰ç”µä¼ æ„Ÿå™¨æ˜¯å®ç°è‡ªåŠ¨è§¦å‘æ‹ç…§çš„å…³é”®ï¼Œå¿…é¡»ä¿æŒå…¶æ¸…æ´ä¸åŠŸèƒ½æ­£å¸¸ã€‚Ùz'ç”¨äºæ£€æµ‹äº§å“ä½ç½®çš„å…‰ç”µä¼ æ„Ÿå™¨æ˜¯å®ç°è‡ªåŠ¨è§¦å‘æ‹ç…§çš„å…³é”®ï¼Œå¿…é¡»ä¿æŒå…¶æ¸…æ´ä¸åŠŸèƒ½æ­£å¸¸ã€‚'¤init]¨PropertyÍJ‘ÍKÂÂÂLªIdentifierÍJ‘ÍJ ¯fullDescriptionR§LiteralÍJ¢ÍKÚ«ä¼ é€å¸¦ä¸Šç”¨äºå®šä½äº§å“çš„å…‰ç”µä¼ æ„Ÿå™¨ï¼ˆé€šå¸¸å®‰è£…åœ¨ä¾§é¢ï¼‰éœ€è¦å®šæœŸç»´æŠ¤ï¼š
+
+1. **æ¸…æ´**ï¼šæ¯ç­æ¬¡åº”ç”¨å¹²å‡€çš„è½¯å¸ƒæˆ–æ£‰ç­¾ï¼Œæ“¦æ‹­ä¼ æ„Ÿå™¨çš„å‘å°„ç«¯å’Œæ¥æ”¶ç«¯é•œå¤´ï¼Œå»é™¤ç°å°˜å’Œæ²¹æ±¡ã€‚
+2. **å¯¹å‡†æ£€æŸ¥**ï¼šå¯¹äºå¯¹å°„å¼ä¼ æ„Ÿå™¨ï¼Œè¦ç¡®ä¿å‘å°„å™¨å’Œæ¥æ”¶å™¨ä¸¥æ ¼å¯¹å‡†ã€‚å¯ä»¥è§‚å¯Ÿä¼ æ„Ÿå™¨ä¸Šçš„çŠ¶æ€æŒ‡ç¤ºç¯ï¼Œåœ¨æ²¡æœ‰ç‰©ä½“é®æŒ¡æ—¶ï¼ŒæŒ‡ç¤ºç¯åº”å¤„äºç¨³å®šç‚¹äº®ï¼ˆæˆ–ç†„ç­ï¼‰çŠ¶æ€ã€‚
+3. **çµæ•åº¦è°ƒèŠ‚**ï¼šéƒ¨åˆ†ä¼ æ„Ÿå™¨é…æœ‰çµæ•åº¦è°ƒèŠ‚æ—‹é’®ã€‚å½“å‡ºç°è¯¯è§¦å‘æˆ–ä¸è§¦å‘çš„æƒ…å†µæ—¶ï¼Œå¯åœ¨æœ‰/æ— äº§å“é®æŒ¡æ—¶ï¼Œå¾®è°ƒè¯¥æ—‹é’®ï¼Œç›´åˆ°è§¦å‘ç¨³å®šå¯é ã€‚éä¸“ä¸šäººå‘˜è¯·å‹¿éšæ„å¤§å¹…è°ƒæ•´ã€‚Ú±'ä¼ é€å¸¦ä¸Šç”¨äºå®šä½äº§å“çš„å…‰ç”µä¼ æ„Ÿå™¨ï¼ˆé€šå¸¸å®‰è£…åœ¨ä¾§é¢ï¼‰éœ€è¦å®šæœŸç»´æŠ¤ï¼š\n\n1. **æ¸…æ´**ï¼šæ¯ç­æ¬¡åº”ç”¨å¹²å‡€çš„è½¯å¸ƒæˆ–æ£‰ç­¾ï¼Œæ“¦æ‹­ä¼ æ„Ÿå™¨çš„å‘å°„ç«¯å’Œæ¥æ”¶ç«¯é•œå¤´ï¼Œå»é™¤ç°å°˜å’Œæ²¹æ±¡ã€‚\n2. **å¯¹å‡†æ£€æŸ¥**ï¼šå¯¹äºå¯¹å°„å¼ä¼ æ„Ÿå™¨ï¼Œè¦ç¡®ä¿å‘å°„å™¨å’Œæ¥æ”¶å™¨ä¸¥æ ¼å¯¹å‡†ã€‚å¯ä»¥è§‚å¯Ÿä¼ æ„Ÿå™¨ä¸Šçš„çŠ¶æ€æŒ‡ç¤ºç¯ï¼Œåœ¨æ²¡æœ‰ç‰©ä½“é®æŒ¡æ—¶ï¼ŒæŒ‡ç¤ºç¯åº”å¤„äºç¨³å®šç‚¹äº®ï¼ˆæˆ–ç†„ç­ï¼‰çŠ¶æ€ã€‚\n3. **çµæ•åº¦è°ƒèŠ‚**ï¼šéƒ¨åˆ†ä¼ æ„Ÿå™¨é…æœ‰çµæ•åº¦è°ƒèŠ‚æ—‹é’®ã€‚å½“å‡ºç°è¯¯è§¦å‘æˆ–ä¸è§¦å‘çš„æƒ…å†µæ—¶ï¼Œå¯åœ¨æœ‰/æ— äº§å“é®æŒ¡æ—¶ï¼Œå¾®è°ƒè¯¥æ—‹é’®ï¼Œç›´åˆ°è§¦å‘ç¨³å®šå¯é ã€‚éä¸“ä¸šäººå‘˜è¯·å‹¿éšæ„å¤§å¹…è°ƒæ•´ã€‚'¤initU®ThisExpressionÍK¹ÍK½R§LiteralÍK¿ÍKÏ®knowledgeItems°"knowledgeItems"S³ExpressionStatementÍKÛÍL*X´AssignmentExpressionÍKÛÍL)¡=Y°MemberExpressionÍKÛÍKîU®ThisExpressionÍKÛÍKßLªIdentifierÍKàÍKî®__selectedItemÂÂZ­NewExpressionÍKñÍL)LªIdentifierÍKõÍL¸ObservedPropertyObjectPU“R§LiteralÍLÍLÀ¤nullU®ThisExpressionÍLÍLR§LiteralÍLÍL(¬selectedItem®"selectedItem"S³ExpressionStatementÍL4ÍOeX´AssignmentExpressionÍL4ÍOd¡=Y°MemberExpressionÍL4ÍLIU®ThisExpressionÍL4ÍL8LªIdentifierÍL9ÍLI°dialogControllerÂÂZ­NewExpressionÍLLÍOdLªIdentifierÍLPÍLf¶CustomDialogController’\°ObjectExpressionÍLgÍO]”]¨PropertyÍLvÍNãÂÂÂLªIdentifierÍLvÍL}§builderO·ArrowFunctionExpressionÍLÍNãÀÂÂÂM®BlockStatementÍL…ÍNã•Ôr^•¤type¥start£end¬declarations¤kind³VariableDeclarationÍL˜ÍM†‘Ôr_•¤type¥start£end¢id¤init²VariableDeclaratorÍLœÍM…LªIdentifierÍLœÍL¤¨jsDialogZ­NewExpressionÍL§ÍM…LªIdentifierÍL«ÍLÀµKnowledgeDetailDialog–U®ThisExpressionÍLÁÍLÅ\°ObjectExpressionÍLÇÍM!‘]¨PropertyÍLŞÍL÷ÂÂÂLªIdentifierÍLŞÍLâ¤itemY°MemberExpressionÍLäÍL÷U®ThisExpressionÍLäÍLèLªIdentifierÍLéÍL÷®__selectedItemÂÂ¤initLªIdentifierÍM#ÍM,©undefinedQ¯UnaryExpressionÍM.ÍM0¡-ÃR§LiteralÍM/ÍM0¡1O·ArrowFunctionExpressionÍM2ÍM;ÀÂÂÂM®BlockStatementÍM8ÍM;\°ObjectExpressionÍM=ÍM„“]¨PropertyÍM?ÍMnÂÂÂLªIdentifierÍM?ÍMC¤pageR§LiteralÍMEÍMnÙ'entry/src/main/ets/view/DataStatics.etsÙ)"entry/src/main/ets/view/DataStatics.ets"¤init]¨PropertyÍMpÍMyÂÂÂLªIdentifierÍMpÍMt¤lineR§LiteralÍMvÍMyÌû£251¤init]¨PropertyÍM{ÍM‚ÂÂÂLªIdentifierÍM{ÍM~£colR§LiteralÍM€ÍM‚¢14¤init£letS³ExpressionStatementÍM˜ÍMÆT®CallExpressionÍM˜ÍMÅY°MemberExpressionÍM˜ÍM®LªIdentifierÍM˜ÍM ¨jsDialogLªIdentifierÍM¡ÍM®­setControllerÂÂ‘Y°MemberExpressionÍM¯ÍMÄU®ThisExpressionÍM¯ÍM³LªIdentifierÍM´ÍMÄ°dialogControllerÂÂÂS³ExpressionStatementÍMØÍMğT®CallExpressionÍMØÍMïY°MemberExpressionÍMØÍMåLªIdentifierÍMØÍMŞ¦ViewPULªIdentifierÍMßÍMå¦createÂÂ‘LªIdentifierÍMæÍMî¨jsDialogÂ^³VariableDeclarationÍNÍN™‘_²VariableDeclaratorÍNÍN˜LªIdentifierÍNÍN¬paramsLambdaO·ArrowFunctionExpressionÍNÍN˜ÀÂÂÂM®BlockStatementÍNÍN˜‘Ôr`”¤type¥start£end¨argument¯ReturnStatementÍN2ÍN…\°ObjectExpressionÍN9ÍN„‘]¨PropertyÍNTÍNmÂÂÂLªIdentifierÍNTÍNX¤itemY°MemberExpressionÍNZÍNmU®ThisExpressionÍNZÍN^LªIdentifierÍN_ÍNm®__selectedItemÂÂ¤init£letS³ExpressionStatementÍN«ÍNÔX´AssignmentExpressionÍN«ÍNÓ¡=Y°MemberExpressionÍN«ÍNÄLªIdentifierÍN«ÍN³¨jsDialogLªIdentifierÍN´ÍNÄ°paramsGenerator_ÂÂLªIdentifierÍNÇÍNÓ¬paramsLambda¤init]¨PropertyÍNòÍOÂÂÂLªIdentifierÍNòÍNüªautoCancelR§LiteralÍNşÍOÃ¤true¤init]¨PropertyÍOÍO2ÂÂÂLªIdentifierÍOÍO©alignmentY°MemberExpressionÍOÍO2LªIdentifierÍOÍO+¯DialogAlignmentLªIdentifierÍO,ÍO2¦CenterÂÂ¤init]¨PropertyÍOAÍORÂÂÂLªIdentifierÍOAÍOL«customStyleR§LiteralÍONÍORÃ¤true¤initU®ThisExpressionÍO_ÍOcS³ExpressionStatementÍOoÍO–T®CallExpressionÍOoÍO•Y°MemberExpressionÍOoÍOU®ThisExpressionÍOoÍOsLªIdentifierÍOtÍO¹setInitiallyProvidedValueÂÂ‘LªIdentifierÍOÍO”¦paramsÂS³ExpressionStatementÍO ÍO¼T®CallExpressionÍO ÍO»Y°MemberExpressionÍO ÍO¹U®ThisExpressionÍO ÍO¤LªIdentifierÍO¥ÍO¹´finalizeConstructionÂÂÂN°MethodDefinitionÍOÉÍQ^ÂÂLªIdentifierÍOÉÍOâ¹setInitiallyProvidedValue¦methodO²FunctionExpressionÍOâÍQ^ÀÂÂÂ‘LªIdentifierÍOãÍOé¦paramsM®BlockStatementÍOëÍQ^“V«IfStatementÍOöÍPeW°BinaryExpressionÍOúÍPY°MemberExpressionÍOúÍPLªIdentifierÍOúÍP ¦paramsLªIdentifierÍPÍP®knowledgeItemsÂÂ£!==LªIdentifierÍPÍP©undefinedM®BlockStatementÍPÍPe‘S³ExpressionStatementÍP.ÍPZX´AssignmentExpressionÍP.ÍPY¡=Y°MemberExpressionÍP.ÍPAU®ThisExpressionÍP.ÍP2LªIdentifierÍP3ÍPA®knowledgeItemsÂÂY°MemberExpressionÍPDÍPYLªIdentifierÍPDÍPJ¦paramsLªIdentifierÍPKÍPY®knowledgeItemsÂÂÀV«IfStatementÍPoÍPØW°BinaryExpressionÍPsÍP”Y°MemberExpressionÍPsÍP†LªIdentifierÍPsÍPy¦paramsLªIdentifierÍPzÍP†¬selectedItemÂÂ£!==LªIdentifierÍP‹ÍP”©undefinedM®BlockStatementÍP–ÍPØ‘S³ExpressionStatementÍP¥ÍPÍX´AssignmentExpressionÍP¥ÍPÌ¡=Y°MemberExpressionÍP¥ÍP¶U®ThisExpressionÍP¥ÍP©LªIdentifierÍPªÍP¶¬selectedItemÂÂY°MemberExpressionÍP¹ÍPÌLªIdentifierÍP¹ÍP¿¦paramsLªIdentifierÍPÀÍPÌ¬selectedItemÂÂÀV«IfStatementÍPâÍQWW°BinaryExpressionÍPæÍQY°MemberExpressionÍPæÍPıLªIdentifierÍPæÍPì¦paramsLªIdentifierÍPíÍPı°dialogControllerÂÂ£!==LªIdentifierÍQÍQ©undefinedM®BlockStatementÍQÍQW‘S³ExpressionStatementÍQÍQLX´AssignmentExpressionÍQÍQK¡=Y°MemberExpressionÍQÍQ1U®ThisExpressionÍQÍQ LªIdentifierÍQ!ÍQ1°dialogControllerÂÂY°MemberExpressionÍQ4ÍQKLªIdentifierÍQ4ÍQ:¦paramsLªIdentifierÍQ;ÍQK°dialogControllerÂÂÀN°MethodDefinitionÍQdÍQ„ÂÂLªIdentifierÍQdÍQs¯updateStateVars¦methodO²FunctionExpressionÍQsÍQ„ÀÂÂÂ‘LªIdentifierÍQtÍQz¦paramsM®BlockStatementÍQ|ÍQ„N°MethodDefinitionÍQŠÍR@ÂÂLªIdentifierÍQŠÍQ«Ù!purgeVariableDependenciesOnElmtId¦methodO²FunctionExpressionÍQ«ÍR@ÀÂÂÂ‘LªIdentifierÍQ¬ÍQ´¨rmElmtIdM®BlockStatementÍQ¶ÍR@’S³ExpressionStatementÍQÁÍQùT®CallExpressionÍQÁÍQøY°MemberExpressionÍQÁÍQîY°MemberExpressionÍQÁÍQÖU®ThisExpressionÍQÁÍQÅLªIdentifierÍQÆÍQÖ°__knowledgeItemsÂÂLªIdentifierÍQ×ÍQî·purgeDependencyOnElmtIdÂÂ‘LªIdentifierÍQïÍQ÷¨rmElmtIdÂS³ExpressionStatementÍRÍR9T®CallExpressionÍRÍR8Y°MemberExpressionÍRÍR.Y°MemberExpressionÍRÍRU®ThisExpressionÍRÍRLªIdentifierÍRÍR®__selectedItemÂÂLªIdentifierÍRÍR.·purgeDependencyOnElmtIdÂÂ‘LªIdentifierÍR/ÍR7¨rmElmtIdÂN°MethodDefinitionÍRFÍS%ÂÂLªIdentifierÍRFÍRV°aboutToBeDeleted¦methodO²FunctionExpressionÍRVÍS%ÀÂÂÂM®BlockStatementÍRYÍS%”S³ExpressionStatementÍRdÍRT®CallExpressionÍRdÍRŒY°MemberExpressionÍRdÍRŠY°MemberExpressionÍRdÍRyU®ThisExpressionÍRdÍRhLªIdentifierÍRiÍRy°__knowledgeItemsÂÂLªIdentifierÍRzÍRŠ°aboutToBeDeletedÂÂÂS³ExpressionStatementÍR—ÍR¾T®CallExpressionÍR—ÍR½Y°MemberExpressionÍR—ÍR»Y°MemberExpressionÍR—ÍRªU®ThisExpressionÍR—ÍR›LªIdentifierÍRœÍRª®__selectedItemÂÂLªIdentifierÍR«ÍR»°aboutToBeDeletedÂÂÂS³ExpressionStatementÍRÈÍRôT®CallExpressionÍRÈÍRóY°MemberExpressionÍRÈÍRæT®CallExpressionÍRÈÍRßY°MemberExpressionÍRÈÍRİLªIdentifierÍRÈÍRÙ±SubscriberManagerLªIdentifierÍRÚÍRİ£GetÂÂÂLªIdentifierÍRàÍRæ¦deleteÂÂ‘T®CallExpressionÍRçÍRòY°MemberExpressionÍRçÍRğU®ThisExpressionÍRçÍRëLªIdentifierÍRìÍRğ¤id__ÂÂÂÂS³ExpressionStatementÍRşÍST®CallExpressionÍRşÍSY°MemberExpressionÍRşÍSU®ThisExpressionÍRşÍSLªIdentifierÍSÍS¸aboutToBeDeletedInternalÂÂÂN°MethodDefinitionÍS+ÍSuÂÂLªIdentifierÍS/ÍS=®knowledgeItems£getO²FunctionExpressionÍS=ÍSuÀÂÂÂM®BlockStatementÍS@ÍSu‘`¯ReturnStatementÍSKÍSnT®CallExpressionÍSRÍSmY°MemberExpressionÍSRÍSkY°MemberExpressionÍSRÍSgU®ThisExpressionÍSRÍSVLªIdentifierÍSWÍSg°__knowledgeItemsÂÂLªIdentifierÍShÍSk£getÂÂÂN°MethodDefinitionÍS{ÍSÎÂÂLªIdentifierÍSÍS®knowledgeItems£setO²FunctionExpressionÍSÍSÎÀÂÂÂ‘LªIdentifierÍSÍS–¨newValueM®BlockStatementÍS˜ÍSÎ‘S³ExpressionStatementÍS£ÍSÇT®CallExpressionÍS£ÍSÆY°MemberExpressionÍS£ÍS¼Y°MemberExpressionÍS£ÍS¸U®ThisExpressionÍS£ÍS§LªIdentifierÍS¨ÍS¸°__knowledgeItemsÂÂLªIdentifierÍS¹ÍS¼£setÂÂ‘LªIdentifierÍS½ÍSÅ¨newValueÂN°MethodDefinitionÍSÔÍTÂÂLªIdentifierÍSØÍSä¬selectedItem£getO²FunctionExpressionÍSäÍTÀÂÂÂM®BlockStatementÍSçÍT‘`¯ReturnStatementÍSòÍTT®CallExpressionÍSùÍTY°MemberExpressionÍSùÍTY°MemberExpressionÍSùÍTU®ThisExpressionÍSùÍSıLªIdentifierÍSşÍT®__selectedItemÂÂLªIdentifierÍTÍT£getÂÂÂN°MethodDefinitionÍT ÍToÂÂLªIdentifierÍT$ÍT0¬selectedItem£setO²FunctionExpressionÍT0ÍToÀÂÂÂ‘LªIdentifierÍT1ÍT9¨newValueM®BlockStatementÍT;ÍTo‘S³ExpressionStatementÍTFÍThT®CallExpressionÍTFÍTgY°MemberExpressionÍTFÍT]Y°MemberExpressionÍTFÍTYU®ThisExpressionÍTFÍTJLªIdentifierÍTKÍTY®__selectedItemÂÂLªIdentifierÍTZÍT]£setÂÂ‘LªIdentifierÍT^ÍTf¨newValueÂN°MethodDefinitionÍTuÍW&ÂÂLªIdentifierÍTuÍT‚­aboutToAppear¦methodO²FunctionExpressionÍT‚ÍW&ÀÂÂÂM®BlockStatementÍT…ÍW&™S³ExpressionStatementÍTÀÍTğT®CallExpressionÍTÀÍTïY°MemberExpressionÍTÀÍTÓLªIdentifierÍTÀÍTÆ¦lvTextLªIdentifierÍTÇÍTÓ¬setTextColorÂÂ‘R§LiteralÍTÔÍTî¸rgba(255, 255, 255, 0.9)º'rgba(255, 255, 255, 0.9)'ÂS³ExpressionStatementÍUÍU&T®CallExpressionÍUÍU%Y°MemberExpressionÍUÍULªIdentifierÍUÍU¦lvTextLªIdentifierÍUÍU±setTextLineHeightÂÂ‘R§LiteralÍU ÍU$¢24¤'24'ÂS³ExpressionStatementÍUQÍUwT®CallExpressionÍUQÍUvY°MemberExpressionÍUQÍUkLªIdentifierÍUQÍUX§lvTitleLªIdentifierÍUYÍUk²setLevelTitleColorÂÂ‘R§LiteralÍUlÍUu§#ffffff©'#ffffff'ÂS³ExpressionStatementÍU¦ÍUÅT®CallExpressionÍU¦ÍUÄY°MemberExpressionÍU¦ÍU¹LªIdentifierÍU¦ÍU¬¦lvLinkLªIdentifierÍU­ÍU¹¬setTextColorÂÂ‘R§LiteralÍUºÍUÃ§#5cdbd3©'#5cdbd3'ÂS³ExpressionStatementÍUİÍUûT®CallExpressionÍUİÍUúY°MemberExpressionÍUİÍUôLªIdentifierÍUİÍUã¦lvLinkLªIdentifierÍUäÍUô°setTextUnderlineÂÂ‘R§LiteralÍUõÍUùÃ¤trueÂS³ExpressionStatementÍV-ÍVET®CallExpressionÍV-ÍVDY°MemberExpressionÍV-ÍV<LªIdentifierÍV-ÍV3¦lvCodeLªIdentifierÍV4ÍV<¨setThemeÂÂ‘R§LiteralÍV=ÍVC¤dark¦"dark"ÂS³ExpressionStatementÍV_ÍVzT®CallExpressionÍV_ÍVyY°MemberExpressionÍV_ÍVsLªIdentifierÍV_ÍVe¦lvCodeLªIdentifierÍVfÍVs­setIndexStateÂÂ‘R§LiteralÍVtÍVxÃ¤trueÂS³ExpressionStatementÍV£ÍVÚT®CallExpressionÍV£ÍVÙY°MemberExpressionÍV£ÍV½LªIdentifierÍV£ÍVª§lvQuoteLªIdentifierÍV«ÍV½²setBackgroundColorÂÂ‘R§LiteralÍV¾ÍVØ¸rgba(255, 255, 255, 0.1)º'rgba(255, 255, 255, 0.1)'ÂS³ExpressionStatementÍVñÍWT®CallExpressionÍVñÍWY°MemberExpressionÍVñÍWLªIdentifierÍVñÍVø§lvQuoteLªIdentifierÍVùÍW®setBorderColorÂÂ‘R§LiteralÍWÍW§#69c0ff©'#69c0ff'ÂN°MethodDefinitionÍW,ÍeâÂÂLªIdentifierÍW,ÍW9­initialRender¦methodO²FunctionExpressionÍW9ÍeâÀÂÂÂM®BlockStatementÍW<Íeâ˜S³ExpressionStatementÍWGÍXíT®CallExpressionÍWGÍXìY°MemberExpressionÍWGÍWeU®ThisExpressionÍWGÍWKLªIdentifierÍWLÍWe¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍWfÍXãÀÂÂÂ’LªIdentifierÍWgÍWm¦elmtIdLªIdentifierÍWoÍW~¯isInitialRenderM®BlockStatementÍWƒÍXã˜S³ExpressionStatementÍW’ÍW¢T®CallExpressionÍW’ÍW¡Y°MemberExpressionÍW’ÍWŸLªIdentifierÍW’ÍW˜¦ScrollLªIdentifierÍW™ÍWŸ¦createÂÂÂS³ExpressionStatementÍW°ÍWÅT®CallExpressionÍW°ÍWÄY°MemberExpressionÍW°ÍW¼LªIdentifierÍW°ÍW¶¦ScrollLªIdentifierÍW·ÍW¼¥widthÂÂ‘R§LiteralÍW½ÍWÃ¤100%¦'100%'ÂS³ExpressionStatementÍWÓÍWéT®CallExpressionÍWÓÍWèY°MemberExpressionÍWÓÍWàLªIdentifierÍWÓÍWÙ¦ScrollLªIdentifierÍWÚÍWà¦heightÂÂ‘R§LiteralÍWáÍWç¤100%¦'100%'ÂS³ExpressionStatementÍW÷ÍX#T®CallExpressionÍW÷ÍX"Y°MemberExpressionÍW÷ÍXLªIdentifierÍW÷ÍWı¦ScrollLªIdentifierÍWşÍXªscrollableÂÂ‘Y°MemberExpressionÍX	ÍX!LªIdentifierÍX	ÍX¯ScrollDirectionLªIdentifierÍXÍX!¨VerticalÂÂÂS³ExpressionStatementÍX1ÍXOT®CallExpressionÍX1ÍXNY°MemberExpressionÍX1ÍXALªIdentifierÍX1ÍX7¦ScrollLªIdentifierÍX8ÍXA©scrollBarÂÂ‘Y°MemberExpressionÍXBÍXMLªIdentifierÍXBÍXJ¨BarStateLªIdentifierÍXKÍXM¢OnÂÂÂS³ExpressionStatementÍX]ÍX~T®CallExpressionÍX]ÍX}Y°MemberExpressionÍX]ÍXrLªIdentifierÍX]ÍXc¦ScrollLªIdentifierÍXdÍXr®scrollBarColorÂÂ‘R§LiteralÍXsÍX|§#888888©'#888888'ÂS³ExpressionStatementÍXŒÍX¥T®CallExpressionÍXŒÍX¤Y°MemberExpressionÍXŒÍX¡LªIdentifierÍXŒÍX’¦ScrollLªIdentifierÍX“ÍX¡®scrollBarWidthÂÂ‘R§LiteralÍX¢ÍX£¡8ÂS³ExpressionStatementÍX³ÍXØT®CallExpressionÍX³ÍX×Y°MemberExpressionÍX³ÍXÄLªIdentifierÍX³ÍX¹¦ScrollLªIdentifierÍXºÍXÄªedgeEffectÂÂ‘Y°MemberExpressionÍXÅÍXÖLªIdentifierÍXÅÍXÏªEdgeEffectLªIdentifierÍXĞÍXÖ¦SpringÂÂÂLªIdentifierÍXåÍXë¦ScrollÂS³ExpressionStatementÍX÷ÍY«T®CallExpressionÍX÷ÍYªY°MemberExpressionÍX÷ÍYU®ThisExpressionÍX÷ÍXûLªIdentifierÍXüÍY¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍYÍY¡ÀÂÂÂ’LªIdentifierÍYÍY¦elmtIdLªIdentifierÍYÍY.¯isInitialRenderM®BlockStatementÍY3ÍY¡“S³ExpressionStatementÍYBÍYRT®CallExpressionÍYBÍYQY°MemberExpressionÍYBÍYOLªIdentifierÍYBÍYH¦ColumnLªIdentifierÍYIÍYO¦createÂÂÂS³ExpressionStatementÍY`ÍYsT®CallExpressionÍY`ÍYrY°MemberExpressionÍY`ÍYnLªIdentifierÍY`ÍYf¦ColumnLªIdentifierÍYgÍYn§paddingÂÂ‘R§LiteralÍYoÍYq¢24ÂS³ExpressionStatementÍYÍY–T®CallExpressionÍYÍY•Y°MemberExpressionÍYÍYLªIdentifierÍYÍY‡¦ColumnLªIdentifierÍYˆÍY¥widthÂÂ‘R§LiteralÍYÍY”¤100%¦'100%'ÂLªIdentifierÍY£ÍY©¦ColumnÂS³ExpressionStatementÍYµÍZµT®CallExpressionÍYµÍZ´Y°MemberExpressionÍYµÍYÓU®ThisExpressionÍYµÍY¹LªIdentifierÍYºÍYÓ¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍYÔÍZ­ÀÂÂÂ’LªIdentifierÍYÕÍYÛ¦elmtIdLªIdentifierÍYİÍYì¯isInitialRenderM®BlockStatementÍYñÍZ­•S³ExpressionStatementÍZ ÍZT®CallExpressionÍZ ÍZY°MemberExpressionÍZ ÍZLªIdentifierÍZ ÍZ¤GridLªIdentifierÍZÍZ¦createÂÂÂS³ExpressionStatementÍZÍZ@T®CallExpressionÍZÍZ?Y°MemberExpressionÍZÍZ0LªIdentifierÍZÍZ ¤GridLªIdentifierÍZ!ÍZ0¯columnsTemplateÂÂ‘R§LiteralÍZ1ÍZ>«1fr 1fr 1fr­'1fr 1fr 1fr'ÂS³ExpressionStatementÍZNÍZbT®CallExpressionÍZNÍZaY°MemberExpressionÍZNÍZ]LªIdentifierÍZNÍZR¤GridLªIdentifierÍZSÍZ]ªcolumnsGapÂÂ‘R§LiteralÍZ^ÍZ`¢20ÂS³ExpressionStatementÍZpÍZT®CallExpressionÍZpÍZ€Y°MemberExpressionÍZpÍZ|LªIdentifierÍZpÍZt¤GridLªIdentifierÍZuÍZ|§rowsGapÂÂ‘R§LiteralÍZ}ÍZ¢20ÂS³ExpressionStatementÍZÍZ¢T®CallExpressionÍZÍZ¡Y°MemberExpressionÍZÍZ™LªIdentifierÍZÍZ“¤GridLªIdentifierÍZ”ÍZ™¥widthÂÂ‘R§LiteralÍZšÍZ ¤100%¦'100%'ÂLªIdentifierÍZ¯ÍZ³¤GridÂS³ExpressionStatementÍZ¿Íe€T®CallExpressionÍZ¿ÍeY°MemberExpressionÍZ¿ÍZİU®ThisExpressionÍZ¿ÍZÃLªIdentifierÍZÄÍZİ¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍZŞÍeuÀÂÂÂ’LªIdentifierÍZßÍZå¦elmtIdLªIdentifierÍZçÍZö¯isInitialRenderM®BlockStatementÍZûÍeu“S³ExpressionStatementÍ[
+Í[T®CallExpressionÍ[
+Í[Y°MemberExpressionÍ[
+Í[LªIdentifierÍ[
+Í[§ForEachLªIdentifierÍ[Í[¦createÂÂÂ^³VariableDeclarationÍ[)Ídà‘_²VariableDeclaratorÍ[/ÍdßLªIdentifierÍ[/Í[E¶forEachItemGenFunctionO·ArrowFunctionExpressionÍ[HÍdßÀÂÂÂ‘LªIdentifierÍ[HÍ[M¥_itemM®BlockStatementÍ[QÍdß’^³VariableDeclarationÍ[dÍ[w‘_²VariableDeclaratorÍ[jÍ[vLªIdentifierÍ[jÍ[n¤itemLªIdentifierÍ[qÍ[v¥_item¥constM®BlockStatementÍ[‰ÍdĞ“^³VariableDeclarationÍ[ Í\(‘_²VariableDeclaratorÍ[¦Í\'LªIdentifierÍ[¦Í[³­itemCreation2O·ArrowFunctionExpressionÍ[¶Í\'ÀÂÂÂ’LªIdentifierÍ[·Í[½¦elmtIdLªIdentifierÍ[¿Í[Î¯isInitialRenderM®BlockStatementÍ[ÓÍ\'‘S³ExpressionStatementÍ[îÍ\T®CallExpressionÍ[îÍ\Y°MemberExpressionÍ[îÍ[ıLªIdentifierÍ[îÍ[ö¨GridItemLªIdentifierÍ[÷Í[ı¦createÂÂ’O·ArrowFunctionExpressionÍ[şÍ\ÀÂÂÂM®BlockStatementÍ\Í\R§LiteralÍ\	Í\Â¥falseÂ¥const^³VariableDeclarationÍ\>Íd’‘_²VariableDeclaratorÍ\DÍd‘LªIdentifierÍ\DÍ\V²observedDeepRenderO·ArrowFunctionExpressionÍ\YÍd‘ÀÂÂÂM®BlockStatementÍ\_Íd‘“S³ExpressionStatementÍ\zÍ\²T®CallExpressionÍ\zÍ\±Y°MemberExpressionÍ\zÍ\˜U®ThisExpressionÍ\zÍ\~LªIdentifierÍ\Í\˜¹observeComponentCreation2ÂÂ’LªIdentifierÍ\™Í\¦­itemCreation2LªIdentifierÍ\¨Í\°¨GridItemÂM®BlockStatementÍ\ÌÍdQ‘S³ExpressionStatementÍ\ëÍd6T®CallExpressionÍ\ëÍd5Y°MemberExpressionÍ\ëÍ]	U®ThisExpressionÍ\ëÍ\ïLªIdentifierÍ\ğÍ]	¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍ]
+ÍdÀÂÂÂ’LªIdentifierÍ]Í]¦elmtIdLªIdentifierÍ]Í]"¯isInitialRenderM®BlockStatementÍ]'Íd‘V«IfStatementÍ]JÍcúLªIdentifierÍ]NÍ]]¯isInitialRenderM®BlockStatementÍ]_Íbÿ”^³VariableDeclarationÍ]†Í_Õ‘_²VariableDeclaratorÍ]ŠÍ_ÔLªIdentifierÍ]ŠÍ]—­componentCallZ­NewExpressionÍ]šÍ_ÔLªIdentifierÍ]Í]«­KnowledgeCard–U®ThisExpressionÍ]¬Í]°\°ObjectExpressionÍ]²Í_l’]¨PropertyÍ]İÍ]çÂÂÂLªIdentifierÍ]İÍ]á¤infoLªIdentifierÍ]ãÍ]ç¤item¤init]¨PropertyÍ^Í_EÂÂÂLªIdentifierÍ^Í^«onCardClickO·ArrowFunctionExpressionÍ^Í_EÀÂÂÂ‘LªIdentifierÍ^ Í^+«clickedInfoM®BlockStatementÍ^0Í_E’S³ExpressionStatementÍ^¯Í^ÏX´AssignmentExpressionÍ^¯Í^Î¡=Y°MemberExpressionÍ^¯Í^ÀU®ThisExpressionÍ^¯Í^³LªIdentifierÍ^´Í^À¬selectedItemÂÂLªIdentifierÍ^ÃÍ^Î«clickedInfoS³ExpressionStatementÍ^ıÍ_T®CallExpressionÍ^ıÍ_Y°MemberExpressionÍ^ıÍ_Y°MemberExpressionÍ^ıÍ_U®ThisExpressionÍ^ıÍ_LªIdentifierÍ_Í_°dialogControllerÂÂLªIdentifierÍ_Í_¤openÂÂÂ¤initLªIdentifierÍ_nÍ_w©undefinedLªIdentifierÍ_yÍ_¦elmtIdO·ArrowFunctionExpressionÍ_Í_ŠÀÂÂÂM®BlockStatementÍ_‡Í_Š\°ObjectExpressionÍ_ŒÍ_Ó“]¨PropertyÍ_Í_½ÂÂÂLªIdentifierÍ_Í_’¤pageR§LiteralÍ_”Í_½Ù'entry/src/main/ets/view/DataStatics.etsÙ)"entry/src/main/ets/view/DataStatics.ets"¤init]¨PropertyÍ_¿Í_ÈÂÂÂLªIdentifierÍ_¿Í_Ã¤lineR§LiteralÍ_ÅÍ_ÈÍ!£289¤init]¨PropertyÍ_ÊÍ_ÑÂÂÂLªIdentifierÍ_ÊÍ_Í£colR§LiteralÍ_ÏÍ_Ñ¢17¤init£letS³ExpressionStatementÍ_ûÍ`T®CallExpressionÍ_ûÍ`Y°MemberExpressionÍ_ûÍ`LªIdentifierÍ_ûÍ`¦ViewPULªIdentifierÍ`Í`¦createÂÂ‘LªIdentifierÍ`	Í`­componentCallÂ^³VariableDeclarationÍ`>Íbˆ‘_²VariableDeclaratorÍ`BÍb‡LªIdentifierÍ`BÍ`N¬paramsLambdaO·ArrowFunctionExpressionÍ`QÍb‡ÀÂÂÂM®BlockStatementÍ`WÍb‡‘`¯ReturnStatementÍ`‚Íb`\°ObjectExpressionÍ`‰Íb_’]¨PropertyÍ`¸Í`ÂÂÂÂLªIdentifierÍ`¸Í`¼¤infoLªIdentifierÍ`¾Í`Â¤item¤init]¨PropertyÍ`ñÍb4ÂÂÂLªIdentifierÍ`ñÍ`ü«onCardClickO·ArrowFunctionExpressionÍ`şÍb4ÀÂÂÂ‘LªIdentifierÍ`ÿÍa
+«clickedInfoM®BlockStatementÍaÍb4’S³ExpressionStatementÍa–Ía¶X´AssignmentExpressionÍa–Íaµ¡=Y°MemberExpressionÍa–Ía§U®ThisExpressionÍa–ÍašLªIdentifierÍa›Ía§¬selectedItemÂÂLªIdentifierÍaªÍaµ«clickedInfoS³ExpressionStatementÍaèÍbT®CallExpressionÍaèÍbY°MemberExpressionÍaèÍbY°MemberExpressionÍaèÍaıU®ThisExpressionÍaèÍaìLªIdentifierÍaíÍaı°dialogControllerÂÂLªIdentifierÍaşÍb¤openÂÂÂ¤init£letS³ExpressionStatementÍb®ÍbÜX´AssignmentExpressionÍb®ÍbÛ¡=Y°MemberExpressionÍb®ÍbÌLªIdentifierÍb®Íb»­componentCallLªIdentifierÍb¼ÍbÌ°paramsGenerator_ÂÂLªIdentifierÍbÏÍbÛ¬paramsLambdaM®BlockStatementÍc&Ícú‘S³ExpressionStatementÍcMÍc×T®CallExpressionÍcMÍcÖY°MemberExpressionÍcMÍcpU®ThisExpressionÍcMÍcQLªIdentifierÍcRÍcp¾updateStateVarsOfChildByElmtIdÂÂ’LªIdentifierÍcqÍcw¦elmtId\°ObjectExpressionÍcyÍcÕ‘]¨PropertyÍc¤Íc®ÂÂÂLªIdentifierÍc¤Íc¨¤infoLªIdentifierÍcªÍc®¤item¤initÂ\°ObjectExpressionÍdÍd4‘]¨PropertyÍdÍd2ÂÂÂLªIdentifierÍdÍd!¤nameR§LiteralÍd#Íd2­KnowledgeCard¯"KnowledgeCard"¤initÂS³ExpressionStatementÍdkÍdzT®CallExpressionÍdkÍdyY°MemberExpressionÍdkÍdwLªIdentifierÍdkÍds¨GridItemLªIdentifierÍdtÍdw£popÂÂÂ¥constS³ExpressionStatementÍd¨Íd½T®CallExpressionÍd¨Íd¼LªIdentifierÍd¨Ídº²observedDeepRenderÂ¥constS³ExpressionStatementÍdîÍejT®CallExpressionÍdîÍeiY°MemberExpressionÍdîÍeU®ThisExpressionÍdîÍdòLªIdentifierÍdóÍeµforEachUpdateFunctionÂÂ–LªIdentifierÍe	Íe¦elmtIdY°MemberExpressionÍeÍe$U®ThisExpressionÍeÍeLªIdentifierÍeÍe$®knowledgeItemsÂÂLªIdentifierÍe&Íe<¶forEachItemGenFunctionO·ArrowFunctionExpressionÍe>ÍeZÀÃÂÂ‘LªIdentifierÍe?ÍeC¤itemT®CallExpressionÍeHÍeZY°MemberExpressionÍeHÍeXY°MemberExpressionÍeHÍeOLªIdentifierÍeHÍeL¤itemLªIdentifierÍeMÍeO¢idÂÂLªIdentifierÍePÍeX¨toStringÂÂÂR§LiteralÍe\ÍeaÂ¥falseR§LiteralÍecÍehÂ¥falseÂLªIdentifierÍewÍe~§ForEachÂS³ExpressionStatementÍeŠÍe˜T®CallExpressionÍeŠÍe—Y°MemberExpressionÍeŠÍe•LªIdentifierÍeŠÍe‘§ForEachLªIdentifierÍe’Íe•£popÂÂÂS³ExpressionStatementÍe¢Íe­T®CallExpressionÍe¢Íe¬Y°MemberExpressionÍe¢ÍeªLªIdentifierÍe¢Íe¦¤GridLªIdentifierÍe§Íeª£popÂÂÂS³ExpressionStatementÍe·ÍeÄT®CallExpressionÍe·ÍeÃY°MemberExpressionÍe·ÍeÁLªIdentifierÍe·Íe½¦ColumnLªIdentifierÍe¾ÍeÁ£popÂÂÂS³ExpressionStatementÍeÎÍeÛT®CallExpressionÍeÎÍeÚY°MemberExpressionÍeÎÍeØLªIdentifierÍeÎÍeÔ¦ScrollLªIdentifierÍeÕÍeØ£popÂÂÂN°MethodDefinitionÍeèÍf ÂÂLªIdentifierÍeèÍeğ¨rerender¦methodO²FunctionExpressionÍeğÍf ÀÂÂÂM®BlockStatementÍeóÍf ‘S³ExpressionStatementÍeşÍfT®CallExpressionÍeşÍfY°MemberExpressionÍeşÍfU®ThisExpressionÍeşÍfLªIdentifierÍfÍf³updateDirtyElementsÂÂÂÀ‘Ôra•¤type¥start£endªspecifiers¦source±ImportDeclarationÌ€ÌŞ–Ôrb•¤type¥start£end¨imported¥local¯ImportSpecifierÌ‰Ì•LªIdentifierÌ‰Ì•¬LvMarkdownInLªIdentifierÌ‰Ì•¬LvMarkdownInb¯ImportSpecifierÌ—ÌLªIdentifierÌ—Ì¦lvTextLªIdentifierÌ—Ì¦lvTextb¯ImportSpecifierÌŸÌ¦LªIdentifierÌŸÌ¦§lvTitleLªIdentifierÌŸÌ¦§lvTitleb¯ImportSpecifierÌ¨Ì®LªIdentifierÌ¨Ì®¦lvLinkLªIdentifierÌ¨Ì®¦lvLinkb¯ImportSpecifierÌ°Ì¶LªIdentifierÌ°Ì¶¦lvCodeLªIdentifierÌ°Ì¶¦lvCodeb¯ImportSpecifierÌ¸Ì¿LªIdentifierÌ¸Ì¿§lvQuoteLªIdentifierÌ¸Ì¿§lvQuoteR§LiteralÌÇÌİ´@luvi/lv-markdown-in¶'@luvi/lv-markdown-in'

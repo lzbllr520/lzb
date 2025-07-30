@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>ROS 实时综合视图</title>
+<style>
+    /* 您的美化样式可以保持不变 */
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background-color: #f0f2f5;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    h1 {
+        color: #1e3a5f;
+    }
+    .canvas-container {
+        background-color: #ffffff;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        padding: 15px;
+    }
+    #viewer-canvas { /* 注意ID的统一 */
+        background-color: #777; /* 使用RViz风格的背景色 */
+    }
+    h2 {
+        margin-top: 0;
+    }
+    #status-panel {
+        width: 870px; /* 匹配Canvas宽度 */
+        background-color: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+    }
+    #status-panel p { margin: 5px 0; font-size: 14px; }
+    #connection-status { font-weight: bold; }
+    .status-connected { color: #28a745; }
+    .status-disconnected { color: #dc3545; }
+</style>
+
+<script src="./eventemitter2.min.js"></script>
+<script src="./easeljs.min.js"></script>
+<script src="./roslib.min.js"></script>
+<script src="./ros2d.js"></script> </head>
+<body onload="init()">
+
+    <h1>ROS 实时综合视图</h1>
+
+    <div id="status-panel">
+        <p><b>连接状态:</b> <span id="connection-status" class="status-disconnected">未连接</span></p>
+        <p><b>里程计 (/odom):</b> <span id="odom-data">等待数据...</span></p>
+        <p><b>激光雷达 (/scan):</b> <span id="scan-data">等待数据...</span></p>
+    </div>
+
+    <div class="canvas-container">
+        <h2>综合视图 (地图, 位置, 激光雷达)</h2>
+        <div id="viewer-canvas"></div> </div>
+
+<script>
+    function init() {
+        // --- 1. ROS 连接设置 ---
+        const ros = new ROSLIB.Ros({
+            url: 'ws://192.168.2.19:9090'
+        });
+
+        // --- DOM 元素获取 ---
+        const connectionStatusEl = document.getElementById('connection-status');
+        const odomDataEl = document.getElementById('odom-data');
+        const scanDataEl = document.getElementById('scan-data');
+        
+        ros.on('connection', () => {
+            console.log('✅ 已连接到 WebSocket 服务器。');
+            connectionStatusEl.textContent = '已连接';
+            connectionStatusEl.className = 'status-connected';
+        });
+        ros.on('error', (error) => {
+            console.error('❌ 连接 WebSocket 服务器出错: ', error);
+        });
+        ros.on('close', () => {
+            console.log('🔌 已断开与 WebSocket 服务器的连接。');
+            connectionStatusEl.textContent = '已断开';
+            connectionStatusEl.className = 'status-disconnected';
+        });
+
+        // --- 2. 创建 Viewer ---
+        const viewer = new ROS2D.Viewer({
+            divID: 'viewer-canvas',
+            width: 870,
+            height: 800
+        });
+
+        // --- 3. 设置地图客户端 ---
+        const gridClient = new ROS2D.OccupancyGridClient({
+            ros: ros,
+            rootObject: viewer.scene,
+            continuous: true 
+        });
+
+        gridClient.on('change', () => {
+            viewer.scaleToDimensions(gridClient.currentGrid.width, gridClient.currentGrid.height);
+            viewer.shift(gridClient.currentGrid.pose.position.x, gridClient.currentGrid.pose.position.y);
+        });
+
+        // =======================================================
+        // ========== 4. 整合您的机器人和小车绘制逻辑 ==========
+        // =======================================================
+
+        // 创建一个 createjs.Shape 对象来绘制机器人
+        const robotMarker = new createjs.Shape();
+        viewer.scene.addChild(robotMarker);
+
+        // 创建一个 createjs.Shape 对象来绘制激光点
+        const laserScanMarker = new createjs.Shape();
+        viewer.scene.addChild(laserScanMarker);
+
+        // 订阅 /odom 话题
+        const odomListener = new ROSLIB.Topic({
+            ros: ros,
+            name: '/odom',
+            messageType: 'nav_msgs/Odometry'
+        });
+
+        odomListener.subscribe((message) => {
+            const pose = message.pose.pose;
+            const x = pose.position.x;
+            const y = -pose.position.y; // Y轴反转
+            
+            // 计算朝向
+            const q = pose.orientation;
+            const yaw = -Math.atan2(2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y * q.y + q.z * q.z));
+            const rotation = yaw * 180 / Math.PI; // 转换为角度
+
+            // 更新机器人位置和朝向
+            robotMarker.x = x;
+            robotMarker.y = y;
+            robotMarker.rotation = rotation;
+            
+            // 使用EaselJS的Graphics API重绘机器人形状 (蓝色圆圈+白色箭头)
+            robotMarker.graphics.clear()
+                .beginFill('rgba(0, 80, 200, 0.9)').drawCircle(0, 0, 0.125) // 绘制机器人主体
+                .beginStroke('white').setStrokeStyle(0.05)
+                .moveTo(0, 0).lineTo(0.25, 0).endStroke(); // 绘制朝向箭头
+            
+            // 更新状态面板
+            odomDataEl.textContent = `X: ${x.toFixed(2)}m, Y: ${(-y).toFixed(2)}m, θ: ${(rotation).toFixed(1)}°`;
+        });
+        
+        // 订阅 /scan 话题
+        const scanListener = new ROSLIB.Topic({
+            ros: ros,
+            name: '/scan',
+            messageType: 'sensor_msgs/LaserScan'
+        });
+
+        scanListener.subscribe((message) => {
+            // 首先，清除旧的激光点
+            laserScanMarker.graphics.clear();
+            
+            // 开始绘制新的点
+            laserScanMarker.graphics.beginFill('rgba(255, 20, 20, 0.7)');
+
+            const { ranges, angle_min, angle_increment } = message;
+            
+            for (let i = 0; i < ranges.length; i++) {
+                const range = ranges[i];
+                if (range > message.range_min && range < message.range_max) {
+                    const angle = angle_min + i * angle_increment;
+                    const pointX = range * Math.cos(angle);
+                    const pointY = -range * Math.sin(angle); // Y轴反转
+                    laserScanMarker.graphics.drawCircle(pointX, pointY, 0.05);
+                }
+            }
+            laserScanMarker.graphics.endFill();
+
+            // 将激光点的位置和朝向与机器人同步
+            laserScanMarker.x = robotMarker.x;
+            laserScanMarker.y = robotMarker.y;
+            laserScanMarker.rotation = robotMarker.rotation;
+
+            // 更新状态面板
+            scanDataEl.textContent = `接收到 ${ranges.length} 个点`;
+        });
+    }
+</script>
+
+</body>
+</html>

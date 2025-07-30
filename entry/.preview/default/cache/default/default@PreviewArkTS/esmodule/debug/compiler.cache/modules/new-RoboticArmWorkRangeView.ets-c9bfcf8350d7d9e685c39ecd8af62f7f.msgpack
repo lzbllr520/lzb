@@ -1,0 +1,688 @@
+Ôr@Ÿªassertions¤code´customTransformCache¬dependencies¢id¤meta±moduleSideEffects¬originalCode±originalSourcemap«resolvedIds®sourcemapChainµsyntheticNamedExportsµtransformDependencies®transformFiles¨cacheAstÔrAÚ3ƒif (!("finalizeConstruction" in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+}
+export class RoboticArmWorkRangeView extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.context = new CanvasRenderingContext2D();
+        this.centerX = 450;
+        this.centerY = 300;
+        this.radius = 180;
+        this.__currentPos = new ObservedPropertyObjectPU({ x: 0, y: 0 }, this, "currentPos");
+        this.__targetPos = new ObservedPropertyObjectPU({ x: 0, y: 0 }, this, "targetPos");
+        this.__displayCurrentPos = new ObservedPropertyObjectPU({ x: 0, y: 0 }, this, "displayCurrentPos");
+        this.__displayTargetPos = new ObservedPropertyObjectPU({ x: 0, y: 0 }, this, "displayTargetPos");
+        this.setInitiallyProvidedValue(params);
+        this.declareWatch("displayCurrentPos", this.redraw);
+        this.declareWatch("displayTargetPos", this.redraw);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params) {
+        if (params.context !== undefined) {
+            this.context = params.context;
+        }
+        if (params.centerX !== undefined) {
+            this.centerX = params.centerX;
+        }
+        if (params.centerY !== undefined) {
+            this.centerY = params.centerY;
+        }
+        if (params.radius !== undefined) {
+            this.radius = params.radius;
+        }
+        if (params.currentPos !== undefined) {
+            this.currentPos = params.currentPos;
+        }
+        if (params.targetPos !== undefined) {
+            this.targetPos = params.targetPos;
+        }
+        if (params.displayCurrentPos !== undefined) {
+            this.displayCurrentPos = params.displayCurrentPos;
+        }
+        if (params.displayTargetPos !== undefined) {
+            this.displayTargetPos = params.displayTargetPos;
+        }
+    }
+    updateStateVars(params) {
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__currentPos.purgeDependencyOnElmtId(rmElmtId);
+        this.__targetPos.purgeDependencyOnElmtId(rmElmtId);
+        this.__displayCurrentPos.purgeDependencyOnElmtId(rmElmtId);
+        this.__displayTargetPos.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.__currentPos.aboutToBeDeleted();
+        this.__targetPos.aboutToBeDeleted();
+        this.__displayCurrentPos.aboutToBeDeleted();
+        this.__displayTargetPos.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    get currentPos() {
+        return this.__currentPos.get();
+    }
+    set currentPos(newValue) {
+        this.__currentPos.set(newValue);
+    }
+    get targetPos() {
+        return this.__targetPos.get();
+    }
+    set targetPos(newValue) {
+        this.__targetPos.set(newValue);
+    }
+    get displayCurrentPos() {
+        return this.__displayCurrentPos.get();
+    }
+    set displayCurrentPos(newValue) {
+        this.__displayCurrentPos.set(newValue);
+    }
+    get displayTargetPos() {
+        return this.__displayTargetPos.get();
+    }
+    set displayTargetPos(newValue) {
+        this.__displayTargetPos.set(newValue);
+    }
+    //å°†é€»è¾‘åæ ‡ (ä¸­å¿ƒä¸º0,0) è½¬æ¢ä¸ºç”»å¸ƒåæ ‡
+    logicalToCanvas(logicalCoords) {
+        return {
+            x: this.centerX + logicalCoords.y,
+            y: this.centerY - logicalCoords.x
+        };
+    }
+    //ä¸»ç»˜åˆ¶å‡½æ•°ï¼Œå®ƒä¼šè°ƒç”¨æ‰€æœ‰å­ç»˜åˆ¶å‡½æ•°
+    redraw() {
+        if (!this.context) {
+            return;
+        }
+        this.context.clearRect(0, 0, this.centerX * 2, this.centerY * 2);
+        this.drawBase();
+        this.drawTicksAndLabels();
+        this.drawConcentricArcs();
+        this.drawInteractivePoints();
+    }
+    // å›¾å½¢ç»˜åˆ¶å‡½æ•°
+    drawBase() {
+        //å®šä¹‰æ ‡ç­¾åæ ‡ç³»ä¸­çš„å·¦å³è¾¹ç•Œè§’åº¦
+        const leftBoundaryAngle_label = -15; // å·¦è¾¹ç•Œæ˜¯ -15 åº¦
+        const rightBoundaryAngle_label = 195; // å³è¾¹ç•Œæ˜¯ 195 åº¦
+        //å°†æ ‡ç­¾è§’åº¦è½¬æ¢ä¸º Canvas arc å‡½æ•°æ‰€éœ€çš„è§’åº¦
+        // è½¬æ¢å…¬å¼: canvas_angle = label_angle + 180
+        const startAngleRad_canvas = (leftBoundaryAngle_label + 180) * Math.PI / 180; // 165åº¦
+        const endAngleRad_canvas = (rightBoundaryAngle_label + 180) * Math.PI / 180; // 375åº¦
+        //ä¸»è¦è½®å»“çº¿ç»˜åˆ¶
+        this.context.beginPath();
+        this.context.lineWidth = 1.5;
+        this.context.strokeStyle = '#E9ECEF';
+        //ä½¿ç”¨è½¬æ¢åçš„ Canvas è§’åº¦å’Œæ­£ç¡®çš„æ–¹å‘ (true/é€†æ—¶é’ˆ) æ¥ç»˜åˆ¶ä¸»å¼§çº¿
+        // ä» 165Â° é€†æ—¶é’ˆç”»åˆ° 375Â°(ç›¸å½“äº15Â°), æ­£å¥½æ˜¯ä¸Šæ–¹çš„å¼§
+        this.context.arc(this.centerX, this.centerY, this.radius, startAngleRad_canvas, endAngleRad_canvas, false);
+        //ç»˜åˆ¶å¾„å‘çº¿æ—¶ï¼Œå¿…é¡»ä½¿ç”¨åŸå§‹çš„æ ‡ç­¾è§’åº¦
+        const leftBoundaryRad_label = leftBoundaryAngle_label * Math.PI / 180;
+        const rightBoundaryRad_label = rightBoundaryAngle_label * Math.PI / 180;
+        this.context.moveTo(this.centerX, this.centerY);
+        this.context.lineTo(this.centerX - this.radius * Math.cos(leftBoundaryRad_label), this.centerY - this.radius * Math.sin(leftBoundaryRad_label));
+        this.context.moveTo(this.centerX, this.centerY);
+        this.context.lineTo(this.centerX - this.radius * Math.cos(rightBoundaryRad_label), this.centerY - this.radius * Math.sin(rightBoundaryRad_label));
+        this.context.stroke();
+        //ä¸­å¿ƒç‚¹ç»˜åˆ¶
+        this.context.beginPath();
+        this.context.fillStyle = '#C92A2A';
+        this.context.arc(this.centerX, this.centerY, 4, 0, 2 * Math.PI);
+        this.context.fill();
+    }
+    drawTicksAndLabels() {
+        const labelRadius = this.radius + 18;
+        this.context.beginPath();
+        this.context.lineWidth = 0.75;
+        //è¾…åŠ©è™šçº¿é¢œè‰²
+        this.context.strokeStyle = '#495057';
+        this.context.setLineDash([3, 5]);
+        for (let angle = -10; angle <= 190; angle += 10) {
+            const angleRad = angle * Math.PI / 180;
+            this.context.moveTo(this.centerX, this.centerY);
+            this.context.lineTo(this.centerX - this.radius * Math.cos(angleRad), this.centerY - this.radius * Math.sin(angleRad));
+        }
+        this.context.stroke();
+        this.context.setLineDash([]);
+        for (let angle = -15; angle <= 195; angle++) {
+            const angleRad = angle * Math.PI / 180;
+            const startX = this.centerX - this.radius * Math.cos(angleRad);
+            const startY = this.centerY - this.radius * Math.sin(angleRad);
+            let tickLength = 6;
+            let tickWidth = 1;
+            if (angle % 10 === 0 || angle === -15 || angle === 195) {
+                tickLength = 18;
+                tickWidth = 2;
+            }
+            else if (angle % 5 === 0) {
+                tickLength = 14;
+                tickWidth = 1.5;
+            }
+            const endX = this.centerX - (this.radius - tickLength) * Math.cos(angleRad);
+            const endY = this.centerY - (this.radius - tickLength) * Math.sin(angleRad);
+            this.context.beginPath();
+            this.context.lineWidth = tickWidth;
+            //åˆ»åº¦çº¿é¢œè‰²
+            this.context.strokeStyle = '#E9ECEF';
+            this.context.moveTo(startX, startY);
+            this.context.lineTo(endX, endY);
+            this.context.stroke();
+            if (angle % 10 === 0 || angle === -15 || angle === 195) {
+                const labelX = this.centerX - labelRadius * Math.cos(angleRad);
+                const labelY = this.centerY - labelRadius * Math.sin(angleRad);
+                this.context.save();
+                this.context.translate(labelX, labelY);
+                this.context.rotate(angleRad - Math.PI / 2);
+                this.context.font = 'bold 14px sans-serif';
+                //åˆ»åº¦çº¿æ•°å­—é¢œè‰²
+                this.context.fillStyle = '#F8F9FA';
+                this.context.textAlign = 'center';
+                this.context.textBaseline = 'middle';
+                this.context.fillText(angle.toString(), 0, 0);
+                this.context.restore();
+            }
+        }
+    }
+    drawConcentricArcs() {
+        const values = [50, 100, 150, 200];
+        const maxDataValue = 250;
+        //å®šä¹‰ä¸ drawBase ä¸€è‡´çš„è¾¹ç•Œè§’åº¦å¹¶è¿›è¡Œè½¬æ¢
+        const leftBoundaryAngle_label = -15;
+        const rightBoundaryAngle_label = 195;
+        const startAngleRad_canvas = (leftBoundaryAngle_label + 180) * Math.PI / 180;
+        const endAngleRad_canvas = (rightBoundaryAngle_label + 180) * Math.PI / 180;
+        values.forEach(value => {
+            const arcRadius = (value / maxDataValue) * this.radius;
+            this.context.beginPath();
+            this.context.lineWidth = 1;
+            //åŒå¿ƒåœ†å¼§é¢œè‰²
+            this.context.strokeStyle = '#495057';
+            this.context.setLineDash([4, 4]);
+            //ä½¿ç”¨è½¬æ¢åçš„ Canvas è§’åº¦ç»˜åˆ¶åŒå¿ƒåœ†å¼§
+            this.context.arc(this.centerX, this.centerY, arcRadius, startAngleRad_canvas, endAngleRad_canvas, false);
+            this.context.stroke();
+            const labelAngleRad = 90 * Math.PI / 180; // 90åº¦åœ¨æ ‡ç­¾åæ ‡ç³»é‡Œæ˜¯æ­£ä¸Šæ–¹ï¼Œè®¡ç®—ä½ç½®æ— è¯¯
+            const labelX = this.centerX - arcRadius * Math.cos(labelAngleRad);
+            const labelY = this.centerY - arcRadius * Math.sin(labelAngleRad) - 8;
+            this.context.font = '14px sans-serif';
+            //åŒå¿ƒåœ†æ•°å­—é¢œè‰²
+            this.context.fillStyle = '#868e96';
+            this.context.textAlign = 'center';
+            this.context.textBaseline = 'alphabetic';
+            this.context.fillText(value.toString(), labelX, labelY);
+        });
+        this.context.setLineDash([]);
+    }
+    //ç»˜åˆ¶å¯äº¤äº’çš„ä¸¤ä¸ªç‚¹ï¼ˆå½“å‰ç‚¹å’Œç›®æ ‡ç‚¹ï¼‰
+    drawInteractivePoints() {
+        // ç»˜åˆ¶ç»¿è‰² "å½“å‰ç‚¹"
+        const currentCanvasPos = this.logicalToCanvas(this.displayCurrentPos);
+        this.context.beginPath();
+        this.context.fillStyle = '#088107';
+        this.context.strokeStyle = '#FFFFFF'; // æ·»åŠ ç™½è‰²æè¾¹ï¼Œä½¿å…¶æ›´æ¸…æ™°
+        this.context.lineWidth = 1;
+        this.context.arc(currentCanvasPos.x, currentCanvasPos.y, 8, 0, 2 * Math.PI);
+        this.context.fill();
+        this.context.stroke();
+        // ç»˜åˆ¶ç´«è‰² "ç›®æ ‡ç‚¹"
+        const targetCanvasPos = this.logicalToCanvas(this.displayTargetPos);
+        this.context.beginPath();
+        this.context.fillStyle = '#7F007F';
+        this.context.strokeStyle = '#FFFFFF'; // æ·»åŠ ç™½è‰²æè¾¹
+        this.context.lineWidth = 1;
+        this.context.arc(targetCanvasPos.x, targetCanvasPos.y, 8, 0, 2 * Math.PI);
+        this.context.fill();
+        this.context.stroke();
+    }
+    // ç»„ä»¶UIæ„å»ºä¸äº¤äº’
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+            Column.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(197:5)", "entry");
+            Column.width('100%');
+            Column.height('100%');
+            Column.justifyContent(FlexAlign.Center);
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Canvas.create(this.context);
+            Canvas.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(198:7)", "entry");
+            Canvas.width('900vp');
+            Canvas.height('600vp');
+            Canvas.onReady(() => {
+                this.redraw();
+            });
+            Canvas.onClick((event) => {
+                // å°†ç‚¹å‡»çš„ç”»å¸ƒåæ ‡è½¬æ¢ä¸ºé€»è¾‘åæ ‡
+                const clickedLogicalX = this.centerY - event.y;
+                const clickedLogicalY = event.x - this.centerX;
+                //ç¡®å®šå¹¶ç«‹å³æ›´æ–°æœ€ç»ˆçš„ç›®æ ‡ä½ç½®
+                //    - æ–°çš„ "å½“å‰ç‚¹" åº”è¯¥æ˜¯æ—§çš„ "ç›®æ ‡ç‚¹"
+                //    - æ–°çš„ "ç›®æ ‡ç‚¹" åº”è¯¥æ˜¯åˆšç‚¹å‡»çš„ä½ç½®
+                this.currentPos = this.targetPos;
+                this.targetPos = { x: clickedLogicalX, y: clickedLogicalY };
+                //ä½¿ç”¨ animateTo é©±åŠ¨ "æ˜¾ç¤ºä½ç½®" çš„å˜åŒ–ï¼Œäº§ç”ŸåŠ¨ç”»
+                Context.animateTo({
+                    duration: 400,
+                    curve: Curve.EaseInOut
+                }, () => {
+                    // è®© display...Pos ä»å½“å‰å€¼è¿‡æ¸¡åˆ°æ–°çš„æœ€ç»ˆå€¼
+                    this.displayCurrentPos = this.currentPos;
+                    this.displayTargetPos = this.targetPos;
+                });
+            });
+        }, Canvas);
+        Canvas.pop();
+        Column.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+//# sourceMappingURL=RoboticArmWorkRangeView.js.mapÂÙTD:\apps\deveco\tzb2025jbgs\entry\src\main\ets\components\RoboticArmWorkRangeView.etsÔrB›ªmoduleName±isLocalDependency¯isNodeEntryFile§pkgPath±belongProjectPath§pkgNameªpkgVersion±dependencyPkgInfo¯hostModulesInfo°belongModulePath¬shouldEmitJs¥entryÃÂÙ D:\apps\deveco\tzb2025jbgs\entryºD:\apps\deveco\tzb2025jbgs¥entry¥1.0.0Ô  ‘ÔrC’²hostDependencyName®hostModuleNameÙ(../../components/RoboticArmWorkRangeView¥entryÙ D:\apps\deveco\tzb2025jbgs\entryÃÃÚ$p// å®šä¹‰ä¸€ä¸ªåæ ‡ç‚¹ç±»å‹
+interface Point {
+  x: number;
+  y: number;
+}
+
+@Component
+export  struct RoboticArmWorkRangeView {
+  // ä½¿ç”¨ CanvasRenderingContext2D è¿›è¡Œ2Då›¾å½¢ç»˜åˆ¶
+  private context: CanvasRenderingContext2D = new CanvasRenderingContext2D();
+
+  // ç”»å¸ƒä¸­å¿ƒç‚¹åæ ‡ (å•ä½: vp)
+  private readonly centerX: number = 450;
+  private readonly centerY: number = 300;
+  // é‡è§’å™¨ä¸»åŠå¾„ (å•ä½: vp)
+  private readonly radius: number = 180;
+
+  //æœ€ç»ˆç›®æ ‡ä½ç½®çŠ¶æ€ï¼šè¿™äº›å˜é‡å­˜å‚¨ç‚¹çš„æœ€ç»ˆä½ç½®ï¼Œåœ¨ç‚¹å‡»æ—¶ç«‹å³æ›´æ–°ã€‚
+  @State private currentPos: Point = { x: 0, y: 0 };
+  @State private targetPos: Point = { x: 0, y: 0 };
+
+  //åŠ¨ç”»æ˜¾ç¤ºä½ç½®çŠ¶æ€ï¼šè¿™äº›å˜é‡ç”¨äºåœ¨åŠ¨ç”»è¿‡ç¨‹ä¸­å®æ—¶æ›´æ–°å¹¶ç»˜åˆ¶åœ¨ç”»å¸ƒä¸Šã€‚
+  // @Watch ä¼šç›‘æ§å®ƒä»¬çš„å˜åŒ–ï¼Œå¹¶åœ¨æ¯ä¸€å¸§è§¦å‘ redrawã€‚
+  @State @Watch('redraw') private displayCurrentPos: Point = { x: 0, y: 0 };
+  @State @Watch('redraw') private displayTargetPos: Point = { x: 0, y: 0 };
+
+  //å°†é€»è¾‘åæ ‡ (ä¸­å¿ƒä¸º0,0) è½¬æ¢ä¸ºç”»å¸ƒåæ ‡
+  private logicalToCanvas(logicalCoords: Point): Point {
+    return {
+      x: this.centerX + logicalCoords.y,
+      y: this.centerY - logicalCoords.x
+    };
+  }
+
+  //ä¸»ç»˜åˆ¶å‡½æ•°ï¼Œå®ƒä¼šè°ƒç”¨æ‰€æœ‰å­ç»˜åˆ¶å‡½æ•°
+  private redraw(): void {
+    if (!this.context) {
+      return;
+    }
+    this.context.clearRect(0, 0, this.centerX * 2, this.centerY * 2);
+    this.drawBase();
+    this.drawTicksAndLabels();
+    this.drawConcentricArcs();
+    this.drawInteractivePoints();
+  }
+
+  // å›¾å½¢ç»˜åˆ¶å‡½æ•°
+  private drawBase(): void {
+    //å®šä¹‰æ ‡ç­¾åæ ‡ç³»ä¸­çš„å·¦å³è¾¹ç•Œè§’åº¦
+    const leftBoundaryAngle_label = -15;  // å·¦è¾¹ç•Œæ˜¯ -15 åº¦
+    const rightBoundaryAngle_label = 195; // å³è¾¹ç•Œæ˜¯ 195 åº¦
+
+    //å°†æ ‡ç­¾è§’åº¦è½¬æ¢ä¸º Canvas arc å‡½æ•°æ‰€éœ€çš„è§’åº¦
+    // è½¬æ¢å…¬å¼: canvas_angle = label_angle + 180
+    const startAngleRad_canvas = (leftBoundaryAngle_label + 180) * Math.PI / 180; // 165åº¦
+    const endAngleRad_canvas = (rightBoundaryAngle_label + 180) * Math.PI / 180;   // 375åº¦
+
+    //ä¸»è¦è½®å»“çº¿ç»˜åˆ¶
+    this.context.beginPath();
+    this.context.lineWidth = 1.5;
+    this.context.strokeStyle = '#E9ECEF';
+
+    //ä½¿ç”¨è½¬æ¢åçš„ Canvas è§’åº¦å’Œæ­£ç¡®çš„æ–¹å‘ (true/é€†æ—¶é’ˆ) æ¥ç»˜åˆ¶ä¸»å¼§çº¿
+    // ä» 165Â° é€†æ—¶é’ˆç”»åˆ° 375Â°(ç›¸å½“äº15Â°), æ­£å¥½æ˜¯ä¸Šæ–¹çš„å¼§
+    this.context.arc(this.centerX, this.centerY, this.radius, startAngleRad_canvas, endAngleRad_canvas, false);
+
+    //ç»˜åˆ¶å¾„å‘çº¿æ—¶ï¼Œå¿…é¡»ä½¿ç”¨åŸå§‹çš„æ ‡ç­¾è§’åº¦
+    const leftBoundaryRad_label = leftBoundaryAngle_label * Math.PI / 180;
+    const rightBoundaryRad_label = rightBoundaryAngle_label * Math.PI / 180;
+
+    this.context.moveTo(this.centerX, this.centerY);
+    this.context.lineTo(this.centerX - this.radius * Math.cos(leftBoundaryRad_label), this.centerY - this.radius * Math.sin(leftBoundaryRad_label));
+    this.context.moveTo(this.centerX, this.centerY);
+    this.context.lineTo(this.centerX - this.radius * Math.cos(rightBoundaryRad_label), this.centerY - this.radius * Math.sin(rightBoundaryRad_label));
+
+    this.context.stroke();
+
+    //ä¸­å¿ƒç‚¹ç»˜åˆ¶
+    this.context.beginPath();
+    this.context.fillStyle = '#C92A2A';
+    this.context.arc(this.centerX, this.centerY, 4, 0, 2 * Math.PI);
+    this.context.fill();
+  }
+  private drawTicksAndLabels(): void {
+    const labelRadius = this.radius + 18;
+    this.context.beginPath();
+    this.context.lineWidth = 0.75;
+    //è¾…åŠ©è™šçº¿é¢œè‰²
+    this.context.strokeStyle = '#495057';
+    this.context.setLineDash([3, 5]);
+    for (let angle = -10; angle <= 190; angle += 10) {
+      const angleRad = angle * Math.PI / 180;
+      this.context.moveTo(this.centerX, this.centerY);
+      this.context.lineTo(this.centerX - this.radius * Math.cos(angleRad), this.centerY - this.radius * Math.sin(angleRad));
+    }
+    this.context.stroke();
+    this.context.setLineDash([]);
+    for (let angle = -15; angle <= 195; angle++) {
+      const angleRad = angle * Math.PI / 180;
+      const startX = this.centerX - this.radius * Math.cos(angleRad);
+      const startY = this.centerY - this.radius * Math.sin(angleRad);
+      let tickLength = 6;
+      let tickWidth = 1;
+      if (angle % 10 === 0 || angle === -15 || angle === 195) {
+        tickLength = 18;
+        tickWidth = 2;
+      } else if (angle % 5 === 0) {
+        tickLength = 14;
+        tickWidth = 1.5;
+      }
+      const endX = this.centerX - (this.radius - tickLength) * Math.cos(angleRad);
+      const endY = this.centerY - (this.radius - tickLength) * Math.sin(angleRad);
+      this.context.beginPath();
+      this.context.lineWidth = tickWidth;
+      //åˆ»åº¦çº¿é¢œè‰²
+      this.context.strokeStyle = '#E9ECEF';
+      this.context.moveTo(startX, startY);
+      this.context.lineTo(endX, endY);
+      this.context.stroke();
+      if (angle % 10 === 0 || angle === -15 || angle === 195) {
+        const labelX = this.centerX - labelRadius * Math.cos(angleRad);
+        const labelY = this.centerY - labelRadius * Math.sin(angleRad);
+        this.context.save();
+        this.context.translate(labelX, labelY);
+        this.context.rotate(angleRad - Math.PI / 2);
+        this.context.font = 'bold 14px sans-serif';
+        //åˆ»åº¦çº¿æ•°å­—é¢œè‰²
+        this.context.fillStyle = '#F8F9FA';
+        this.context.textAlign = 'center';
+        this.context.textBaseline = 'middle';
+        this.context.fillText(angle.toString(), 0, 0);
+        this.context.restore();
+      }
+    }
+  }
+  private drawConcentricArcs(): void {
+    const values = [50, 100, 150, 200];
+    const maxDataValue = 250;
+
+    //å®šä¹‰ä¸ drawBase ä¸€è‡´çš„è¾¹ç•Œè§’åº¦å¹¶è¿›è¡Œè½¬æ¢
+    const leftBoundaryAngle_label = -15;
+    const rightBoundaryAngle_label = 195;
+    const startAngleRad_canvas = (leftBoundaryAngle_label + 180) * Math.PI / 180;
+    const endAngleRad_canvas = (rightBoundaryAngle_label + 180) * Math.PI / 180;
+
+    values.forEach(value => {
+      const arcRadius = (value / maxDataValue) * this.radius;
+      this.context.beginPath();
+      this.context.lineWidth = 1;
+      //åŒå¿ƒåœ†å¼§é¢œè‰²
+      this.context.strokeStyle = '#495057';
+      this.context.setLineDash([4, 4]);
+
+      //ä½¿ç”¨è½¬æ¢åçš„ Canvas è§’åº¦ç»˜åˆ¶åŒå¿ƒåœ†å¼§
+      this.context.arc(this.centerX, this.centerY, arcRadius, startAngleRad_canvas, endAngleRad_canvas, false);
+
+      this.context.stroke();
+      const labelAngleRad = 90 * Math.PI / 180; // 90åº¦åœ¨æ ‡ç­¾åæ ‡ç³»é‡Œæ˜¯æ­£ä¸Šæ–¹ï¼Œè®¡ç®—ä½ç½®æ— è¯¯
+      const labelX = this.centerX - arcRadius * Math.cos(labelAngleRad);
+      const labelY = this.centerY - arcRadius * Math.sin(labelAngleRad) - 8;
+      this.context.font = '14px sans-serif';
+      //åŒå¿ƒåœ†æ•°å­—é¢œè‰²
+      this.context.fillStyle = '#868e96';
+      this.context.textAlign = 'center';
+      this.context.textBaseline = 'alphabetic';
+      this.context.fillText(value.toString(), labelX, labelY);
+    });
+
+    this.context.setLineDash([]);
+  }
+
+  //ç»˜åˆ¶å¯äº¤äº’çš„ä¸¤ä¸ªç‚¹ï¼ˆå½“å‰ç‚¹å’Œç›®æ ‡ç‚¹ï¼‰
+  private drawInteractivePoints(): void {
+    // ç»˜åˆ¶ç»¿è‰² "å½“å‰ç‚¹"
+    const currentCanvasPos = this.logicalToCanvas(this.displayCurrentPos);
+    this.context.beginPath();
+    this.context.fillStyle = '#088107';
+    this.context.strokeStyle = '#FFFFFF'; // æ·»åŠ ç™½è‰²æè¾¹ï¼Œä½¿å…¶æ›´æ¸…æ™°
+    this.context.lineWidth = 1;
+    this.context.arc(currentCanvasPos.x, currentCanvasPos.y, 8, 0, 2 * Math.PI);
+    this.context.fill();
+    this.context.stroke();
+
+    // ç»˜åˆ¶ç´«è‰² "ç›®æ ‡ç‚¹"
+    const targetCanvasPos = this.logicalToCanvas(this.displayTargetPos);
+    this.context.beginPath();
+    this.context.fillStyle = '#7F007F';
+    this.context.strokeStyle = '#FFFFFF'; // æ·»åŠ ç™½è‰²æè¾¹
+    this.context.lineWidth = 1;
+    this.context.arc(targetCanvasPos.x, targetCanvasPos.y, 8, 0, 2 * Math.PI);
+    this.context.fill();
+    this.context.stroke();
+  }
+
+  // ç»„ä»¶UIæ„å»ºä¸äº¤äº’
+  build() {
+    Column() {
+      Canvas(this.context)
+        .width('900vp')
+        .height('600vp')
+        .onReady(() => {
+          this.redraw();
+        })
+        .onClick((event: ClickEvent) => {
+          // å°†ç‚¹å‡»çš„ç”»å¸ƒåæ ‡è½¬æ¢ä¸ºé€»è¾‘åæ ‡
+          const clickedLogicalX = this.centerY - event.y;
+          const clickedLogicalY = event.x - this.centerX;
+
+          //ç¡®å®šå¹¶ç«‹å³æ›´æ–°æœ€ç»ˆçš„ç›®æ ‡ä½ç½®
+          //    - æ–°çš„ "å½“å‰ç‚¹" åº”è¯¥æ˜¯æ—§çš„ "ç›®æ ‡ç‚¹"
+          //    - æ–°çš„ "ç›®æ ‡ç‚¹" åº”è¯¥æ˜¯åˆšç‚¹å‡»çš„ä½ç½®
+          this.currentPos = this.targetPos;
+          this.targetPos = { x: clickedLogicalX, y: clickedLogicalY };
+
+          //ä½¿ç”¨ animateTo é©±åŠ¨ "æ˜¾ç¤ºä½ç½®" çš„å˜åŒ–ï¼Œäº§ç”ŸåŠ¨ç”»
+          animateTo({
+            duration: 400,
+            curve: Curve.EaseInOut
+          }, () => {
+            // è®© display...Pos ä»å½“å‰å€¼è¿‡æ¸¡åˆ°æ–°çš„æœ€ç»ˆå€¼
+            this.displayCurrentPos = this.currentPos;
+            this.displayTargetPos = this.targetPos;
+          });
+        })
+    }
+    .width('100%')
+    .height('100%')
+    .justifyContent(FlexAlign.Center)
+  }
+}
+ÀA“ÔrD–§version¤fileªsourceRoot§sources¥names¨mappingsºRoboticArmWorkRangeView.js ‘»RoboticArmWorkRangeView.etsÜ””   ” ” ”$ &‘”  ”” 	.” 	2”3 	ÌJ”5 	ÌL’” %” (’” %” (’” $” 'š”9 %”; '”< (”> *”? +”ÌA -”ÌB .”ÌD 0”ÌE 1”ÌG 3š”8 $”: &”; '”= )”> *”Ì@ ,”ÌA -”ÌC /”ÌD 0”ÌF 2š”Ì@ =”ÌB ?”ÌC Ì@”ÌE ÌB”ÌF ÌC”ÌH ÌE”ÌI ÌF”ÌK ÌH”ÌL ÌI”ÌN ÌKš”? <”ÌA >”ÌB ?”ÌD ÌA”ÌE ÌB”ÌG ÌD”ÌH ÌE”ÌJ ÌG”ÌK ÌH”ÌM ÌJ‘” ’” ” ’” ” ’” ” ’” ” ’” "” 3’” "” 3’” "” 2’” "” 2’” ” ”” 
+” ” ”! .’” ” š” ” ” 	” ” ” ” ”+ %”, &”- 'š” ” ” 	” ” ” ” ”+ %”, &”- '’”	 ”
+ ’”  ”  ’” "” "’” #
+”
+ #—” $” $” $	” $” $” $” $’” %” %‘”	 &Ü ” '” '” '	” '” '” '” '”  '”" '”# '”% '!”) '%”* '&”1 '-”4 '0”5 '1”7 '3”; '7”< '8”ÌC '?”ÌF 'ÌB”ÌG 'ÌC”ÌH 'ÌD”ÌI 'ÌE–” (” (” (	” (” (” (–” )” )” )	” )”! )”" )–” *” *” *	” *”! *”" *–” +” +” +	”" +”$ + ”% +!’” ,” ,’” .” .’” /
+” /’” 0” 0™” 1” 1
+”% 1!”( 1$”) 1%”+ 1'”, 1(”- 1*”: 17˜” 2” 2
+”& 2"”) 2%”, 2(”- 2)”. 2*”; 27’” 4”% 4!’” 5”1 5-Ü ” 6” 6
+”" 6”% 6!”& 6"”= 69”Ì@ 6<”ÌC 6?”ÌD 6Ì@”ÌG 6ÌC”ÌK 6ÌG”ÌL 6ÌH”ÌN 6ÌJ”ÌQ 6ÌM”ÌT 6ÌP”ÌU 6ÌQ”ÌV 6ÌR”Ì] 6ÌYÜ ” 7” 7
+”  7”# 7”$ 7 ”< 78”? 7;”ÌB 7>”ÌC 7?”ÌF 7ÌB”ÌJ 7ÌF”ÌK 7ÌG”ÌM 7ÌI”ÌP 7ÌL”ÌS 7ÌO”ÌT 7ÌP”ÌU 7ÌS”Ì\ 7ÌZ’” 9” 9˜” :” :” :	” :” :” :”  :”! :™” ;” ;” ;	” ;” ;” ;”! ;”$ ; ”% ;!™” <” <” <	” <” <”  <”# <”, <(”- <)’” >”2 >.’” ?”- ?)Ü ” Ì@” Ì@” Ì@	” Ì@” Ì@” Ì@” Ì@” Ì@” Ì@”% Ì@!”' Ì@#”+ Ì@'”, Ì@(”3 Ì@/”5 Ì@1”9 Ì@5”: Ì@6”Ì@ Ì@<”ÌB Ì@>”ÌV Ì@ÌR”ÌX Ì@ÌT”Ìj Ì@Ìf”Ìl Ì@Ìh”Ìq Ì@Ìm”Ìr Ì@Ìn”Ìs Ì@Ìo’” ÌB” ÌBœ” ÌC” ÌC
+”# ÌC”& ÌC"”= ÌC9”Ì@ ÌC<”ÌD ÌCÌ@”ÌE ÌCÌA”ÌG ÌCÌC”ÌJ ÌCÌF”ÌM ÌCÌI”ÌN ÌCÌJœ” ÌD” ÌD
+”$ ÌD ”' ÌD#”? ÌD;”ÌB ÌD>”ÌF ÌDÌB”ÌG ÌDÌC”ÌI ÌDÌE”ÌL ÌDÌH”ÌO ÌDÌK”ÌP ÌDÌLÜ ” ÌF” ÌF” ÌF	” ÌF” ÌF” ÌF” ÌF”  ÌF”! ÌF”( ÌF$”* ÌF&”. ÌF*”/ ÌF+”6 ÌF2”7 ÌF3”8 ÌF4Ü &” ÌG” ÌG” ÌG	” ÌG” ÌG” ÌG” ÌG”  ÌG”! ÌG”( ÌG$”+ ÌG'”/ ÌG+”0 ÌG,”6 ÌG2”9 ÌG5”= ÌG9”> ÌG:”ÌA ÌG=”ÌB ÌG>”ÌW ÌGÌS”ÌX ÌGÌT”ÌZ ÌGÌV”Ì^ ÌGÌZ”Ì_ ÌGÌ[”Ìf ÌGÌb”Ìi ÌGÌe”Ìm ÌGÌi”Ìn ÌGÌj”Ìt ÌGÌp”Ìw ÌGÌs”Ì{ ÌGÌw”Ì| ÌGÌx”Ì ÌGÌ{”Ì€ ÌGÌ|”Ì• ÌGÌ‘”Ì– ÌGÌ’”Ì— ÌGÌ“”Ì˜ ÌGÌ”Ü ” ÌH” ÌH” ÌH	” ÌH” ÌH” ÌH” ÌH”  ÌH”! ÌH”( ÌH$”* ÌH&”. ÌH*”/ ÌH+”6 ÌH2”7 ÌH3”8 ÌH4Ü &” ÌI” ÌI” ÌI	” ÌI” ÌI” ÌI” ÌI”  ÌI”! ÌI”( ÌI$”+ ÌI'”/ ÌI+”0 ÌI,”6 ÌI2”9 ÌI5”= ÌI9”> ÌI:”ÌA ÌI=”ÌB ÌI>”ÌX ÌIÌT”ÌY ÌIÌU”Ì[ ÌIÌW”Ì_ ÌIÌ[”Ì` ÌIÌ\”Ìg ÌIÌc”Ìj ÌIÌf”Ìn ÌIÌj”Ìo ÌIÌk”Ìu ÌIÌq”Ìx ÌIÌt”Ì| ÌIÌx”Ì} ÌIÌy”Ì€ ÌIÌ|”Ì ÌIÌ}”Ì— ÌIÌ“”Ì˜ ÌIÌ””Ì™ ÌIÌ•”Ìš ÌIÌ–˜” ÌK” ÌK” ÌK	” ÌK” ÌK” ÌK” ÌK” ÌK’” ÌM” ÌM˜” ÌN” ÌN” ÌN	” ÌN” ÌN” ÌN”  ÌN”! ÌN™” ÌO” ÌO” ÌO	” ÌO” ÌO” ÌO”! ÌO”* ÌO&”+ ÌO'Ü ” ÌP” ÌP” ÌP	” ÌP” ÌP” ÌP” ÌP” ÌP” ÌP”% ÌP!”' ÌP#”+ ÌP'”, ÌP(”3 ÌP/”5 ÌP1”6 ÌP2”8 ÌP4”9 ÌP5”; ÌP7”< ÌP8”? ÌP;”ÌC ÌP?”ÌD ÌPÌ@”ÌF ÌPÌB”ÌG ÌPÌC”ÌH ÌPÌD˜” ÌQ” ÌQ” ÌQ	” ÌQ” ÌQ” ÌQ” ÌQ” ÌQ’” ÌR” ÌR’” ÌS
+” ÌSš” ÌT” ÌT
+” ÌT” ÌT”  ÌT”! ÌT”' ÌT#”* ÌT&”, ÌT(”- ÌT)˜” ÌU” ÌU” ÌU	” ÌU” ÌU” ÌU”  ÌU”! ÌU™” ÌV” ÌV” ÌV	” ÌV” ÌV” ÌV”! ÌV”% ÌV!”& ÌV"’” ÌW” ÌW™” ÌX” ÌX” ÌX	” ÌX” ÌX”  ÌX”# ÌX”, ÌX(”- ÌX)” ÌY” ÌY” ÌY	” ÌY” ÌY”  ÌY”! ÌY”" ÌY”# ÌY”% ÌY!”& ÌY"”' ÌY#”( ÌY$”) ÌY%Ü ” ÌZ” ÌZ	” ÌZ” ÌZ” ÌZ” ÌZ” ÌZ” ÌZ”# ÌZ”' ÌZ#”* ÌZ&”, ÌZ(”1 ÌZ-”5 ÌZ1”7 ÌZ3”9 ÌZ5œ” Ì[” Ì[” Ì[” Ì[”" Ì[”% Ì[”) Ì[#”* Ì[$”, Ì[&”/ Ì[)”2 Ì[,”3 Ì[-Ü ” Ì\” Ì\
+” Ì\” Ì\” Ì\” Ì\”  Ì\”$ Ì\”% Ì\”, Ì\&”. Ì\(”2 Ì\,”3 Ì\-”: Ì\4”; Ì\5”< Ì\6Ü &” Ì]” Ì]
+” Ì]” Ì]” Ì]” Ì]”  Ì]”$ Ì]”% Ì]”, Ì]&”/ Ì])”3 Ì]-”4 Ì].”: Ì]4”= Ì]7”ÌA Ì];”ÌB Ì]<”ÌE Ì]?”ÌF Ì]Ì@”ÌN Ì]ÌH”ÌO Ì]ÌI”ÌQ Ì]ÌK”ÌU Ì]ÌO”ÌV Ì]ÌP”Ì] Ì]ÌW”Ì` Ì]ÌZ”Ìd Ì]Ì^”Ìe Ì]Ì_”Ìk Ì]Ìe”Ìn Ì]Ìh”Ìr Ì]Ìl”Ìs Ì]Ìm”Ìv Ì]Ìp”Ìw Ì]Ìq”Ì Ì]Ìy”Ì€ Ì]Ìz”Ì Ì]Ì{”Ì‚ Ì]Ì|‘”	 Ì^˜” Ì_” Ì_” Ì_	” Ì_” Ì_” Ì_” Ì_” Ì_š” Ì`” Ì`” Ì`	” Ì`” Ì`”  Ì`”! Ì`”# Ì`”$ Ì` ”% Ì`!Ÿ” Ìa” Ìa	” Ìa” Ìa” Ìa” Ìa” Ìa” Ìa”# Ìa”' Ìa#”* Ìa&”, Ìa(”1 Ìa-”3 Ìa/”5 Ìa1œ” Ìb” Ìb” Ìb” Ìb”" Ìb”% Ìb”) Ìb#”* Ìb$”, Ìb&”/ Ìb)”2 Ìb,”3 Ìb-Ü ” Ìc” Ìc” Ìc” Ìc” Ìc”  Ìc”' Ìc!”* Ìc$”. Ìc(”/ Ìc)”5 Ìc/”8 Ìc2”< Ìc6”= Ìc7”Ì@ Ìc:”ÌA Ìc;”ÌI ÌcÌC”ÌJ ÌcÌD”ÌK ÌcÌEÜ ” Ìd” Ìd” Ìd” Ìd” Ìd”  Ìd”' Ìd!”* Ìd$”. Ìd(”/ Ìd)”5 Ìd/”8 Ìd2”< Ìd6”= Ìd7”Ì@ Ìd:”ÌA Ìd;”ÌI ÌdÌC”ÌJ ÌdÌD”ÌK ÌdÌE–” Ìe” Ìe
+” Ìe” Ìe” Ìe” Ìe–” Ìf” Ìf
+” Ìf” Ìf” Ìf” ÌfÜ ” Ìg” Ìg
+” Ìg” Ìg” Ìg” Ìg”  Ìg”$ Ìg”) Ìg#”. Ìg(”/ Ìg)”1 Ìg+”5 Ìg/”: Ìg4”? Ìg9”ÌB Ìg<”ÌD Ìg>•” Ìh” Ìh” Ìh” Ìh”  Ìh•” Ìi” Ìi” Ìi” Ìi” Ìi‘” Ìj˜” Ìj” Ìj” Ìj” Ìj” Ìj”# Ìj”$ Ìj ”& Ìj"•” Ìk” Ìk” Ìk” Ìk”  Ìk•” Ìl” Ìl” Ìl” Ìl”  Ìl‘” ÌmÜ ” Ìn” Ìn” Ìn” Ìn” Ìn” Ìn”% Ìn”( Ìn"”) Ìn#”- Ìn'”. Ìn(”4 Ìn.”7 Ìn1”ÌA Ìn;”ÌB Ìn<”ÌE Ìn?”ÌI ÌnÌC”ÌJ ÌnÌD”ÌM ÌnÌG”ÌN ÌnÌH”ÌV ÌnÌP”ÌW ÌnÌQ”ÌX ÌnÌRÜ ” Ìo” Ìo” Ìo” Ìo” Ìo” Ìo”% Ìo”( Ìo"”) Ìo#”- Ìo'”. Ìo(”4 Ìo.”7 Ìo1”ÌA Ìo;”ÌB Ìo<”ÌE Ìo?”ÌI ÌoÌC”ÌJ ÌoÌD”ÌM ÌoÌG”ÌN ÌoÌH”ÌV ÌoÌP”ÌW ÌoÌQ”ÌX ÌoÌR˜” Ìp” Ìp
+” Ìp” Ìp” Ìp”" Ìp”$ Ìp”% Ìp™” Ìq” Ìq
+” Ìq” Ìq” Ìq”" Ìq”% Ìq”. Ìq(”/ Ìq)’” Ìr” Ìr™” Ìs” Ìs
+” Ìs” Ìs” Ìs”$ Ìs”' Ìs!”0 Ìs*”1 Ìs+œ” Ìt” Ìt
+” Ìt” Ìt” Ìt” Ìt”  Ìt”& Ìt ”( Ìt"”. Ìt(”/ Ìt)”0 Ìt*œ” Ìu” Ìu
+” Ìu” Ìu” Ìu” Ìu”  Ìu”$ Ìu”& Ìu ”* Ìu$”+ Ìu%”, Ìu&˜” Ìv” Ìv
+” Ìv” Ìv” Ìv” Ìv”! Ìv”" ÌvÜ ” Ìw” Ìw
+” Ìw” Ìw” Ìw” Ìw”  Ìw”$ Ìw”) Ìw#”. Ìw(”/ Ìw)”1 Ìw+”5 Ìw/”: Ìw4”? Ìw9”ÌB Ìw<”ÌD Ìw>Ü ” Ìx” Ìx” Ìx” Ìx”# Ìx”$ Ìx”+ Ìx#”. Ìx&”9 Ìx1”< Ìx4”Ì@ Ìx8”ÌA Ìx9”ÌD Ìx<”ÌE Ìx=”ÌM ÌxÌE”ÌN ÌxÌF”ÌO ÌxÌGÜ ” Ìy” Ìy” Ìy” Ìy”# Ìy”$ Ìy”+ Ìy#”. Ìy&”9 Ìy1”< Ìy4”Ì@ Ìy8”ÌA Ìy9”ÌD Ìy<”ÌE Ìy=”ÌM ÌyÌE”ÌN ÌyÌF”ÌO ÌyÌG˜” Ìz” Ìz” Ìz” Ìz” Ìz”! Ìz”# Ìz”$ Ìzœ” Ì{” Ì{” Ì{” Ì{” Ì{”& Ì{”' Ì{”- Ì{%”/ Ì{'”5 Ì{-”6 Ì{.”7 Ì{/Ü ” Ì|” Ì|” Ì|” Ì|” Ì|”# Ì|”$ Ì|”, Ì|$”/ Ì|'”3 Ì|+”4 Ì|,”6 Ì|.”9 Ì|1”: Ì|2”; Ì|3”< Ì|4™” Ì}” Ì}” Ì}” Ì}” Ì}”! Ì}”$ Ì}”: Ì}2”; Ì}3’” Ì~” Ì~™” Ì” Ì” Ì” Ì” Ì”& Ì”) Ì!”2 Ì*”3 Ì+™” Ì€” Ì€” Ì€” Ì€” Ì€”& Ì€”) Ì€!”1 Ì€)”2 Ì€*™” Ì” Ì” Ì” Ì” Ì”) Ì!”, Ì$”4 Ì,”5 Ì-Ü ” Ì‚” Ì‚” Ì‚” Ì‚” Ì‚”% Ì‚”& Ì‚”+ Ì‚#”, Ì‚$”4 Ì‚,”6 Ì‚.”8 Ì‚0”9 Ì‚1”; Ì‚3”< Ì‚4”= Ì‚5”> Ì‚6˜” Ìƒ” Ìƒ” Ìƒ” Ìƒ” Ìƒ”$ Ìƒ”& Ìƒ”' Ìƒ‘” Ì„‘”	 Ì…’” Ì†” Ì†’” Ì‡
+” Ì‡” Ìˆ” Ìˆ
+” Ìˆ” Ìˆ” Ìˆ” Ìˆ” Ìˆ” Ìˆ”! Ìˆ”$ Ìˆ ”& Ìˆ"”) Ìˆ%”* Ìˆ&”+ Ìˆ'–” Ì‰” Ì‰
+” Ì‰” Ì‰”  Ì‰”! Ì‰’” Ì‹”# Ì‹—” ÌŒ” ÌŒ
+”% ÌŒ!”( ÌŒ$”) ÌŒ%”+ ÌŒ'”, ÌŒ(–” Ì” Ì
+”& Ì"”) Ì%”, Ì(”- Ì)Ü ” Ì” Ì
+”" Ì”% Ì!”& Ì"”= Ì9”Ì@ Ì<”ÌC Ì?”ÌD ÌÌ@”ÌG ÌÌC”ÌK ÌÌG”ÌL ÌÌH”ÌN ÌÌJ”ÌQ ÌÌM”ÌT ÌÌP”ÌU ÌÌQÜ ” Ì” Ì
+”  Ì”# Ì”$ Ì ”< Ì8”? Ì;”ÌB Ì>”ÌC Ì?”ÌF ÌÌB”ÌJ ÌÌF”ÌK ÌÌG”ÌM ÌÌI”ÌP ÌÌL”ÌS ÌÌO”ÌT ÌÌP˜” Ì‘” Ì‘
+” Ì‘” Ì‘” Ì‘” Ì‘” Ì‘” Ì‘” Ì’” Ì’” Ì’” Ì’” Ì’”$ Ì’”' Ì’!”3 Ì’-”4 Ì’.”7 Ì’1”; Ì’5”< Ì’6”ÌB Ì’<”ÌC Ì’=˜” Ì“” Ì“
+” Ì“” Ì“” Ì“”" Ì“”$ Ì“”% Ì“™” Ì”” Ì”
+” Ì”” Ì”” Ì””" Ì””% Ì””& Ì” ”' Ì”!’” Ì•” Ì•™” Ì–” Ì–
+” Ì–” Ì–” Ì–”$ Ì–”' Ì–!”0 Ì–*”1 Ì–+” Ì—” Ì—
+” Ì—” Ì—” Ì—”$ Ì—”% Ì—”& Ì— ”' Ì—!”) Ì—#”* Ì—$”+ Ì—%”, Ì—&”- Ì—'’” Ì™”$ Ì™Ü ” Ìš” Ìš
+” Ìš” Ìš” Ìš” Ìš” Ìš”! Ìš”" Ìš”) Ìš#”+ Ìš%”/ Ìš)”0 Ìš*”7 Ìš1”9 Ìš3”ÌB Ìš<”ÌD Ìš>”ÌX ÌšÌR”ÌZ ÌšÌT”Ìl ÌšÌf”Ìn ÌšÌh”Ìs ÌšÌm”Ìt ÌšÌn”Ìu ÌšÌo˜” Ìœ” Ìœ
+” Ìœ” Ìœ” Ìœ” Ìœ”! Ìœ”" Ìœ” Ì” Ì” Ì”" Ì”$ Ì”' Ì!”+ Ì%”, Ì&”. Ì(”1 Ì+”4 Ì.”5 Ì/”6 Ì0”ÌN ÌÌHÜ ” Ì” Ì” Ì” Ì” Ì”  Ì”' Ì!”* Ì$”3 Ì-”6 Ì0”: Ì4”; Ì5”> Ì8”? Ì9”ÌL ÌÌF”ÌM ÌÌG”ÌN ÌÌHÜ ” ÌŸ” ÌŸ” ÌŸ” ÌŸ” ÌŸ”  ÌŸ”' ÌŸ!”* ÌŸ$”3 ÌŸ-”6 ÌŸ0”: ÌŸ4”; ÌŸ5”> ÌŸ8”? ÌŸ9”ÌL ÌŸÌF”ÌM ÌŸÌG”ÌP ÌŸÌJ”ÌQ ÌŸÌK”ÌR ÌŸÌL™” Ì ” Ì 
+” Ì ” Ì ” Ì ” Ì ”  Ì ”1 Ì +”2 Ì ,’” Ì¡” Ì¡™” Ì¢” Ì¢
+” Ì¢” Ì¢” Ì¢”" Ì¢”% Ì¢”. Ì¢(”/ Ì¢)™” Ì£” Ì£
+” Ì£” Ì£” Ì£”" Ì£”% Ì£”- Ì£'”. Ì£(™” Ì¤” Ì¤
+” Ì¤” Ì¤” Ì¤”% Ì¤”( Ì¤"”4 Ì¤.”5 Ì¤/Ü ” Ì¥” Ì¥
+” Ì¥” Ì¥” Ì¥”! Ì¥”" Ì¥”' Ì¥!”( Ì¥"”0 Ì¥*”2 Ì¥,”4 Ì¥.”: Ì¥4”< Ì¥6”ÌB Ì¥<”ÌC Ì¥=”ÌD Ì¥>”” Ì¦”	 Ì¦”
+ Ì¦” Ì¦š” Ì¨” Ì¨” Ì¨	” Ì¨” Ì¨”  Ì¨”! Ì¨”# Ì¨”$ Ì¨ ”% Ì¨!’” Ì©” Ì©’” Ì«” Ì«’” Ì¬
+” Ì¬’” Ì­” Ì­” Ì®” Ì®
+” Ì®”! Ì®”% Ì®!”& Ì®"”5 Ì®1”6 Ì®2”: Ì®6”; Ì®7”ÌL Ì®ÌH”ÌM Ì®ÌI”ÌN Ì®ÌJ˜” Ì¯” Ì¯” Ì¯	” Ì¯” Ì¯” Ì¯”  Ì¯”! Ì¯™” Ì°” Ì°” Ì°	” Ì°” Ì°” Ì°”! Ì°”* Ì°&”+ Ì°'›” Ì±” Ì±” Ì±	” Ì±” Ì±”  Ì±”# Ì±”, Ì±(”- Ì±)”. Ì±*”= Ì±9™” Ì²” Ì²” Ì²	” Ì²” Ì²” Ì²”! Ì²”" Ì²”# Ì²Ü ” Ì³” Ì³” Ì³	” Ì³” Ì³” Ì³” Ì³”) Ì³%”* Ì³&”+ Ì³'”- Ì³)”= Ì³9”> Ì³:”? Ì³;”ÌA Ì³=”ÌB Ì³>”ÌD Ì³Ì@”ÌE Ì³ÌA”ÌG Ì³ÌC”ÌH Ì³ÌD”ÌK Ì³ÌG”ÌO Ì³ÌK”ÌP Ì³ÌL”ÌR Ì³ÌN”ÌS Ì³ÌO”ÌT Ì³ÌP˜” Ì´” Ì´” Ì´	” Ì´” Ì´” Ì´” Ì´” Ì´˜” Ìµ” Ìµ” Ìµ	” Ìµ” Ìµ” Ìµ” Ìµ” Ìµ’” Ì·” Ì·” Ì¸” Ì¸
+” Ì¸”  Ì¸”$ Ì¸ ”% Ì¸!”4 Ì¸0”5 Ì¸1”9 Ì¸5”: Ì¸6”ÌJ Ì¸ÌF”ÌK Ì¸ÌG”ÌL Ì¸ÌH˜” Ì¹” Ì¹” Ì¹	” Ì¹” Ì¹” Ì¹”  Ì¹”! Ì¹™” Ìº” Ìº” Ìº	” Ìº” Ìº” Ìº”! Ìº”* Ìº&”+ Ìº'›” Ì»” Ì»” Ì»	” Ì»” Ì»”  Ì»”# Ì»”, Ì»(”- Ì»)”. Ì»*”7 Ì»3™” Ì¼” Ì¼” Ì¼	” Ì¼” Ì¼” Ì¼”! Ì¼”" Ì¼”# Ì¼Ü ” Ì½” Ì½” Ì½	” Ì½” Ì½” Ì½” Ì½”( Ì½$”) Ì½%”* Ì½&”, Ì½(”; Ì½7”< Ì½8”= Ì½9”? Ì½;”Ì@ Ì½<”ÌB Ì½>”ÌC Ì½?”ÌE Ì½ÌA”ÌF Ì½ÌB”ÌI Ì½ÌE”ÌM Ì½ÌI”ÌN Ì½ÌJ”ÌP Ì½ÌL”ÌQ Ì½ÌM”ÌR Ì½ÌN˜” Ì¾” Ì¾” Ì¾	” Ì¾” Ì¾” Ì¾” Ì¾” Ì¾˜” Ì¿” Ì¿” Ì¿	” Ì¿” Ì¿” Ì¿” Ì¿” Ì¿’” ÌÀ” ÌÀ’” ÌÂ” ÌÂ‘” ÌÃ’” ÌÄ” ÌÄ
+–” ÌÄ” ÌÄ
+” Ìá” Ìá
+” Ìá” Ìá–” ÌÄ” ÌÄ
+” Ìâ” Ìâ” Ìâ”  Ìâ˜” ÌÄ” ÌÄ
+” Ìã”! Ìã”" Ìã”+ Ìã”, Ìã”2 Ìã$–” ÌÅ” ÌÅ” ÌÅ” ÌÅ” ÌÅ”& ÌÅ–” ÌÅ” ÌÅ” ÌÆ	” ÌÆ” ÌÆ”  ÌÆ–” ÌÅ” ÌÅ” ÌÇ	” ÌÇ” ÌÇ”! ÌÇ—” ÌÅ” ÌÅ” ÌÈ	” ÌÈ” ÌÈ” ÌÈ”  ÌÈ–” ÌÉ
+” ÌÉ” ÌÉ” ÌÉ” ÌÉ” ÌÉ’” ÌÊ” ÌÊ	™” ÌÅ” ÌÅ” ÌË	” ÌË” ÌË” ÌË”! ÌË#”# ÌË%”% ÌË'’” ÌÌ
+”" ÌÌœ” ÌÍ
+” ÌÍ”% ÌÍ”( ÌÍ"”, ÌÍ&”- ÌÍ'”4 ÌÍ.”7 ÌÍ1”< ÌÍ6”= ÌÍ7”> ÌÍ8”? ÌÍ9œ” ÌÎ
+” ÌÎ”% ÌÎ”( ÌÎ"”- ÌÎ'”. ÌÎ(”/ ÌÎ)”2 ÌÎ,”6 ÌÎ0”7 ÌÎ1”> ÌÎ8”? ÌÎ9’” ÌĞ
+”  ÌĞ’” ÌÑ
+”, ÌÑ&’” ÌÒ
+”* ÌÒ$™” ÌÓ
+” ÌÓ” ÌÓ” ÌÓ”" ÌÓ”& ÌÓ ”' ÌÓ!”0 ÌÓ*”1 ÌÓ+Ÿ” ÌÔ
+” ÌÔ” ÌÔ” ÌÔ”! ÌÔ”# ÌÔ”$ ÌÔ”& ÌÔ ”5 ÌÔ/”7 ÌÔ1”8 ÌÔ2”: ÌÔ4”ÌI ÌÔÌC”ÌK ÌÔÌE”ÌL ÌÔÌF’” ÌÖ
+”1 ÌÖ+’” Ì×
+”" Ì×”” ÌØ” ÌØ” ÌØ”! ÌØ–” ÌÙ” ÌÙ” ÌÙ”  ÌÙ”! ÌÙ”* ÌÙ"”” ÌÚ” ÌÚ” ÌÚ” ÌÚ’” ÌÛ”3 ÌÛ+™” ÌÜ” ÌÜ” ÌÜ”* ÌÜ"”- ÌÜ%”1 ÌÜ)”2 ÌÜ*”< ÌÜ4”= ÌÜ5™” Ìİ” Ìİ” Ìİ”) Ìİ!”, Ìİ$”0 Ìİ(”1 Ìİ)”: Ìİ2”; Ìİ3”” ÌŞ
+” ÌŞ” ÌŞ” ÌŞ’” Ìß” Ìß	’” ÌÅ” ÌÅ’” ÌÄ” ÌÄ
+‘” ÌäÔrE–§version¤file§sources®sourcesContent¥names¨mappingsÀ‘À‘ÀÜ‘”    ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”  	 ‘”  
+ ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”    ‘”  ! ‘”  " ‘”  # ‘”  $ ‘”  % ‘”  & ‘”  ' ‘”  ( ‘”  ) ‘”  * ‘”  + ‘”  , ‘”  - ‘”  . ‘”  / ‘”  0 ‘”  1 ‘”  2 ‘”  3 ‘”  4 ‘”  5 ‘”  6 ‘”  7 ‘”  8 ‘”  9 ‘”  : ‘”  ; ‘”  < ‘”  = ‘”  > ‘”  ? ‘”  Ì@ ‘”  ÌA ‘”  ÌB ‘”  ÌC ‘”  ÌD ‘”  ÌE ‘”  ÌF ‘”  ÌG ‘”  ÌH ‘”  ÌI ‘”  ÌJ ‘”  ÌK ‘”  ÌL ‘”  ÌM ‘”  ÌN ‘”  ÌO ‘”  ÌP ‘”  ÌQ ‘”  ÌR ‘”  ÌS ‘”  ÌT ‘”  ÌU ‘”  ÌV ‘”  ÌW ‘”  ÌX ‘”  ÌY ‘”  ÌZ ‘”  Ì[ ‘”  Ì\ ‘”  Ì] ‘”  Ì^ ‘”  Ì_ ‘”  Ì` ‘”  Ìa ‘”  Ìb ‘”  Ìc ‘”  Ìd ‘”  Ìe ‘”  Ìf ‘”  Ìg ‘”  Ìh ‘”  Ìi ‘”  Ìj ‘”  Ìk ‘”  Ìl ‘”  Ìm ‘”  Ìn ‘”  Ìo ‘”  Ìp ‘”  Ìq ‘”  Ìr ‘”  Ìs ‘”  Ìt ‘”  Ìu ‘”  Ìv ‘”  Ìw ‘”  Ìx ‘”  Ìy ‘”  Ìz ‘”  Ì{ ‘”  Ì| ‘”  Ì} ‘”  Ì~ ‘”  Ì ‘”  Ì€ ‘”  Ì ‘”  Ì‚ ‘”  Ìƒ ‘”  Ì„ ‘”  Ì… ‘”  Ì† ‘”  Ì‡ ‘”  Ìˆ ‘”  Ì‰ ‘”  ÌŠ ‘”  Ì‹ ‘”  ÌŒ ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì‘ ‘”  Ì’ ‘”  Ì“ ‘”  Ì” ‘”  Ì• ‘”  Ì– ‘”  Ì— ‘”  Ì˜ ‘”  Ì™ ‘”  Ìš ‘”  Ì› ‘”  Ìœ ‘”  Ì ‘”  Ì ‘”  ÌŸ ‘”  Ì  ‘”  Ì¡ ‘”  Ì¢ ‘”  Ì£ ‘”  Ì¤ ‘”  Ì¥ ‘”  Ì¦ ‘”  Ì§ ‘”  Ì¨ ‘”  Ì© ‘”  Ìª ‘”  Ì« ‘”  Ì¬ ‘”  Ì­ ‘”  Ì® ‘”  Ì¯ ‘”  Ì° ‘”  Ì± ‘”  Ì² ‘”  Ì³ ‘”  Ì´ ‘”  Ìµ ‘”  Ì¶ ‘”  Ì· ‘”  Ì¸ ‘”  Ì¹ ‘”  Ìº ‘”  Ì» ‘”  Ì¼ ‘”  Ì½ ‘”  Ì¾ ‘”  Ì¿ ‘”  ÌÀ ‘”  ÌÁ ‘”  ÌÂ ‘”  ÌÃ ‘”  ÌÄ ‘”  ÌÅ ‘”  ÌÆ ‘”  ÌÇ ‘”  ÌÈ ‘”  ÌÉ ‘”  ÌÊ ‘”  ÌË ‘”  ÌÌ ‘”  ÌÍ ‘”  ÌÎ ‘”  ÌÏ ‘”  ÌĞ ‘”  ÌÑ ‘”  ÌÒ ‘”  ÌÓ ‘”  ÌÔ ‘”  ÌÕ ‘”  ÌÖ ‘”  Ì× ‘”  ÌØ ‘”  ÌÙ ‘”  ÌÚ ‘”  ÌÛ ‘”  ÌÜ ‘”  Ìİ ‘”  ÌŞ ‘”  Ìß ‘”  Ìà ‘”  Ìá ‘”  Ìâ ‘”  Ìã ‘”  Ìä ‘”  Ìå ‘”  Ìæ ‘”  Ìç ‘”  Ìè ‘”  Ìé ‘”  Ìê ‘”  Ìë ‘”  Ìì ‘”  Ìí ‘”  Ìî ‘”  Ìï ‘”  Ìğ ‘”  Ìñ ‘”  Ìò ‘”  Ìó ‘”  Ìô ‘”  Ìõ ‘”  Ìö ‘”  Ì÷ ‘”  Ìø ‘”  Ìù ‘”  Ìú ‘”  Ìû ‘”  Ìü ‘”  Ìı ‘”  Ìş ‘”  Ìÿ ‘”  Í  ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í	 ‘”  Í
+ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ÔrF’§missing¦pluginÃ¦genAbcÂÔ  ÔrG”²dynamicImportCache¹exportAllDeclarationCache»exportNamedDeclarationCache«importCache‘ÔrH–¤type¥start£end«declarationªspecifiers¦source¶ExportNamedDeclarationÌ€Í0_ÔrI–¤type¥start£end¢idªsuperClass¤body°ClassDeclarationÌ‡Í0_ÔrJ”¤type¥start£end¤nameªIdentifierÌÌ¤·RoboticArmWorkRangeViewJªIdentifierÌ­Ì³¦ViewPUÔrK”¤type¥start£end¤body©ClassBodyÌ´Í0_Ü ÔrL˜¤type¥start£end¦static¨computed£key¤kind¥value°MethodDefinitionÌ»ÍÁÂÂJªIdentifierÌ»ÌÆ«constructor«constructorÔrM™¤type¥start£end¢idªexpression©generator¥async¦params¤body²FunctionExpressionÌÆÍÁÀÂÂÂ–JªIdentifierÌÇÌÍ¦parentJªIdentifierÌÏÌÕ¦paramsJªIdentifierÌ×Ìå®__localStorageÔrN•¤type¥start£end¤left¥right±AssignmentPatternÌçÌòJªIdentifierÌçÌí¦elmtIdÔrO–¤type¥start£end¨operator¦prefix¨argument¯UnaryExpressionÌğÌò¡-ÃÔrP•¤type¥start£end¥value£raw§LiteralÌñÌò¡1N±AssignmentPatternÌôÍJªIdentifierÌôÍ ¬paramsLambdaJªIdentifierÍÍ©undefinedJªIdentifierÍÍ©extraInfoK®BlockStatementÍÍÁÔrQ”¤type¥start£endªexpression³ExpressionStatementÍ$ÍUÔrR–¤type¥start£end¦callee©arguments¨optional®CallExpressionÍ$ÍTÔrS“¤type¥start£end¥SuperÍ$Í)”JªIdentifierÍ*Í0¦parentJªIdentifierÍ2Í@®__localStorageJªIdentifierÍBÍH¦elmtIdJªIdentifierÍJÍS©extraInfoÂÔrT–¤type¥start£end¤testªconsequent©alternate«IfStatementÍ_ÍÆÔrU–¤type¥start£end¤left¨operator¥right°BinaryExpressionÍcÍ…O¯UnaryExpressionÍcÍv¦typeofÃJªIdentifierÍjÍv¬paramsLambda£===P§LiteralÍ{Í…¨functionª"function"K®BlockStatementÍ‡ÍÆ‘Q³ExpressionStatementÍ–Í»ÔrV–¤type¥start£end¨operator¤left¥right´AssignmentExpressionÍ–Íº¡=ÔrW—¤type¥start£end¦object¨property¨computed¨optional°MemberExpressionÍ–Í«S®ThisExpressionÍ–ÍšJªIdentifierÍ›Í«°paramsGenerator_ÂÂJªIdentifierÍ®Íº¬paramsLambdaÀQ³ExpressionStatementÍĞÍşV´AssignmentExpressionÍĞÍı¡=W°MemberExpressionÍĞÍÜS®ThisExpressionÍĞÍÔJªIdentifierÍÕÍÜ§contextÂÂÔrX•¤type¥start£end¦callee©arguments­NewExpressionÍßÍıJªIdentifierÍãÍû¸CanvasRenderingContext2DQ³ExpressionStatementÍÍV´AssignmentExpressionÍÍ¡=W°MemberExpressionÍÍS®ThisExpressionÍÍJªIdentifierÍÍ§centerXÂÂP§LiteralÍÍÍÂ£450Q³ExpressionStatementÍ%Í8V´AssignmentExpressionÍ%Í7¡=W°MemberExpressionÍ%Í1S®ThisExpressionÍ%Í)JªIdentifierÍ*Í1§centerYÂÂP§LiteralÍ4Í7Í,£300Q³ExpressionStatementÍBÍTV´AssignmentExpressionÍBÍS¡=W°MemberExpressionÍBÍMS®ThisExpressionÍBÍFJªIdentifierÍGÍM¦radiusÂÂP§LiteralÍPÍSÌ´£180Q³ExpressionStatementÍ^Í³V´AssignmentExpressionÍ^Í²¡=W°MemberExpressionÍ^ÍoS®ThisExpressionÍ^ÍbJªIdentifierÍcÍo¬__currentPosÂÂX­NewExpressionÍrÍ²JªIdentifierÍvÍ¸ObservedPropertyObjectPU“ÔrY”¤type¥start£endªproperties°ObjectExpressionÍÍ’ÔrZ™¤type¥start£end¦method©shorthand¨computed£key¥value¤kind¨PropertyÍ‘Í•ÂÂÂJªIdentifierÍ‘Í’¡xP§LiteralÍ”Í• ¡0¤initZ¨PropertyÍ—Í›ÂÂÂJªIdentifierÍ—Í˜¡yP§LiteralÍšÍ› ¡0¤initS®ThisExpressionÍŸÍ£P§LiteralÍ¥Í±ªcurrentPos¬"currentPos"Q³ExpressionStatementÍ½ÍV´AssignmentExpressionÍ½Í¡=W°MemberExpressionÍ½ÍÍS®ThisExpressionÍ½ÍÁJªIdentifierÍÂÍÍ«__targetPosÂÂX­NewExpressionÍĞÍJªIdentifierÍÔÍì¸ObservedPropertyObjectPU“Y°ObjectExpressionÍíÍû’Z¨PropertyÍïÍóÂÂÂJªIdentifierÍïÍğ¡xP§LiteralÍòÍó ¡0¤initZ¨PropertyÍõÍùÂÂÂJªIdentifierÍõÍö¡yP§LiteralÍøÍù ¡0¤initS®ThisExpressionÍıÍP§LiteralÍÍ©targetPos«"targetPos"Q³ExpressionStatementÍÍ}V´AssignmentExpressionÍÍ|¡=W°MemberExpressionÍÍ2S®ThisExpressionÍÍJªIdentifierÍÍ2³__displayCurrentPosÂÂX­NewExpressionÍ5Í|JªIdentifierÍ9ÍQ¸ObservedPropertyObjectPU“Y°ObjectExpressionÍRÍ`’Z¨PropertyÍTÍXÂÂÂJªIdentifierÍTÍU¡xP§LiteralÍWÍX ¡0¤initZ¨PropertyÍZÍ^ÂÂÂJªIdentifierÍZÍ[¡yP§LiteralÍ]Í^ ¡0¤initS®ThisExpressionÍbÍfP§LiteralÍhÍ{±displayCurrentPos³"displayCurrentPos"Q³ExpressionStatementÍ‡ÍèV´AssignmentExpressionÍ‡Íç¡=W°MemberExpressionÍ‡ÍS®ThisExpressionÍ‡Í‹JªIdentifierÍŒÍ²__displayTargetPosÂÂX­NewExpressionÍ¡ÍçJªIdentifierÍ¥Í½¸ObservedPropertyObjectPU“Y°ObjectExpressionÍ¾ÍÌ’Z¨PropertyÍÀÍÄÂÂÂJªIdentifierÍÀÍÁ¡xP§LiteralÍÃÍÄ ¡0¤initZ¨PropertyÍÆÍÊÂÂÂJªIdentifierÍÆÍÇ¡yP§LiteralÍÉÍÊ ¡0¤initS®ThisExpressionÍÎÍÒP§LiteralÍÔÍæ°displayTargetPos²"displayTargetPos"Q³ExpressionStatementÍòÍR®CallExpressionÍòÍW°MemberExpressionÍòÍS®ThisExpressionÍòÍöJªIdentifierÍ÷Í¹setInitiallyProvidedValueÂÂ‘JªIdentifierÍÍ¦paramsÂQ³ExpressionStatementÍ#ÍWR®CallExpressionÍ#ÍVW°MemberExpressionÍ#Í4S®ThisExpressionÍ#Í'JªIdentifierÍ(Í4¬declareWatchÂÂ’P§LiteralÍ5ÍH±displayCurrentPos³"displayCurrentPos"W°MemberExpressionÍJÍUS®ThisExpressionÍJÍNJªIdentifierÍOÍU¦redrawÂÂÂQ³ExpressionStatementÍaÍ”R®CallExpressionÍaÍ“W°MemberExpressionÍaÍrS®ThisExpressionÍaÍeJªIdentifierÍfÍr¬declareWatchÂÂ’P§LiteralÍsÍ…°displayTargetPos²"displayTargetPos"W°MemberExpressionÍ‡Í’S®ThisExpressionÍ‡Í‹JªIdentifierÍŒÍ’¦redrawÂÂÂQ³ExpressionStatementÍÍºR®CallExpressionÍÍ¹W°MemberExpressionÍÍ·S®ThisExpressionÍÍ¢JªIdentifierÍ£Í·´finalizeConstructionÂÂÂL°MethodDefinitionÍÇÍVÂÂJªIdentifierÍÇÍà¹setInitiallyProvidedValue¦methodM²FunctionExpressionÍàÍVÀÂÂÂ‘JªIdentifierÍáÍç¦paramsK®BlockStatementÍéÍV˜T«IfStatementÍôÍNU°BinaryExpressionÍøÍW°MemberExpressionÍøÍJªIdentifierÍøÍş¦paramsJªIdentifierÍÿÍ§contextÂÂ£!==JªIdentifierÍÍ©undefinedK®BlockStatementÍÍN‘Q³ExpressionStatementÍ%ÍCV´AssignmentExpressionÍ%ÍB¡=W°MemberExpressionÍ%Í1S®ThisExpressionÍ%Í)JªIdentifierÍ*Í1§contextÂÂW°MemberExpressionÍ4ÍBJªIdentifierÍ4Í:¦paramsJªIdentifierÍ;ÍB§contextÂÂÀT«IfStatementÍXÍ²U°BinaryExpressionÍ\ÍxW°MemberExpressionÍ\ÍjJªIdentifierÍ\Íb¦paramsJªIdentifierÍcÍj§centerXÂÂ£!==JªIdentifierÍoÍx©undefinedK®BlockStatementÍzÍ²‘Q³ExpressionStatementÍ‰Í§V´AssignmentExpressionÍ‰Í¦¡=W°MemberExpressionÍ‰Í•S®ThisExpressionÍ‰ÍJªIdentifierÍÍ•§centerXÂÂW°MemberExpressionÍ˜Í¦JªIdentifierÍ˜Í¦paramsJªIdentifierÍŸÍ¦§centerXÂÂÀT«IfStatementÍ¼ÍU°BinaryExpressionÍÀÍÜW°MemberExpressionÍÀÍÎJªIdentifierÍÀÍÆ¦paramsJªIdentifierÍÇÍÎ§centerYÂÂ£!==JªIdentifierÍÓÍÜ©undefinedK®BlockStatementÍŞÍ‘Q³ExpressionStatementÍíÍV´AssignmentExpressionÍíÍ
+¡=W°MemberExpressionÍíÍùS®ThisExpressionÍíÍñJªIdentifierÍòÍù§centerYÂÂW°MemberExpressionÍüÍ
+JªIdentifierÍüÍ¦paramsJªIdentifierÍÍ
+§centerYÂÂÀT«IfStatementÍ ÍwU°BinaryExpressionÍ$Í?W°MemberExpressionÍ$Í1JªIdentifierÍ$Í*¦paramsJªIdentifierÍ+Í1¦radiusÂÂ£!==JªIdentifierÍ6Í?©undefinedK®BlockStatementÍAÍw‘Q³ExpressionStatementÍPÍlV´AssignmentExpressionÍPÍk¡=W°MemberExpressionÍPÍ[S®ThisExpressionÍPÍTJªIdentifierÍUÍ[¦radiusÂÂW°MemberExpressionÍ^ÍkJªIdentifierÍ^Íd¦paramsJªIdentifierÍeÍk¦radiusÂÂÀT«IfStatementÍÍäU°BinaryExpressionÍ…Í¤W°MemberExpressionÍ…Í–JªIdentifierÍ…Í‹¦paramsJªIdentifierÍŒÍ–ªcurrentPosÂÂ£!==JªIdentifierÍ›Í¤©undefinedK®BlockStatementÍ¦Íä‘Q³ExpressionStatementÍµÍÙV´AssignmentExpressionÍµÍØ¡=W°MemberExpressionÍµÍÄS®ThisExpressionÍµÍ¹JªIdentifierÍºÍÄªcurrentPosÂÂW°MemberExpressionÍÇÍØJªIdentifierÍÇÍÍ¦paramsJªIdentifierÍÎÍØªcurrentPosÂÂÀT«IfStatementÍîÍNU°BinaryExpressionÍòÍW°MemberExpressionÍòÍJªIdentifierÍòÍø¦paramsJªIdentifierÍùÍ©targetPosÂÂ£!==JªIdentifierÍÍ©undefinedK®BlockStatementÍÍN‘Q³ExpressionStatementÍ!ÍCV´AssignmentExpressionÍ!ÍB¡=W°MemberExpressionÍ!Í/S®ThisExpressionÍ!Í%JªIdentifierÍ&Í/©targetPosÂÂW°MemberExpressionÍ2ÍBJªIdentifierÍ2Í8¦paramsJªIdentifierÍ9ÍB©targetPosÂÂÀT«IfStatementÍXÍĞU°BinaryExpressionÍ\Í‚W°MemberExpressionÍ\ÍtJªIdentifierÍ\Íb¦paramsJªIdentifierÍcÍt±displayCurrentPosÂÂ£!==JªIdentifierÍyÍ‚©undefinedK®BlockStatementÍ„ÍĞ‘Q³ExpressionStatementÍ“ÍÅV´AssignmentExpressionÍ“ÍÄ¡=W°MemberExpressionÍ“Í©S®ThisExpressionÍ“Í—JªIdentifierÍ˜Í©±displayCurrentPosÂÂW°MemberExpressionÍ¬ÍÄJªIdentifierÍ¬Í²¦paramsJªIdentifierÍ³ÍÄ±displayCurrentPosÂÂÀT«IfStatementÍÚÍOU°BinaryExpressionÍŞÍW°MemberExpressionÍŞÍõJªIdentifierÍŞÍä¦paramsJªIdentifierÍåÍõ°displayTargetPosÂÂ£!==JªIdentifierÍúÍ©undefinedK®BlockStatementÍÍO‘Q³ExpressionStatementÍÍDV´AssignmentExpressionÍÍC¡=W°MemberExpressionÍÍ)S®ThisExpressionÍÍJªIdentifierÍÍ)°displayTargetPosÂÂW°MemberExpressionÍ,ÍCJªIdentifierÍ,Í2¦paramsJªIdentifierÍ3ÍC°displayTargetPosÂÂÀL°MethodDefinitionÍ\Í|ÂÂJªIdentifierÍ\Ík¯updateStateVars¦methodM²FunctionExpressionÍkÍ|ÀÂÂÂ‘JªIdentifierÍlÍr¦paramsK®BlockStatementÍtÍ|L°MethodDefinitionÍ‚Í	ºÂÂJªIdentifierÍ‚Í£Ù!purgeVariableDependenciesOnElmtId¦methodM²FunctionExpressionÍ£Í	ºÀÂÂÂ‘JªIdentifierÍ¤Í¬¨rmElmtIdK®BlockStatementÍ®Í	º”Q³ExpressionStatementÍ¹ÍíR®CallExpressionÍ¹ÍìW°MemberExpressionÍ¹ÍâW°MemberExpressionÍ¹ÍÊS®ThisExpressionÍ¹Í½JªIdentifierÍ¾ÍÊ¬__currentPosÂÂJªIdentifierÍËÍâ·purgeDependencyOnElmtIdÂÂ‘JªIdentifierÍãÍë¨rmElmtIdÂQ³ExpressionStatementÍ÷Í	*R®CallExpressionÍ÷Í	)W°MemberExpressionÍ÷Í	W°MemberExpressionÍ÷Í	S®ThisExpressionÍ÷ÍûJªIdentifierÍüÍ	«__targetPosÂÂJªIdentifierÍ	Í	·purgeDependencyOnElmtIdÂÂ‘JªIdentifierÍ	 Í	(¨rmElmtIdÂQ³ExpressionStatementÍ	4Í	oR®CallExpressionÍ	4Í	nW°MemberExpressionÍ	4Í	dW°MemberExpressionÍ	4Í	LS®ThisExpressionÍ	4Í	8JªIdentifierÍ	9Í	L³__displayCurrentPosÂÂJªIdentifierÍ	MÍ	d·purgeDependencyOnElmtIdÂÂ‘JªIdentifierÍ	eÍ	m¨rmElmtIdÂQ³ExpressionStatementÍ	yÍ	³R®CallExpressionÍ	yÍ	²W°MemberExpressionÍ	yÍ	¨W°MemberExpressionÍ	yÍ	S®ThisExpressionÍ	yÍ	}JªIdentifierÍ	~Í	²__displayTargetPosÂÂJªIdentifierÍ	‘Í	¨·purgeDependencyOnElmtIdÂÂ‘JªIdentifierÍ	©Í	±¨rmElmtIdÂL°MethodDefinitionÍ	ÀÍÂÂJªIdentifierÍ	ÀÍ	Ğ°aboutToBeDeleted¦methodM²FunctionExpressionÍ	ĞÍÀÂÂÂK®BlockStatementÍ	ÓÍ–Q³ExpressionStatementÍ	ŞÍ
+R®CallExpressionÍ	ŞÍ
+W°MemberExpressionÍ	ŞÍ
+ W°MemberExpressionÍ	ŞÍ	ïS®ThisExpressionÍ	ŞÍ	âJªIdentifierÍ	ãÍ	ï¬__currentPosÂÂJªIdentifierÍ	ğÍ
+ °aboutToBeDeletedÂÂÂQ³ExpressionStatementÍ
+Í
+1R®CallExpressionÍ
+Í
+0W°MemberExpressionÍ
+Í
+.W°MemberExpressionÍ
+Í
+S®ThisExpressionÍ
+Í
+JªIdentifierÍ
+Í
+«__targetPosÂÂJªIdentifierÍ
+Í
+.°aboutToBeDeletedÂÂÂQ³ExpressionStatementÍ
+;Í
+gR®CallExpressionÍ
+;Í
+fW°MemberExpressionÍ
+;Í
+dW°MemberExpressionÍ
+;Í
+SS®ThisExpressionÍ
+;Í
+?JªIdentifierÍ
+@Í
+S³__displayCurrentPosÂÂJªIdentifierÍ
+TÍ
+d°aboutToBeDeletedÂÂÂQ³ExpressionStatementÍ
+qÍ
+œR®CallExpressionÍ
+qÍ
+›W°MemberExpressionÍ
+qÍ
+™W°MemberExpressionÍ
+qÍ
+ˆS®ThisExpressionÍ
+qÍ
+uJªIdentifierÍ
+vÍ
+ˆ²__displayTargetPosÂÂJªIdentifierÍ
+‰Í
+™°aboutToBeDeletedÂÂÂQ³ExpressionStatementÍ
+¦Í
+ÒR®CallExpressionÍ
+¦Í
+ÑW°MemberExpressionÍ
+¦Í
+ÄR®CallExpressionÍ
+¦Í
+½W°MemberExpressionÍ
+¦Í
+»JªIdentifierÍ
+¦Í
+·±SubscriberManagerJªIdentifierÍ
+¸Í
+»£GetÂÂÂJªIdentifierÍ
+¾Í
+Ä¦deleteÂÂ‘R®CallExpressionÍ
+ÅÍ
+ĞW°MemberExpressionÍ
+ÅÍ
+ÎS®ThisExpressionÍ
+ÅÍ
+ÉJªIdentifierÍ
+ÊÍ
+Î¤id__ÂÂÂÂQ³ExpressionStatementÍ
+ÜÍ
+üR®CallExpressionÍ
+ÜÍ
+ûW°MemberExpressionÍ
+ÜÍ
+ùS®ThisExpressionÍ
+ÜÍ
+àJªIdentifierÍ
+áÍ
+ù¸aboutToBeDeletedInternalÂÂÂL°MethodDefinitionÍ	ÍKÂÂJªIdentifierÍÍªcurrentPos£getM²FunctionExpressionÍÍKÀÂÂÂK®BlockStatementÍÍK‘Ôr[”¤type¥start£end¨argument¯ReturnStatementÍ%ÍDR®CallExpressionÍ,ÍCW°MemberExpressionÍ,ÍAW°MemberExpressionÍ,Í=S®ThisExpressionÍ,Í0JªIdentifierÍ1Í=¬__currentPosÂÂJªIdentifierÍ>ÍA£getÂÂÂL°MethodDefinitionÍQÍœÂÂJªIdentifierÍUÍ_ªcurrentPos£setM²FunctionExpressionÍ_ÍœÀÂÂÂ‘JªIdentifierÍ`Íh¨newValueK®BlockStatementÍjÍœ‘Q³ExpressionStatementÍuÍ•R®CallExpressionÍuÍ”W°MemberExpressionÍuÍŠW°MemberExpressionÍuÍ†S®ThisExpressionÍuÍyJªIdentifierÍzÍ†¬__currentPosÂÂJªIdentifierÍ‡ÍŠ£setÂÂ‘JªIdentifierÍ‹Í“¨newValueÂL°MethodDefinitionÍ¢ÍâÂÂJªIdentifierÍ¦Í¯©targetPos£getM²FunctionExpressionÍ¯ÍâÀÂÂÂK®BlockStatementÍ²Íâ‘[¯ReturnStatementÍ½ÍÛR®CallExpressionÍÄÍÚW°MemberExpressionÍÄÍØW°MemberExpressionÍÄÍÔS®ThisExpressionÍÄÍÈJªIdentifierÍÉÍÔ«__targetPosÂÂJªIdentifierÍÕÍØ£getÂÂÂL°MethodDefinitionÍèÍ1ÂÂJªIdentifierÍìÍõ©targetPos£setM²FunctionExpressionÍõÍ1ÀÂÂÂ‘JªIdentifierÍöÍş¨newValueK®BlockStatementÍ Í1‘Q³ExpressionStatementÍÍ*R®CallExpressionÍÍ)W°MemberExpressionÍÍW°MemberExpressionÍÍS®ThisExpressionÍÍJªIdentifierÍÍ«__targetPosÂÂJªIdentifierÍÍ£setÂÂ‘JªIdentifierÍ Í(¨newValueÂL°MethodDefinitionÍ7Í‡ÂÂJªIdentifierÍ;ÍL±displayCurrentPos£getM²FunctionExpressionÍLÍ‡ÀÂÂÂK®BlockStatementÍOÍ‡‘[¯ReturnStatementÍZÍ€R®CallExpressionÍaÍW°MemberExpressionÍaÍ}W°MemberExpressionÍaÍyS®ThisExpressionÍaÍeJªIdentifierÍfÍy³__displayCurrentPosÂÂJªIdentifierÍzÍ}£getÂÂÂL°MethodDefinitionÍÍæÂÂJªIdentifierÍ‘Í¢±displayCurrentPos£setM²FunctionExpressionÍ¢ÍæÀÂÂÂ‘JªIdentifierÍ£Í«¨newValueK®BlockStatementÍ­Íæ‘Q³ExpressionStatementÍ¸ÍßR®CallExpressionÍ¸ÍŞW°MemberExpressionÍ¸ÍÔW°MemberExpressionÍ¸ÍĞS®ThisExpressionÍ¸Í¼JªIdentifierÍ½ÍĞ³__displayCurrentPosÂÂJªIdentifierÍÑÍÔ£setÂÂ‘JªIdentifierÍÕÍİ¨newValueÂL°MethodDefinitionÍìÍ:ÂÂJªIdentifierÍğÍ °displayTargetPos£getM²FunctionExpressionÍ Í:ÀÂÂÂK®BlockStatementÍÍ:‘[¯ReturnStatementÍÍ3R®CallExpressionÍÍ2W°MemberExpressionÍÍ0W°MemberExpressionÍÍ,S®ThisExpressionÍÍJªIdentifierÍÍ,²__displayTargetPosÂÂJªIdentifierÍ-Í0£getÂÂÂL°MethodDefinitionÍ@Í—ÂÂJªIdentifierÍDÍT°displayTargetPos£setM²FunctionExpressionÍTÍ—ÀÂÂÂ‘JªIdentifierÍUÍ]¨newValueK®BlockStatementÍ_Í—‘Q³ExpressionStatementÍjÍR®CallExpressionÍjÍW°MemberExpressionÍjÍ…W°MemberExpressionÍjÍS®ThisExpressionÍjÍnJªIdentifierÍoÍ²__displayTargetPosÂÂJªIdentifierÍ‚Í…£setÂÂ‘JªIdentifierÍ†Í¨newValueÂL°MethodDefinitionÍ»Í_ÂÂJªIdentifierÍ»ÍÊ¯logicalToCanvas¦methodM²FunctionExpressionÍÊÍ_ÀÂÂÂ‘JªIdentifierÍËÍØ­logicalCoordsK®BlockStatementÍÚÍ_‘[¯ReturnStatementÍåÍXY°ObjectExpressionÍìÍW’Z¨PropertyÍûÍÂÂÂJªIdentifierÍûÍü¡xU°BinaryExpressionÍşÍW°MemberExpressionÍşÍ
+S®ThisExpressionÍşÍJªIdentifierÍÍ
+§centerXÂÂ¡+W°MemberExpressionÍÍJªIdentifierÍÍ­logicalCoordsJªIdentifierÍÍ¡yÂÂ¤initZ¨PropertyÍ+ÍLÂÂÂJªIdentifierÍ+Í,¡yU°BinaryExpressionÍ.ÍLW°MemberExpressionÍ.Í:S®ThisExpressionÍ.Í2JªIdentifierÍ3Í:§centerYÂÂ¡-W°MemberExpressionÍ=ÍLJªIdentifierÍ=ÍJ­logicalCoordsJªIdentifierÍKÍL¡xÂÂ¤initL°MethodDefinitionÍ~Í¡ÂÂJªIdentifierÍ~Í„¦redraw¦methodM²FunctionExpressionÍ„Í¡ÀÂÂÂK®BlockStatementÍ‡Í¡–T«IfStatementÍ’ÍÆO¯UnaryExpressionÍ–Í£¡!ÃW°MemberExpressionÍ—Í£S®ThisExpressionÍ—Í›JªIdentifierÍœÍ£§contextÂÂK®BlockStatementÍ¥ÍÆ‘[¯ReturnStatementÍ´Í»ÀÀQ³ExpressionStatementÍĞÍR®CallExpressionÍĞÍW°MemberExpressionÍĞÍæW°MemberExpressionÍĞÍÜS®ThisExpressionÍĞÍÔJªIdentifierÍÕÍÜ§contextÂÂJªIdentifierÍİÍæ©clearRectÂÂ”P§LiteralÍçÍè ¡0P§LiteralÍêÍë ¡0U°BinaryExpressionÍíÍıW°MemberExpressionÍíÍùS®ThisExpressionÍíÍñJªIdentifierÍòÍù§centerXÂÂ¡*P§LiteralÍüÍı¡2U°BinaryExpressionÍÿÍW°MemberExpressionÍÿÍS®ThisExpressionÍÿÍJªIdentifierÍÍ§centerYÂÂ¡*P§LiteralÍÍ¡2ÂQ³ExpressionStatementÍÍ+R®CallExpressionÍÍ*W°MemberExpressionÍÍ(S®ThisExpressionÍÍJªIdentifierÍ Í(¨drawBaseÂÂÂQ³ExpressionStatementÍ5ÍOR®CallExpressionÍ5ÍNW°MemberExpressionÍ5ÍLS®ThisExpressionÍ5Í9JªIdentifierÍ:ÍL²drawTicksAndLabelsÂÂÂQ³ExpressionStatementÍYÍsR®CallExpressionÍYÍrW°MemberExpressionÍYÍpS®ThisExpressionÍYÍ]JªIdentifierÍ^Íp²drawConcentricArcsÂÂÂQ³ExpressionStatementÍ}ÍšR®CallExpressionÍ}Í™W°MemberExpressionÍ}Í—S®ThisExpressionÍ}ÍJªIdentifierÍ‚Í—µdrawInteractivePointsÂÂÂL°MethodDefinitionÍ¶Í+ÂÂJªIdentifierÍ¶Í¾¨drawBase¦methodM²FunctionExpressionÍ¾Í+ÀÂÂÂK®BlockStatementÍÁÍ+Ü Ôr\•¤type¥start£end¬declarations¤kind³VariableDeclarationÍçÍ‘Ôr]•¤type¥start£end¢id¤init²VariableDeclaratorÍíÍ
+JªIdentifierÍíÍ·leftBoundaryAngle_labelO¯UnaryExpressionÍÍ
+¡-ÃP§LiteralÍÍ
+¢15¥const\³VariableDeclarationÍ#ÍH‘]²VariableDeclaratorÍ)ÍGJªIdentifierÍ)ÍA¸rightBoundaryAngle_labelP§LiteralÍDÍGÌÃ£195¥const\³VariableDeclarationÍºÍ‘]²VariableDeclaratorÍÀÍJªIdentifierÍÀÍÔ´startAngleRad_canvasU°BinaryExpressionÍ×ÍU°BinaryExpressionÍ×Í U°BinaryExpressionÍØÍõJªIdentifierÍØÍï·leftBoundaryAngle_label¡+P§LiteralÍòÍõÌ´£180¡*W°MemberExpressionÍùÍ JªIdentifierÍùÍı¤MathJªIdentifierÍşÍ ¢PIÂÂ¡/P§LiteralÍÍÌ´£180¥const\³VariableDeclarationÍÍe‘]²VariableDeclaratorÍÍdJªIdentifierÍÍ1²endAngleRad_canvasU°BinaryExpressionÍ4ÍdU°BinaryExpressionÍ4Í^U°BinaryExpressionÍ5ÍSJªIdentifierÍ5ÍM¸rightBoundaryAngle_label¡+P§LiteralÍPÍSÌ´£180¡*W°MemberExpressionÍWÍ^JªIdentifierÍWÍ[¤MathJªIdentifierÍ\Í^¢PIÂÂ¡/P§LiteralÍaÍdÌ´£180¥constQ³ExpressionStatementÍŠÍ£R®CallExpressionÍŠÍ¢W°MemberExpressionÍŠÍ W°MemberExpressionÍŠÍ–S®ThisExpressionÍŠÍJªIdentifierÍÍ–§contextÂÂJªIdentifierÍ—Í ©beginPathÂÂÂQ³ExpressionStatementÍ­ÍÊV´AssignmentExpressionÍ­ÍÉ¡=W°MemberExpressionÍ­ÍÃW°MemberExpressionÍ­Í¹S®ThisExpressionÍ­Í±JªIdentifierÍ²Í¹§contextÂÂJªIdentifierÍºÍÃ©lineWidthÂÂP§LiteralÍÆÍÉË?ø      £1.5Q³ExpressionStatementÍÔÍùV´AssignmentExpressionÍÔÍø¡=W°MemberExpressionÍÔÍìW°MemberExpressionÍÔÍàS®ThisExpressionÍÔÍØJªIdentifierÍÙÍà§contextÂÂJªIdentifierÍáÍì«strokeStyleÂÂP§LiteralÍïÍø§#E9ECEF©'#E9ECEF'Q³ExpressionStatementÍfÍÑR®CallExpressionÍfÍĞW°MemberExpressionÍfÍvW°MemberExpressionÍfÍrS®ThisExpressionÍfÍjJªIdentifierÍkÍr§contextÂÂJªIdentifierÍsÍv£arcÂÂ–W°MemberExpressionÍwÍƒS®ThisExpressionÍwÍ{JªIdentifierÍ|Íƒ§centerXÂÂW°MemberExpressionÍ…Í‘S®ThisExpressionÍ…Í‰JªIdentifierÍŠÍ‘§centerYÂÂW°MemberExpressionÍ“ÍS®ThisExpressionÍ“Í—JªIdentifierÍ˜Í¦radiusÂÂJªIdentifierÍ Í´´startAngleRad_canvasJªIdentifierÍ¶ÍÈ²endAngleRad_canvasP§LiteralÍÊÍÏÂ¥falseÂ\³VariableDeclarationÍùÍ?‘]²VariableDeclaratorÍÿÍ>JªIdentifierÍÿÍµleftBoundaryRad_labelU°BinaryExpressionÍÍ>U°BinaryExpressionÍÍ8JªIdentifierÍÍ.·leftBoundaryAngle_label¡*W°MemberExpressionÍ1Í8JªIdentifierÍ1Í5¤MathJªIdentifierÍ6Í8¢PIÂÂ¡/P§LiteralÍ;Í>Ì´£180¥const\³VariableDeclarationÍIÍ‘‘]²VariableDeclaratorÍOÍJªIdentifierÍOÍe¶rightBoundaryRad_labelU°BinaryExpressionÍhÍU°BinaryExpressionÍhÍŠJªIdentifierÍhÍ€¸rightBoundaryAngle_label¡*W°MemberExpressionÍƒÍŠJªIdentifierÍƒÍ‡¤MathJªIdentifierÍˆÍŠ¢PIÂÂ¡/P§LiteralÍÍÌ´£180¥constQ³ExpressionStatementÍ›ÍËR®CallExpressionÍ›ÍÊW°MemberExpressionÍ›Í®W°MemberExpressionÍ›Í§S®ThisExpressionÍ›ÍŸJªIdentifierÍ Í§§contextÂÂJªIdentifierÍ¨Í®¦moveToÂÂ’W°MemberExpressionÍ¯Í»S®ThisExpressionÍ¯Í³JªIdentifierÍ´Í»§centerXÂÂW°MemberExpressionÍ½ÍÉS®ThisExpressionÍ½ÍÁJªIdentifierÍÂÍÉ§centerYÂÂÂQ³ExpressionStatementÍÕÍeR®CallExpressionÍÕÍdW°MemberExpressionÍÕÍèW°MemberExpressionÍÕÍáS®ThisExpressionÍÕÍÙJªIdentifierÍÚÍá§contextÂÂJªIdentifierÍâÍè¦lineToÂÂ’U°BinaryExpressionÍéÍ%W°MemberExpressionÍéÍõS®ThisExpressionÍéÍíJªIdentifierÍîÍõ§centerXÂÂ¡-U°BinaryExpressionÍøÍ%W°MemberExpressionÍøÍS®ThisExpressionÍøÍüJªIdentifierÍıÍ¦radiusÂÂ¡*R®CallExpressionÍÍ%W°MemberExpressionÍÍJªIdentifierÍÍ
+¤MathJªIdentifierÍÍ£cosÂÂ‘JªIdentifierÍÍ$µleftBoundaryRad_labelÂU°BinaryExpressionÍ'ÍcW°MemberExpressionÍ'Í3S®ThisExpressionÍ'Í+JªIdentifierÍ,Í3§centerYÂÂ¡-U°BinaryExpressionÍ6ÍcW°MemberExpressionÍ6ÍAS®ThisExpressionÍ6Í:JªIdentifierÍ;ÍA¦radiusÂÂ¡*R®CallExpressionÍDÍcW°MemberExpressionÍDÍLJªIdentifierÍDÍH¤MathJªIdentifierÍIÍL£sinÂÂ‘JªIdentifierÍMÍbµleftBoundaryRad_labelÂÂQ³ExpressionStatementÍoÍŸR®CallExpressionÍoÍW°MemberExpressionÍoÍ‚W°MemberExpressionÍoÍ{S®ThisExpressionÍoÍsJªIdentifierÍtÍ{§contextÂÂJªIdentifierÍ|Í‚¦moveToÂÂ’W°MemberExpressionÍƒÍS®ThisExpressionÍƒÍ‡JªIdentifierÍˆÍ§centerXÂÂW°MemberExpressionÍ‘ÍS®ThisExpressionÍ‘Í•JªIdentifierÍ–Í§centerYÂÂÂQ³ExpressionStatementÍ©Í;R®CallExpressionÍ©Í:W°MemberExpressionÍ©Í¼W°MemberExpressionÍ©ÍµS®ThisExpressionÍ©Í­JªIdentifierÍ®Íµ§contextÂÂJªIdentifierÍ¶Í¼¦lineToÂÂ’U°BinaryExpressionÍ½ÍúW°MemberExpressionÍ½ÍÉS®ThisExpressionÍ½ÍÁJªIdentifierÍÂÍÉ§centerXÂÂ¡-U°BinaryExpressionÍÌÍúW°MemberExpressionÍÌÍ×S®ThisExpressionÍÌÍĞJªIdentifierÍÑÍ×¦radiusÂÂ¡*R®CallExpressionÍÚÍúW°MemberExpressionÍÚÍâJªIdentifierÍÚÍŞ¤MathJªIdentifierÍßÍâ£cosÂÂ‘JªIdentifierÍãÍù¶rightBoundaryRad_labelÂU°BinaryExpressionÍüÍ9W°MemberExpressionÍüÍS®ThisExpressionÍüÍ JªIdentifierÍÍ§centerYÂÂ¡-U°BinaryExpressionÍÍ9W°MemberExpressionÍÍS®ThisExpressionÍÍJªIdentifierÍÍ¦radiusÂÂ¡*R®CallExpressionÍÍ9W°MemberExpressionÍÍ!JªIdentifierÍÍ¤MathJªIdentifierÍÍ!£sinÂÂ‘JªIdentifierÍ"Í8¶rightBoundaryRad_labelÂÂQ³ExpressionStatementÍEÍ[R®CallExpressionÍEÍZW°MemberExpressionÍEÍXW°MemberExpressionÍEÍQS®ThisExpressionÍEÍIJªIdentifierÍJÍQ§contextÂÂJªIdentifierÍRÍX¦strokeÂÂÂQ³ExpressionStatementÍvÍR®CallExpressionÍvÍW°MemberExpressionÍvÍŒW°MemberExpressionÍvÍ‚S®ThisExpressionÍvÍzJªIdentifierÍ{Í‚§contextÂÂJªIdentifierÍƒÍŒ©beginPathÂÂÂQ³ExpressionStatementÍ™Í¼V´AssignmentExpressionÍ™Í»¡=W°MemberExpressionÍ™Í¯W°MemberExpressionÍ™Í¥S®ThisExpressionÍ™ÍJªIdentifierÍÍ¥§contextÂÂJªIdentifierÍ¦Í¯©fillStyleÂÂP§LiteralÍ²Í»§#C92A2A©'#C92A2A'Q³ExpressionStatementÍÆÍR®CallExpressionÍÆÍW°MemberExpressionÍÆÍÖW°MemberExpressionÍÆÍÒS®ThisExpressionÍÆÍÊJªIdentifierÍËÍÒ§contextÂÂJªIdentifierÍÓÍÖ£arcÂÂ•W°MemberExpressionÍ×ÍãS®ThisExpressionÍ×ÍÛJªIdentifierÍÜÍã§centerXÂÂW°MemberExpressionÍåÍñS®ThisExpressionÍåÍéJªIdentifierÍêÍñ§centerYÂÂP§LiteralÍóÍô¡4P§LiteralÍöÍ÷ ¡0U°BinaryExpressionÍùÍP§LiteralÍùÍú¡2¡*W°MemberExpressionÍıÍJªIdentifierÍıÍ¤MathJªIdentifierÍÍ¢PIÂÂÂQ³ExpressionStatementÍÍ$R®CallExpressionÍÍ#W°MemberExpressionÍÍ!W°MemberExpressionÍÍS®ThisExpressionÍÍJªIdentifierÍÍ§contextÂÂJªIdentifierÍÍ!¤fillÂÂÂL°MethodDefinitionÍ1ÍîÂÂJªIdentifierÍ1ÍC²drawTicksAndLabels¦methodM²FunctionExpressionÍCÍîÀÂÂÂK®BlockStatementÍFÍî™\³VariableDeclarationÍQÍv‘]²VariableDeclaratorÍWÍuJªIdentifierÍWÍb«labelRadiusU°BinaryExpressionÍeÍuW°MemberExpressionÍeÍpS®ThisExpressionÍeÍiJªIdentifierÍjÍp¦radiusÂÂ¡+P§LiteralÍsÍu¢18¥constQ³ExpressionStatementÍ€Í™R®CallExpressionÍ€Í˜W°MemberExpressionÍ€Í–W°MemberExpressionÍ€ÍŒS®ThisExpressionÍ€Í„JªIdentifierÍ…ÍŒ§contextÂÂJªIdentifierÍÍ–©beginPathÂÂÂQ³ExpressionStatementÍ£ÍÁV´AssignmentExpressionÍ£ÍÀ¡=W°MemberExpressionÍ£Í¹W°MemberExpressionÍ£Í¯S®ThisExpressionÍ£Í§JªIdentifierÍ¨Í¯§contextÂÂJªIdentifierÍ°Í¹©lineWidthÂÂP§LiteralÍ¼ÍÀË?è      ¤0.75Q³ExpressionStatementÍİÍV´AssignmentExpressionÍİÍ¡=W°MemberExpressionÍİÍõW°MemberExpressionÍİÍéS®ThisExpressionÍİÍáJªIdentifierÍâÍé§contextÂÂJªIdentifierÍêÍõ«strokeStyleÂÂP§LiteralÍøÍ§#495057©'#495057'Q³ExpressionStatementÍÍ-R®CallExpressionÍÍ,W°MemberExpressionÍÍ$W°MemberExpressionÍÍS®ThisExpressionÍÍJªIdentifierÍÍ§contextÂÂJªIdentifierÍÍ$«setLineDashÂÂ‘Ôr^”¤type¥start£end¨elements¯ArrayExpressionÍ%Í+’P§LiteralÍ&Í'¡3P§LiteralÍ)Í*¡5ÂÔr_—¤type¥start£end¤init¤test¦update¤body¬ForStatementÍ7Ík\³VariableDeclarationÍ<ÍK‘]²VariableDeclaratorÍ@ÍKJªIdentifierÍ@ÍE¥angleO¯UnaryExpressionÍHÍK¡-ÃP§LiteralÍIÍK
+¢10£letU°BinaryExpressionÍMÍYJªIdentifierÍMÍR¥angle¢<=P§LiteralÍVÍYÌ¾£190V´AssignmentExpressionÍ[Íf¢+=JªIdentifierÍ[Í`¥angleP§LiteralÍdÍf
+¢10K®BlockStatementÍhÍk“\³VariableDeclarationÍwÍ‘]²VariableDeclaratorÍ}ÍJªIdentifierÍ}Í…¨angleRadU°BinaryExpressionÍˆÍU°BinaryExpressionÍˆÍ—JªIdentifierÍˆÍ¥angle¡*W°MemberExpressionÍÍ—JªIdentifierÍÍ”¤MathJªIdentifierÍ•Í—¢PIÂÂ¡/P§LiteralÍšÍÌ´£180¥constQ³ExpressionStatementÍ¬ÍÜR®CallExpressionÍ¬ÍÛW°MemberExpressionÍ¬Í¿W°MemberExpressionÍ¬Í¸S®ThisExpressionÍ¬Í°JªIdentifierÍ±Í¸§contextÂÂJªIdentifierÍ¹Í¿¦moveToÂÂ’W°MemberExpressionÍÀÍÌS®ThisExpressionÍÀÍÄJªIdentifierÍÅÍÌ§centerXÂÂW°MemberExpressionÍÎÍÚS®ThisExpressionÍÎÍÒJªIdentifierÍÓÍÚ§centerYÂÂÂQ³ExpressionStatementÍêÍ`R®CallExpressionÍêÍ_W°MemberExpressionÍêÍıW°MemberExpressionÍêÍöS®ThisExpressionÍêÍîJªIdentifierÍïÍö§contextÂÂJªIdentifierÍ÷Íı¦lineToÂÂ’U°BinaryExpressionÍşÍ-W°MemberExpressionÍşÍ
+S®ThisExpressionÍşÍJªIdentifierÍÍ
+§centerXÂÂ¡-U°BinaryExpressionÍÍ-W°MemberExpressionÍÍS®ThisExpressionÍÍJªIdentifierÍÍ¦radiusÂÂ¡*R®CallExpressionÍÍ-W°MemberExpressionÍÍ#JªIdentifierÍÍ¤MathJªIdentifierÍ Í#£cosÂÂ‘JªIdentifierÍ$Í,¨angleRadÂU°BinaryExpressionÍ/Í^W°MemberExpressionÍ/Í;S®ThisExpressionÍ/Í3JªIdentifierÍ4Í;§centerYÂÂ¡-U°BinaryExpressionÍ>Í^W°MemberExpressionÍ>ÍIS®ThisExpressionÍ>ÍBJªIdentifierÍCÍI¦radiusÂÂ¡*R®CallExpressionÍLÍ^W°MemberExpressionÍLÍTJªIdentifierÍLÍP¤MathJªIdentifierÍQÍT£sinÂÂ‘JªIdentifierÍUÍ]¨angleRadÂÂQ³ExpressionStatementÍuÍ‹R®CallExpressionÍuÍŠW°MemberExpressionÍuÍˆW°MemberExpressionÍuÍS®ThisExpressionÍuÍyJªIdentifierÍzÍ§contextÂÂJªIdentifierÍ‚Íˆ¦strokeÂÂÂQ³ExpressionStatementÍ•Í²R®CallExpressionÍ•Í±W°MemberExpressionÍ•Í­W°MemberExpressionÍ•Í¡S®ThisExpressionÍ•Í™JªIdentifierÍšÍ¡§contextÂÂJªIdentifierÍ¢Í­«setLineDashÂÂ‘^¯ArrayExpressionÍ®Í°Â_¬ForStatementÍ¼Íç\³VariableDeclarationÍÁÍĞ‘]²VariableDeclaratorÍÅÍĞJªIdentifierÍÅÍÊ¥angleO¯UnaryExpressionÍÍÍĞ¡-ÃP§LiteralÍÎÍĞ¢15£letU°BinaryExpressionÍÒÍŞJªIdentifierÍÒÍ×¥angle¢<=P§LiteralÍÛÍŞÌÃ£195O°UpdateExpressionÍàÍç¢++ÂJªIdentifierÍàÍå¥angleK®BlockStatementÍéÍçŸ\³VariableDeclarationÍøÍ‘]²VariableDeclaratorÍşÍJªIdentifierÍşÍ¨angleRadU°BinaryExpressionÍ	ÍU°BinaryExpressionÍ	ÍJªIdentifierÍ	Í¥angle¡*W°MemberExpressionÍÍJªIdentifierÍÍ¤MathJªIdentifierÍÍ¢PIÂÂ¡/P§LiteralÍÍÌ´£180¥const\³VariableDeclarationÍ-Íl‘]²VariableDeclaratorÍ3ÍkJªIdentifierÍ3Í9¦startXU°BinaryExpressionÍ<ÍkW°MemberExpressionÍ<ÍHS®ThisExpressionÍ<Í@JªIdentifierÍAÍH§centerXÂÂ¡-U°BinaryExpressionÍKÍkW°MemberExpressionÍKÍVS®ThisExpressionÍKÍOJªIdentifierÍPÍV¦radiusÂÂ¡*R®CallExpressionÍYÍkW°MemberExpressionÍYÍaJªIdentifierÍYÍ]¤MathJªIdentifierÍ^Ía£cosÂÂ‘JªIdentifierÍbÍj¨angleRadÂ¥const\³VariableDeclarationÍzÍ¹‘]²VariableDeclaratorÍ€Í¸JªIdentifierÍ€Í†¦startYU°BinaryExpressionÍ‰Í¸W°MemberExpressionÍ‰Í•S®ThisExpressionÍ‰ÍJªIdentifierÍÍ•§centerYÂÂ¡-U°BinaryExpressionÍ˜Í¸W°MemberExpressionÍ˜Í£S®ThisExpressionÍ˜ÍœJªIdentifierÍÍ£¦radiusÂÂ¡*R®CallExpressionÍ¦Í¸W°MemberExpressionÍ¦Í®JªIdentifierÍ¦Íª¤MathJªIdentifierÍ«Í®£sinÂÂ‘JªIdentifierÍ¯Í·¨angleRadÂ¥const\³VariableDeclarationÍÇÍÚ‘]²VariableDeclaratorÍËÍÙJªIdentifierÍËÍÕªtickLengthP§LiteralÍØÍÙ¡6£let\³VariableDeclarationÍèÍú‘]²VariableDeclaratorÍìÍùJªIdentifierÍìÍõ©tickWidthP§LiteralÍøÍù¡1£letT«IfStatementÍÍU±LogicalExpressionÍÍ>U±LogicalExpressionÍÍ-U°BinaryExpressionÍÍU°BinaryExpressionÍÍJªIdentifierÍÍ¥angle¡%P§LiteralÍÍ
+¢10£===P§LiteralÍÍ ¡0¢||U°BinaryExpressionÍ Í-JªIdentifierÍ Í%¥angle£===O¯UnaryExpressionÍ*Í-¡-ÃP§LiteralÍ+Í-¢15¢||U°BinaryExpressionÍ1Í>JªIdentifierÍ1Í6¥angle£===P§LiteralÍ;Í>ÌÃ£195K®BlockStatementÍ@Í’’Q³ExpressionStatementÍSÍcV´AssignmentExpressionÍSÍb¡=JªIdentifierÍSÍ]ªtickLengthP§LiteralÍ`Íb¢18Q³ExpressionStatementÍuÍƒV´AssignmentExpressionÍuÍ‚¡=JªIdentifierÍuÍ~©tickWidthP§LiteralÍÍ‚¡2T«IfStatementÍ¥ÍU°BinaryExpressionÍ©Í¸U°BinaryExpressionÍ©Í²JªIdentifierÍ©Í®¥angle¡%P§LiteralÍ±Í²¡5£===P§LiteralÍ·Í¸ ¡0K®BlockStatementÍºÍ’Q³ExpressionStatementÍÍÍİV´AssignmentExpressionÍÍÍÜ¡=JªIdentifierÍÍÍ×ªtickLengthP§LiteralÍÚÍÜ¢14Q³ExpressionStatementÍïÍÿV´AssignmentExpressionÍïÍş¡=JªIdentifierÍïÍø©tickWidthP§LiteralÍûÍşË?ø      £1.5À\³VariableDeclarationÍÍh‘]²VariableDeclaratorÍ"ÍgJªIdentifierÍ"Í&¤endXU°BinaryExpressionÍ)ÍgW°MemberExpressionÍ)Í5S®ThisExpressionÍ)Í-JªIdentifierÍ.Í5§centerXÂÂ¡-U°BinaryExpressionÍ8ÍgU°BinaryExpressionÍ9ÍQW°MemberExpressionÍ9ÍDS®ThisExpressionÍ9Í=JªIdentifierÍ>ÍD¦radiusÂÂ¡-JªIdentifierÍGÍQªtickLength¡*R®CallExpressionÍUÍgW°MemberExpressionÍUÍ]JªIdentifierÍUÍY¤MathJªIdentifierÍZÍ]£cosÂÂ‘JªIdentifierÍ^Íf¨angleRadÂ¥const\³VariableDeclarationÍvÍÂ‘]²VariableDeclaratorÍ|ÍÁJªIdentifierÍ|Í€¤endYU°BinaryExpressionÍƒÍÁW°MemberExpressionÍƒÍS®ThisExpressionÍƒÍ‡JªIdentifierÍˆÍ§centerYÂÂ¡-U°BinaryExpressionÍ’ÍÁU°BinaryExpressionÍ“Í«W°MemberExpressionÍ“ÍS®ThisExpressionÍ“Í—JªIdentifierÍ˜Í¦radiusÂÂ¡-JªIdentifierÍ¡Í«ªtickLength¡*R®CallExpressionÍ¯ÍÁW°MemberExpressionÍ¯Í·JªIdentifierÍ¯Í³¤MathJªIdentifierÍ´Í·£sinÂÂ‘JªIdentifierÍ¸ÍÀ¨angleRadÂ¥constQ³ExpressionStatementÍĞÍéR®CallExpressionÍĞÍèW°MemberExpressionÍĞÍæW°MemberExpressionÍĞÍÜS®ThisExpressionÍĞÍÔJªIdentifierÍÕÍÜ§contextÂÂJªIdentifierÍİÍæ©beginPathÂÂÂQ³ExpressionStatementÍ÷ÍV´AssignmentExpressionÍ÷Í¡=W°MemberExpressionÍ÷ÍW°MemberExpressionÍ÷ÍS®ThisExpressionÍ÷ÍûJªIdentifierÍüÍ§contextÂÂJªIdentifierÍÍ©lineWidthÂÂJªIdentifierÍÍ©tickWidthQ³ExpressionStatementÍ=ÍbV´AssignmentExpressionÍ=Ía¡=W°MemberExpressionÍ=ÍUW°MemberExpressionÍ=ÍIS®ThisExpressionÍ=ÍAJªIdentifierÍBÍI§contextÂÂJªIdentifierÍJÍU«strokeStyleÂÂP§LiteralÍXÍa§#E9ECEF©'#E9ECEF'Q³ExpressionStatementÍpÍ”R®CallExpressionÍpÍ“W°MemberExpressionÍpÍƒW°MemberExpressionÍpÍ|S®ThisExpressionÍpÍtJªIdentifierÍuÍ|§contextÂÂJªIdentifierÍ}Íƒ¦moveToÂÂ’JªIdentifierÍ„ÍŠ¦startXJªIdentifierÍŒÍ’¦startYÂQ³ExpressionStatementÍ¢ÍÂR®CallExpressionÍ¢ÍÁW°MemberExpressionÍ¢ÍµW°MemberExpressionÍ¢Í®S®ThisExpressionÍ¢Í¦JªIdentifierÍ§Í®§contextÂÂJªIdentifierÍ¯Íµ¦lineToÂÂ’JªIdentifierÍ¶Íº¤endXJªIdentifierÍ¼ÍÀ¤endYÂQ³ExpressionStatementÍĞÍæR®CallExpressionÍĞÍåW°MemberExpressionÍĞÍãW°MemberExpressionÍĞÍÜS®ThisExpressionÍĞÍÔJªIdentifierÍÕÍÜ§contextÂÂJªIdentifierÍİÍã¦strokeÂÂÂT«IfStatementÍôÍÜU±LogicalExpressionÍøÍ*U±LogicalExpressionÍøÍU°BinaryExpressionÍøÍU°BinaryExpressionÍøÍJªIdentifierÍøÍı¥angle¡%P§LiteralÍ Í
+¢10£===P§LiteralÍÍ ¡0¢||U°BinaryExpressionÍÍJªIdentifierÍÍ¥angle£===O¯UnaryExpressionÍÍ¡-ÃP§LiteralÍÍ¢15¢||U°BinaryExpressionÍÍ*JªIdentifierÍÍ"¥angle£===P§LiteralÍ'Í*ÌÃ£195K®BlockStatementÍ,ÍÜ›\³VariableDeclarationÍ?Í~‘]²VariableDeclaratorÍEÍ}JªIdentifierÍEÍK¦labelXU°BinaryExpressionÍNÍ}W°MemberExpressionÍNÍZS®ThisExpressionÍNÍRJªIdentifierÍSÍZ§centerXÂÂ¡-U°BinaryExpressionÍ]Í}JªIdentifierÍ]Íh«labelRadius¡*R®CallExpressionÍkÍ}W°MemberExpressionÍkÍsJªIdentifierÍkÍo¤MathJªIdentifierÍpÍs£cosÂÂ‘JªIdentifierÍtÍ|¨angleRadÂ¥const\³VariableDeclarationÍÍÏ‘]²VariableDeclaratorÍ–ÍÎJªIdentifierÍ–Íœ¦labelYU°BinaryExpressionÍŸÍÎW°MemberExpressionÍŸÍ«S®ThisExpressionÍŸÍ£JªIdentifierÍ¤Í«§centerYÂÂ¡-U°BinaryExpressionÍ®ÍÎJªIdentifierÍ®Í¹«labelRadius¡*R®CallExpressionÍ¼ÍÎW°MemberExpressionÍ¼ÍÄJªIdentifierÍ¼ÍÀ¤MathJªIdentifierÍÁÍÄ£sinÂÂ‘JªIdentifierÍÅÍÍ¨angleRadÂ¥constQ³ExpressionStatementÍáÍõR®CallExpressionÍáÍôW°MemberExpressionÍáÍòW°MemberExpressionÍáÍíS®ThisExpressionÍáÍåJªIdentifierÍæÍí§contextÂÂJªIdentifierÍîÍò¤saveÂÂÂQ³ExpressionStatementÍÍ.R®CallExpressionÍÍ-W°MemberExpressionÍÍW°MemberExpressionÍÍS®ThisExpressionÍÍJªIdentifierÍÍ§contextÂÂJªIdentifierÍÍ©translateÂÂ’JªIdentifierÍÍ$¦labelXJªIdentifierÍ&Í,¦labelYÂQ³ExpressionStatementÍ@ÍlR®CallExpressionÍ@ÍkW°MemberExpressionÍ@ÍSW°MemberExpressionÍ@ÍLS®ThisExpressionÍ@ÍDJªIdentifierÍEÍL§contextÂÂJªIdentifierÍMÍS¦rotateÂÂ‘U°BinaryExpressionÍTÍjJªIdentifierÍTÍ\¨angleRad¡-U°BinaryExpressionÍ_ÍjW°MemberExpressionÍ_ÍfJªIdentifierÍ_Íc¤MathJªIdentifierÍdÍf¢PIÂÂ¡/P§LiteralÍiÍj¡2ÂQ³ExpressionStatementÍ~Í©V´AssignmentExpressionÍ~Í¨¡=W°MemberExpressionÍ~ÍW°MemberExpressionÍ~ÍŠS®ThisExpressionÍ~Í‚JªIdentifierÍƒÍŠ§contextÂÂJªIdentifierÍ‹Í¤fontÂÂP§LiteralÍ’Í¨´bold 14px sans-serif¶'bold 14px sans-serif'Q³ExpressionStatementÍÖÍùV´AssignmentExpressionÍÖÍø¡=W°MemberExpressionÍÖÍìW°MemberExpressionÍÖÍâS®ThisExpressionÍÖÍÚJªIdentifierÍÛÍâ§contextÂÂJªIdentifierÍãÍì©fillStyleÂÂP§LiteralÍïÍø§#F8F9FA©'#F8F9FA'Q³ExpressionStatementÍÍ-V´AssignmentExpressionÍÍ,¡=W°MemberExpressionÍÍ!W°MemberExpressionÍÍS®ThisExpressionÍÍJªIdentifierÍÍ§contextÂÂJªIdentifierÍÍ!©textAlignÂÂP§LiteralÍ$Í,¦center¨'center'Q³ExpressionStatementÍ?ÍdV´AssignmentExpressionÍ?Íc¡=W°MemberExpressionÍ?ÍXW°MemberExpressionÍ?ÍKS®ThisExpressionÍ?ÍCJªIdentifierÍDÍK§contextÂÂJªIdentifierÍLÍX¬textBaselineÂÂP§LiteralÍ[Íc¦middle¨'middle'Q³ExpressionStatementÍvÍ¤R®CallExpressionÍvÍ£W°MemberExpressionÍvÍ‹W°MemberExpressionÍvÍ‚S®ThisExpressionÍvÍzJªIdentifierÍ{Í‚§contextÂÂJªIdentifierÍƒÍ‹¨fillTextÂÂ“R®CallExpressionÍŒÍœW°MemberExpressionÍŒÍšJªIdentifierÍŒÍ‘¥angleJªIdentifierÍ’Íš¨toStringÂÂÂP§LiteralÍÍŸ ¡0P§LiteralÍ¡Í¢ ¡0ÂQ³ExpressionStatementÍ¶ÍÍR®CallExpressionÍ¶ÍÌW°MemberExpressionÍ¶ÍÊW°MemberExpressionÍ¶ÍÂS®ThisExpressionÍ¶ÍºJªIdentifierÍ»ÍÂ§contextÂÂJªIdentifierÍÃÍÊ§restoreÂÂÂÀL°MethodDefinitionÍôÍ%ÒÂÂJªIdentifierÍôÍ ²drawConcentricArcs¦methodM²FunctionExpressionÍ Í%ÒÀÂÂÂK®BlockStatementÍ 	Í%Ò˜\³VariableDeclarationÍ Í 7‘]²VariableDeclaratorÍ Í 6JªIdentifierÍ Í  ¦values^¯ArrayExpressionÍ #Í 6”P§LiteralÍ $Í &2¢50P§LiteralÍ (Í +Ìd£100P§LiteralÍ -Í 0Ì–£150P§LiteralÍ 2Í 5ÌÈ£200¥const\³VariableDeclarationÍ AÍ Z‘]²VariableDeclaratorÍ GÍ YJªIdentifierÍ GÍ S¬maxDataValueP§LiteralÍ VÍ YÌú£250¥const\³VariableDeclarationÍ ‰Í ­‘]²VariableDeclaratorÍ Í ¬JªIdentifierÍ Í ¦·leftBoundaryAngle_labelO¯UnaryExpressionÍ ©Í ¬¡-ÃP§LiteralÍ ªÍ ¬¢15¥const\³VariableDeclarationÍ ·Í Ü‘]²VariableDeclaratorÍ ½Í ÛJªIdentifierÍ ½Í Õ¸rightBoundaryAngle_labelP§LiteralÍ ØÍ ÛÌÃ£195¥const\³VariableDeclarationÍ æÍ!3‘]²VariableDeclaratorÍ ìÍ!2JªIdentifierÍ ìÍ! ´startAngleRad_canvasU°BinaryExpressionÍ!Í!2U°BinaryExpressionÍ!Í!,U°BinaryExpressionÍ!Í!!JªIdentifierÍ!Í!·leftBoundaryAngle_label¡+P§LiteralÍ!Í!!Ì´£180¡*W°MemberExpressionÍ!%Í!,JªIdentifierÍ!%Í!)¤MathJªIdentifierÍ!*Í!,¢PIÂÂ¡/P§LiteralÍ!/Í!2Ì´£180¥const\³VariableDeclarationÍ!=Í!‰‘]²VariableDeclaratorÍ!CÍ!ˆJªIdentifierÍ!CÍ!U²endAngleRad_canvasU°BinaryExpressionÍ!XÍ!ˆU°BinaryExpressionÍ!XÍ!‚U°BinaryExpressionÍ!YÍ!wJªIdentifierÍ!YÍ!q¸rightBoundaryAngle_label¡+P§LiteralÍ!tÍ!wÌ´£180¡*W°MemberExpressionÍ!{Í!‚JªIdentifierÍ!{Í!¤MathJªIdentifierÍ!€Í!‚¢PIÂÂ¡/P§LiteralÍ!…Í!ˆÌ´£180¥constQ³ExpressionStatementÍ!“Í%¤R®CallExpressionÍ!“Í%£W°MemberExpressionÍ!“Í!¡JªIdentifierÍ!“Í!™¦valuesJªIdentifierÍ!šÍ!¡§forEachÂÂ‘M·ArrowFunctionExpressionÍ!¢Í%¢ÀÂÂÂ‘JªIdentifierÍ!¢Í!§¥valueK®BlockStatementÍ!«Í%¢Ÿ\³VariableDeclarationÍ!ºÍ!ñ‘]²VariableDeclaratorÍ!ÀÍ!ğJªIdentifierÍ!ÀÍ!É©arcRadiusU°BinaryExpressionÍ!ÌÍ!ğU°BinaryExpressionÍ!ÍÍ!áJªIdentifierÍ!ÍÍ!Ò¥value¡/JªIdentifierÍ!ÕÍ!á¬maxDataValue¡*W°MemberExpressionÍ!åÍ!ğS®ThisExpressionÍ!åÍ!éJªIdentifierÍ!êÍ!ğ¦radiusÂÂ¥constQ³ExpressionStatementÍ!ÿÍ"R®CallExpressionÍ!ÿÍ"W°MemberExpressionÍ!ÿÍ"W°MemberExpressionÍ!ÿÍ"S®ThisExpressionÍ!ÿÍ"JªIdentifierÍ"Í"§contextÂÂJªIdentifierÍ"Í"©beginPathÂÂÂQ³ExpressionStatementÍ"&Í"AV´AssignmentExpressionÍ"&Í"@¡=W°MemberExpressionÍ"&Í"<W°MemberExpressionÍ"&Í"2S®ThisExpressionÍ"&Í"*JªIdentifierÍ"+Í"2§contextÂÂJªIdentifierÍ"3Í"<©lineWidthÂÂP§LiteralÍ"?Í"@¡1Q³ExpressionStatementÍ"eÍ"ŠV´AssignmentExpressionÍ"eÍ"‰¡=W°MemberExpressionÍ"eÍ"}W°MemberExpressionÍ"eÍ"qS®ThisExpressionÍ"eÍ"iJªIdentifierÍ"jÍ"q§contextÂÂJªIdentifierÍ"rÍ"}«strokeStyleÂÂP§LiteralÍ"€Í"‰§#495057©'#495057'Q³ExpressionStatementÍ"˜Í"¹R®CallExpressionÍ"˜Í"¸W°MemberExpressionÍ"˜Í"°W°MemberExpressionÍ"˜Í"¤S®ThisExpressionÍ"˜Í"œJªIdentifierÍ"Í"¤§contextÂÂJªIdentifierÍ"¥Í"°«setLineDashÂÂ‘^¯ArrayExpressionÍ"±Í"·’P§LiteralÍ"²Í"³¡4P§LiteralÍ"µÍ"¶¡4ÂQ³ExpressionStatementÍ"íÍ#VR®CallExpressionÍ"íÍ#UW°MemberExpressionÍ"íÍ"ıW°MemberExpressionÍ"íÍ"ùS®ThisExpressionÍ"íÍ"ñJªIdentifierÍ"òÍ"ù§contextÂÂJªIdentifierÍ"úÍ"ı£arcÂÂ–W°MemberExpressionÍ"şÍ#
+S®ThisExpressionÍ"şÍ#JªIdentifierÍ#Í#
+§centerXÂÂW°MemberExpressionÍ#Í#S®ThisExpressionÍ#Í#JªIdentifierÍ#Í#§centerYÂÂJªIdentifierÍ#Í##©arcRadiusJªIdentifierÍ#%Í#9´startAngleRad_canvasJªIdentifierÍ#;Í#M²endAngleRad_canvasP§LiteralÍ#OÍ#TÂ¥falseÂQ³ExpressionStatementÍ#dÍ#zR®CallExpressionÍ#dÍ#yW°MemberExpressionÍ#dÍ#wW°MemberExpressionÍ#dÍ#pS®ThisExpressionÍ#dÍ#hJªIdentifierÍ#iÍ#p§contextÂÂJªIdentifierÍ#qÍ#w¦strokeÂÂÂ\³VariableDeclarationÍ#ˆÍ#±‘]²VariableDeclaratorÍ#Í#°JªIdentifierÍ#Í#›­labelAngleRadU°BinaryExpressionÍ#Í#°U°BinaryExpressionÍ#Í#ªP§LiteralÍ#Í# ÌZ¢90¡*W°MemberExpressionÍ#£Í#ªJªIdentifierÍ#£Í#§¤MathJªIdentifierÍ#¨Í#ª¢PIÂÂ¡/P§LiteralÍ#­Í#°Ì´£180¥const\³VariableDeclarationÍ#ØÍ$‘]²VariableDeclaratorÍ#ŞÍ$JªIdentifierÍ#ŞÍ#ä¦labelXU°BinaryExpressionÍ#çÍ$W°MemberExpressionÍ#çÍ#óS®ThisExpressionÍ#çÍ#ëJªIdentifierÍ#ìÍ#ó§centerXÂÂ¡-U°BinaryExpressionÍ#öÍ$JªIdentifierÍ#öÍ#ÿ©arcRadius¡*R®CallExpressionÍ$Í$W°MemberExpressionÍ$Í$
+JªIdentifierÍ$Í$¤MathJªIdentifierÍ$Í$
+£cosÂÂ‘JªIdentifierÍ$Í$­labelAngleRadÂ¥const\³VariableDeclarationÍ$(Í$n‘]²VariableDeclaratorÍ$.Í$mJªIdentifierÍ$.Í$4¦labelYU°BinaryExpressionÍ$7Í$mU°BinaryExpressionÍ$7Í$iW°MemberExpressionÍ$7Í$CS®ThisExpressionÍ$7Í$;JªIdentifierÍ$<Í$C§centerYÂÂ¡-U°BinaryExpressionÍ$FÍ$iJªIdentifierÍ$FÍ$O©arcRadius¡*R®CallExpressionÍ$RÍ$iW°MemberExpressionÍ$RÍ$ZJªIdentifierÍ$RÍ$V¤MathJªIdentifierÍ$WÍ$Z£sinÂÂ‘JªIdentifierÍ$[Í$h­labelAngleRadÂ¡-P§LiteralÍ$lÍ$m¡8¥constQ³ExpressionStatementÍ$|Í$¢V´AssignmentExpressionÍ$|Í$¡¡=W°MemberExpressionÍ$|Í$W°MemberExpressionÍ$|Í$ˆS®ThisExpressionÍ$|Í$€JªIdentifierÍ$Í$ˆ§contextÂÂJªIdentifierÍ$‰Í$¤fontÂÂP§LiteralÍ$Í$¡¯14px sans-serif±'14px sans-serif'Q³ExpressionStatementÍ$ÇÍ$êV´AssignmentExpressionÍ$ÇÍ$é¡=W°MemberExpressionÍ$ÇÍ$İW°MemberExpressionÍ$ÇÍ$ÓS®ThisExpressionÍ$ÇÍ$ËJªIdentifierÍ$ÌÍ$Ó§contextÂÂJªIdentifierÍ$ÔÍ$İ©fillStyleÂÂP§LiteralÍ$àÍ$é§#868e96©'#868e96'Q³ExpressionStatementÍ$øÍ%V´AssignmentExpressionÍ$øÍ%¡=W°MemberExpressionÍ$øÍ%W°MemberExpressionÍ$øÍ%S®ThisExpressionÍ$øÍ$üJªIdentifierÍ$ıÍ%§contextÂÂJªIdentifierÍ%Í%©textAlignÂÂP§LiteralÍ%Í%¦center¨'center'Q³ExpressionStatementÍ%(Í%QV´AssignmentExpressionÍ%(Í%P¡=W°MemberExpressionÍ%(Í%AW°MemberExpressionÍ%(Í%4S®ThisExpressionÍ%(Í%,JªIdentifierÍ%-Í%4§contextÂÂJªIdentifierÍ%5Í%A¬textBaselineÂÂP§LiteralÍ%DÍ%Pªalphabetic¬'alphabetic'Q³ExpressionStatementÍ%_Í%—R®CallExpressionÍ%_Í%–W°MemberExpressionÍ%_Í%tW°MemberExpressionÍ%_Í%kS®ThisExpressionÍ%_Í%cJªIdentifierÍ%dÍ%k§contextÂÂJªIdentifierÍ%lÍ%t¨fillTextÂÂ“R®CallExpressionÍ%uÍ%…W°MemberExpressionÍ%uÍ%ƒJªIdentifierÍ%uÍ%z¥valueJªIdentifierÍ%{Í%ƒ¨toStringÂÂÂJªIdentifierÍ%‡Í%¦labelXJªIdentifierÍ%Í%•¦labelYÂÂQ³ExpressionStatementÍ%®Í%ËR®CallExpressionÍ%®Í%ÊW°MemberExpressionÍ%®Í%ÆW°MemberExpressionÍ%®Í%ºS®ThisExpressionÍ%®Í%²JªIdentifierÍ%³Í%º§contextÂÂJªIdentifierÍ%»Í%Æ«setLineDashÂÂ‘^¯ArrayExpressionÍ%ÇÍ%ÉÂL°MethodDefinitionÍ%òÍ)fÂÂJªIdentifierÍ%òÍ&µdrawInteractivePoints¦methodM²FunctionExpressionÍ&Í)fÀÂÂÂK®BlockStatementÍ&
+Í)fÜ \³VariableDeclarationÍ&,Í&r‘]²VariableDeclaratorÍ&2Í&qJªIdentifierÍ&2Í&B°currentCanvasPosR®CallExpressionÍ&EÍ&qW°MemberExpressionÍ&EÍ&YS®ThisExpressionÍ&EÍ&IJªIdentifierÍ&JÍ&Y¯logicalToCanvasÂÂ‘W°MemberExpressionÍ&ZÍ&pS®ThisExpressionÍ&ZÍ&^JªIdentifierÍ&_Í&p±displayCurrentPosÂÂÂ¥constQ³ExpressionStatementÍ&|Í&•R®CallExpressionÍ&|Í&”W°MemberExpressionÍ&|Í&’W°MemberExpressionÍ&|Í&ˆS®ThisExpressionÍ&|Í&€JªIdentifierÍ&Í&ˆ§contextÂÂJªIdentifierÍ&‰Í&’©beginPathÂÂÂQ³ExpressionStatementÍ&ŸÍ&ÂV´AssignmentExpressionÍ&ŸÍ&Á¡=W°MemberExpressionÍ&ŸÍ&µW°MemberExpressionÍ&ŸÍ&«S®ThisExpressionÍ&ŸÍ&£JªIdentifierÍ&¤Í&«§contextÂÂJªIdentifierÍ&¬Í&µ©fillStyleÂÂP§LiteralÍ&¸Í&Á§#088107©'#088107'Q³ExpressionStatementÍ&ÌÍ&ñV´AssignmentExpressionÍ&ÌÍ&ğ¡=W°MemberExpressionÍ&ÌÍ&äW°MemberExpressionÍ&ÌÍ&ØS®ThisExpressionÍ&ÌÍ&ĞJªIdentifierÍ&ÑÍ&Ø§contextÂÂJªIdentifierÍ&ÙÍ&ä«strokeStyleÂÂP§LiteralÍ&çÍ&ğ§#FFFFFF©'#FFFFFF'Q³ExpressionStatementÍ'Í'&V´AssignmentExpressionÍ'Í'%¡=W°MemberExpressionÍ'Í'!W°MemberExpressionÍ'Í'S®ThisExpressionÍ'Í'JªIdentifierÍ'Í'§contextÂÂJªIdentifierÍ'Í'!©lineWidthÂÂP§LiteralÍ'$Í'%¡1Q³ExpressionStatementÍ'0Í'|R®CallExpressionÍ'0Í'{W°MemberExpressionÍ'0Í'@W°MemberExpressionÍ'0Í'<S®ThisExpressionÍ'0Í'4JªIdentifierÍ'5Í'<§contextÂÂJªIdentifierÍ'=Í'@£arcÂÂ•W°MemberExpressionÍ'AÍ'SJªIdentifierÍ'AÍ'Q°currentCanvasPosJªIdentifierÍ'RÍ'S¡xÂÂW°MemberExpressionÍ'UÍ'gJªIdentifierÍ'UÍ'e°currentCanvasPosJªIdentifierÍ'fÍ'g¡yÂÂP§LiteralÍ'iÍ'j¡8P§LiteralÍ'lÍ'm ¡0U°BinaryExpressionÍ'oÍ'zP§LiteralÍ'oÍ'p¡2¡*W°MemberExpressionÍ'sÍ'zJªIdentifierÍ'sÍ'w¤MathJªIdentifierÍ'xÍ'z¢PIÂÂÂQ³ExpressionStatementÍ'†Í'šR®CallExpressionÍ'†Í'™W°MemberExpressionÍ'†Í'—W°MemberExpressionÍ'†Í'’S®ThisExpressionÍ'†Í'ŠJªIdentifierÍ'‹Í'’§contextÂÂJªIdentifierÍ'“Í'—¤fillÂÂÂQ³ExpressionStatementÍ'¤Í'ºR®CallExpressionÍ'¤Í'¹W°MemberExpressionÍ'¤Í'·W°MemberExpressionÍ'¤Í'°S®ThisExpressionÍ'¤Í'¨JªIdentifierÍ'©Í'°§contextÂÂJªIdentifierÍ'±Í'·¦strokeÂÂÂ\³VariableDeclarationÍ'ÛÍ(‘]²VariableDeclaratorÍ'áÍ(JªIdentifierÍ'áÍ'ğ¯targetCanvasPosR®CallExpressionÍ'óÍ(W°MemberExpressionÍ'óÍ(S®ThisExpressionÍ'óÍ'÷JªIdentifierÍ'øÍ(¯logicalToCanvasÂÂ‘W°MemberExpressionÍ(Í(S®ThisExpressionÍ(Í(JªIdentifierÍ(Í(°displayTargetPosÂÂÂ¥constQ³ExpressionStatementÍ()Í(BR®CallExpressionÍ()Í(AW°MemberExpressionÍ()Í(?W°MemberExpressionÍ()Í(5S®ThisExpressionÍ()Í(-JªIdentifierÍ(.Í(5§contextÂÂJªIdentifierÍ(6Í(?©beginPathÂÂÂQ³ExpressionStatementÍ(LÍ(oV´AssignmentExpressionÍ(LÍ(n¡=W°MemberExpressionÍ(LÍ(bW°MemberExpressionÍ(LÍ(XS®ThisExpressionÍ(LÍ(PJªIdentifierÍ(QÍ(X§contextÂÂJªIdentifierÍ(YÍ(b©fillStyleÂÂP§LiteralÍ(eÍ(n§#7F007F©'#7F007F'Q³ExpressionStatementÍ(yÍ(V´AssignmentExpressionÍ(yÍ(¡=W°MemberExpressionÍ(yÍ(‘W°MemberExpressionÍ(yÍ(…S®ThisExpressionÍ(yÍ(}JªIdentifierÍ(~Í(…§contextÂÂJªIdentifierÍ(†Í(‘«strokeStyleÂÂP§LiteralÍ(”Í(§#FFFFFF©'#FFFFFF'Q³ExpressionStatementÍ(²Í(ÍV´AssignmentExpressionÍ(²Í(Ì¡=W°MemberExpressionÍ(²Í(ÈW°MemberExpressionÍ(²Í(¾S®ThisExpressionÍ(²Í(¶JªIdentifierÍ(·Í(¾§contextÂÂJªIdentifierÍ(¿Í(È©lineWidthÂÂP§LiteralÍ(ËÍ(Ì¡1Q³ExpressionStatementÍ(×Í)!R®CallExpressionÍ(×Í) W°MemberExpressionÍ(×Í(çW°MemberExpressionÍ(×Í(ãS®ThisExpressionÍ(×Í(ÛJªIdentifierÍ(ÜÍ(ã§contextÂÂJªIdentifierÍ(äÍ(ç£arcÂÂ•W°MemberExpressionÍ(èÍ(ùJªIdentifierÍ(èÍ(÷¯targetCanvasPosJªIdentifierÍ(øÍ(ù¡xÂÂW°MemberExpressionÍ(ûÍ)JªIdentifierÍ(ûÍ)
+¯targetCanvasPosJªIdentifierÍ)Í)¡yÂÂP§LiteralÍ)Í)¡8P§LiteralÍ)Í) ¡0U°BinaryExpressionÍ)Í)P§LiteralÍ)Í)¡2¡*W°MemberExpressionÍ)Í)JªIdentifierÍ)Í)¤MathJªIdentifierÍ)Í)¢PIÂÂÂQ³ExpressionStatementÍ)+Í)?R®CallExpressionÍ)+Í)>W°MemberExpressionÍ)+Í)<W°MemberExpressionÍ)+Í)7S®ThisExpressionÍ)+Í)/JªIdentifierÍ)0Í)7§contextÂÂJªIdentifierÍ)8Í)<¤fillÂÂÂQ³ExpressionStatementÍ)IÍ)_R®CallExpressionÍ)IÍ)^W°MemberExpressionÍ)IÍ)\W°MemberExpressionÍ)IÍ)US®ThisExpressionÍ)IÍ)MJªIdentifierÍ)NÍ)U§contextÂÂJªIdentifierÍ)VÍ)\¦strokeÂÂÂL°MethodDefinitionÍ)~Í0ÂÂJªIdentifierÍ)~Í)‹­initialRender¦methodM²FunctionExpressionÍ)‹Í0ÀÂÂÂK®BlockStatementÍ)Í0”Q³ExpressionStatementÍ)™Í*òR®CallExpressionÍ)™Í*ñW°MemberExpressionÍ)™Í)·S®ThisExpressionÍ)™Í)JªIdentifierÍ)Í)·¹observeComponentCreation2ÂÂ’M·ArrowFunctionExpressionÍ)¸Í*èÀÂÂÂ’JªIdentifierÍ)¹Í)¿¦elmtIdJªIdentifierÍ)ÁÍ)Ğ¯isInitialRenderK®BlockStatementÍ)ÕÍ*è•Q³ExpressionStatementÍ)äÍ)ôR®CallExpressionÍ)äÍ)óW°MemberExpressionÍ)äÍ)ñJªIdentifierÍ)äÍ)ê¦ColumnJªIdentifierÍ)ëÍ)ñ¦createÂÂÂQ³ExpressionStatementÍ*Í*`R®CallExpressionÍ*Í*_W°MemberExpressionÍ*Í*JªIdentifierÍ*Í*¦ColumnJªIdentifierÍ*	Í*©debugLineÂÂ’P§LiteralÍ*Í*UÙ@entry/src/main/ets/components/RoboticArmWorkRangeView.ets(197:5)ÙB"entry/src/main/ets/components/RoboticArmWorkRangeView.ets(197:5)"P§LiteralÍ*WÍ*^¥entry§"entry"ÂQ³ExpressionStatementÍ*nÍ*ƒR®CallExpressionÍ*nÍ*‚W°MemberExpressionÍ*nÍ*zJªIdentifierÍ*nÍ*t¦ColumnJªIdentifierÍ*uÍ*z¥widthÂÂ‘P§LiteralÍ*{Í*¤100%¦'100%'ÂQ³ExpressionStatementÍ*‘Í*§R®CallExpressionÍ*‘Í*¦W°MemberExpressionÍ*‘Í*JªIdentifierÍ*‘Í*—¦ColumnJªIdentifierÍ*˜Í*¦heightÂÂ‘P§LiteralÍ*ŸÍ*¥¤100%¦'100%'ÂQ³ExpressionStatementÍ*µÍ*İR®CallExpressionÍ*µÍ*ÜW°MemberExpressionÍ*µÍ*ÊJªIdentifierÍ*µÍ*»¦ColumnJªIdentifierÍ*¼Í*Ê®justifyContentÂÂ‘W°MemberExpressionÍ*ËÍ*ÛJªIdentifierÍ*ËÍ*Ô©FlexAlignJªIdentifierÍ*ÕÍ*Û¦CenterÂÂÂJªIdentifierÍ*êÍ*ğ¦ColumnÂQ³ExpressionStatementÍ*üÍ/éR®CallExpressionÍ*üÍ/èW°MemberExpressionÍ*üÍ+S®ThisExpressionÍ*üÍ+ JªIdentifierÍ+Í+¹observeComponentCreation2ÂÂ’M·ArrowFunctionExpressionÍ+Í/ßÀÂÂÂ’JªIdentifierÍ+Í+"¦elmtIdJªIdentifierÍ+$Í+3¯isInitialRenderK®BlockStatementÍ+8Í/ß–Q³ExpressionStatementÍ+GÍ+cR®CallExpressionÍ+GÍ+bW°MemberExpressionÍ+GÍ+TJªIdentifierÍ+GÍ+M¦CanvasJªIdentifierÍ+NÍ+T¦createÂÂ‘W°MemberExpressionÍ+UÍ+aS®ThisExpressionÍ+UÍ+YJªIdentifierÍ+ZÍ+a§contextÂÂÂQ³ExpressionStatementÍ+qÍ+ÏR®CallExpressionÍ+qÍ+ÎW°MemberExpressionÍ+qÍ+JªIdentifierÍ+qÍ+w¦CanvasJªIdentifierÍ+xÍ+©debugLineÂÂ’P§LiteralÍ+‚Í+ÄÙ@entry/src/main/ets/components/RoboticArmWorkRangeView.ets(198:7)ÙB"entry/src/main/ets/components/RoboticArmWorkRangeView.ets(198:7)"P§LiteralÍ+ÆÍ+Í¥entry§"entry"ÂQ³ExpressionStatementÍ+İÍ+óR®CallExpressionÍ+İÍ+òW°MemberExpressionÍ+İÍ+éJªIdentifierÍ+İÍ+ã¦CanvasJªIdentifierÍ+äÍ+é¥widthÂÂ‘P§LiteralÍ+êÍ+ñ¥900vp§'900vp'ÂQ³ExpressionStatementÍ,Í,R®CallExpressionÍ,Í,W°MemberExpressionÍ,Í,JªIdentifierÍ,Í,¦CanvasJªIdentifierÍ,Í,¦heightÂÂ‘P§LiteralÍ,Í,¥600vp§'600vp'ÂQ³ExpressionStatementÍ,&Í,mR®CallExpressionÍ,&Í,lW°MemberExpressionÍ,&Í,4JªIdentifierÍ,&Í,,¦CanvasJªIdentifierÍ,-Í,4§onReadyÂÂ‘M·ArrowFunctionExpressionÍ,5Í,kÀÂÂÂK®BlockStatementÍ,;Í,k‘Q³ExpressionStatementÍ,NÍ,\R®CallExpressionÍ,NÍ,[W°MemberExpressionÍ,NÍ,YS®ThisExpressionÍ,NÍ,RJªIdentifierÍ,SÍ,Y¦redrawÂÂÂÂQ³ExpressionStatementÍ,{Í/ÔR®CallExpressionÍ,{Í/ÓW°MemberExpressionÍ,{Í,‰JªIdentifierÍ,{Í,¦CanvasJªIdentifierÍ,‚Í,‰§onClickÂÂ‘M·ArrowFunctionExpressionÍ,ŠÍ/ÒÀÂÂÂ‘JªIdentifierÍ,‹Í,¥eventK®BlockStatementÍ,•Í/Ò•\³VariableDeclarationÍ,ÌÍ,û‘]²VariableDeclaratorÍ,ÒÍ,úJªIdentifierÍ,ÒÍ,á¯clickedLogicalXU°BinaryExpressionÍ,äÍ,úW°MemberExpressionÍ,äÍ,ğS®ThisExpressionÍ,äÍ,èJªIdentifierÍ,éÍ,ğ§centerYÂÂ¡-W°MemberExpressionÍ,óÍ,úJªIdentifierÍ,óÍ,ø¥eventJªIdentifierÍ,ùÍ,ú¡yÂÂ¥const\³VariableDeclarationÍ-Í-<‘]²VariableDeclaratorÍ-Í-;JªIdentifierÍ-Í-"¯clickedLogicalYU°BinaryExpressionÍ-%Í-;W°MemberExpressionÍ-%Í-,JªIdentifierÍ-%Í-*¥eventJªIdentifierÍ-+Í-,¡xÂÂ¡-W°MemberExpressionÍ-/Í-;S®ThisExpressionÍ-/Í-3JªIdentifierÍ-4Í-;§centerXÂÂ¥constQ³ExpressionStatementÍ-ÊÍ-ëV´AssignmentExpressionÍ-ÊÍ-ê¡=W°MemberExpressionÍ-ÊÍ-ÙS®ThisExpressionÍ-ÊÍ-ÎJªIdentifierÍ-ÏÍ-ÙªcurrentPosÂÂW°MemberExpressionÍ-ÜÍ-êS®ThisExpressionÍ-ÜÍ-àJªIdentifierÍ-áÍ-ê©targetPosÂÂQ³ExpressionStatementÍ-ıÍ.9V´AssignmentExpressionÍ-ıÍ.8¡=W°MemberExpressionÍ-ıÍ.S®ThisExpressionÍ-ıÍ.JªIdentifierÍ.Í.©targetPosÂÂY°ObjectExpressionÍ.Í.8’Z¨PropertyÍ.Í."ÂÂÂJªIdentifierÍ.Í.¡xJªIdentifierÍ.Í."¯clickedLogicalX¤initZ¨PropertyÍ.$Í.6ÂÂÂJªIdentifierÍ.$Í.%¡yJªIdentifierÍ.'Í.6¯clickedLogicalY¤initQ³ExpressionStatementÍ.~Í/ÃR®CallExpressionÍ.~Í/ÂW°MemberExpressionÍ.~Í.JªIdentifierÍ.~Í.…§ContextJªIdentifierÍ.†Í.©animateToÂÂ’Y°ObjectExpressionÍ.Í.ô’Z¨PropertyÍ.§Í.´ÂÂÂJªIdentifierÍ.§Í.¯¨durationP§LiteralÍ.±Í.´Í£400¤initZ¨PropertyÍ.ËÍ.áÂÂÂJªIdentifierÍ.ËÍ.Ğ¥curveW°MemberExpressionÍ.ÒÍ.áJªIdentifierÍ.ÒÍ.×¥CurveJªIdentifierÍ.ØÍ.á©EaseInOutÂÂ¤initM·ArrowFunctionExpressionÍ.öÍ/ÁÀÂÂÂK®BlockStatementÍ.üÍ/Á’Q³ExpressionStatementÍ/HÍ/qV´AssignmentExpressionÍ/HÍ/p¡=W°MemberExpressionÍ/HÍ/^S®ThisExpressionÍ/HÍ/LJªIdentifierÍ/MÍ/^±displayCurrentPosÂÂW°MemberExpressionÍ/aÍ/pS®ThisExpressionÍ/aÍ/eJªIdentifierÍ/fÍ/pªcurrentPosÂÂQ³ExpressionStatementÍ/‡Í/®V´AssignmentExpressionÍ/‡Í/­¡=W°MemberExpressionÍ/‡Í/œS®ThisExpressionÍ/‡Í/‹JªIdentifierÍ/ŒÍ/œ°displayTargetPosÂÂW°MemberExpressionÍ/ŸÍ/­S®ThisExpressionÍ/ŸÍ/£JªIdentifierÍ/¤Í/­©targetPosÂÂÂÂJªIdentifierÍ/áÍ/ç¦CanvasÂQ³ExpressionStatementÍ/óÍ0 R®CallExpressionÍ/óÍ/ÿW°MemberExpressionÍ/óÍ/ıJªIdentifierÍ/óÍ/ù¦CanvasJªIdentifierÍ/úÍ/ı£popÂÂÂQ³ExpressionStatementÍ0
+Í0R®CallExpressionÍ0
+Í0W°MemberExpressionÍ0
+Í0JªIdentifierÍ0
+Í0¦ColumnJªIdentifierÍ0Í0£popÂÂÂL°MethodDefinitionÍ0$Í0\ÂÂJªIdentifierÍ0$Í0,¨rerender¦methodM²FunctionExpressionÍ0,Í0\ÀÂÂÂK®BlockStatementÍ0/Í0\‘Q³ExpressionStatementÍ0:Í0UR®CallExpressionÍ0:Í0TW°MemberExpressionÍ0:Í0RS®ThisExpressionÍ0:Í0>JªIdentifierÍ0?Í0R³updateDirtyElementsÂÂÂÀ

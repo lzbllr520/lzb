@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>点云图界面绘制</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 1vw; height: 100vh; box-sizing: border-box; } #status { display: none;font-size: 1.2em; margin-bottom: 15px; color: #555; font-weight: 500; } #chart-container { width: 95vmin; height: 95vmin; max-width: 800px; max-height: 800px; background-color: #5E6E6C; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); padding: 15px; box-sizing: border-box; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="status">正在初始化...</div>
+    <div id="chart-container">
+        <canvas id="mainChartCanvas"></canvas>
+    </div>
+
+    <script>
+        // --- 配置区域 ---
+        const WEBSOCKET_URL = 'ws://192.168.2.19:9090'; 
+        const MAX_VIEW_RANGE = 10;
+        
+        // --- 全局变量 ---
+        const statusDiv = document.getElementById('status');
+        const ctx = document.getElementById('mainChartCanvas').getContext('2d');
+        let mainChart = null; 
+        let mapImage = null;
+        let mapInfo = {};
+
+        // --- 地图数据处理函数 ---
+        function renderMapData(msg) {
+            const info = msg.info;
+            const width = info.width;
+            const height = info.height;
+            const mapData = msg.data;
+            if (!width || !height || !mapData || mapData.length !== width * height) { return; }
+            const offscreenCanvas = document.createElement('canvas');
+            offscreenCanvas.width = width;
+            offscreenCanvas.height = height;
+            const offscreenCtx = offscreenCanvas.getContext('2d');
+            const imageData = offscreenCtx.createImageData(width, height);
+            const pixelData = imageData.data;
+            for (let i = 0; i < mapData.length; i++) {
+                const pixelIndex = i * 4;
+                let r, g, b;
+
+                if (mapData[i] === 0) {
+                    // 对应 "亮白色" 的自由区域 (值=0)，保持白色
+                    r = g = b = 255;
+                } else if (mapData[i] === 100) {
+                    // 障碍物 (值=100)，保持黑色
+                    r = g = b = 0;
+                } else {
+                    // 对应 "暗白色" 的未知区域 (值=-1)，改为 #5E6E6C
+                    r = 94;
+                    g = 110;
+                    b = 108;
+                }
+                
+                pixelData[pixelIndex] = r;
+                pixelData[pixelIndex + 1] = g;
+                pixelData[pixelIndex + 2] = b;
+                pixelData[pixelIndex + 3] = 255; // Alpha通道，不透明
+            }
+            offscreenCtx.putImageData(imageData, 0, 0);
+            createImageBitmap(offscreenCanvas).then(img => {
+                mapImage = img;
+                mapInfo = info;
+                if(mainChart) mainChart.update('none');
+            });
+        }
+
+        // --- 自定义Chart.js插件 ---
+        const mapBackgroundPlugin = {
+            id: 'mapBackground',
+            beforeDraw: (chart) => {
+                if (mapImage && mapInfo.resolution) {
+                    const { ctx, scales } = chart;
+                    const { x: xScale, y: yScale } = scales;
+                    const mapOriginX = mapInfo.origin.position.x;
+                    const mapOriginY = mapInfo.origin.position.y;
+                    const mapWidthMeters = mapInfo.width * mapInfo.resolution;
+                    const mapHeightMeters = mapInfo.height * mapInfo.resolution;
+                    const mapLeftPx = xScale.getPixelForValue(mapOriginX);
+                    const mapTopPx = yScale.getPixelForValue(mapOriginY + mapHeightMeters);
+                    const mapWidthPx = xScale.getPixelForValue(mapOriginX + mapWidthMeters) - mapLeftPx;
+                    const mapHeightPx = yScale.getPixelForValue(mapOriginY) - mapTopPx;
+                    ctx.save();
+                    ctx.imageSmoothingEnabled = false;
+                    ctx.drawImage(mapImage, mapLeftPx, mapTopPx, mapWidthPx, mapHeightPx);
+                    ctx.restore();
+                }
+            }
+        };
+
+        // --- 图表初始化函数 ---
+        function initializeChart() {
+            mainChart = new Chart(ctx, {
+                type: 'scatter',
+                data: { datasets: [ { label: 'LIDAR Scan', data: [], backgroundColor: 'rgba(255, 0, 0, 0.7)', pointRadius: 1.5, order: 1 }, { label: 'Robot Position', data: [{x: 0, y: 0}], backgroundColor: 'rgba(0, 128, 255, 1)', pointRadius: 5, pointStyle: 'crossRot', order: 2 }] },
+                plugins: [mapBackgroundPlugin],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true, 
+                    aspectRatio: 1,
+                    events: [],
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            min: -MAX_VIEW_RANGE,
+                            max: MAX_VIEW_RANGE,
+                            grid: {
+                                lineWidth: 1.5 // 稍微加粗线条
+                            },
+                            title: { display: false },
+                            ticks: {
+                                display:false,
+                                stepSize: 2 // 设置X轴步长为2
+                            }
+                        },
+                        y: {
+                            min: -MAX_VIEW_RANGE,
+                            max: MAX_VIEW_RANGE,
+                            grid: {
+                                lineWidth: 1.5 // 稍微加粗线条
+                            },
+                            title: { display: false },
+                            ticks: {
+                                display:false,
+                                stepSize: 2 // 设置Y轴步长为2
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // --- WebSocket连接函数 ---
+        function connectToScan() {
+            const ws = new WebSocket(WEBSOCKET_URL);
+            ws.onopen = () => { ws.send(JSON.stringify({ op: 'subscribe', topic: '/scan', type: 'sensor_msgs/LaserScan' })); };
+            ws.onmessage = (event) => { const data = JSON.parse(event.data); if (data.op === 'publish' && data.msg) { const msg = data.msg; const points = []; let c=0; for (let i = 0; i < msg.ranges.length; i++) { const r = msg.ranges[i]; if (r !== null && isFinite(r) && r >= msg.range_min && r <= msg.range_max) { const a = msg.angle_min + i * msg.angle_increment; points.push({ x: r * Math.sin(a), y: r * Math.cos(a) }); c++; } } if (mainChart) { mainChart.data.datasets[0].data = points; mainChart.update('none'); statusDiv.textContent = `已连接 | ${mapImage ? '地图已加载' : '等待地图'} | LIDAR点: ${c}`; } } };
+            ws.onclose = () => { console.warn('/scan 连接关闭，5秒后重连...'); setTimeout(connectToScan, 5000); };
+            ws.onerror = (error) => { console.error('/scan 连接错误:', error); };
+        }
+
+        function connectToMap() {
+            const ws = new WebSocket(WEBSOCKET_URL);
+            ws.onopen = () => { ws.send(JSON.stringify({ op: 'subscribe', topic: '/map', type: 'nav_msgs/OccupancyGrid' })); statusDiv.textContent = '连接成功! 等待地图数据...';};
+            ws.onmessage = (event) => { const data = JSON.parse(event.data); if (data.op === 'publish' && data.msg) { renderMapData(data.msg); } };
+            ws.onclose = () => { console.warn('/map 连接关闭，5秒后重连...'); setTimeout(connectToMap, 5000); };
+            ws.onerror = (error) => { console.error('/map 连接错误:', error); };
+        }
+
+        // --- 启动 ---
+        initializeChart();
+        connectToMap();
+        connectToScan();
+    </script>
+</body>
+</html>

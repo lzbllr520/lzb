@@ -1,0 +1,609 @@
+Ôr@Ÿªassertions¤code´customTransformCache¬dependencies¢id¤meta±moduleSideEffects¬originalCode±originalSourcemap«resolvedIds®sourcemapChainµsyntheticNamedExportsµtransformDependencies®transformFiles¨cacheAstÔrAÚ[if (!("finalizeConstruction" in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+}
+import { lvImage } from '../domain/LvImage';
+import { mdRegister } from './common';
+import { lvFootnoteController } from './controller/lvFootnoteController';
+import handleImgText from './handle/handleImgText';
+import { lvCompositeComponent } from './lvCompositeComponent';
+export class lvImgComponent extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.o = new ObservedPropertySimplePU("", this, "text");
+        this.m = new ObservedPropertyObjectPU(lvImage, this, "nImage");
+        this.h1 = new ObservedPropertyObjectPU(null, this, "dialogController");
+        this.z1 = new ObservedPropertySimplePU(this.nImage.getImgWidth(), this, "imgWidth");
+        this.a2 = new ObservedPropertySimplePU(this.nImage.getImgHeight(), this, "imgHeight");
+        this.setInitiallyProvidedValue(params);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params) {
+        if (params.text !== undefined) {
+            this.text = params.text;
+        }
+        if (params.nImage !== undefined) {
+            this.nImage = params.nImage;
+        }
+        if (params.dialogController !== undefined) {
+            this.dialogController = params.dialogController;
+        }
+        if (params.imgWidth !== undefined) {
+            this.imgWidth = params.imgWidth;
+        }
+        if (params.imgHeight !== undefined) {
+            this.imgHeight = params.imgHeight;
+        }
+    }
+    updateStateVars(params) {
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.o.purgeDependencyOnElmtId(rmElmtId);
+        this.m.purgeDependencyOnElmtId(rmElmtId);
+        this.h1.purgeDependencyOnElmtId(rmElmtId);
+        this.z1.purgeDependencyOnElmtId(rmElmtId);
+        this.a2.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.o.aboutToBeDeleted();
+        this.m.aboutToBeDeleted();
+        this.h1.aboutToBeDeleted();
+        this.z1.aboutToBeDeleted();
+        this.a2.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    get text() {
+        return this.o.get();
+    }
+    set text(newValue) {
+        this.o.set(newValue);
+    }
+    get nImage() {
+        return this.m.get();
+    }
+    set nImage(newValue) {
+        this.m.set(newValue);
+    }
+    get dialogController() {
+        return this.h1.get();
+    }
+    set dialogController(newValue) {
+        this.h1.set(newValue);
+    }
+    get imgWidth() {
+        return this.z1.get();
+    }
+    set imgWidth(newValue) {
+        this.z1.set(newValue);
+    }
+    get imgHeight() {
+        return this.a2.get();
+    }
+    set imgHeight(newValue) {
+        this.a2.set(newValue);
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Flex.create({
+                wrap: FlexWrap.Wrap,
+                direction: FlexDirection.Row
+            });
+        }, Flex);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            ForEach.create();
+            const forEachItemGenFunction = _item => {
+                const item = _item;
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    If.create();
+                    if (item.trim().slice(0, 2) == '![' && item.trim().slice(-1) == ')' && item.trim().indexOf('](') !== -1) {
+                        this.ifElseBranchUpdateFunction(0, () => {
+                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                Image.create(item.split('](')[1].slice(0, -1));
+                                Image.alt({ "id": -1, "type": 30000, params: ["imgs/imgErr.png"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                Image.interpolation(ImageInterpolation.Medium);
+                                Image.width(this.imgWidth);
+                                Image.height(this.imgHeight);
+                                Image.objectFit(ImageFit.Auto);
+                                Image.borderRadius(5);
+                                Image.margin({
+                                    top: 5, bottom: 5
+                                });
+                                Image.onClick(() => {
+                                    let uri = item.split('](')[1].slice(0, -1);
+                                    if (mdRegister.HandleImage(uri)) {
+                                        this.nImage.setImgUrl(uri);
+                                        this.dialogController?.open();
+                                    }
+                                });
+                                Image.onError(() => {
+                                    this.imgWidth = 20;
+                                    this.imgHeight = 20;
+                                });
+                            }, Image);
+                        });
+                    }
+                    else {
+                        this.ifElseBranchUpdateFunction(1, () => {
+                            {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    if (isInitialRender) {
+                                        let componentCall = new lvCompositeComponent(this, {
+                                            footnoteController: lvFootnoteController,
+                                            text: item
+                                        }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/utils/lvImgComponent.ets", line: 44, f1: 11 });
+                                        ViewPU.create(componentCall);
+                                        let paramsLambda = () => {
+                                            return {
+                                                footnoteController: lvFootnoteController,
+                                                text: item
+                                            };
+                                        };
+                                        componentCall.paramsGenerator_ = paramsLambda;
+                                    }
+                                    else {
+                                        this.updateStateVarsOfChildByElmtId(elmtId, {
+                                            footnoteController: lvFootnoteController
+                                        });
+                                    }
+                                }, { name: "lvCompositeComponent" });
+                            }
+                        });
+                    }
+                }, If);
+                If.pop();
+            };
+            this.forEachUpdateFunction(elmtId, handleImgText(this.text), forEachItemGenFunction);
+        }, ForEach);
+        ForEach.pop();
+        Flex.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+Â•Ù™D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\domain\LvImage.jsÙD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\common\index.jsÙ°D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\controller\lvFootnoteController.jsÙ¥D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\handle\handleImgText.jsÙ¥D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvCompositeComponent.jsÙŸD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvImgComponent.jsÔrB˜±isLocalDependency¯isNodeEntryFile§pkgPath§pkgNameªpkgVersion±belongProjectPath±dependencyPkgInfo¨commonjsÂÂÙgD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in´@luvi/lv-markdown-in¦2.0.15ºD:\apps\deveco\tzb2025jbgsÔrC’§pkgNameªpkgVersion´@luvi/lv-markdown-in¦2.0.15ÔrD’¯hasNamedExportsªisCommonJSÃÂÃÚ[if (!("finalizeConstruction" in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+}
+import { lvImage } from '../domain/LvImage';
+import { mdRegister } from './common';
+import { lvFootnoteController } from './controller/lvFootnoteController';
+import handleImgText from './handle/handleImgText';
+import { lvCompositeComponent } from './lvCompositeComponent';
+export class lvImgComponent extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.o = new ObservedPropertySimplePU("", this, "text");
+        this.m = new ObservedPropertyObjectPU(lvImage, this, "nImage");
+        this.h1 = new ObservedPropertyObjectPU(null, this, "dialogController");
+        this.z1 = new ObservedPropertySimplePU(this.nImage.getImgWidth(), this, "imgWidth");
+        this.a2 = new ObservedPropertySimplePU(this.nImage.getImgHeight(), this, "imgHeight");
+        this.setInitiallyProvidedValue(params);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params) {
+        if (params.text !== undefined) {
+            this.text = params.text;
+        }
+        if (params.nImage !== undefined) {
+            this.nImage = params.nImage;
+        }
+        if (params.dialogController !== undefined) {
+            this.dialogController = params.dialogController;
+        }
+        if (params.imgWidth !== undefined) {
+            this.imgWidth = params.imgWidth;
+        }
+        if (params.imgHeight !== undefined) {
+            this.imgHeight = params.imgHeight;
+        }
+    }
+    updateStateVars(params) {
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.o.purgeDependencyOnElmtId(rmElmtId);
+        this.m.purgeDependencyOnElmtId(rmElmtId);
+        this.h1.purgeDependencyOnElmtId(rmElmtId);
+        this.z1.purgeDependencyOnElmtId(rmElmtId);
+        this.a2.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.o.aboutToBeDeleted();
+        this.m.aboutToBeDeleted();
+        this.h1.aboutToBeDeleted();
+        this.z1.aboutToBeDeleted();
+        this.a2.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    get text() {
+        return this.o.get();
+    }
+    set text(newValue) {
+        this.o.set(newValue);
+    }
+    get nImage() {
+        return this.m.get();
+    }
+    set nImage(newValue) {
+        this.m.set(newValue);
+    }
+    get dialogController() {
+        return this.h1.get();
+    }
+    set dialogController(newValue) {
+        this.h1.set(newValue);
+    }
+    get imgWidth() {
+        return this.z1.get();
+    }
+    set imgWidth(newValue) {
+        this.z1.set(newValue);
+    }
+    get imgHeight() {
+        return this.a2.get();
+    }
+    set imgHeight(newValue) {
+        this.a2.set(newValue);
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Flex.create({
+                wrap: FlexWrap.Wrap,
+                direction: FlexDirection.Row
+            });
+        }, Flex);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            ForEach.create();
+            const forEachItemGenFunction = _item => {
+                const item = _item;
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    If.create();
+                    if (item.trim().slice(0, 2) == '![' && item.trim().slice(-1) == ')' && item.trim().indexOf('](') !== -1) {
+                        this.ifElseBranchUpdateFunction(0, () => {
+                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                Image.create(item.split('](')[1].slice(0, -1));
+                                Image.alt({ "id": -1, "type": 30000, params: ["imgs/imgErr.png"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                Image.interpolation(ImageInterpolation.Medium);
+                                Image.width(this.imgWidth);
+                                Image.height(this.imgHeight);
+                                Image.objectFit(ImageFit.Auto);
+                                Image.borderRadius(5);
+                                Image.margin({
+                                    top: 5, bottom: 5
+                                });
+                                Image.onClick(() => {
+                                    let uri = item.split('](')[1].slice(0, -1);
+                                    if (mdRegister.HandleImage(uri)) {
+                                        this.nImage.setImgUrl(uri);
+                                        this.dialogController?.open();
+                                    }
+                                });
+                                Image.onError(() => {
+                                    this.imgWidth = 20;
+                                    this.imgHeight = 20;
+                                });
+                            }, Image);
+                        });
+                    }
+                    else {
+                        this.ifElseBranchUpdateFunction(1, () => {
+                            {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    if (isInitialRender) {
+                                        let componentCall = new lvCompositeComponent(this, {
+                                            footnoteController: lvFootnoteController,
+                                            text: item
+                                        }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/utils/lvImgComponent.ets", line: 44, f1: 11 });
+                                        ViewPU.create(componentCall);
+                                        let paramsLambda = () => {
+                                            return {
+                                                footnoteController: lvFootnoteController,
+                                                text: item
+                                            };
+                                        };
+                                        componentCall.paramsGenerator_ = paramsLambda;
+                                    }
+                                    else {
+                                        this.updateStateVarsOfChildByElmtId(elmtId, {
+                                            footnoteController: lvFootnoteController
+                                        });
+                                    }
+                                }, { name: "lvCompositeComponent" });
+                            }
+                        });
+                    }
+                }, If);
+                If.pop();
+            };
+            this.forEachUpdateFunction(elmtId, handleImgText(this.text), forEachItemGenFunction);
+        }, ForEach);
+        ForEach.pop();
+        Flex.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+ÔrE•§version¨mappings¥names§sources®sourcesContentÜ §‘”    ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”  	 ‘”  
+ ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”    ‘”  ! ‘”  " ‘”  # ‘”  $ ‘”  % ‘”  & ‘”  ' ‘”  ( ‘”  ) ‘”  * ‘”  + ‘”  , ‘”  - ‘”  . ‘”  / ‘”  0 ‘”  1 ‘”  2 ‘”  3 ‘”  4 ‘”  5 ‘”  6 ‘”  7 ‘”  8 ‘”  9 ‘”  : ‘”  ; ‘”  < ‘”  = ‘”  > ‘”  ? ‘”  Ì@ ‘”  ÌA ‘”  ÌB ‘”  ÌC ‘”  ÌD ‘”  ÌE ‘”  ÌF ‘”  ÌG ‘”  ÌH ‘”  ÌI ‘”  ÌJ ‘”  ÌK ‘”  ÌL ‘”  ÌM ‘”  ÌN ‘”  ÌO ‘”  ÌP ‘”  ÌQ ‘”  ÌR ‘”  ÌS ‘”  ÌT ‘”  ÌU ‘”  ÌV ‘”  ÌW ‘”  ÌX ‘”  ÌY ‘”  ÌZ ‘”  Ì[ ‘”  Ì\ ‘”  Ì] ‘”  Ì^ ‘”  Ì_ ‘”  Ì` ‘”  Ìa ‘”  Ìb ‘”  Ìc ‘”  Ìd ‘”  Ìe ‘”  Ìf ‘”  Ìg ‘”  Ìh ‘”  Ìi ‘”  Ìj ‘”  Ìk ‘”  Ìl ‘”  Ìm ‘”  Ìn ‘”  Ìo ‘”  Ìp ‘”  Ìq ‘”  Ìr ‘”  Ìs ‘”  Ìt ‘”  Ìu ‘”  Ìv ‘”  Ìw ‘”  Ìx ‘”  Ìy ‘”  Ìz ‘”  Ì{ ‘”  Ì| ‘”  Ì} ‘”  Ì~ ‘”  Ì ‘”  Ì€ ‘”  Ì ‘”  Ì‚ ‘”  Ìƒ ‘”  Ì„ ‘”  Ì… ‘”  Ì† ‘”  Ì‡ ‘”  Ìˆ ‘”  Ì‰ ‘”  ÌŠ ‘”  Ì‹ ‘”  ÌŒ ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì‘ ‘”  Ì’ ‘”  Ì“ ‘”  Ì” ‘”  Ì• ‘”  Ì– ‘”  Ì— ‘”  Ì˜ ‘”  Ì™ ‘”  Ìš ‘”  Ì› ‘”  Ìœ ‘”  Ì ‘”  Ì ‘”  ÌŸ ‘”  Ì  ‘”  Ì¡ ‘”  Ì¢ ‘”  Ì£ ‘”  Ì¤ ‘”  Ì¥ ‘ÙŸD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvImgComponent.js‘Ú[if (!("finalizeConstruction" in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+}
+import { lvImage } from '../domain/LvImage';
+import { mdRegister } from './common';
+import { lvFootnoteController } from './controller/lvFootnoteController';
+import handleImgText from './handle/handleImgText';
+import { lvCompositeComponent } from './lvCompositeComponent';
+export class lvImgComponent extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.o = new ObservedPropertySimplePU("", this, "text");
+        this.m = new ObservedPropertyObjectPU(lvImage, this, "nImage");
+        this.h1 = new ObservedPropertyObjectPU(null, this, "dialogController");
+        this.z1 = new ObservedPropertySimplePU(this.nImage.getImgWidth(), this, "imgWidth");
+        this.a2 = new ObservedPropertySimplePU(this.nImage.getImgHeight(), this, "imgHeight");
+        this.setInitiallyProvidedValue(params);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params) {
+        if (params.text !== undefined) {
+            this.text = params.text;
+        }
+        if (params.nImage !== undefined) {
+            this.nImage = params.nImage;
+        }
+        if (params.dialogController !== undefined) {
+            this.dialogController = params.dialogController;
+        }
+        if (params.imgWidth !== undefined) {
+            this.imgWidth = params.imgWidth;
+        }
+        if (params.imgHeight !== undefined) {
+            this.imgHeight = params.imgHeight;
+        }
+    }
+    updateStateVars(params) {
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.o.purgeDependencyOnElmtId(rmElmtId);
+        this.m.purgeDependencyOnElmtId(rmElmtId);
+        this.h1.purgeDependencyOnElmtId(rmElmtId);
+        this.z1.purgeDependencyOnElmtId(rmElmtId);
+        this.a2.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.o.aboutToBeDeleted();
+        this.m.aboutToBeDeleted();
+        this.h1.aboutToBeDeleted();
+        this.z1.aboutToBeDeleted();
+        this.a2.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    get text() {
+        return this.o.get();
+    }
+    set text(newValue) {
+        this.o.set(newValue);
+    }
+    get nImage() {
+        return this.m.get();
+    }
+    set nImage(newValue) {
+        this.m.set(newValue);
+    }
+    get dialogController() {
+        return this.h1.get();
+    }
+    set dialogController(newValue) {
+        this.h1.set(newValue);
+    }
+    get imgWidth() {
+        return this.z1.get();
+    }
+    set imgWidth(newValue) {
+        this.z1.set(newValue);
+    }
+    get imgHeight() {
+        return this.a2.get();
+    }
+    set imgHeight(newValue) {
+        this.a2.set(newValue);
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Flex.create({
+                wrap: FlexWrap.Wrap,
+                direction: FlexDirection.Row
+            });
+        }, Flex);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            ForEach.create();
+            const forEachItemGenFunction = _item => {
+                const item = _item;
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    If.create();
+                    if (item.trim().slice(0, 2) == '![' && item.trim().slice(-1) == ')' && item.trim().indexOf('](') !== -1) {
+                        this.ifElseBranchUpdateFunction(0, () => {
+                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                Image.create(item.split('](')[1].slice(0, -1));
+                                Image.alt({ "id": -1, "type": 30000, params: ["imgs/imgErr.png"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                Image.interpolation(ImageInterpolation.Medium);
+                                Image.width(this.imgWidth);
+                                Image.height(this.imgHeight);
+                                Image.objectFit(ImageFit.Auto);
+                                Image.borderRadius(5);
+                                Image.margin({
+                                    top: 5, bottom: 5
+                                });
+                                Image.onClick(() => {
+                                    let uri = item.split('](')[1].slice(0, -1);
+                                    if (mdRegister.HandleImage(uri)) {
+                                        this.nImage.setImgUrl(uri);
+                                        this.dialogController?.open();
+                                    }
+                                });
+                                Image.onError(() => {
+                                    this.imgWidth = 20;
+                                    this.imgHeight = 20;
+                                });
+                            }, Image);
+                        });
+                    }
+                    else {
+                        this.ifElseBranchUpdateFunction(1, () => {
+                            {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    if (isInitialRender) {
+                                        let componentCall = new lvCompositeComponent(this, {
+                                            footnoteController: lvFootnoteController,
+                                            text: item
+                                        }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/utils/lvImgComponent.ets", line: 44, f1: 11 });
+                                        ViewPU.create(componentCall);
+                                        let paramsLambda = () => {
+                                            return {
+                                                footnoteController: lvFootnoteController,
+                                                text: item
+                                            };
+                                        };
+                                        componentCall.paramsGenerator_ = paramsLambda;
+                                    }
+                                    else {
+                                        this.updateStateVarsOfChildByElmtId(elmtId, {
+                                            footnoteController: lvFootnoteController
+                                        });
+                                    }
+                                }, { name: "lvCompositeComponent" });
+                            }
+                        });
+                    }
+                }, If);
+                If.pop();
+            };
+            this.forEachUpdateFunction(elmtId, handleImgText(this.text), forEachItemGenFunction);
+        }, ForEach);
+        ForEach.pop();
+        Flex.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+ÔrF•±../domain/LvImage¨./commonÙ!./controller/lvFootnoteController¶./lvCompositeComponent¶./handle/handleImgTextÔrG—ªassertions¨external¢id¤meta±moduleSideEffectsªresolvedByµsyntheticNamedExportsAÂÙ™D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\domain\LvImage.jsAÃªoh-resolveÂGAÂÙD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\common\index.jsAÃªoh-resolveÂGAÂÙ°D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\controller\lvFootnoteController.jsAÃªoh-resolveÂGAÂÙ¥D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvCompositeComponent.jsAÃªoh-resolveÂGAÂÙ¥D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\handle\handleImgText.jsAÃªoh-resolveÂ‘ÔrH’§missing¦pluginÃ¦genAbcÂÔ  ÔrI”²dynamicImportCache¹exportAllDeclarationCache»exportNamedDeclarationCache«importCache‘ÔrJ–¤type¥start£end«declarationªspecifiers¦source¶ExportNamedDeclarationÍÍZÔrK–¤type¥start£end¢idªsuperClass¤body°ClassDeclarationÍ•ÍZÔrL”¤type¥start£end¤nameªIdentifierÍ›Í©®lvImgComponentLªIdentifierÍ²Í¸¦ViewPUÔrM”¤type¥start£end¤body©ClassBodyÍ¹ÍZÜ ÔrN˜¤type¥start£end¦static¨computed£key¤kind¥value°MethodDefinitionÍ¿Í¶ÂÂLªIdentifierÍ¿ÍÊ«constructor«constructorÔrO™¤type¥start£end¢idªexpression©generator¥async¦params¤body²FunctionExpressionÍÊÍ¶ÀÂÂÂ–LªIdentifierÍËÍÑ¦parentLªIdentifierÍÓÍÙ¦paramsLªIdentifierÍÛÍé®__localStorageÔrP•¤type¥start£end¤left¥right±AssignmentPatternÍëÍöLªIdentifierÍëÍñ¦elmtIdÔrQ–¤type¥start£end¨operator¦prefix¨argument¯UnaryExpressionÍôÍö¡-ÃÔrR•¤type¥start£end¥value£raw§LiteralÍõÍö¡1P±AssignmentPatternÍøÍLªIdentifierÍøÍ¬paramsLambdaLªIdentifierÍÍ©undefinedLªIdentifierÍÍ©extraInfoM®BlockStatementÍÍ¶™ÔrS”¤type¥start£endªexpression³ExpressionStatementÍ'ÍXÔrT–¤type¥start£end¦callee©arguments¨optional®CallExpressionÍ'ÍWÔrU“¤type¥start£end¥SuperÍ'Í,”LªIdentifierÍ-Í3¦parentLªIdentifierÍ5ÍC®__localStorageLªIdentifierÍEÍK¦elmtIdLªIdentifierÍMÍV©extraInfoÂÔrV–¤type¥start£end¤testªconsequent©alternate«IfStatementÍaÍÆÔrW–¤type¥start£end¤left¨operator¥right°BinaryExpressionÍeÍ‡Q¯UnaryExpressionÍeÍx¦typeofÃLªIdentifierÍlÍx¬paramsLambda£===R§LiteralÍ}Í‡¨functionª"function"M®BlockStatementÍ‰ÍÆ‘S³ExpressionStatementÍ—Í¼ÔrX–¤type¥start£end¨operator¤left¥right´AssignmentExpressionÍ—Í»¡=ÔrY—¤type¥start£end¦object¨property¨computed¨optional°MemberExpressionÍ—Í¬U®ThisExpressionÍ—Í›LªIdentifierÍœÍ¬°paramsGenerator_ÂÂLªIdentifierÍ¯Í»¬paramsLambdaÀS³ExpressionStatementÍÏÍX´AssignmentExpressionÍÏÍ¡=Y°MemberExpressionÍÏÍÕU®ThisExpressionÍÏÍÓLªIdentifierÍÔÍÕ¡oÂÂÔrZ•¤type¥start£end¦callee©arguments­NewExpressionÍØÍLªIdentifierÍÜÍô¸ObservedPropertySimplePU“R§LiteralÍõÍ÷ ¢""U®ThisExpressionÍùÍıR§LiteralÍÿÍ¤text¦"text"S³ExpressionStatementÍÍOX´AssignmentExpressionÍÍN¡=Y°MemberExpressionÍÍU®ThisExpressionÍÍLªIdentifierÍÍ¡mÂÂZ­NewExpressionÍÍNLªIdentifierÍÍ5¸ObservedPropertyObjectPU“LªIdentifierÍ6Í=§lvImageU®ThisExpressionÍ?ÍCR§LiteralÍEÍM¦nImage¨"nImage"S³ExpressionStatementÍXÍŸX´AssignmentExpressionÍXÍ¡=Y°MemberExpressionÍXÍ_U®ThisExpressionÍXÍ\LªIdentifierÍ]Í_¢h1ÂÂZ­NewExpressionÍbÍLªIdentifierÍfÍ~¸ObservedPropertyObjectPU“R§LiteralÍÍƒÀ¤nullU®ThisExpressionÍ…Í‰R§LiteralÍ‹Í°dialogController²"dialogController"S³ExpressionStatementÍ¨ÍüX´AssignmentExpressionÍ¨Íû¡=Y°MemberExpressionÍ¨Í¯U®ThisExpressionÍ¨Í¬LªIdentifierÍ­Í¯¢z1ÂÂZ­NewExpressionÍ²ÍûLªIdentifierÍ¶ÍÎ¸ObservedPropertySimplePU“T®CallExpressionÍÏÍèY°MemberExpressionÍÏÍæY°MemberExpressionÍÏÍÚU®ThisExpressionÍÏÍÓLªIdentifierÍÔÍÚ¦nImageÂÂLªIdentifierÍÛÍæ«getImgWidthÂÂÂU®ThisExpressionÍêÍîR§LiteralÍğÍú¨imgWidthª"imgWidth"S³ExpressionStatementÍÍ[X´AssignmentExpressionÍÍZ¡=Y°MemberExpressionÍÍU®ThisExpressionÍÍ	LªIdentifierÍ
+Í¢a2ÂÂZ­NewExpressionÍÍZLªIdentifierÍÍ+¸ObservedPropertySimplePU“T®CallExpressionÍ,ÍFY°MemberExpressionÍ,ÍDY°MemberExpressionÍ,Í7U®ThisExpressionÍ,Í0LªIdentifierÍ1Í7¦nImageÂÂLªIdentifierÍ8ÍD¬getImgHeightÂÂÂU®ThisExpressionÍHÍLR§LiteralÍNÍY©imgHeight«"imgHeight"S³ExpressionStatementÍdÍ‹T®CallExpressionÍdÍŠY°MemberExpressionÍdÍ‚U®ThisExpressionÍdÍhLªIdentifierÍiÍ‚¹setInitiallyProvidedValueÂÂ‘LªIdentifierÍƒÍ‰¦paramsÂS³ExpressionStatementÍ”Í°T®CallExpressionÍ”Í¯Y°MemberExpressionÍ”Í­U®ThisExpressionÍ”Í˜LªIdentifierÍ™Í­´finalizeConstructionÂÂÂN°MethodDefinitionÍ»ÍáÂÂLªIdentifierÍ»ÍÔ¹setInitiallyProvidedValue¦methodO²FunctionExpressionÍÔÍáÀÂÂÂ‘LªIdentifierÍÕÍÛ¦paramsM®BlockStatementÍİÍá•V«IfStatementÍçÍ6W°BinaryExpressionÍëÍY°MemberExpressionÍëÍöLªIdentifierÍëÍñ¦paramsLªIdentifierÍòÍö¤textÂÂ£!==LªIdentifierÍûÍ©undefinedM®BlockStatementÍÍ6‘S³ExpressionStatementÍÍ,X´AssignmentExpressionÍÍ+¡=Y°MemberExpressionÍÍU®ThisExpressionÍÍLªIdentifierÍÍ¤textÂÂY°MemberExpressionÍ Í+LªIdentifierÍ Í&¦paramsLªIdentifierÍ'Í+¤textÂÂÀV«IfStatementÍ?Í”W°BinaryExpressionÍCÍ^Y°MemberExpressionÍCÍPLªIdentifierÍCÍI¦paramsLªIdentifierÍJÍP¦nImageÂÂ£!==LªIdentifierÍUÍ^©undefinedM®BlockStatementÍ`Í”‘S³ExpressionStatementÍnÍŠX´AssignmentExpressionÍnÍ‰¡=Y°MemberExpressionÍnÍyU®ThisExpressionÍnÍrLªIdentifierÍsÍy¦nImageÂÂY°MemberExpressionÍ|Í‰LªIdentifierÍ|Í‚¦paramsLªIdentifierÍƒÍ‰¦nImageÂÂÀV«IfStatementÍÍW°BinaryExpressionÍ¡ÍÆY°MemberExpressionÍ¡Í¸LªIdentifierÍ¡Í§¦paramsLªIdentifierÍ¨Í¸°dialogControllerÂÂ£!==LªIdentifierÍ½ÍÆ©undefinedM®BlockStatementÍÈÍ‘S³ExpressionStatementÍÖÍX´AssignmentExpressionÍÖÍ¡=Y°MemberExpressionÍÖÍëU®ThisExpressionÍÖÍÚLªIdentifierÍÛÍë°dialogControllerÂÂY°MemberExpressionÍîÍLªIdentifierÍîÍô¦paramsLªIdentifierÍõÍ°dialogControllerÂÂÀV«IfStatementÍÍtW°BinaryExpressionÍÍ:Y°MemberExpressionÍÍ,LªIdentifierÍÍ#¦paramsLªIdentifierÍ$Í,¨imgWidthÂÂ£!==LªIdentifierÍ1Í:©undefinedM®BlockStatementÍ<Ít‘S³ExpressionStatementÍJÍjX´AssignmentExpressionÍJÍi¡=Y°MemberExpressionÍJÍWU®ThisExpressionÍJÍNLªIdentifierÍOÍW¨imgWidthÂÂY°MemberExpressionÍZÍiLªIdentifierÍZÍ`¦paramsLªIdentifierÍaÍi¨imgWidthÂÂÀV«IfStatementÍ}ÍÛW°BinaryExpressionÍÍŸY°MemberExpressionÍÍ‘LªIdentifierÍÍ‡¦paramsLªIdentifierÍˆÍ‘©imgHeightÂÂ£!==LªIdentifierÍ–ÍŸ©undefinedM®BlockStatementÍ¡ÍÛ‘S³ExpressionStatementÍ¯ÍÑX´AssignmentExpressionÍ¯ÍĞ¡=Y°MemberExpressionÍ¯Í½U®ThisExpressionÍ¯Í³LªIdentifierÍ´Í½©imgHeightÂÂY°MemberExpressionÍÀÍĞLªIdentifierÍÀÍÆ¦paramsLªIdentifierÍÇÍĞ©imgHeightÂÂÀN°MethodDefinitionÍæÍÂÂLªIdentifierÍæÍõ¯updateStateVars¦methodO²FunctionExpressionÍõÍÀÂÂÂ‘LªIdentifierÍöÍü¦paramsM®BlockStatementÍşÍN°MethodDefinitionÍ
+Í:ÂÂLªIdentifierÍ
+Í+Ù!purgeVariableDependenciesOnElmtId¦methodO²FunctionExpressionÍ+Í:ÀÂÂÂ‘LªIdentifierÍ,Í4¨rmElmtIdM®BlockStatementÍ6Í:•S³ExpressionStatementÍ@ÍiT®CallExpressionÍ@ÍhY°MemberExpressionÍ@Í^Y°MemberExpressionÍ@ÍFU®ThisExpressionÍ@ÍDLªIdentifierÍEÍF¡oÂÂLªIdentifierÍGÍ^·purgeDependencyOnElmtIdÂÂ‘LªIdentifierÍ_Íg¨rmElmtIdÂS³ExpressionStatementÍrÍ›T®CallExpressionÍrÍšY°MemberExpressionÍrÍY°MemberExpressionÍrÍxU®ThisExpressionÍrÍvLªIdentifierÍwÍx¡mÂÂLªIdentifierÍyÍ·purgeDependencyOnElmtIdÂÂ‘LªIdentifierÍ‘Í™¨rmElmtIdÂS³ExpressionStatementÍ¤ÍÎT®CallExpressionÍ¤ÍÍY°MemberExpressionÍ¤ÍÃY°MemberExpressionÍ¤Í«U®ThisExpressionÍ¤Í¨LªIdentifierÍ©Í«¢h1ÂÂLªIdentifierÍ¬ÍÃ·purgeDependencyOnElmtIdÂÂ‘LªIdentifierÍÄÍÌ¨rmElmtIdÂS³ExpressionStatementÍ×ÍT®CallExpressionÍ×Í Y°MemberExpressionÍ×ÍöY°MemberExpressionÍ×ÍŞU®ThisExpressionÍ×ÍÛLªIdentifierÍÜÍŞ¢z1ÂÂLªIdentifierÍßÍö·purgeDependencyOnElmtIdÂÂ‘LªIdentifierÍ÷Íÿ¨rmElmtIdÂS³ExpressionStatementÍ
+Í4T®CallExpressionÍ
+Í3Y°MemberExpressionÍ
+Í)Y°MemberExpressionÍ
+ÍU®ThisExpressionÍ
+ÍLªIdentifierÍÍ¢a2ÂÂLªIdentifierÍÍ)·purgeDependencyOnElmtIdÂÂ‘LªIdentifierÍ*Í2¨rmElmtIdÂN°MethodDefinitionÍ?Í	iÂÂLªIdentifierÍ?ÍO°aboutToBeDeleted¦methodO²FunctionExpressionÍOÍ	iÀÂÂÂM®BlockStatementÍRÍ	i—S³ExpressionStatementÍ\ÍvT®CallExpressionÍ\ÍuY°MemberExpressionÍ\ÍsY°MemberExpressionÍ\ÍbU®ThisExpressionÍ\Í`LªIdentifierÍaÍb¡oÂÂLªIdentifierÍcÍs°aboutToBeDeletedÂÂÂS³ExpressionStatementÍÍ™T®CallExpressionÍÍ˜Y°MemberExpressionÍÍ–Y°MemberExpressionÍÍ…U®ThisExpressionÍÍƒLªIdentifierÍ„Í…¡mÂÂLªIdentifierÍ†Í–°aboutToBeDeletedÂÂÂS³ExpressionStatementÍ¢Í½T®CallExpressionÍ¢Í¼Y°MemberExpressionÍ¢ÍºY°MemberExpressionÍ¢Í©U®ThisExpressionÍ¢Í¦LªIdentifierÍ§Í©¢h1ÂÂLªIdentifierÍªÍº°aboutToBeDeletedÂÂÂS³ExpressionStatementÍÆÍáT®CallExpressionÍÆÍàY°MemberExpressionÍÆÍŞY°MemberExpressionÍÆÍÍU®ThisExpressionÍÆÍÊLªIdentifierÍËÍÍ¢z1ÂÂLªIdentifierÍÎÍŞ°aboutToBeDeletedÂÂÂS³ExpressionStatementÍêÍ	T®CallExpressionÍêÍ	Y°MemberExpressionÍêÍ	Y°MemberExpressionÍêÍñU®ThisExpressionÍêÍîLªIdentifierÍïÍñ¢a2ÂÂLªIdentifierÍòÍ	°aboutToBeDeletedÂÂÂS³ExpressionStatementÍ	Í	:T®CallExpressionÍ	Í	9Y°MemberExpressionÍ	Í	,T®CallExpressionÍ	Í	%Y°MemberExpressionÍ	Í	#LªIdentifierÍ	Í	±SubscriberManagerLªIdentifierÍ	 Í	#£GetÂÂÂLªIdentifierÍ	&Í	,¦deleteÂÂ‘T®CallExpressionÍ	-Í	8Y°MemberExpressionÍ	-Í	6U®ThisExpressionÍ	-Í	1LªIdentifierÍ	2Í	6¤id__ÂÂÂÂS³ExpressionStatementÍ	CÍ	cT®CallExpressionÍ	CÍ	bY°MemberExpressionÍ	CÍ	`U®ThisExpressionÍ	CÍ	GLªIdentifierÍ	HÍ	`¸aboutToBeDeletedInternalÂÂÂN°MethodDefinitionÍ	nÍ	ÂÂLªIdentifierÍ	rÍ	v¤text£getO²FunctionExpressionÍ	vÍ	ÀÂÂÂM®BlockStatementÍ	yÍ	‘Ôr[”¤type¥start£end¨argument¯ReturnStatementÍ	ƒÍ	—T®CallExpressionÍ	ŠÍ	–Y°MemberExpressionÍ	ŠÍ	”Y°MemberExpressionÍ	ŠÍ	U®ThisExpressionÍ	ŠÍ	LªIdentifierÍ	Í	¡oÂÂLªIdentifierÍ	‘Í	”£getÂÂÂN°MethodDefinitionÍ	¢Í	ÚÂÂLªIdentifierÍ	¦Í	ª¤text£setO²FunctionExpressionÍ	ªÍ	ÚÀÂÂÂ‘LªIdentifierÍ	«Í	³¨newValueM®BlockStatementÍ	µÍ	Ú‘S³ExpressionStatementÍ	¿Í	ÔT®CallExpressionÍ	¿Í	ÓY°MemberExpressionÍ	¿Í	ÉY°MemberExpressionÍ	¿Í	ÅU®ThisExpressionÍ	¿Í	ÃLªIdentifierÍ	ÄÍ	Å¡oÂÂLªIdentifierÍ	ÆÍ	É£setÂÂ‘LªIdentifierÍ	ÊÍ	Ò¨newValueÂN°MethodDefinitionÍ	ßÍ
+ÂÂLªIdentifierÍ	ãÍ	é¦nImage£getO²FunctionExpressionÍ	éÍ
+ÀÂÂÂM®BlockStatementÍ	ìÍ
+‘[¯ReturnStatementÍ	öÍ
+
+T®CallExpressionÍ	ıÍ
+	Y°MemberExpressionÍ	ıÍ
+Y°MemberExpressionÍ	ıÍ
+U®ThisExpressionÍ	ıÍ
+LªIdentifierÍ
+Í
+¡mÂÂLªIdentifierÍ
+Í
+£getÂÂÂN°MethodDefinitionÍ
+Í
+OÂÂLªIdentifierÍ
+Í
+¦nImage£setO²FunctionExpressionÍ
+Í
+OÀÂÂÂ‘LªIdentifierÍ
+ Í
+(¨newValueM®BlockStatementÍ
+*Í
+O‘S³ExpressionStatementÍ
+4Í
+IT®CallExpressionÍ
+4Í
+HY°MemberExpressionÍ
+4Í
+>Y°MemberExpressionÍ
+4Í
+:U®ThisExpressionÍ
+4Í
+8LªIdentifierÍ
+9Í
+:¡mÂÂLªIdentifierÍ
+;Í
+>£setÂÂ‘LªIdentifierÍ
+?Í
+G¨newValueÂN°MethodDefinitionÍ
+TÍ
+ÂÂLªIdentifierÍ
+XÍ
+h°dialogController£getO²FunctionExpressionÍ
+hÍ
+ÀÂÂÂM®BlockStatementÍ
+kÍ
+‘[¯ReturnStatementÍ
+uÍ
+ŠT®CallExpressionÍ
+|Í
+‰Y°MemberExpressionÍ
+|Í
+‡Y°MemberExpressionÍ
+|Í
+ƒU®ThisExpressionÍ
+|Í
+€LªIdentifierÍ
+Í
+ƒ¢h1ÂÂLªIdentifierÍ
+„Í
+‡£getÂÂÂN°MethodDefinitionÍ
+•Í
+ÚÂÂLªIdentifierÍ
+™Í
+©°dialogController£setO²FunctionExpressionÍ
+©Í
+ÚÀÂÂÂ‘LªIdentifierÍ
+ªÍ
+²¨newValueM®BlockStatementÍ
+´Í
+Ú‘S³ExpressionStatementÍ
+¾Í
+ÔT®CallExpressionÍ
+¾Í
+ÓY°MemberExpressionÍ
+¾Í
+ÉY°MemberExpressionÍ
+¾Í
+ÅU®ThisExpressionÍ
+¾Í
+ÂLªIdentifierÍ
+ÃÍ
+Å¢h1ÂÂLªIdentifierÍ
+ÆÍ
+É£setÂÂ‘LªIdentifierÍ
+ÊÍ
+Ò¨newValueÂN°MethodDefinitionÍ
+ßÍÂÂLªIdentifierÍ
+ãÍ
+ë¨imgWidth£getO²FunctionExpressionÍ
+ëÍÀÂÂÂM®BlockStatementÍ
+îÍ‘[¯ReturnStatementÍ
+øÍT®CallExpressionÍ
+ÿÍY°MemberExpressionÍ
+ÿÍ
+Y°MemberExpressionÍ
+ÿÍU®ThisExpressionÍ
+ÿÍLªIdentifierÍÍ¢z1ÂÂLªIdentifierÍÍ
+£getÂÂÂN°MethodDefinitionÍÍUÂÂLªIdentifierÍÍ$¨imgWidth£setO²FunctionExpressionÍ$ÍUÀÂÂÂ‘LªIdentifierÍ%Í-¨newValueM®BlockStatementÍ/ÍU‘S³ExpressionStatementÍ9ÍOT®CallExpressionÍ9ÍNY°MemberExpressionÍ9ÍDY°MemberExpressionÍ9Í@U®ThisExpressionÍ9Í=LªIdentifierÍ>Í@¢z1ÂÂLªIdentifierÍAÍD£setÂÂ‘LªIdentifierÍEÍM¨newValueÂN°MethodDefinitionÍZÍÂÂLªIdentifierÍ^Íg©imgHeight£getO²FunctionExpressionÍgÍÀÂÂÂM®BlockStatementÍjÍ‘[¯ReturnStatementÍtÍ‰T®CallExpressionÍ{ÍˆY°MemberExpressionÍ{Í†Y°MemberExpressionÍ{Í‚U®ThisExpressionÍ{ÍLªIdentifierÍ€Í‚¢a2ÂÂLªIdentifierÍƒÍ†£getÂÂÂN°MethodDefinitionÍ”ÍÒÂÂLªIdentifierÍ˜Í¡©imgHeight£setO²FunctionExpressionÍ¡ÍÒÀÂÂÂ‘LªIdentifierÍ¢Íª¨newValueM®BlockStatementÍ¬ÍÒ‘S³ExpressionStatementÍ¶ÍÌT®CallExpressionÍ¶ÍËY°MemberExpressionÍ¶ÍÁY°MemberExpressionÍ¶Í½U®ThisExpressionÍ¶ÍºLªIdentifierÍ»Í½¢a2ÂÂLªIdentifierÍ¾ÍÁ£setÂÂ‘LªIdentifierÍÂÍÊ¨newValueÂN°MethodDefinitionÍ×ÍÂÂLªIdentifierÍ×Íä­initialRender¦methodO²FunctionExpressionÍäÍÀÂÂÂM®BlockStatementÍçÍ”S³ExpressionStatementÍñÍ¼T®CallExpressionÍñÍ»Y°MemberExpressionÍñÍU®ThisExpressionÍñÍõLªIdentifierÍöÍ¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍÍ´ÀÂÂÂ’LªIdentifierÍÍ¦elmtIdLªIdentifierÍÍ(¯isInitialRenderM®BlockStatementÍ-Í´‘S³ExpressionStatementÍ;ÍªT®CallExpressionÍ;Í©Y°MemberExpressionÍ;ÍFLªIdentifierÍ;Í?¤FlexLªIdentifierÍ@ÍF¦createÂÂ‘Ôr\”¤type¥start£endªproperties°ObjectExpressionÍGÍ¨’Ôr]™¤type¥start£end¦method©shorthand¨computed£key¥value¤kind¨PropertyÍYÍlÂÂÂLªIdentifierÍYÍ]¤wrapY°MemberExpressionÍ_ÍlLªIdentifierÍ_Íg¨FlexWrapLªIdentifierÍhÍl¤WrapÂÂ¤init]¨PropertyÍ~ÍšÂÂÂLªIdentifierÍ~Í‡©directionY°MemberExpressionÍ‰ÍšLªIdentifierÍ‰Í–­FlexDirectionLªIdentifierÍ—Íš£RowÂÂ¤initÂLªIdentifierÍ¶Íº¤FlexÂS³ExpressionStatementÍÅÍìT®CallExpressionÍÅÍëY°MemberExpressionÍÅÍãU®ThisExpressionÍÅÍÉLªIdentifierÍÊÍã¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍäÍáÀÂÂÂ’LªIdentifierÍåÍë¦elmtIdLªIdentifierÍíÍü¯isInitialRenderM®BlockStatementÍÍá“S³ExpressionStatementÍÍ T®CallExpressionÍÍY°MemberExpressionÍÍLªIdentifierÍÍ§ForEachLªIdentifierÍÍ¦createÂÂÂÔr^•¤type¥start£end¬declarations¤kind³VariableDeclarationÍ-Íu‘Ôr_•¤type¥start£end¢id¤init²VariableDeclaratorÍ3ÍtLªIdentifierÍ3ÍI¶forEachItemGenFunctionO·ArrowFunctionExpressionÍLÍtÀÂÂÂ‘LªIdentifierÍLÍQ¥_itemM®BlockStatementÍUÍt“^³VariableDeclarationÍgÍz‘_²VariableDeclaratorÍmÍyLªIdentifierÍmÍq¤itemLªIdentifierÍtÍy¥_item¥constS³ExpressionStatementÍ‹ÍLT®CallExpressionÍ‹ÍKY°MemberExpressionÍ‹Í©U®ThisExpressionÍ‹ÍLªIdentifierÍÍ©¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍªÍFÀÂÂÂ’LªIdentifierÍ«Í±¦elmtIdLªIdentifierÍ³ÍÂ¯isInitialRenderM®BlockStatementÍÇÍF’S³ExpressionStatementÍİÍéT®CallExpressionÍİÍèY°MemberExpressionÍİÍæLªIdentifierÍİÍß¢IfLªIdentifierÍàÍæ¦createÂÂÂV«IfStatementÍşÍ4W±LogicalExpressionÍÍeW±LogicalExpressionÍÍAW°BinaryExpressionÍÍ!T®CallExpressionÍÍY°MemberExpressionÍÍT®CallExpressionÍÍY°MemberExpressionÍÍLªIdentifierÍÍ¤itemLªIdentifierÍÍ¤trimÂÂÂLªIdentifierÍÍ¥sliceÂÂ’R§LiteralÍÍ ¡0R§LiteralÍÍ¡2Â¢==R§LiteralÍÍ!¢![¤'!['¢&&W°BinaryExpressionÍ%ÍAT®CallExpressionÍ%Í:Y°MemberExpressionÍ%Í6T®CallExpressionÍ%Í0Y°MemberExpressionÍ%Í.LªIdentifierÍ%Í)¤itemLªIdentifierÍ*Í.¤trimÂÂÂLªIdentifierÍ1Í6¥sliceÂÂ‘Q¯UnaryExpressionÍ7Í9¡-ÃR§LiteralÍ8Í9¡1Â¢==R§LiteralÍ>ÍA¡)£')'¢&&W°BinaryExpressionÍEÍeT®CallExpressionÍEÍ^Y°MemberExpressionÍEÍXT®CallExpressionÍEÍPY°MemberExpressionÍEÍNLªIdentifierÍEÍI¤itemLªIdentifierÍJÍN¤trimÂÂÂLªIdentifierÍQÍX§indexOfÂÂ‘R§LiteralÍYÍ]¢](¤']('Â£!==Q¯UnaryExpressionÍcÍe¡-ÃR§LiteralÍdÍe¡1M®BlockStatementÍgÍ‘S³ExpressionStatementÍÍˆT®CallExpressionÍÍ‡Y°MemberExpressionÍÍ U®ThisExpressionÍÍ…LªIdentifierÍ†Í ºifElseBranchUpdateFunctionÂÂ’R§LiteralÍ¡Í¢ ¡0O·ArrowFunctionExpressionÍ¤Í†ÀÂÂÂM®BlockStatementÍªÍ†‘S³ExpressionStatementÍÈÍlT®CallExpressionÍÈÍkY°MemberExpressionÍÈÍæU®ThisExpressionÍÈÍÌLªIdentifierÍÍÍæ¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍçÍcÀÂÂÂ’LªIdentifierÍèÍî¦elmtIdLªIdentifierÍğÍÿ¯isInitialRenderM®BlockStatementÍÍcšS³ExpressionStatementÍ&ÍUT®CallExpressionÍ&ÍTY°MemberExpressionÍ&Í2LªIdentifierÍ&Í+¥ImageLªIdentifierÍ,Í2¦createÂÂ‘T®CallExpressionÍ3ÍSY°MemberExpressionÍ3ÍLY°MemberExpressionÍ3ÍFT®CallExpressionÍ3ÍCY°MemberExpressionÍ3Í=LªIdentifierÍ3Í7¤itemLªIdentifierÍ8Í=¥splitÂÂ‘R§LiteralÍ>ÍB¢](¤']('ÂR§LiteralÍDÍE¡1ÃÂLªIdentifierÍGÍL¥sliceÂÂ’R§LiteralÍMÍN ¡0Q¯UnaryExpressionÍPÍR¡-ÃR§LiteralÍQÍR¡1ÂÂS³ExpressionStatementÍvÍT®CallExpressionÍvÍY°MemberExpressionÍvÍLªIdentifierÍvÍ{¥ImageLªIdentifierÍ|Í£altÂÂ‘\°ObjectExpressionÍ€Í•]¨PropertyÍ‚ÍŠÂÂÂR§LiteralÍ‚Í†¢id¤"id"Q¯UnaryExpressionÍˆÍŠ¡-ÃR§LiteralÍ‰ÍŠ¡1¤init]¨PropertyÍŒÍ™ÂÂÂR§LiteralÍŒÍ’¤type¦"type"R§LiteralÍ”Í™Íu0¥30000¤init]¨PropertyÍ›Í¶ÂÂÂLªIdentifierÍ›Í¡¦paramsÔr`”¤type¥start£end¨elements¯ArrayExpressionÍ£Í¶‘R§LiteralÍ¤Íµ¯imgs/imgErr.png±"imgs/imgErr.png"¤init]¨PropertyÍ¸ÍàÂÂÂR§LiteralÍ¸ÍÄªbundleName¬"bundleName"R§LiteralÍÆÍà¸__harDefaultBundleName__º"__harDefaultBundleName__"¤init]¨PropertyÍâÍ
+ÂÂÂR§LiteralÍâÍîªmoduleName¬"moduleName"R§LiteralÍğÍ
+¸__harDefaultModuleName__º"__harDefaultModuleName__"¤initÂS³ExpressionStatementÍ/Í^T®CallExpressionÍ/Í]Y°MemberExpressionÍ/ÍBLªIdentifierÍ/Í4¥ImageLªIdentifierÍ5ÍB­interpolationÂÂ‘Y°MemberExpressionÍCÍ\LªIdentifierÍCÍU²ImageInterpolationLªIdentifierÍVÍ\¦MediumÂÂÂS³ExpressionStatementÍÍšT®CallExpressionÍÍ™Y°MemberExpressionÍÍŠLªIdentifierÍÍ„¥ImageLªIdentifierÍ…ÍŠ¥widthÂÂ‘Y°MemberExpressionÍ‹Í˜U®ThisExpressionÍ‹ÍLªIdentifierÍÍ˜¨imgWidthÂÂÂS³ExpressionStatementÍ»ÍØT®CallExpressionÍ»Í×Y°MemberExpressionÍ»ÍÇLªIdentifierÍ»ÍÀ¥ImageLªIdentifierÍÁÍÇ¦heightÂÂ‘Y°MemberExpressionÍÈÍÖU®ThisExpressionÍÈÍÌLªIdentifierÍÍÍÖ©imgHeightÂÂÂS³ExpressionStatementÍùÍT®CallExpressionÍùÍY°MemberExpressionÍùÍLªIdentifierÍùÍş¥ImageLªIdentifierÍÿÍ©objectFitÂÂ‘Y°MemberExpressionÍ	ÍLªIdentifierÍ	Í¨ImageFitLªIdentifierÍÍ¤AutoÂÂÂS³ExpressionStatementÍ9ÍOT®CallExpressionÍ9ÍNY°MemberExpressionÍ9ÍKLªIdentifierÍ9Í>¥ImageLªIdentifierÍ?ÍK¬borderRadiusÂÂ‘R§LiteralÍLÍM¡5ÂS³ExpressionStatementÍpÍØT®CallExpressionÍpÍ×Y°MemberExpressionÍpÍ|LªIdentifierÍpÍu¥ImageLªIdentifierÍvÍ|¦marginÂÂ‘\°ObjectExpressionÍ}ÍÖ’]¨PropertyÍ£Í©ÂÂÂLªIdentifierÍ£Í¦£topR§LiteralÍ¨Í©¡5¤init]¨PropertyÍ«Í´ÂÂÂLªIdentifierÍ«Í±¦bottomR§LiteralÍ³Í´¡5¤initÂS³ExpressionStatementÍùÍzT®CallExpressionÍùÍyY°MemberExpressionÍùÍLªIdentifierÍùÍş¥ImageLªIdentifierÍÿÍ§onClickÂÂ‘O·ArrowFunctionExpressionÍÍxÀÂÂÂM®BlockStatementÍÍx’^³VariableDeclarationÍ3Í^‘_²VariableDeclaratorÍ7Í]LªIdentifierÍ7Í:£uriT®CallExpressionÍ=Í]Y°MemberExpressionÍ=ÍVY°MemberExpressionÍ=ÍPT®CallExpressionÍ=ÍMY°MemberExpressionÍ=ÍGLªIdentifierÍ=ÍA¤itemLªIdentifierÍBÍG¥splitÂÂ‘R§LiteralÍHÍL¢](¤']('ÂR§LiteralÍNÍO¡1ÃÂLªIdentifierÍQÍV¥sliceÂÂ’R§LiteralÍWÍX ¡0Q¯UnaryExpressionÍZÍ\¡-ÃR§LiteralÍ[Í\¡1Â£letV«IfStatementÍƒÍVT®CallExpressionÍ‡Í¢Y°MemberExpressionÍ‡ÍLªIdentifierÍ‡Í‘ªmdRegisterLªIdentifierÍ’Í«HandleImageÂÂ‘LªIdentifierÍÍ¡£uriÂM®BlockStatementÍ¤ÍV’S³ExpressionStatementÍÎÍéT®CallExpressionÍÎÍèY°MemberExpressionÍÎÍãY°MemberExpressionÍÎÍÙU®ThisExpressionÍÎÍÒLªIdentifierÍÓÍÙ¦nImageÂÂLªIdentifierÍÚÍã©setImgUrlÂÂ‘LªIdentifierÍäÍç£uriÂS³ExpressionStatementÍÍ0S¯ChainExpressionÍÍ/T®CallExpressionÍÍ/Y°MemberExpressionÍÍ-Y°MemberExpressionÍÍ'U®ThisExpressionÍÍLªIdentifierÍÍ'°dialogControllerÂÂLªIdentifierÍ)Í-¤openÂÃÂÀÂS³ExpressionStatementÍ›ÍET®CallExpressionÍ›ÍDY°MemberExpressionÍ›Í¨LªIdentifierÍ›Í ¥ImageLªIdentifierÍ¡Í¨§onErrorÂÂ‘O·ArrowFunctionExpressionÍ©ÍCÀÂÂÂM®BlockStatementÍ¯ÍC’S³ExpressionStatementÍÕÍèX´AssignmentExpressionÍÕÍç¡=Y°MemberExpressionÍÕÍâU®ThisExpressionÍÕÍÙLªIdentifierÍÚÍâ¨imgWidthÂÂR§LiteralÍåÍç¢20S³ExpressionStatementÍÍ!X´AssignmentExpressionÍÍ ¡=Y°MemberExpressionÍÍU®ThisExpressionÍÍLªIdentifierÍÍ©imgHeightÂÂR§LiteralÍÍ ¢20ÂLªIdentifierÍeÍj¥ImageÂÂM®BlockStatementÍ¸Í4‘S³ExpressionStatementÍÒÍT®CallExpressionÍÒÍY°MemberExpressionÍÒÍñU®ThisExpressionÍÒÍÖLªIdentifierÍ×ÍñºifElseBranchUpdateFunctionÂÂ’R§LiteralÍòÍó¡1O·ArrowFunctionExpressionÍõÍÀÂÂÂM®BlockStatementÍûÍ‘M®BlockStatementÍÍ‘S³ExpressionStatementÍ;ÍäT®CallExpressionÍ;ÍãY°MemberExpressionÍ;ÍYU®ThisExpressionÍ;Í?LªIdentifierÍ@ÍY¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍZÍÀÀÂÂÂ’LªIdentifierÍ[Ía¦elmtIdLªIdentifierÍcÍr¯isInitialRenderM®BlockStatementÍwÍÀ‘V«IfStatementÍÍLªIdentifierÍ¡Í°¯isInitialRenderM®BlockStatementÍ²Ív”^³VariableDeclarationÍÜÍL‘_²VariableDeclaratorÍàÍKLªIdentifierÍàÍí­componentCallZ­NewExpressionÍğÍKLªIdentifierÍôÍ´lvCompositeComponent–U®ThisExpressionÍ	Í\°ObjectExpressionÍÍÇ’]¨PropertyÍ=ÍeÂÂÂLªIdentifierÍ=ÍO²footnoteControllerLªIdentifierÍQÍe´lvFootnoteController¤init]¨PropertyÍ“ÍÂÂÂLªIdentifierÍ“Í—¤textLªIdentifierÍ™Í¤item¤initLªIdentifierÍÉÍÒ©undefinedLªIdentifierÍÔÍÚ¦elmtIdO·ArrowFunctionExpressionÍÜÍåÀÂÂÂM®BlockStatementÍâÍå\°ObjectExpressionÍçÍJ“]¨PropertyÍéÍ6ÂÂÂLªIdentifierÍéÍí¤pageR§LiteralÍïÍ6ÙElvMarkdownIn/src/main/ets/lv-markdown-in/lib/utils/lvImgComponent.etsÙG"lvMarkdownIn/src/main/ets/lv-markdown-in/lib/utils/lvImgComponent.ets"¤init]¨PropertyÍ8Í@ÂÂÂLªIdentifierÍ8Í<¤lineR§LiteralÍ>Í@,¢44¤init]¨PropertyÍBÍHÂÂÂLªIdentifierÍBÍD¢f1R§LiteralÍFÍH¢11¤init£letS³ExpressionStatementÍuÍ’T®CallExpressionÍuÍ‘Y°MemberExpressionÍuÍ‚LªIdentifierÍuÍ{¦ViewPULªIdentifierÍ|Í‚¦createÂÂ‘LªIdentifierÍƒÍ­componentCallÂ^³VariableDeclarationÍ»Íù‘_²VariableDeclaratorÍ¿ÍøLªIdentifierÍ¿ÍË¬paramsLambdaO·ArrowFunctionExpressionÍÎÍøÀÂÂÂM®BlockStatementÍÔÍø‘[¯ReturnStatementÍÍÎ\°ObjectExpressionÍ	ÍÍ’]¨PropertyÍ;ÍcÂÂÂLªIdentifierÍ;ÍM²footnoteControllerLªIdentifierÍOÍc´lvFootnoteController¤init]¨PropertyÍ•ÍŸÂÂÂLªIdentifierÍ•Í™¤textLªIdentifierÍ›ÍŸ¤item¤init£letS³ExpressionStatementÍ"ÍPX´AssignmentExpressionÍ"ÍO¡=Y°MemberExpressionÍ"Í@LªIdentifierÍ"Í/­componentCallLªIdentifierÍ0Í@°paramsGenerator_ÂÂLªIdentifierÍCÍO¬paramsLambdaM®BlockStatementÍ Í‘S³ExpressionStatementÍÊÍxT®CallExpressionÍÊÍwY°MemberExpressionÍÊÍíU®ThisExpressionÍÊÍÎLªIdentifierÍÏÍí¾updateStateVarsOfChildByElmtIdÂÂ’LªIdentifierÍîÍô¦elmtId\°ObjectExpressionÍöÍv‘]¨PropertyÍ$ÍLÂÂÂLªIdentifierÍ$Í6²footnoteControllerLªIdentifierÍ8ÍL´lvFootnoteController¤initÂ\°ObjectExpressionÍÂÍâ‘]¨PropertyÍÄÍàÂÂÂLªIdentifierÍÄÍÈ¤nameR§LiteralÍÊÍà´lvCompositeComponent¶"lvCompositeComponent"¤initÂÂLªIdentifierÍHÍJ¢IfÂS³ExpressionStatementÍ]ÍfT®CallExpressionÍ]ÍeY°MemberExpressionÍ]ÍcLªIdentifierÍ]Í_¢IfLªIdentifierÍ`Íc£popÂÂÂ¥constS³ExpressionStatementÍ‚Í×T®CallExpressionÍ‚ÍÖY°MemberExpressionÍ‚ÍœU®ThisExpressionÍ‚Í†LªIdentifierÍ‡ÍœµforEachUpdateFunctionÂÂ“LªIdentifierÍÍ£¦elmtIdT®CallExpressionÍ¥Í½LªIdentifierÍ¥Í²­handleImgText‘Y°MemberExpressionÍ³Í¼U®ThisExpressionÍ³Í·LªIdentifierÍ¸Í¼¤textÂÂÂLªIdentifierÍ¿ÍÕ¶forEachItemGenFunctionÂLªIdentifierÍãÍê§ForEachÂS³ExpressionStatementÍõÍT®CallExpressionÍõÍY°MemberExpressionÍõÍ LªIdentifierÍõÍü§ForEachLªIdentifierÍıÍ £popÂÂÂS³ExpressionStatementÍÍT®CallExpressionÍÍY°MemberExpressionÍÍLªIdentifierÍÍ¤FlexLªIdentifierÍÍ£popÂÂÂN°MethodDefinitionÍ"ÍXÂÂLªIdentifierÍ"Í*¨rerender¦methodO²FunctionExpressionÍ*ÍXÀÂÂÂM®BlockStatementÍ-ÍX‘S³ExpressionStatementÍ7ÍRT®CallExpressionÍ7ÍQY°MemberExpressionÍ7ÍOU®ThisExpressionÍ7Í;LªIdentifierÍ<ÍO³updateDirtyElementsÂÂÂÀ•Ôra•¤type¥start£endªspecifiers¦source±ImportDeclarationÌ}Ì©‘Ôrb•¤type¥start£end¨imported¥local¯ImportSpecifierÌ†ÌLªIdentifierÌ†Ì§lvImageLªIdentifierÌ†Ì§lvImageR§LiteralÌ•Ì¨±../domain/LvImage³'../domain/LvImage'a±ImportDeclarationÌªÌĞ‘b¯ImportSpecifierÌ³Ì½LªIdentifierÌ³Ì½ªmdRegisterLªIdentifierÌ³Ì½ªmdRegisterR§LiteralÌÅÌÏ¨./commonª'./common'a±ImportDeclarationÌÑÍ‘b¯ImportSpecifierÌÚÌîLªIdentifierÌÚÌî´lvFootnoteControllerLªIdentifierÌÚÌî´lvFootnoteControllerR§LiteralÌöÍÙ!./controller/lvFootnoteControllerÙ#'./controller/lvFootnoteController'a±ImportDeclarationÍÍN‘Ôrc”¤type¥start£end¥local¶ImportDefaultSpecifierÍ"Í/LªIdentifierÍ"Í/­handleImgTextR§LiteralÍ5ÍM¶./handle/handleImgText¸'./handle/handleImgText'a±ImportDeclarationÍOÍ‘b¯ImportSpecifierÍXÍlLªIdentifierÍXÍl´lvCompositeComponentLªIdentifierÍXÍl´lvCompositeComponentR§LiteralÍtÍŒ¶./lvCompositeComponent¸'./lvCompositeComponent'

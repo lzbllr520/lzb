@@ -1,0 +1,722 @@
+// import { Chart } from './charts'
+// import { calculateNum, drawTexts, drawBreakText, deepCopy, requestAnimationFramePolyfill } from './index'
+// import { lineStyle as commonLineStyle, axisLineStyle, yLineStyle, label as commonLabel, itemStyle as commonItemStyle, areaStyle as commonAreaStyle } from './defaultOption'
+// /**
+//  * 折线图
+//  */
+// class DrawLine extends Chart {
+//   zeroScaleY = 0
+//   xs = 0
+//   nameH = 0
+//   private animationInfo = {
+//     startTime: null,
+//     timer: null,
+//     duration: 200,
+//     progress: 0
+//   }
+//   constructor () {
+//     super('line')
+//   }
+//
+//   bindEvent (e, callback) {
+//     const { xl, xStart, xEnd } = this.getXdataLength()
+//     const xs = (this.W - this.cPaddingL - this.cPaddingR) / ((xEnd - xStart) || 1)
+//     let index = 0;
+//     let dataIndex = 0;
+//     let isLegend = false;
+//     let pos = {
+//       x: e.localX,
+//       y: e.localY
+//     };
+//     if (isLegend || this.drawing || !this.animateArr.length) return;
+//     // 鼠标位置在图表中时
+//     if (pos.y > this.cPaddingT && pos.y < this.H - this.cPaddingB && pos.x > this.cPaddingL && pos.x < this.W - this.cPaddingR) {
+//       // canvas.style.cursor = 'pointer';
+//       for (let i = 0; i < (xEnd - xStart); i++) {
+//         if (pos.x > i * xs + this.cPaddingL) {
+//           index = i;
+//           dataIndex = i + xStart;
+//         }
+//       }
+//       const obj = this.animateArr[0].data[index]
+//       if (!obj) return
+//       this.clearGrid(index);
+//       // 获取处于当前位置的信息
+//       let arr = [];
+//       for (let j = 0, item, l = this.animateArr.length; j < l; j++) {
+//         item = this.animateArr[j];
+//         if (item.hide) continue;
+//         arr.push({ name: item.name, num: item.data[index].num })
+//       }
+//       // this.showInfo(pos, this.xAxis.data[index], arr);
+//       // console.log('callback', JSON.stringify(arr))
+//       callback(true, e, {
+//         x: obj.x,
+//         W: this.W,
+//         H: this.H,
+//       }, this.xAxis.data[dataIndex], arr, this.tooltip)
+//     } else {
+//       this.clearGrid();
+//       callback(false, e)
+//     }
+//   }
+//
+//   clearGrid (index?) {
+//     let that = this
+//     let obj; let r = 2
+//     let ctx = this.ctx
+//     let nameH = 0
+//     if (this.yAxis && !Array.isArray(this.yAxis) && this.yAxis.name) {
+//       nameH = this.ctx.measureText(this.yAxis.name).height; // 获取文字的长度
+//     }
+//     ctx.clearRect(0, 0, that.W, that.H);
+//     // 画坐标系
+//     this.drawAxis()
+//     // 画标签
+//     this.drawLegend(this.series)
+//     // 画y轴刻度
+//     this.drawY()
+//     ctx.save()
+//     ctx.translate(that.cPaddingL, that.H - that.cPaddingB);
+//     // 画标志线
+//     if (typeof index === 'number') {
+//       const { axisPointer = {} } = that.tooltip
+//       const { type = 'line', lineStyle = {}, shadowStyle } = axisPointer
+//       const { width = 1, color = '#DDE2EB'} = lineStyle
+//       ctx.beginPath()
+//       obj = that.animateArr[0].data[index]
+//       ctx.lineWidth = width
+//       ctx.strokeStyle = color
+//       ctx.moveTo(obj.x, -(that.H - that.cPaddingT - that.cPaddingB - nameH))
+//       ctx.lineTo(obj.x, 0)
+//       ctx.stroke()
+//     }
+//
+//
+//     for (let i = 0, item, il = that.animateArr.length; i < il; i++) {
+//       item = that.animateArr[i]
+//       if (item.hide) continue
+//       const { lineStyle = {}, itemStyle = {}, color: itemColor, label = {}, data = [], smooth = false, areaStyle = {} } = item
+//       const { color = '', width = 1, cap = 'round' } = {...commonLineStyle, ...(lineStyle || {})};
+//       that.setCtxStyle({
+//         strokeStyle: color || itemColor,
+//         lineWidth: width,
+//         lineCap: cap
+//       })
+//       ctx.beginPath()
+//       that.drawSmoothLine(ctx, data, smooth, areaStyle, width)
+//       const { symbol = commonItemStyle.symbol, symbolSize = commonItemStyle.symbolSize, symbolColor = commonItemStyle.symbolColor, borderWidth = commonItemStyle.borderWidth, borderType = commonItemStyle.borderType, borderColor = commonItemStyle.borderColor } = itemStyle
+//       const { show: labelShow = commonLabel.show, color: labelColor = commonLabel.color, fontWeight = commonLabel.fontWeight, fontFamily = commonLabel.fontFamily, fontSize = commonLabel.fontSize } = label
+//       // 画完曲线后再画圆球
+//       for (let j = 0, jl = item.data.length; j < jl; j++) {
+//         obj = item.data[j]
+//         if (symbol === 'solidCircle' || j === index) {
+//           ctx.beginPath();
+//           ctx.arc(obj.x, -obj.h, (symbolSize + borderWidth) * (index === j ? 1.5 : 1), 0, Math.PI * 2, false);
+//           ctx.fillStyle = borderColor || itemColor;
+//           ctx.fill();
+//           ctx.beginPath();
+//           ctx.arc(obj.x, -obj.h, symbolSize * (index === j ? 1.5 : 1), 0, Math.PI * 2, false);
+//           ctx.fillStyle = symbolColor || itemColor;
+//           ctx.fill();
+//         }
+//         // 绘画拐点标签
+//         if (labelShow) {
+//           ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+//           ctx.fillStyle = labelColor
+//           ctx.textAlign = 'center'
+//           ctx.textBaseline = 'middle'
+//           const text = String(obj.num)
+//           const textHeight = ctx.measureText(text).height; // 获取文字的长度
+//           const symbolH = ((symbolSize + borderWidth) / 2) * (index === j ? 2 : 1)
+//           ctx.fillText(text, obj.x, -obj.h - textHeight - symbolH);
+//         }
+//       }
+//     }
+//     ctx.restore()
+//   }
+//
+//   animate () {
+//     if (this.animationInfo.timer) {
+//       clearTimeout(this.animationInfo.timer)
+//       this.animationInfo.timer = null
+//     }
+//     let ctx = this.ctx
+//     let i = 0
+//     const animateArr = this.animateArr
+//     this.drawing = true;
+//     ctx.clearRect(0, 0, this.W, this.H);
+//     // 画坐标系
+//     this.drawAxis()
+//     // 画标签
+//     this.drawLegend(this.series)
+//     // 画y轴刻度
+//     this.drawY()
+//     ctx.save()
+//     ctx.translate(this.cPaddingL, this.H - this.cPaddingB);
+//     this.previousData = deepCopy(animateArr)
+//     this.animationInfo.duration = this.animationInfo.duration / animateArr.length
+//     for (let index = 0; index < animateArr.length; index++) {
+//       const element = animateArr[index];
+//       setTimeout(() => {
+//         let index = 0
+//         this.loopLine(element.data[0].x, -element.data[0].h, element.data[1].x, -element.data[1].h, index, element)
+//       }, 0)
+//     }
+//     // const drawLine = () => {
+//     //   if (i > animateArr.length - 1) {
+//     //     this.drawing = false;
+//     //     ctx.restore()
+//     //     return
+//     //   }
+//     //   const { lineStyle = {}, itemStyle = {}, color: itemColor, label = {}, smooth = false, data: item = [], areaStyle = {} } = animateArr[i]
+//     //   const { color = '', width = 2, cap = 'round' } = {...commonLineStyle, ...(lineStyle || {})};
+//     //   ctx.beginPath()
+//     //   this.setCtxStyle({
+//     //     strokeStyle: color || itemColor,
+//     //     lineWidth: width,
+//     //     lineCap: cap
+//     //   })
+//     //   this.drawSmoothLine(ctx, item, smooth, areaStyle, width)
+//     //   for (let j = 0, jl = item.length; j < jl; j++) {
+//     //     this.drawInflectionPoint(item[j], itemStyle)
+//     //     this.drawLabel(item[j], label, itemStyle)
+//     //   }
+//     //   i++
+//     //   drawLine()
+//     // }
+//     // drawLine()
+//   }
+//
+//   loopLine(sx, sy, ex, ey, index, element) {  //动画画线 ，参数：起始坐标x,起始坐标y,终点坐标x,终点坐标y, this.coord.data的下标
+//     var _this = this, xproportion = ex - sx,yproportion = ey - sy,yset = xproportion ? yproportion / xproportion : 0;
+//     // _this.option.speed = _this.option.speed > 1 ? _this.option.speed : 1;  //动画速度最小是1
+//     _this.ctx.save();
+//     _this.ctx.beginPath();
+//     _this.ctx.lineWidth=2;
+//     _this.ctx.strokeStyle="#aa0000";
+//     _this.ctx.moveTo(sx,sy);
+//     sx+= 1;
+//     sy+= (yset);
+//
+//     if((sx >= ex && sy >= ey) || (sx >= ex && sy <= ey)){  //到达位置时
+//
+//       sx = ex;
+//       sy = ey;
+//       var controlX = (ex + sx) / 2;
+//       var controlY = (ey + sy) / 2;
+//       index++;
+//       if(index !== element.data.length){
+//         ex = element.data[index].x;
+//         ey = -element.data[index].h;
+//         _this.ctx.bezierCurveTo(ex, ey, controlX, controlY, sx, sy)
+//         _this.ctx.stroke();
+//         _this.ctx.restore();
+//       }
+//     } else {
+//       _this.ctx.lineTo(sx,sy);
+//       _this.ctx.stroke();
+//       _this.ctx.restore();
+//     }
+//     if(index == element.data.length){ //循环到data的最大值就结束
+//       return;
+//     }
+//
+//     setTimeout(() => {
+//       this.loopLine(sx,sy,ex,ey,index, element)
+//     }, 1000 / 60)
+//     // window.requestAnimation(function(){;});
+//   }
+//
+//   animateUpdate () {
+//     if (this.animationInfo.timer) {
+//       clearTimeout(this.animationInfo.timer)
+//       this.animationInfo.timer = null
+//     }
+//     let ctx = this.ctx
+//     this.drawing = true;
+//     let time = null
+//     this.animationInfo.startTime = null
+//     let newData = this.animateArr
+//     const drawLine = () => {
+//       if (this.animationInfo.startTime === null) {
+//         this.animationInfo.startTime = time;
+//       }
+//       const elapsedTime = time - this.animationInfo.startTime;
+//       if (elapsedTime > 850) {
+//         this.animationInfo.progress = this.animationInfo.progress === 1 ? 2 : 1
+//       } else {
+//         this.animationInfo.progress = Math.min(elapsedTime / 800, 1); // 确保进度不超过1
+//       }
+//       if (this.animationInfo.progress <= 1) {
+//         ctx.clearRect(0, 0, this.W, this.H);
+//         // 画坐标系
+//         this.drawAxis()
+//         // 画标签
+//         this.drawLegend(this.series)
+//         // 画y轴刻度
+//         this.drawY()
+//         ctx.save()
+//         ctx.translate(this.cPaddingL, this.H - this.cPaddingB);
+//         for (let i = 0, item, il = newData.length; i < il; i++) {
+//           item = newData[i]
+//           const oldItem = this.previousData[i] || {data: []}
+//           let { lineStyle = {}, itemStyle = {}, color: itemColor, label = {}, smooth = false, data = [], areaStyle = {} } = item
+//           const { color = '', width = 2, cap = 'round' } = {...commonLineStyle, ...(lineStyle || {})};
+//           if (item.hide || !data || !data.length) continue
+//           if (oldItem) {
+//             data = data.map((cli, i) => {
+//               if (cli.oldH === undefined) {
+//                 cli.oldH = cli.h
+//               }
+//               const oldY = (oldItem.data && oldItem.data[i] ? oldItem.data[i].h || 0 : 0)
+//               let deltaY = (cli.oldH - oldY)
+//               cli.h = oldY + (deltaY * this.animationInfo.progress)
+//               return cli
+//             })
+//           }
+//           ctx.beginPath()
+//           this.setCtxStyle({
+//             strokeStyle: color || itemColor,
+//             lineWidth: width,
+//             lineCap: cap
+//           })
+//           this.drawSmoothLine(ctx, data, smooth, areaStyle, width)
+//           for (let j = 0, jl = data.length; j < jl; j++) {
+//             this.drawInflectionPoint(data[j], itemStyle)
+//             this.drawLabel(data[j], label, itemStyle)
+//           }
+//         }
+//         ctx.restore()
+//         this.animationInfo.timer = setTimeout(() => {
+//           time = Date.now()
+//           drawLine()
+//         }, 16)
+//       } else {
+//         ctx.restore()
+//         this.drawing = false;
+//       }
+//     }
+//     time = Date.now()
+//     drawLine()
+//   }
+//
+//   drawLineAnimate (time, start, end, callback, allStyle) {
+//     const ctx = this.ctx
+//     if (this.animationInfo.startTime === null) {
+//       this.animationInfo.startTime = time;
+//     }
+//     const { areaStyle, itemStyle, label, smooth } = allStyle
+//     const { color = commonAreaStyle.color } = areaStyle
+//
+//     const elapsedTime = time - this.animationInfo.startTime;
+//     this.animationInfo.progress = Math.min(elapsedTime / this.animationInfo.duration, 1); // 确保进度不超过1
+//     // 计算当前点的位置
+//     const currentX = start.x + (end.x - start.x) * this.animationInfo.progress;
+//     const currentY = start.h + (end.h - start.h) * this.animationInfo.progress;
+//
+//     // 绘制连接线
+//     const smoothX = -(currentX - start.x) * (smooth ? 0.5 : 0.1)
+//     ctx.bezierCurveTo(start.x - smoothX, -start.h, currentX + smoothX, -currentY, currentX, -currentY)
+//     if (this.animationInfo.progress < 1) {
+//       this.animationInfo.timer = setTimeout(() => {
+//         this.drawLineAnimate(Date.now(), start, end, callback, allStyle)
+//       }, this.animationInfo.duration)
+//     } else {
+//       this.animationInfo.progress = 0
+//       this.animationInfo.startTime = null
+//       ctx.stroke();
+//       // ctx.lineTo(currentX, -currentY);
+//       if (color) {
+//         ctx.lineTo(currentX, 0);
+//         ctx.lineTo(start.x, 0);
+//         if (typeof color === 'string') {
+//           ctx.fillStyle = color
+//         } else if (typeof color === 'object') {
+//           const { direction = [0, 1, 0, 0], colors = [] } = color || {}
+//           const gradient = ctx.createLinearGradient(this.W / 2 * (direction[0] || 0), -this.H * (direction[1] || 1), this.W / 2 * (direction[2] || 0), -this.H * (direction[0] || 0));
+//           colors.forEach(item => {
+//             gradient.addColorStop(item.offset, item.color)
+//           })
+//           ctx.fillStyle = gradient;
+//         }
+//         ctx.fill();
+//       }
+//       this.drawInflectionPoint(start, itemStyle)
+//       this.drawLabel(start, label, itemStyle)
+//       callback && callback()
+//     }
+//   }
+//   // 绘画拐点
+//   drawInflectionPoint (start, itemStyle) {
+//     const ctx = this.ctx
+//     const { symbol = commonItemStyle.symbol, symbolSize = commonItemStyle.symbolSize, symbolColor = commonItemStyle.symbolColor, borderWidth = commonItemStyle.borderWidth, borderType = commonItemStyle.borderType, borderColor = commonItemStyle.borderColor } = itemStyle
+//     if (symbol === 'solidCircle') {
+//       ctx.beginPath();
+//       ctx.arc(start.x, -start.h, (symbolSize + borderWidth), 0, Math.PI * 2, false);
+//       ctx.fillStyle = borderColor;
+//       ctx.fill();
+//       ctx.beginPath();
+//       ctx.arc(start.x, -start.h, symbolSize, 0, Math.PI * 2, false);
+//       ctx.fillStyle = symbolColor;
+//       ctx.fill();
+//     }
+//   }
+//
+//   // 绘画拐点
+//   drawLabel (obj, label, itemStyle) {
+//     const ctx = this.ctx
+//     const { show: labelShow = commonLabel.show, color: labelColor = commonLabel.color, fontWeight = commonLabel.fontWeight, fontFamily = commonLabel.fontFamily, fontSize = commonLabel.fontSize, formatter } = label
+//     const { symbolSize = commonItemStyle.symbolSize, borderWidth = commonItemStyle.borderWidth } = itemStyle
+//     if (labelShow) {
+//       ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+//       ctx.fillStyle = labelColor
+//       ctx.textAlign = 'center'
+//       ctx.textBaseline = 'middle'
+//       const text = String(formatter ? formatter({
+//         ...obj
+//       }) : obj.num)
+//       const textHeight = ctx.measureText(text).height; // 获取文字的长度
+//       const symbolH =  (symbolSize + borderWidth) / 2
+//       ctx.fillText(text, obj.x, -obj.h - textHeight - symbolH);
+//     }
+//   }
+//
+//   drawSmoothLine(ctx, data, smooth, areaStyle, width) {
+//     const { color = commonAreaStyle.color } = areaStyle
+//     let f = smooth ? 0.5 : 0.05
+//     const points = data.map(item => {
+//       return {x: item.x, y: -item.h}
+//     })
+//     ctx.moveTo(points[0].x + width / 2, points[0].y)
+//     let dx2 = 0
+//     let dy2 = 0
+//     let prevPoint = points[0]
+//     let length = points.length
+//     for (let i = 1; i < length; i++) {
+//       let currtPoint = points[i]
+//       // nextPoint = points[i + 1]
+//       const currentX = prevPoint.x + (currtPoint.x - prevPoint.x)
+//       dx2 = -(currentX - prevPoint.x) * f
+//       ctx.bezierCurveTo(prevPoint.x - dx2, prevPoint.y, currentX + dx2, currtPoint.y + dy2, currentX, currtPoint.y)
+//       prevPoint = currtPoint
+//     }
+//     ctx.stroke()
+//     if (color) {
+//       // ctx.lineTo(data[length - 1].x + width / 2, points[length - 1].y);
+//       ctx.lineTo(data[length - 1].x, -this.zeroScaleY);
+//       // ctx.lineTo(data[0].x - width / 2, points[0].y);
+//       ctx.lineTo(data[0].x, -this.zeroScaleY);
+//       // const mathData = points.map(item => item.y)
+//       if (typeof color === 'string') {
+//         ctx.fillStyle = color
+//       } else if (typeof color === 'object') {
+//         const { direction = [0, 1, 0, 0], colors = [] } = color || {}
+//         const gradient = ctx.createLinearGradient((this.W - this.cPaddingL - this.cPaddingR) * (direction[0] || 0), -this.H * (direction[1] || 1), (this.W - this.cPaddingL - this.cPaddingR) * (direction[2] || 0), -this.H * (direction[0] || 0));
+//         colors.forEach(item => {
+//           gradient.addColorStop(item.offset, item.color)
+//         })
+//         ctx.fillStyle = gradient;
+//       }
+//       ctx.fill();
+//     }
+//
+//     // animateIndex += 1
+//     // return animateIndex
+//   }
+//
+//   create () {
+//     // 组织数据
+//     this.initData()
+//     if (this.renderType === 'init') {
+//       // 执行动画
+//       // startTime = Date.now();
+//       this.animate();
+//     } else {
+//       // 更新动画
+//       this.animateUpdate();
+//     }
+//   }
+//
+//   initData () {
+//       let that = this
+//       const { xl, xStart, xEnd } = this.getXdataLength()
+//       const { boundaryGap = true } = this.xAxis
+//       this.xs = (this.W - this.cPaddingL - this.cPaddingR) / ((xEnd - xStart - (boundaryGap ? 0 : 1)) || 1)
+//       this.nameH = 0
+//       if (this.yAxis && !Array.isArray(this.yAxis)) {
+//         const { name, nameTextStyle } = this.yAxis;
+//         const { color = '#999', fontWeight = 'normal', fontSize = 22, fontFamily = 'sans-serif' } = nameTextStyle
+//         this.ctx.fillStyle = color
+//         this.ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+//         this.nameH = name ? (this.ctx.measureText(name).height) : 0; // 获取文字的长度
+//       }
+//       let ydis = this.H - this.cPaddingB - this.cPaddingT - this.nameH
+//       let sl = 0
+//       let min = 0
+//       let max = 0
+//       let item; let obj; let arr = []
+//       if (!this.series.length) {
+//         return
+//       }
+//       for (let i = 0; i < this.series.length; i++) {
+//         item = this.series[i]
+//         if (!item.data || !item.data.length) {
+//           this.series.splice(i--, 1)
+//           continue
+//         }
+//         // 赋予没有颜色的项
+//         if (!item.color) {
+//           item.color = this.color[i]
+//         }
+//         item.name = item.name || 'unnamed'
+//
+//         if (item.hide) continue
+//         sl++
+//         arr = arr.concat(item.data.slice(xStart, xEnd))
+//       }
+//       // 计算数据在Y轴刻度
+//       this.info = calculateNum(arr)
+//       min = this.info.min
+//       max = this.info.max
+//       this.getZeroScaleY()
+//       for (let i = 0; i < this.series.length; i++) {
+//         item = this.series[i]
+//         if (!this.animateArr[i]) {
+//           obj = Object.assign({}, {
+//             i: i,
+//             isStop: true,
+//             xl: 0,
+//             create: true,
+//             ...item,
+//             hide: !!item.hide,
+//             name: item.name,
+//             color: item.color,
+//             data: []
+//           })
+//           // console.log('this.zeroScaleY', this.zeroScaleY)
+//           item.data.slice(xStart, xEnd).forEach((d, j) => {
+//             obj.data.push({
+//               num: d,
+//               h: d === 0 ? this.zeroScaleY : ((d - min) / (max - min) * ydis),
+//               p: 0,
+//               x: Math.round(boundaryGap ? (this.xs * (j + 1) - this.xs / 2) : (this.xs * j)),
+//               y: 0
+//             })
+//           })
+//           this.animateArr.push(obj)
+//         } else { // 更新
+//           if (that.animateArr[i].hide && !item.hide) {
+//             that.animateArr[i].create = true
+//             that.animateArr[i].xl = 0
+//           } else {
+//             that.animateArr[i].create = false
+//           }
+//           that.animateArr[i].hide = item.hide
+//           item.data.slice(0, xl).forEach((d, j) => {
+//             that.animateArr[i].data[j].h = Math.floor((d - min) / (max - min) * ydis + 2)
+//           })
+//         }
+//       }
+//   }
+//
+//   drawAxis () {
+//     let that = this
+//     const { xl, xStart, xEnd, zoomShow } = this.getXdataLength()
+//     let ctx = this.ctx
+//     let W = this.W
+//     let H = this.H
+//     let cPaddingL = this.cPaddingL
+//     let cPaddingR = this.cPaddingR
+//     let cPaddingT = this.cPaddingT
+//     let cPaddingB = this.cPaddingB
+//     const xWidth = W - cPaddingL - cPaddingR
+//     // let xs = xWidth / ((xEnd - xStart) || 1) // x轴单位数，每个单位长度
+//     // this.xs = xs
+//     // ctx.clearRect(0, 0, W, H)
+//
+//     // x轴
+//     ctx.save()
+//     ctx.translate(cPaddingL, H - cPaddingB)
+//     const { axisTick, splitLine, axisLine = {}, axisLabel, formatter, data, boundaryGap = true } = this.xAxis;
+//     const {show: axisLineShow = true} = axisLine
+//     const {show: axisTickShow = true, interval = 4, length: axisTickLength = 5, lineStyle = axisLineStyle } = axisTick || {}
+//     if (axisLineShow) {
+//       const { color = '#DDE2EB', width = 1  } = {...axisLineStyle, ...(axisLine.lineStyle || {})};
+//       this.setCtxStyle({
+//         strokeStyle: color,
+//         lineWidth: width
+//       })
+//       ctx.beginPath()
+//       ctx.moveTo(0, 0)
+//       ctx.lineTo(W - cPaddingL - cPaddingR, 0)
+//       ctx.stroke()
+//     }
+//     // x轴刻度
+//     if (this.xAxis) {
+//       // 获取是否滚动
+//       let xInterval = 1
+//       const { color = '#999999', fontWeight = 'normal', fontSize = 22, fontFamily = 'sans-serif', overflow = 'none', margin = 5 } = axisLabel
+//       // 先判断是否已经超出整条x轴线长度了
+//       const { interval: axisLabelInterval = 'auto' } = axisLabel
+//       if (!zoomShow) {
+//         xInterval = axisLabelInterval === 'auto' ? 1 : (Math.max(axisLabelInterval, 1) + 1)
+//         if (axisLabelInterval === 'auto') {
+//           let maxTextWidth = 0
+//           data.forEach((obj, i) => {
+//             this.ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+//             this.ctx.fillStyle = color
+//             ctx.textAlign = 'center'
+//             ctx.textBaseline = 'middle'
+//             obj = String(formatter ? formatter(obj) : obj)
+//             const txtW = this.ctx.measureText(obj).width; // 获取文字的长度
+//             maxTextWidth += txtW
+//           })
+//           if (maxTextWidth > xWidth * 0.8) {
+//             xInterval = Math.round(maxTextWidth / (xWidth)) + 1
+//           }
+//         }
+//       }
+//       for (let i = 0; i < (xEnd - xStart); i++) {
+//         let obj = data[i + xStart]
+//         let x = Math.round(this.xs * (i + (boundaryGap ? 1 : 0)))
+//         if (axisTickShow) {
+//           const { color = '#DDE2EB', width = 1 } = {...axisLineStyle, ...(axisTick.lineStyle || {})};
+//           ctx.beginPath()
+//           this.setCtxStyle({
+//             strokeStyle: color,
+//             lineWidth: width
+//           })
+//           ctx.moveTo(x, 0)
+//           ctx.lineTo(x, axisTickLength)
+//           ctx.stroke()
+//         }
+//         this.ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+//         this.ctx.fillStyle = color
+//         ctx.textAlign = 'center'
+//         ctx.textBaseline = 'middle'
+//         if (i % xInterval === 0 || axisLabelInterval === 0) {
+//           obj = String(formatter ? formatter(obj) : obj)
+//           // 这里后续可以支持设置文字与x轴的距离
+//           const textX = Math.round(x - (boundaryGap ? (this.xs / 2) : 0))
+//           const textY = axisTickLength + margin
+//           let textI = obj.length
+//           if (overflow === 'truncate') {
+//             textI = drawTexts(ctx, obj, this.xs)
+//             ctx.fillText(obj.substring(0, textI) + (textI !== obj.length ? '...' : ''), textX, textY)
+//           } else if (overflow === 'breakAll') {
+//             drawBreakText(ctx, obj, this.xs, {
+//               x: textX,
+//               y: textY
+//             })
+//           } else {
+//             ctx.fillText(obj.substring(0, textI), textX, textY)
+//           }
+//         }
+//       }
+//     }
+//     ctx.restore()
+//   }
+//
+//   drawY () {
+//     if (!Array.isArray(this.yAxis)) {
+//       const { axisTick, splitLine, axisLine, axisLabel, nameTextStyle, nameGap = 5 } = this.yAxis;
+//       const {show: axisTickShow = true, interval: axisTickInterval = 4, length: axisTickLength = 5, lineStyle = axisLineStyle } = axisTick || {}
+//       const { show: splitLineShow = true } = splitLine || {}
+//       let ctx = this.ctx
+//       let nameH = 0
+//       if (this.yAxis && this.yAxis.name) {
+//         const { color = '#999', fontWeight = 'normal', fontSize = 22, fontFamily = 'sans-serif' } = nameTextStyle
+//         this.ctx.fillStyle = color
+//         this.ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+//         ctx.textBaseline = 'middle'
+//         nameH = this.ctx.measureText(this.yAxis.name).height; // 获取文字的长度
+//         const nameW = this.ctx.measureText(this.yAxis.name).width; // 获取文字的长度
+//         ctx.fillText(this.yAxis.name, this.cPaddingL - nameW / 2, this.cPaddingT - nameGap)
+//       }
+//
+//       let xdis = this.W - this.cPaddingL - this.cPaddingR
+//       let ydis = this.H - this.cPaddingB - this.cPaddingT - nameH
+//       let yl = this.info.num
+//       let ys = ydis / yl
+//
+//       // 画Y轴刻度
+//       ctx.save()
+//       // ctx.fillStyle = 'hsl(200,100%,60%)'
+//       ctx.translate(this.cPaddingL, this.H - this.cPaddingB)
+//
+//       for (let i = 0; i <= yl; i++) {
+//         if (axisTickShow) {
+//           const { color = '#DDE2EB', width = 1 } = {...axisLineStyle, ...(axisTick.lineStyle || {})};
+//           ctx.beginPath()
+//           this.setCtxStyle({
+//             strokeStyle: color,
+//             lineWidth: width
+//           })
+//           ctx.moveTo(-axisTickLength, -Math.floor(ys * i))
+//           ctx.lineTo(0, -Math.floor(ys * i))
+//           ctx.stroke()
+//         }
+//
+//         if (i > 0 && splitLineShow) {
+//           const { color = '#DDE2EB', width = 1 } = {...yLineStyle, ...(splitLine.lineStyle || {})};
+//           this.setCtxStyle({
+//             strokeStyle: color,
+//             lineWidth: width
+//           })
+//           ctx.beginPath()
+//           ctx.moveTo(0, -Math.floor(ys * i))
+//           ctx.lineTo(xdis, -Math.floor(ys * i))
+//           ctx.stroke()
+//         }
+//
+//         const { color = '#999', fontWeight = 'normal', fontSize = 22, fontFamily = 'sans-serif', margin = 0 } = axisLabel
+//         this.ctx.fillStyle = color
+//         this.ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+//         ctx.textAlign = 'right'
+//         ctx.textBaseline = 'middle'
+//         let dim = Math.floor(this.info.step * i + this.info.min)
+//         let txt = String(this.yAxis.formatter ? this.yAxis.formatter(dim) : dim)
+//         const txtH = this.ctx.measureText(txt).height; // 获取文字的长度
+//         const interval = (axisTickShow ? -(axisTickInterval + axisTickLength) : -8) - margin
+//         ctx.fillText(txt, interval, -ys * i)
+//       }
+//       const {show: axisLineShow = true} = axisLine
+//       // y轴
+//       if (axisLineShow) {
+//         const { color = '#DDE2EB', width = 1 } = {...axisLineStyle, ...(axisLine.lineStyle || {})};
+//         this.setCtxStyle({
+//           strokeStyle: color,
+//           lineWidth: width
+//         })
+//         ctx.beginPath()
+//         ctx.moveTo(0, 0)
+//         ctx.lineTo(0, this.cPaddingB + this.cPaddingT + nameH - this.H )
+//         ctx.stroke()
+//         // ctx.restore()
+//       }
+//       // ctx.save()
+//       ctx.restore()
+//     }
+//   }
+//
+//   getZeroScaleY () {
+//     let nameH = 0
+//     if (this.yAxis && !Array.isArray(this.yAxis) && this.yAxis.name) {
+//       nameH = this.ctx.measureText(this.yAxis.name).height; // 获取文字的长度
+//     }
+//     let ydis = this.H - this.cPaddingB - this.cPaddingT - nameH
+//     let yl = this.info.num
+//     let ys = ydis / yl
+//     for (let i = 0; i <= yl; i++) {
+//       let dim = Math.floor(this.info.step * i + this.info.min)
+//       if (dim == 0) { // 记录0刻度的坐标渲染有用
+//         this.zeroScaleY = ys * i
+//       }
+//     }
+//   }
+//
+// }
+//
+//
+// export default DrawLine

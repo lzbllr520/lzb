@@ -1,0 +1,579 @@
+Ôr@Ÿªassertions¤code´customTransformCache¬dependencies¢id¤meta±moduleSideEffects¬originalCode±originalSourcemap«resolvedIds®sourcemapChainµsyntheticNamedExportsµtransformDependencies®transformFiles¨cacheAstÔrAÚ6if (!("finalizeConstruction" in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+}
+import router from '@ohos.router';
+import promptAction from '@ohos.promptAction';
+import preferences from '@ohos.data.preferences';
+import window from "@ohos.window";
+// å®šä¹‰å­˜å‚¨ä¸­ä½¿ç”¨çš„å¸¸é‡ï¼Œé¿å…é­”æ³•å­—ç¬¦ä¸²
+const PREFERENCES_FILE_NAME = 'login_prefs'; // å­˜å‚¨æ–‡ä»¶çš„åç§°
+const KEY_SESSION_TOKEN = 'session_token'; // å­˜å‚¨ç™»å½•ä»¤ç‰Œçš„é”®
+const KEY_SESSION_EXPIRY = 'session_expiry'; // å­˜å‚¨è¿‡æœŸæ—¶é—´çš„é”®
+const LOGIN_EXPIRY_DAYS = 7; // è®¾ç½®ç™»å½•æœ‰æ•ˆæœŸä¸º 7 å¤©
+class Login extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.__username = new ObservedPropertySimplePU('', this, "username");
+        this.__password = new ObservedPropertySimplePU('', this, "password");
+        this.__bgScale = new ObservedPropertySimplePU(1.0, this, "bgScale");
+        this.__isButtonPressed = new ObservedPropertySimplePU(false, this, "isButtonPressed");
+        this.__bgOpacity = new ObservedPropertySimplePU(0, this, "bgOpacity");
+        this.context = getContext(this) // èŽ·å–åº”ç”¨ä¸Šä¸‹æ–‡
+        ;
+        this.setInitiallyProvidedValue(params);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params) {
+        if (params.username !== undefined) {
+            this.username = params.username;
+        }
+        if (params.password !== undefined) {
+            this.password = params.password;
+        }
+        if (params.bgScale !== undefined) {
+            this.bgScale = params.bgScale;
+        }
+        if (params.isButtonPressed !== undefined) {
+            this.isButtonPressed = params.isButtonPressed;
+        }
+        if (params.bgOpacity !== undefined) {
+            this.bgOpacity = params.bgOpacity;
+        }
+        if (params.context !== undefined) {
+            this.context = params.context;
+        }
+    }
+    updateStateVars(params) {
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__username.purgeDependencyOnElmtId(rmElmtId);
+        this.__password.purgeDependencyOnElmtId(rmElmtId);
+        this.__bgScale.purgeDependencyOnElmtId(rmElmtId);
+        this.__isButtonPressed.purgeDependencyOnElmtId(rmElmtId);
+        this.__bgOpacity.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.__username.aboutToBeDeleted();
+        this.__password.aboutToBeDeleted();
+        this.__bgScale.aboutToBeDeleted();
+        this.__isButtonPressed.aboutToBeDeleted();
+        this.__bgOpacity.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    get username() {
+        return this.__username.get();
+    }
+    set username(newValue) {
+        this.__username.set(newValue);
+    }
+    get password() {
+        return this.__password.get();
+    }
+    set password(newValue) {
+        this.__password.set(newValue);
+    }
+    get bgScale() {
+        return this.__bgScale.get();
+    }
+    set bgScale(newValue) {
+        this.__bgScale.set(newValue);
+    }
+    get isButtonPressed() {
+        return this.__isButtonPressed.get();
+    }
+    set isButtonPressed(newValue) {
+        this.__isButtonPressed.set(newValue);
+    }
+    get bgOpacity() {
+        return this.__bgOpacity.get();
+    }
+    set bgOpacity(newValue) {
+        this.__bgOpacity.set(newValue);
+    }
+    async aboutToAppear() {
+        try {
+            // ä½¿ç”¨ await ç­‰å¾… Promise è¿”å›žç»“æžœ
+            const win = await window.getLastWindow(this.context);
+            //æŽ§åˆ¶èƒŒæ™¯ç¼“æ…¢æ˜¾ç¤ºåŠ¨ç”»
+            Context.animateTo({ duration: 3000, curve: Curve.EaseInOut }, () => {
+                this.bgOpacity = 1;
+            });
+        }
+        catch (exception) {
+            promptAction.showToast({ message: 'é¡µé¢åˆå§‹åŒ–å‡½æ•°æ‰§è¡Œå¤±è´¥', bottom: '50%', duration: 1000 });
+        }
+    }
+    //é€€å‡ºåº”ç”¨ç¡®è®¤å’Œæ‰§è¡Œå‡½æ•°
+    showExitDialog() {
+        // èŽ·å–UIAbilityçš„ä¸Šä¸‹æ–‡ï¼Œç”¨äºŽè°ƒç”¨terminateSelfæ–¹æ³•
+        const context = getContext(this);
+        //æ“ä½œç¡®è®¤å¼¹å‡ºæ¡†
+        AlertDialog.show({
+            title: 'æ“ä½œç¡®è®¤',
+            message: 'æ˜¯å¦é€€å‡ºåº”ç”¨',
+            autoCancel: true,
+            alignment: DialogAlignment.Center,
+            buttons: [
+                {
+                    value: 'å–æ¶ˆ',
+                    action: () => {
+                        // ç”¨æˆ·ç‚¹å‡»å–æ¶ˆï¼Œä¸åšä»»ä½•äº‹
+                    }
+                },
+                {
+                    value: 'ç¡®è®¤',
+                    fontColor: Color.Red,
+                    action: () => {
+                        context.terminateSelf();
+                    }
+                }
+            ]
+        });
+    }
+    // ç™»å½•é€»è¾‘å‡½æ•°
+    async login() {
+        if (this.username === 'admin' && this.password === 'admin') {
+            try {
+                //ç™»å½•æˆåŠŸåŽï¼Œå­˜å‚¨ä¼šè¯ä¿¡æ¯
+                const prefs = await preferences.getPreferences(getContext(this), PREFERENCES_FILE_NAME);
+                // è®¡ç®—è¿‡æœŸæ—¶é—´æˆ³ï¼ˆä»ŽçŽ°åœ¨å¼€å§‹çš„æ¯«ç§’æ•°ï¼‰
+                const expiryTime = Date.now() + LOGIN_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+                // å­˜å‚¨ä»¤ç‰Œå’Œè¿‡æœŸæ—¶é—´
+                // åœ¨çœŸå®žé¡¹ç›®ä¸­ï¼Œ'LOGGED_IN_TOKEN' åº”è¯¥æ˜¯ç”±æœåŠ¡å™¨è¿”å›žçš„çœŸå®žä»¤ç‰Œ
+                await prefs.put(KEY_SESSION_TOKEN, 'LOGGED_IN_TOKEN');
+                await prefs.put(KEY_SESSION_EXPIRY, expiryTime);
+                // ç¡®ä¿æ•°æ®å†™å…¥ç£ç›˜
+                await prefs.flush();
+                //ç™»å½•æˆåŠŸå¼¹çª—
+                promptAction.showToast({ message: 'ç™»å½•æˆåŠŸ', bottom: '50%', duration: 1000 });
+                //é¡µé¢è·³è½¬åˆ°ä¸»é¡µ
+                router.replaceUrl({ url: 'pages/Index' });
+            }
+            catch (e) {
+                promptAction.showToast({ message: 'ç™»å½•å‡ºé”™ï¼Œæ— æ³•ä¿å­˜ç™»å½•ä¿¡æ¯', bottom: '50%', duration: 1000 });
+            }
+        }
+        else {
+            promptAction.showToast({ message: 'ç”¨æˆ·åæˆ–å¯†ç é”™è¯¯', bottom: '50%', duration: 1000 });
+        }
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Stack.create({ alignContent: Alignment.Center });
+            Stack.debugLine("entry/src/main/ets/pages/Login.ets(96:5)", "entry");
+            Stack.backgroundColor('#0E1307');
+            Stack.width('100%');
+            Stack.height('100%');
+            Gesture.create(GesturePriority.Low);
+            LongPressGesture.create();
+            LongPressGesture.onAction(() => {
+                console.info('Long press detected, showing exit dialog.');
+                // è§¦å‘é•¿æŒ‰åŽï¼Œè°ƒç”¨æ˜¾ç¤ºå¼¹çª—çš„å‡½æ•°ï¼Œç¡®è®¤é€€å‡ºåº”ç”¨
+                this.showExitDialog();
+            });
+            LongPressGesture.pop();
+            Gesture.pop();
+        }, Stack);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Image.create({ "id": 16777226, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+            Image.debugLine("entry/src/main/ets/pages/Login.ets(97:7)", "entry");
+            Image.width('100%');
+            Image.height('100%');
+            Image.objectFit(ImageFit.Cover);
+            Image.opacity(this.bgOpacity);
+        }, Image);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+            Column.debugLine("entry/src/main/ets/pages/Login.ets(103:7)", "entry");
+            Column.width('50%');
+            Column.padding({ top: 40, bottom: 40 });
+            Column.backdropBlur(12);
+            Column.backgroundColor('rgba(10, 10, 15, 0.3)');
+            Column.borderRadius(16);
+            Column.border({
+                width: 1.5,
+                color: 'rgba(255, 255, 255, 0.15)'
+            });
+            Column.shadow({
+                radius: 30,
+                color: 'rgba(173, 216, 230, 0.2)',
+                offsetX: 0,
+                offsetY: 0
+            });
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('å®¶ç”µèƒ½æ•ˆäº§çº¿ä¸­æŽ§å¹³å°');
+            Text.debugLine("entry/src/main/ets/pages/Login.ets(104:9)", "entry");
+            Text.fontSize(32);
+            Text.fontWeight(FontWeight.Bold);
+            Text.fontColor(Color.White);
+            Text.margin({ bottom: 40 });
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Row.create();
+            Row.debugLine("entry/src/main/ets/pages/Login.ets(110:9)", "entry");
+            Row.width('85%');
+            Row.height(55);
+            Row.borderRadius(15);
+            Row.backgroundColor('rgba(255, 255, 255, 0.15)');
+            Row.border({ width: 1, color: 'rgba(255, 255, 255, 0.2)' });
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Image.create({ "id": 16777230, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+            Image.debugLine("entry/src/main/ets/pages/Login.ets(111:11)", "entry");
+            Image.width(20);
+            Image.height(20);
+            Image.margin({ left: 15, right: 10 });
+            Image.fillColor(Color.White);
+        }, Image);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            TextInput.create({ placeholder: 'è¯·è¾“å…¥ç”¨æˆ·å' });
+            TextInput.debugLine("entry/src/main/ets/pages/Login.ets(117:11)", "entry");
+            TextInput.maxLength(30);
+            TextInput.placeholderColor('rgba(255, 255, 255, 0.6)');
+            TextInput.fontColor(Color.White);
+            TextInput.fontSize(18);
+            TextInput.backgroundColor('transparent');
+            TextInput.layoutWeight(1);
+            TextInput.onChange((value) => { this.username = value; });
+        }, TextInput);
+        Row.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Row.create();
+            Row.debugLine("entry/src/main/ets/pages/Login.ets(132:9)", "entry");
+            Row.width('85%');
+            Row.height(55);
+            Row.borderRadius(15);
+            Row.backgroundColor('rgba(255, 255, 255, 0.15)');
+            Row.border({ width: 1, color: 'rgba(255, 255, 255, 0.2)' });
+            Row.margin({ top: 20 });
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Image.create({ "id": 16777251, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+            Image.debugLine("entry/src/main/ets/pages/Login.ets(133:11)", "entry");
+            Image.width(20);
+            Image.height(20);
+            Image.margin({ left: 15, right: 10 });
+            Image.fillColor(Color.White);
+        }, Image);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            TextInput.create({ placeholder: 'è¯·è¾“å…¥å¯†ç ' });
+            TextInput.debugLine("entry/src/main/ets/pages/Login.ets(139:11)", "entry");
+            TextInput.maxLength(30);
+            TextInput.type(InputType.Password);
+            TextInput.placeholderColor('rgba(255, 255, 255, 0.6)');
+            TextInput.fontColor(Color.White);
+            TextInput.fontSize(18);
+            TextInput.backgroundColor('transparent');
+            TextInput.layoutWeight(1);
+            TextInput.onChange((value) => { this.password = value; });
+        }, TextInput);
+        Row.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Button.createWithLabel('ç™» å½•');
+            Button.debugLine("entry/src/main/ets/pages/Login.ets(156:9)", "entry");
+            Context.animation({ duration: 150, curve: Curve.EaseInOut });
+            Button.width('60%');
+            Button.height(55);
+            Button.fontSize(20);
+            Button.fontWeight(FontWeight.Bold);
+            Button.fontColor(Color.White);
+            Button.backgroundColor('#1890ff');
+            Button.borderRadius(15);
+            Button.margin({ top: 40 });
+            Button.scale({ x: this.isButtonPressed ? 0.97 : 1, y: this.isButtonPressed ? 0.97 : 1 });
+            Context.animation(null);
+            Button.onClick(() => {
+                //æ‰§è¡Œç™»å½•å‡½æ•°
+                this.login();
+            });
+            Button.onTouch((event) => {
+                if (event.type === TouchType.Down) {
+                    this.isButtonPressed = true;
+                }
+                if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+                    this.isButtonPressed = false;
+                }
+            });
+        }, Button);
+        Button.pop();
+        Column.pop();
+        Stack.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+    static getEntryName() {
+        return "Login";
+    }
+}
+registerNamedRoute(() => new Login(undefined, {}), "", { bundleName: "com.my.myapplication", moduleName: "entry", pagePath: "pages/Login", pageFullPath: "entry/src/main/ets/pages/Login", integratedHsp: "false", moduleType: "followWithHap" });
+//# sourceMappingURL=Login.js.mapÂ”Ù| hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.router.d.tsÙ‚ hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.promptAction.d.tsÙ† hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.data.preferences.d.tsÙ| hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.window.d.tsÙ=D:\apps\deveco\tzb2025jbgs\entry\src\main\ets\pages\Login.etsÔrBšªmoduleName±isLocalDependency¯isNodeEntryFile§pkgPath±belongProjectPath§pkgNameªpkgVersion±dependencyPkgInfo°belongModulePath¬shouldEmitJs¥entryÃÂÙ D:\apps\deveco\tzb2025jbgs\entryºD:\apps\deveco\tzb2025jbgs¥entry¥1.0.0Ô  Ù D:\apps\deveco\tzb2025jbgs\entryÃÃÚR
+import router from '@ohos.router';
+import promptAction from '@ohos.promptAction';
+import preferences from '@ohos.data.preferences';
+import { common } from '@kit.AbilityKit';
+import { window } from '@kit.ArkUI';
+
+
+// å®šä¹‰å­˜å‚¨ä¸­ä½¿ç”¨çš„å¸¸é‡ï¼Œé¿å…é­”æ³•å­—ç¬¦ä¸²
+const PREFERENCES_FILE_NAME = 'login_prefs';// å­˜å‚¨æ–‡ä»¶çš„åç§°
+const KEY_SESSION_TOKEN = 'session_token';// å­˜å‚¨ç™»å½•ä»¤ç‰Œçš„é”®
+const KEY_SESSION_EXPIRY = 'session_expiry'; // å­˜å‚¨è¿‡æœŸæ—¶é—´çš„é”®
+const LOGIN_EXPIRY_DAYS = 7;// è®¾ç½®ç™»å½•æœ‰æ•ˆæœŸä¸º 7 å¤©
+
+@Entry
+@Component
+struct Login {
+
+  @State username: string = '';
+  @State password: string = '';
+  @State bgScale: number = 1.0;
+  @State isButtonPressed: boolean = false;
+
+  @State bgOpacity: number = 0;
+
+  private context = getContext(this) as common.UIAbilityContext // èŽ·å–åº”ç”¨ä¸Šä¸‹æ–‡
+
+  async aboutToAppear() {
+    try {
+      // ä½¿ç”¨ await ç­‰å¾… Promise è¿”å›žç»“æžœ
+      const win = await window.getLastWindow(this.context);
+      //æŽ§åˆ¶èƒŒæ™¯ç¼“æ…¢æ˜¾ç¤ºåŠ¨ç”»
+      animateTo({ duration: 3000, curve: Curve.EaseInOut }, () => {
+        this.bgOpacity = 1;
+      })
+    } catch (exception) {
+      promptAction.showToast({message:'é¡µé¢åˆå§‹åŒ–å‡½æ•°æ‰§è¡Œå¤±è´¥',bottom:'50%',duration:1000})
+    }
+  }
+
+  //é€€å‡ºåº”ç”¨ç¡®è®¤å’Œæ‰§è¡Œå‡½æ•°
+  private showExitDialog() {
+    // èŽ·å–UIAbilityçš„ä¸Šä¸‹æ–‡ï¼Œç”¨äºŽè°ƒç”¨terminateSelfæ–¹æ³•
+    const context = getContext(this) as common.UIAbilityContext;
+    //æ“ä½œç¡®è®¤å¼¹å‡ºæ¡†
+    AlertDialog.show({
+      title: 'æ“ä½œç¡®è®¤',
+      message: 'æ˜¯å¦é€€å‡ºåº”ç”¨',
+      autoCancel: true, // ç‚¹å‡»å¯¹è¯æ¡†å¤–éƒ¨å¯å–æ¶ˆ
+      alignment: DialogAlignment.Center,
+      buttons: [
+        {
+          value: 'å–æ¶ˆ',
+          action: () => {
+            // ç”¨æˆ·ç‚¹å‡»å–æ¶ˆï¼Œä¸åšä»»ä½•äº‹
+          }
+        },
+        {
+          value: 'ç¡®è®¤',
+          fontColor: Color.Red, // å°†ç¡®è®¤æŒ‰é’®è®¾ä¸ºçº¢è‰²ä»¥ç¤ºè­¦ç¤º
+          action: () => {
+            context.terminateSelf();
+          }
+        }
+      ]
+    });
+  }
+
+  // ç™»å½•é€»è¾‘å‡½æ•°
+  private async login() {
+    if (this.username === 'admin' && this.password === 'admin') {
+      try {
+        //ç™»å½•æˆåŠŸåŽï¼Œå­˜å‚¨ä¼šè¯ä¿¡æ¯
+        const prefs = await preferences.getPreferences(getContext(this), PREFERENCES_FILE_NAME);
+        // è®¡ç®—è¿‡æœŸæ—¶é—´æˆ³ï¼ˆä»ŽçŽ°åœ¨å¼€å§‹çš„æ¯«ç§’æ•°ï¼‰
+        const expiryTime = Date.now() + LOGIN_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+        // å­˜å‚¨ä»¤ç‰Œå’Œè¿‡æœŸæ—¶é—´
+        // åœ¨çœŸå®žé¡¹ç›®ä¸­ï¼Œ'LOGGED_IN_TOKEN' åº”è¯¥æ˜¯ç”±æœåŠ¡å™¨è¿”å›žçš„çœŸå®žä»¤ç‰Œ
+        await prefs.put(KEY_SESSION_TOKEN, 'LOGGED_IN_TOKEN');
+        await prefs.put(KEY_SESSION_EXPIRY, expiryTime);
+        // ç¡®ä¿æ•°æ®å†™å…¥ç£ç›˜
+        await prefs.flush();
+        //ç™»å½•æˆåŠŸå¼¹çª—
+        promptAction.showToast({ message: 'ç™»å½•æˆåŠŸ' ,bottom:'50%',duration:1000});
+        //é¡µé¢è·³è½¬åˆ°ä¸»é¡µ
+        router.replaceUrl({ url: 'pages/Index' });
+      } catch (e) {
+        promptAction.showToast({message:'ç™»å½•å‡ºé”™ï¼Œæ— æ³•ä¿å­˜ç™»å½•ä¿¡æ¯',bottom:'50%',duration:1000})
+      }
+    } else {
+      promptAction.showToast({ message: 'ç”¨æˆ·åæˆ–å¯†ç é”™è¯¯',bottom:'50%',duration:1000 });
+    }
+  }
+
+  build() {
+    Stack({ alignContent: Alignment.Center }) {
+      Image($r('app.media.zb'))
+        .width('100%')
+        .height('100%')
+        .objectFit(ImageFit.Cover)
+        .opacity(this.bgOpacity)
+
+      Column() {
+        Text('å®¶ç”µèƒ½æ•ˆäº§çº¿ä¸­æŽ§å¹³å°')
+          .fontSize(32)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(Color.White)
+          .margin({ bottom: 40 })
+
+        Row() {
+          Image($r("app.media.username"))
+            .width(20)
+            .height(20)
+            .margin({ left: 15, right: 10 })
+            .fillColor(Color.White)
+
+          TextInput({ placeholder: 'è¯·è¾“å…¥ç”¨æˆ·å' })
+            .maxLength(30)
+            .placeholderColor('rgba(255, 255, 255, 0.6)')
+            .fontColor(Color.White)
+            .fontSize(18)
+            .backgroundColor('transparent')
+            .layoutWeight(1)
+            .onChange((value) => { this.username = value; })
+        }
+        .width('85%')
+        .height(55)
+        .borderRadius(15)
+        .backgroundColor('rgba(255, 255, 255, 0.15)')
+        .border({ width: 1, color: 'rgba(255, 255, 255, 0.2)' })
+
+        Row() {
+          Image($r("app.media.password"))
+            .width(20)
+            .height(20)
+            .margin({ left: 15, right: 10 })
+            .fillColor(Color.White)
+
+          TextInput({ placeholder: 'è¯·è¾“å…¥å¯†ç ' })
+            .maxLength(30)
+            .type(InputType.Password)
+            .placeholderColor('rgba(255, 255, 255, 0.6)')
+            .fontColor(Color.White)
+            .fontSize(18)
+            .backgroundColor('transparent')
+            .layoutWeight(1)
+            .onChange((value) => { this.password = value; })
+        }
+        .width('85%')
+        .height(55)
+        .borderRadius(15)
+        .backgroundColor('rgba(255, 255, 255, 0.15)')
+        .border({ width: 1, color: 'rgba(255, 255, 255, 0.2)' })
+        .margin({ top: 20 })
+
+        Button('ç™» å½•')
+          .width('60%')
+          .height(55)
+          .fontSize(20)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(Color.White)
+          .backgroundColor('#1890ff')
+          .borderRadius(15)
+          .margin({ top: 40 })
+          .scale({ x: this.isButtonPressed ? 0.97 : 1, y: this.isButtonPressed ? 0.97 : 1 })
+          .animation({ duration: 150, curve: Curve.EaseInOut })
+          .onClick(() => {
+            //æ‰§è¡Œç™»å½•å‡½æ•°
+            this.login();
+          })
+          .onTouch((event: TouchEvent) => {
+            if (event.type === TouchType.Down) { this.isButtonPressed = true; }
+            if (event.type === TouchType.Up || event.type === TouchType.Cancel) { this.isButtonPressed = false; }
+          })
+      }
+      .width('50%')
+      .padding({ top: 40, bottom: 40 })
+      .backdropBlur(12)
+      .backgroundColor('rgba(10, 10, 15, 0.3)')
+      .borderRadius(16)
+      //æ·»åŠ æ¸…æ™°çš„è½®å»“çº¿
+      .border({
+        width: 1.5,
+        color: 'rgba(255, 255, 255, 0.15)'
+      })
+      // æ·»åŠ æŸ”å’Œçš„èƒŒæ™¯å…‰æ™•
+      .shadow({
+        radius: 30,
+        color: 'rgba(173, 216, 230, 0.2)',
+        offsetX: 0,
+        offsetY: 0
+      })
+    }
+    .backgroundColor('#0E1307')
+    .width('100%')
+    .height('100%')
+    .gesture(
+      LongPressGesture() // ä½¿ç”¨é»˜è®¤å‚æ•°ï¼Œé•¿æŒ‰500msè§¦å‘
+        .onAction(() => {
+          console.info('Long press detected, showing exit dialog.');
+          // è§¦å‘é•¿æŒ‰åŽï¼Œè°ƒç”¨æ˜¾ç¤ºå¼¹çª—çš„å‡½æ•°ï¼Œç¡®è®¤é€€å‡ºåº”ç”¨
+          this.showExitDialog();
+        })
+    )
+  }
+}ÀÔrC”¬@ohos.router²@ohos.promptAction¶@ohos.data.preferences¬@ohos.windowÔrD—ªassertions¨external¢id¤meta±moduleSideEffectsªresolvedByµsyntheticNamedExportsAÃÙ| hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.router.d.tsAÃªoh-resolveÂDAÃÙ‚ hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.promptAction.d.tsAÃªoh-resolveÂDAÃÙ† hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.data.preferences.d.tsAÃªoh-resolveÂDAÃÙ| hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.window.d.tsAÃªoh-resolveÂ“ÔrE–§version¤fileªsourceRoot§sources¥names¨mappings¨Login.js ‘©Login.etsÜ3–”   ” ” ” ”! !”" "–”   ” ” ” ”- -”. .–”   ” ” ” ”0 0”1 1–”   ” 	” ” ”! #”" $’”   ” ˜”  	 ” 	” 	” 	”+ 	+”, 	,”- 	,”7 	6˜”  
+ ” 
+” 
+” 
+”) 
+)”* 
+*”+ 
+*”6 
+5˜”   ” ” ” ”+ +”, ,”- -”8 8˜”   ” ” ” ” ” ” ”, +’” ” ‘”  ’”7 ”9 ’”7 ”9 ’”6 ”9 ’”> $”ÌC )’”8 ”9 —” ”! ”" ”& #”' ?”( Ì@”2 ÌJ‘” ’” 	” ’” 	” ’” 	” ’” 	” ’” 	” ’” 	” ’” 	” ’” 	” ’” 	” ’” 	” ”” ”	 ”
+ ” ’” ” ’” ”' !ž” ” ” ” ” ”$ ”% ”2 ,”3 -”7 1”8 2”? 9”Ì@ :”ÌA ;’” ” Ü ”  ”  ”   ”(  ”*  ”.   ”0  "”5  '”7  )”<  .”=  /”ÌF  8”ÌH  :”ÌJ  <”ÌM  ?”ÌO  ÌA—” !” !” !” !”! !”" !”# !”” "” "” "” "‘”	 #”” #” #” #” #Ü ” $” $” $”" $”# $”% $”, $%”. $&”; $3”= $4”ÌC $:”ÌE $;”ÌJ $Ì@”ÌL $ÌA”ÌT $ÌI”ÌV $ÌJ”ÌZ $ÌN”Ì\ $ÌO”Ì] $ÌP”Ì^ $ÌP‘”	 %’” &” &’” (” (’” )
+” )’” *”. **™” +” +
+” +” +”" +”# +”' +#”( +?”) +Ì@’” ,” ,•” -” -” -” -” -”” .” .” .” .”” /” /” /” /”” 0” 0” 0” 0–” 1” 1” 1”& 1 ”' 1!”- 1'“” 2” 2” 2‘” 3”” 4
+” 4” 4” 4•” 5
+” 5” 5” 5”! 5’” 6”' 6’” 7
+” 7‘” 8	‘” 9”” :
+” :” :” :–” ;
+” ;” ;”$ ;”% ;”( ;•” <
+” <” <” <”! <–” =” =”  =”- =!”/ =#”0 =$’” >
+” >‘” ?	‘” Ì@“”	 ÌA”
+ ÌA” ÌA’” ÌB” ÌB’” ÌD” ÌD”” ÌE
+”	 ÌE”
+ ÌE” ÌEž” ÌF” ÌF” ÌF” ÌF” ÌF” ÌF”% ÌF!”) ÌF%”- ÌF)”. ÌF*”6 ÌF2”; ÌF7”ÌB ÌF>”ÌD ÌFÌ@’” ÌG” ÌG
+’” ÌH” ÌHÜ ” ÌI” ÌI” ÌI” ÌI”$ ÌI”/ ÌI'”0 ÌI(”> ÌI6”? ÌI7”ÌI ÌIÌA”ÌJ ÌIÌB”ÌN ÌIÌF”ÌO ÌIÌG”ÌQ ÌIÌI”Ìf ÌIÌ^”Ìg ÌIÌ_”Ìh ÌIÌ`’” ÌJ”% ÌJÜ ” ÌK” ÌK”  ÌK”# ÌK”' ÌK”( ÌK ”+ ÌK#”- ÌK%”0 ÌK(”ÌA ÌK9”ÌD ÌK<”ÌF ÌK>”ÌI ÌKÌA”ÌK ÌKÌC”ÌN ÌKÌF”ÌP ÌKÌH”ÌS ÌKÌK”ÌW ÌKÌO”ÌX ÌKÌP’” ÌL” ÌL’” ÌM”: ÌM2›” ÌN” ÌN” ÌN” ÌN” ÌN”  ÌN”1 ÌN)”3 ÌN+”ÌD ÌN<”ÌE ÌN=”ÌF ÌN>›” ÌO” ÌO” ÌO” ÌO” ÌO”  ÌO”2 ÌO*”4 ÌO,”> ÌO6”? ÌO7”Ì@ ÌO8’” ÌP” ÌP—” ÌQ” ÌQ” ÌQ” ÌQ”! ÌQ”# ÌQ”$ ÌQ’” ÌR” ÌRÜ ” ÌS” ÌS” ÌS”& ÌS”' ÌS”) ÌS!”0 ÌS(”2 ÌS*”8 ÌS0”: ÌS2”Ì@ ÌS8”ÌB ÌS9”ÌG ÌS>”ÌI ÌS?”ÌQ ÌSÌG”ÌS ÌSÌH”ÌW ÌSÌL”ÌY ÌSÌM”ÌZ ÌSÌN”Ì[ ÌSÌO’” ÌT” ÌTœ” ÌU” ÌU” ÌU”! ÌU”" ÌU”$ ÌU”' ÌU”) ÌU!”6 ÌU.”8 ÌU0”9 ÌU1”: ÌU2‘” ÌV”” ÌV” ÌV” ÌV” ÌVÜ ” ÌW” ÌW” ÌW”& ÌW”' ÌW”) ÌW ”0 ÌW'”2 ÌW(”ÌA ÌW7”ÌC ÌW8”ÌI ÌW>”ÌK ÌW?”ÌP ÌWÌD”ÌR ÌWÌE”ÌZ ÌWÌM”Ì\ ÌWÌN”Ì` ÌWÌR”Ìb ÌWÌS”Ìc ÌWÌT”Ìd ÌWÌT‘” ÌX‘”	 ÌY‘” ÌYÜ ” ÌZ” ÌZ” ÌZ”" ÌZ”# ÌZ”% ÌZ”, ÌZ&”. ÌZ(”8 ÌZ2”: ÌZ3”Ì@ ÌZ9”ÌB ÌZ:”ÌG ÌZ?”ÌI ÌZÌ@”ÌQ ÌZÌH”ÌS ÌZÌI”ÌW ÌZÌM”ÌY ÌZÌO”ÌZ ÌZÌP”Ì[ ÌZÌQ‘”	 Ì[’” Ì\” Ì\‘” Ì^š” Ì_” Ì_	” Ì_
+” Ì_”' Ì_”) Ì_”2 Ì_#”3 Ì_$”9 Ì_*”; Ì_,–” Ì_” Ì_	” ÌÁ”! ÌÁ”" ÌÁ”+ ÌÁ–” Ì_” Ì_	” ÌÂ” ÌÂ
+” ÌÂ” ÌÂ–” Ì_” Ì_	” ÌÃ” ÌÃ” ÌÃ” ÌÃ’” ÌÅ” ÌÅ—” ÌÅ” ÌÅ” ÌÆ	”% ÌÆ”& ÌÆ”) ÌÆ”+ ÌÆ˜” ÌÇ
+” ÌÇ” ÌÇ” ÌÇ” ÌÇ”ÌH ÌÇÌB”ÌI ÌÇÌC”ÌJ ÌÇÌD’” ÌÈ
+”) ÌÈ#–” ÌÉ
+” ÌÉ” ÌÉ”# ÌÉ”% ÌÉ”& ÌÉ ’” ÌÊ” ÌÊ	’” ÌÅ” ÌÅ’” Ì`” Ì`–” Ì`” Ì`” Ìa	” Ìa” Ìa” Ìa–” Ì`” Ì`” Ìb	” Ìb” Ìb” Ìb˜” Ì`” Ì`” Ìc	” Ìc” Ìc”$ Ìc”% Ìc”* Ìc!˜” Ì`” Ì`” Ìd	” Ìd” Ìd” Ìd” Ìd”( Ìd’” Ìf” Ìf–” Ìf” Ìf” Ì¯” Ì¯” Ì¯” Ì¯ž” Ìf” Ìf” Ì°” Ì°” Ì°” Ì°”  Ì°”" Ì°”$ Ì°”& Ì°”, Ì° ”. Ì°"”0 Ì°$”2 Ì°&–” Ìf” Ìf” Ì±” Ì±”  Ì±”" Ì±–” Ìf” Ìf” Ì²”" Ì²”# Ì²”: Ì².–” Ìf” Ìf” Ì³” Ì³”  Ì³”" Ì³•” Ìf” Ìf” Ìµ” Ìµ” Ìµ”” Ì¶” Ì¶” Ì¶” Ì¶”” Ì·” Ì·” Ì·”2 Ì·*‘” Ì¸•” Ìf” Ìf” Ìº” Ìº” Ìº”” Ì»” Ì»” Ì»” Ì»”” Ì¼” Ì¼” Ì¼”1 Ì¼)”” Ì½” Ì½” Ì½” Ì½”” Ì¾” Ì¾” Ì¾” Ì¾‘” Ì¿”” Ìg” Ìg” Ìg”$ Ìg–” Ìg” Ìg” Ìh” Ìh” Ìh” Ìh˜” Ìg” Ìg” Ìi” Ìi” Ìi”& Ìi ”' Ìi!”+ Ìi%˜” Ìg” Ìg” Ìj” Ìj” Ìj”  Ìj”! Ìj”& Ìj š” Ìg” Ìg” Ìk” Ìk” Ìk” Ìk”  Ìk”" Ìk”$ Ìk”& Ìk ’” Ìg” Ìg’” Ìm” Ìm–” Ìm” Ìm” Ì}	” Ì}” Ì}” Ì}–” Ìm” Ìm” Ì~	” Ì~” Ì~” Ì~–” Ìm” Ìm” Ì	” Ì” Ì” Ì–” Ìm” Ìm” Ì€	” Ì€”  Ì€”; Ì€4ž” Ìm” Ìm” Ì	” Ì” Ì” Ì” Ì”  Ì”! Ì”# Ì”( Ì!”* Ì#”ÌD Ì=”ÌF Ì?’” Ìn
+” Ìn–” Ìn
+” Ìn” Ìo” Ìo” Ìo” Ìo–” Ìn
+” Ìn” Ìp” Ìp” Ìp” Ìpž” Ìn
+” Ìn” Ìq” Ìq” Ìq” Ìq” Ìq”! Ìq”# Ìq”% Ìq ”* Ìq%”, Ìq'”. Ìq)”0 Ìq+˜” Ìn
+” Ìn” Ìr” Ìr” Ìr”! Ìr”" Ìr”' Ìr"˜” Ìt
+” Ìt” Ìt” Ìt”* Ìt!”, Ìt#”4 Ìt+”6 Ìt-–” Ìt
+” Ìt” Ìu” Ìu”  Ìu”" Ìu–” Ìt
+” Ìt” Ìv”& Ìv”' Ìv”ÌA Ìv8˜” Ìt
+” Ìt” Ìw” Ìw”  Ìw”% Ìw”& Ìw”+ Ìw"–” Ìt
+” Ìt” Ìx” Ìx” Ìx”! Ìx–” Ìt
+” Ìt” Ìy”% Ìy”& Ìy”3 Ìy*–” Ìt
+” Ìt” Ìz”" Ìz”# Ìz”$ ÌzÜ ” Ìt
+” Ìt” Ì{” Ì{” Ì{”  Ì{”% Ì{”' Ì{”) Ì{ ”, Ì{#”0 Ì{'”1 Ì{(”9 Ì{0”< Ì{3”ÌA Ì{8”ÌB Ì{9”ÌC Ì{:”ÌD Ì{;’” Ìm” Ìm’” Ìƒ” Ìƒ–” Ìƒ” Ìƒ” Ì”	” Ì”” Ì”” Ì”–” Ìƒ” Ìƒ” Ì•	” Ì•” Ì•” Ì•–” Ìƒ” Ìƒ” Ì–	” Ì–” Ì–” Ì––” Ìƒ” Ìƒ” Ì—	” Ì—”  Ì—”; Ì—4ž” Ìƒ” Ìƒ” Ì˜	” Ì˜” Ì˜” Ì˜” Ì˜”  Ì˜”! Ì˜”# Ì˜”( Ì˜!”* Ì˜#”ÌD Ì˜=”ÌF Ì˜?š” Ìƒ” Ìƒ” Ì™	” Ì™” Ì™” Ì™” Ì™” Ì™”  Ì™”" Ì™’” Ì„
+” Ì„–” Ì„
+” Ì„” Ì…” Ì…” Ì…” Ì…–” Ì„
+” Ì„” Ì†” Ì†” Ì†” Ì†ž” Ì„
+” Ì„” Ì‡” Ì‡” Ì‡” Ì‡” Ì‡”! Ì‡”# Ì‡”% Ì‡ ”* Ì‡%”, Ì‡'”. Ì‡)”0 Ì‡+˜” Ì„
+” Ì„” Ìˆ” Ìˆ” Ìˆ”! Ìˆ”" Ìˆ”' Ìˆ"˜” ÌŠ
+” ÌŠ” ÌŠ” ÌŠ”* ÌŠ!”, ÌŠ#”3 ÌŠ*”5 ÌŠ,–” ÌŠ
+” ÌŠ” Ì‹” Ì‹”  Ì‹”" Ì‹˜” ÌŠ
+” ÌŠ” ÌŒ” ÌŒ” ÌŒ”$ ÌŒ”% ÌŒ”- ÌŒ$–” ÌŠ
+” ÌŠ” Ì”& Ì”' Ì”ÌA Ì8˜” ÌŠ
+” ÌŠ” ÌŽ” ÌŽ”  ÌŽ”% ÌŽ”& ÌŽ”+ ÌŽ"–” ÌŠ
+” ÌŠ” Ì” Ì” Ì”! Ì–” ÌŠ
+” ÌŠ” Ì”% Ì”& Ì”3 Ì*–” ÌŠ
+” ÌŠ” Ì‘”" Ì‘”# Ì‘”$ Ì‘Ü ” ÌŠ
+” ÌŠ” Ì’” Ì’” Ì’”  Ì’”% Ì’”' Ì’”) Ì’ ”, Ì’#”0 Ì’'”1 Ì’(”9 Ì’0”< Ì’3”ÌA Ì’8”ÌB Ì’9”ÌC Ì’:”ÌD Ì’;’” Ìƒ” Ìƒ”” Ì›” Ì›”# Ì›”( Ì›ž” Ì¥” Ì¥” Ì¥”  Ì¥”( Ì¥”* Ì¥!”- Ì¥$”/ Ì¥&”4 Ì¥+”6 Ì¥-”; Ì¥2”< Ì¥3”ÌE Ì¥<”ÌG Ì¥>–” Ì›” Ì›” Ìœ” Ìœ” Ìœ” Ìœ–” Ì›” Ì›” Ì” Ì” Ì” Ì–” Ì›” Ì›” Ìž” Ìž” Ìž” Ìž˜” Ì›” Ì›” ÌŸ” ÌŸ” ÌŸ”( ÌŸ ”) ÌŸ!”- ÌŸ%˜” Ì›” Ì›” Ì ” Ì ” Ì ”" Ì ”# Ì ”( Ì  –” Ì›” Ì›” Ì¡”" Ì¡”# Ì¡”, Ì¡$–” Ì›” Ì›” Ì¢” Ì¢”  Ì¢”" Ì¢š” Ì›” Ì›” Ì£” Ì£” Ì£” Ì£” Ì£”! Ì£”# Ì£”% Ì£Ü "” Ì›” Ì›” Ì¤” Ì¤” Ì¤” Ì¤” Ì¤” Ì¤”" Ì¤”# Ì¤”2 Ì¤*”3 Ì¤+”4 Ì¤,”5 Ì¤-”9 Ì¤1”: Ì¤2”; Ì¤3”< Ì¤4”= Ì¤5”? Ì¤7”Ì@ Ì¤8”ÌB Ì¤:”ÌF Ì¤>”ÌG Ì¤?”ÌV Ì¤ÌN”ÌW Ì¤ÌO”ÌX Ì¤ÌP”ÌY Ì¤ÌQ”Ì] Ì¤ÌU”Ì^ Ì¤ÌV”Ì_ Ì¤ÌW”Ì` Ì¤ÌX”Ìa Ì¤ÌY”Ìc Ì¤Ì[’” Ì¥” Ì¥—” Ì›” Ì›” Ì¦” Ì¦” Ì¦” Ì¦”  Ì¦’” Ì§” Ì§–” Ì¨” Ì¨” Ì¨” Ì¨” Ì¨” Ì¨’” Ì©
+” Ì©™” Ì›” Ì›” Ìª” Ìª” Ìª” Ìª”! Ìª%”# Ìª'”% Ìª)š” Ì«” Ì«” Ì«” Ì«” Ì«”# Ì«”, Ì«(”- Ì«)”1 Ì«-”3 Ì«/—” Ì«1” Ì«5” Ì«6”( Ì«ÌE”+ Ì«ÌH”/ Ì«ÌL”0 Ì«ÌM‘” Ì«ÌOÜ ” Ì¬” Ì¬” Ì¬” Ì¬” Ì¬”# Ì¬”, Ì¬(”- Ì¬)”/ Ì¬+”3 Ì¬/”8 Ì¬4”9 Ì¬5”= Ì¬9”ÌB Ì¬>”ÌK Ì¬ÌG”ÌL Ì¬ÌH”ÌR Ì¬ÌN”ÌT Ì¬ÌP—” Ì¬ÌR” Ì¬ÌV” Ì¬ÌW”( Ì¬Ìf”+ Ì¬Ìi”0 Ì¬Ìn”1 Ì¬Ìo‘” Ì¬Ìq’” Ì­
+” Ì­’” Ì›” Ì›’” Ìf” Ìf’” Ì_” Ì_	‘” ÌÌÔrF–§version¤file§sources®sourcesContent¥names¨mappingsÀ‘À‘ÀÜ<‘”    ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”  	 ‘”  
+ ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”    ‘”  ! ‘”  " ‘”  # ‘”  $ ‘”  % ‘”  & ‘”  ' ‘”  ( ‘”  ) ‘”  * ‘”  + ‘”  , ‘”  - ‘”  . ‘”  / ‘”  0 ‘”  1 ‘”  2 ‘”  3 ‘”  4 ‘”  5 ‘”  6 ‘”  7 ‘”  8 ‘”  9 ‘”  : ‘”  ; ‘”  < ‘”  = ‘”  > ‘”  ? ‘”  Ì@ ‘”  ÌA ‘”  ÌB ‘”  ÌC ‘”  ÌD ‘”  ÌE ‘”  ÌF ‘”  ÌG ‘”  ÌH ‘”  ÌI ‘”  ÌJ ‘”  ÌK ‘”  ÌL ‘”  ÌM ‘”  ÌN ‘”  ÌO ‘”  ÌP ‘”  ÌQ ‘”  ÌR ‘”  ÌS ‘”  ÌT ‘”  ÌU ‘”  ÌV ‘”  ÌW ‘”  ÌX ‘”  ÌY ‘”  ÌZ ‘”  Ì[ ‘”  Ì\ ‘”  Ì] ‘”  Ì^ ‘”  Ì_ ‘”  Ì` ‘”  Ìa ‘”  Ìb ‘”  Ìc ‘”  Ìd ‘”  Ìe ‘”  Ìf ‘”  Ìg ‘”  Ìh ‘”  Ìi ‘”  Ìj ‘”  Ìk ‘”  Ìl ‘”  Ìm ‘”  Ìn ‘”  Ìo ‘”  Ìp ‘”  Ìq ‘”  Ìr ‘”  Ìs ‘”  Ìt ‘”  Ìu ‘”  Ìv ‘”  Ìw ‘”  Ìx ‘”  Ìy ‘”  Ìz ‘”  Ì{ ‘”  Ì| ‘”  Ì} ‘”  Ì~ ‘”  Ì ‘”  Ì€ ‘”  Ì ‘”  Ì‚ ‘”  Ìƒ ‘”  Ì„ ‘”  Ì… ‘”  Ì† ‘”  Ì‡ ‘”  Ìˆ ‘”  Ì‰ ‘”  ÌŠ ‘”  Ì‹ ‘”  ÌŒ ‘”  Ì ‘”  ÌŽ ‘”  Ì ‘”  Ì ‘”  Ì‘ ‘”  Ì’ ‘”  Ì“ ‘”  Ì” ‘”  Ì• ‘”  Ì– ‘”  Ì— ‘”  Ì˜ ‘”  Ì™ ‘”  Ìš ‘”  Ì› ‘”  Ìœ ‘”  Ì ‘”  Ìž ‘”  ÌŸ ‘”  Ì  ‘”  Ì¡ ‘”  Ì¢ ‘”  Ì£ ‘”  Ì¤ ‘”  Ì¥ ‘”  Ì¦ ‘”  Ì§ ‘”  Ì¨ ‘”  Ì© ‘”  Ìª ‘”  Ì« ‘”  Ì¬ ‘”  Ì­ ‘”  Ì® ‘”  Ì¯ ‘”  Ì° ‘”  Ì± ‘”  Ì² ‘”  Ì³ ‘”  Ì´ ‘”  Ìµ ‘”  Ì¶ ‘”  Ì· ‘”  Ì¸ ‘”  Ì¹ ‘”  Ìº ‘”  Ì» ‘”  Ì¼ ‘”  Ì½ ‘”  Ì¾ ‘”  Ì¿ ‘”  ÌÀ ‘”  ÌÁ ‘”  ÌÂ ‘”  ÌÃ ‘”  ÌÄ ‘”  ÌÅ ‘”  ÌÆ ‘”  ÌÇ ‘”  ÌÈ ‘”  ÌÉ ‘”  ÌÊ ‘”  ÌË ‘”  ÌÌ ‘”  ÌÍ ‘”  ÌÎ ‘”  ÌÏ ‘”  ÌÐ ‘”  ÌÑ ‘”  ÌÒ ‘”  ÌÓ ‘”  ÌÔ ‘”  ÌÕ ‘”  ÌÖ ‘”  Ì× ‘”  ÌØ ‘”  ÌÙ ‘”  ÌÚ ‘”  ÌÛ ‘”  ÌÜ ‘”  ÌÝ ‘”  ÌÞ ‘”  Ìß ‘”  Ìà ‘”  Ìá ‘”  Ìâ ‘”  Ìã ‘”  Ìä ‘”  Ìå ‘”  Ìæ ‘”  Ìç ‘”  Ìè ‘”  Ìé ‘”  Ìê ‘”  Ìë ‘”  Ìì ‘”  Ìí ‘”  Ìî ‘”  Ìï ‘”  Ìð ‘”  Ìñ ‘”  Ìò ‘”  Ìó ‘”  Ìô ‘”  Ìõ ‘”  Ìö ‘”  Ì÷ ‘”  Ìø ‘”  Ìù ‘”  Ìú ‘”  Ìû ‘”  Ìü ‘”  Ìý ‘”  Ìþ ‘”  Ìÿ ‘”  Í  ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í	 ‘”  Í
+ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í  ‘”  Í! ‘”  Í" ‘”  Í# ‘”  Í$ ‘”  Í% ‘”  Í& ‘”  Í' ‘”  Í( ‘”  Í) ‘”  Í* ‘”  Í+ ‘”  Í, ‘”  Í- ‘”  Í. ‘”  Í/ ‘”  Í0 ‘”  Í1 ‘”  Í2 ‘”  Í3 ‘”  Í4 ‘”  Í5 ‘”  Í6 ‘”  Í7 ‘”  Í8 ‘”  Í9 ‘”  Í: ‘”  Í; ÔrG’§missing¦pluginÃ¦genAbcÂÔ  ÔrH”²dynamicImportCache¹exportAllDeclarationCache»exportNamedDeclarationCache«importCache”ÔrI•¤type¥start£endªspecifiers¦source±ImportDeclarationÌ€Ì¢‘ÔrJ”¤type¥start£end¥local¶ImportDefaultSpecifierÌ‡ÌÔrK”¤type¥start£end¤nameªIdentifierÌ‡Ì¦routerÔrL•¤type¥start£end¥value£raw§LiteralÌ“Ì¡¬@ohos.router®'@ohos.router'I±ImportDeclarationÌ¤ÌÒ‘J¶ImportDefaultSpecifierÌ«Ì·KªIdentifierÌ«Ì·¬promptActionL§LiteralÌ½ÌÑ²@ohos.promptAction´'@ohos.promptAction'I±ImportDeclarationÌÔÍ‘J¶ImportDefaultSpecifierÌÛÌæKªIdentifierÌÛÌæ«preferencesL§LiteralÌìÍ¶@ohos.data.preferences¸'@ohos.data.preferences'I±ImportDeclarationÍÍ)‘J¶ImportDefaultSpecifierÍÍKªIdentifierÍÍ¦windowL§LiteralÍÍ(¬@ohos.window®"@ohos.window"
