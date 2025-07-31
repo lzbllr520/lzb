@@ -504,14 +504,6 @@ class MainPage extends ViewPU {
             Stack.backgroundColor('#0E1307');
             Stack.width('100%');
             Stack.height('100%');
-            Gesture.create(GesturePriority.Low);
-            LongPressGesture.create();
-            LongPressGesture.onAction(() => {
-                // 触发长按手势后，调用显示弹窗的函数
-                this.showExitDialog();
-            });
-            LongPressGesture.pop();
-            Gesture.pop();
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create({ "id": 16777226, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
@@ -1137,7 +1129,7 @@ class NavigationItem extends ViewPU {
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.debugLine("entry/src/main/ets/pages/Index.ets(477:5)", "entry");
+            Column.debugLine("entry/src/main/ets/pages/Index.ets(470:5)", "entry");
             Context.animation({
                 duration: 50,
                 curve: Curve.EaseInOut // 动画曲线
@@ -1164,7 +1156,7 @@ class NavigationItem extends ViewPU {
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.index === this.currentPage ? this.selectedIcon : this.icon);
-            Image.debugLine("entry/src/main/ets/pages/Index.ets(478:7)", "entry");
+            Image.debugLine("entry/src/main/ets/pages/Index.ets(471:7)", "entry");
             Image.width(this.showSidebar ? 18 : 18);
             Image.height(this.showSidebar ? 18 : 18);
         }, Image);
@@ -1174,7 +1166,7 @@ class NavigationItem extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.text);
-                        Text.debugLine("entry/src/main/ets/pages/Index.ets(482:9)", "entry");
+                        Text.debugLine("entry/src/main/ets/pages/Index.ets(475:9)", "entry");
                         Text.fontSize(10);
                         Text.margin({ top: 10 });
                         Text.fontColor(this.index === this.currentPage ? this.selectedColor : this.normalColor);

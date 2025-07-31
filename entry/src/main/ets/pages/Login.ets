@@ -8,13 +8,13 @@ import { window } from '@kit.ArkUI';
 // 导入鸿蒙官方加密框架和 buffer 工具
 import { cryptoFramework } from '@kit.CryptoArchitectureKit';
 import { buffer } from '@kit.ArkTS';
-import { hilog } from '@kit.PerformanceAnalysisKit';
+
+//登录请求接口
+import{AxiosResponse } from '@ohos/axios';
+import {login} from '../service/Request'
 
 // 定义存储中使用的常量，避免魔法字符串
 const PREFERENCES_FILE_NAME = 'login_prefs';// 存储文件的名称
-const KEY_SESSION_TOKEN = 'session_token';// 存储登录令牌的键
-const KEY_SESSION_EXPIRY = 'session_expiry'; // 存储过期时间的键
-const LOGIN_EXPIRY_DAYS = 7;// 设置登录有效期为 7 天
 
 //将16进制字符串转换为 Uint8Array
 function hexToUint8Array(hexString: string): Uint8Array {
@@ -60,13 +60,11 @@ struct Login {
     await this.initPublicKey();
   }
 
-  /**
-   * 初始化 SM2 公钥的函数
-   */
+  //初始化sm2公钥函数
   async initPublicKey() {
     try {
       // 使用我们之前确认过的预设公钥
-      const presetPublicKeyHex = '0467c5dd4de7e975469e8145dda8fd6c50dba0f738e0130fcc43e97ab761b838f1f87f90ababf473802e580cb5df506edf232ad09995afd174333b77e24c643b07';
+      const presetPublicKeyHex = '04f90a27391e54740ff7a93bcad7b7c29eaa44f4614fe406eb63b793ef82b2297c33755e146d9ce16f4dfb065f90aa6ea8f5678b9675d37469fa90b95587082cb5'
       const rawPublicKeyBytes = hexToUint8Array(presetPublicKeyHex);
       const derHeader = new Uint8Array([
         0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x02, 0x01, 0x06, 0x08, 0x2A,
@@ -85,11 +83,7 @@ struct Login {
     }
   }
 
-  /**
-   * 加密密码的函数
-   * @param plainPassword - 需要加密的明文密码
-   * @returns 加密后的Base64密文，或在失败时返回null
-   */
+  //加密密码函数
   async encryptPassword(plainPassword: string): Promise<string | null> {
     if (!this.pubKey) {
       promptAction.showToast({ message: '公钥未就绪，无法加密', bottom: '50%', duration: 1000 });
@@ -102,7 +96,7 @@ struct Login {
       const encryptedBlob = await cipher.doFinal(plainTextBlob);
 
       if (encryptedBlob?.data) {
-        return buffer.from(encryptedBlob.data).toString('base64');
+        return buffer.from(encryptedBlob.data).toString('hex');
       }
       return null;
     } catch (err) {
@@ -152,20 +146,21 @@ struct Login {
       promptAction.showToast({ message: '加密过程出错，无法登录', bottom: '50%', duration: 1000 });
       return;
     }
-    //将加密结果输出到日志中
-    hilog.info(0x0000, 'LoginCrypto', '==================== LOGIN PASSWORD ENCRYPTION RESULT (BASE64) ====================');
-    hilog.info(0x0000, 'LoginCrypto', `Username: ${this.username}`);
-    hilog.info(0x0000, 'LoginCrypto', `Encrypted Password: ${encryptedPassword}`);
-    hilog.info(0x0000, 'LoginCrypto', '=============================================================================');
-    // 不再验证，直接执行登录成功的后续操作
     try {
-      const prefs = await preferences.getPreferences(getContext(this), PREFERENCES_FILE_NAME);
-      const expiryTime = Date.now() + LOGIN_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
-      await prefs.put(KEY_SESSION_TOKEN, 'LOGGED_IN_TOKEN');
-      await prefs.put(KEY_SESSION_EXPIRY, expiryTime);
-      await prefs.flush();
-      promptAction.showToast({ message: '登录成功', bottom: '50%', duration: 1000 });
-      router.replaceUrl({ url: 'pages/Index' });
+      //将登录信息发送到服务器返回登录状态信息token
+      const response:AxiosResponse | null=await login(this.username,encryptedPassword)
+      const token: string | undefined = response?.data?.data;
+      const code:number|undefined=response?.data.code
+      if (code===0&&token) {
+        //持久化存储登录信息token
+        const prefs = await preferences.getPreferences(getContext(this), PREFERENCES_FILE_NAME);
+        await prefs.put('token',token);
+        await prefs.flush();
+        promptAction.showToast({ message: '登录成功', bottom: '50%', duration: 1000 });
+        router.replaceUrl({ url: 'pages/Index' });
+      }else {
+        promptAction.showToast({ message: '用户名或密码错误', bottom: '50%', duration: 1000 });
+      }
     } catch (e) {
       promptAction.showToast({ message: '无法持久化存储登录信息，登录失败', bottom: '50%', duration: 1000 })
     }
@@ -193,7 +188,7 @@ struct Login {
             .margin({ left: 15, right: 10 })
             .fillColor(Color.White)
 
-          TextInput({ placeholder: '请输入用户名' })
+          TextInput({ placeholder: '请输入用户名' ,text:'18613030111'})
             .maxLength(30)
             .placeholderColor('rgba(255, 255, 255, 0.6)')
             .fontColor(Color.White)
@@ -215,7 +210,7 @@ struct Login {
             .margin({ left: 15, right: 10 })
             .fillColor(Color.White)
 
-          TextInput({ placeholder: '请输入密码' })
+          TextInput({ placeholder: '请输入密码',text:'123456' })
             .maxLength(30)
             .type(InputType.Password)
             .placeholderColor('rgba(255, 255, 255, 0.6)')
@@ -276,7 +271,6 @@ struct Login {
     .gesture(
       LongPressGesture() // 使用默认参数，长按500ms触发
         .onAction(() => {
-          console.info('Long press detected, showing exit dialog.');
           // 触发长按后，调用显示弹窗的函数，确认退出应用
           this.showExitDialog();
         })

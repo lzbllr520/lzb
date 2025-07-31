@@ -474,10 +474,10 @@ class MainPage extends ViewPU {
             //先加载本地的日志到应用中
             this.loadLogs();
             //先将图像信息状态提升，这样就不用每次切换页面都去重新加载了
-            this.userAvatar = { "id": 16777269, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" };
-            this.conveyorAvatar = { "id": 16777232, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" };
-            this.dollyAvatar = { "id": 16777238, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" };
-            this.robotArmAvatar = { "id": 16777260, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" };
+            this.userAvatar = { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" };
+            this.conveyorAvatar = { "id": 16777233, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" };
+            this.dollyAvatar = { "id": 16777239, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" };
+            this.robotArmAvatar = { "id": 16777262, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" };
             //获取窗口对象
             const win = await window.getLastWindow(this.context);
             //背景缓慢显示动画控制代码
@@ -505,7 +505,7 @@ class MainPage extends ViewPU {
             Stack.height('100%');
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Image.create({ "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+            Image.create({ "id": 16777273, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
             Image.width('100%');
             Image.height('100%');
             Image.objectFit(ImageFit.Cover);
@@ -549,7 +549,7 @@ class MainPage extends ViewPU {
             if (this.showSidebar) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777247, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777249, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Context.animation({
                             duration: 100,
                             curve: Curve.EaseInOut
@@ -571,7 +571,7 @@ class MainPage extends ViewPU {
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777258, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777260, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Context.animation({
                             duration: 100,
                             curve: Curve.EaseInOut
@@ -600,8 +600,8 @@ class MainPage extends ViewPU {
                     NavigationItem(this, {
                         index: 0,
                         current: this.currentPage,
-                        icon: { "id": 16777253, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
-                        selectedIcon: { "id": 16777254, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777255, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        selectedIcon: { "id": 16777256, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         text: '主控台',
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
@@ -612,8 +612,8 @@ class MainPage extends ViewPU {
                         return {
                             index: 0,
                             current: this.currentPage,
-                            icon: { "id": 16777253, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
-                            selectedIcon: { "id": 16777254, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            icon: { "id": 16777255, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            selectedIcon: { "id": 16777256, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             text: '主控台',
                             currentPage: this.currentPage,
                             showSidebar: this.showSidebar,
@@ -626,8 +626,8 @@ class MainPage extends ViewPU {
                     this.updateStateVarsOfChildByElmtId(elmtId, {
                         index: 0,
                         current: this.currentPage,
-                        icon: { "id": 16777253, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
-                        selectedIcon: { "id": 16777254, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777255, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        selectedIcon: { "id": 16777256, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         text: '主控台',
                         showSidebar: this.showSidebar
                     });
@@ -642,8 +642,8 @@ class MainPage extends ViewPU {
                     NavigationItem(this, {
                         index: 1,
                         current: this.currentPage,
-                        icon: { "id": 16777236, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
-                        selectedIcon: { "id": 16777237, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777237, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        selectedIcon: { "id": 16777238, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         text: '设备管理',
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
@@ -654,8 +654,8 @@ class MainPage extends ViewPU {
                         return {
                             index: 1,
                             current: this.currentPage,
-                            icon: { "id": 16777236, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
-                            selectedIcon: { "id": 16777237, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            icon: { "id": 16777237, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            selectedIcon: { "id": 16777238, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             text: '设备管理',
                             currentPage: this.currentPage,
                             showSidebar: this.showSidebar,
@@ -668,8 +668,8 @@ class MainPage extends ViewPU {
                     this.updateStateVarsOfChildByElmtId(elmtId, {
                         index: 1,
                         current: this.currentPage,
-                        icon: { "id": 16777236, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
-                        selectedIcon: { "id": 16777237, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777237, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        selectedIcon: { "id": 16777238, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         text: '设备管理',
                         showSidebar: this.showSidebar
                     });
@@ -684,8 +684,8 @@ class MainPage extends ViewPU {
                     NavigationItem(this, {
                         index: 2,
                         current: this.currentPage,
-                        icon: { "id": 16777267, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
-                        selectedIcon: { "id": 16777268, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777269, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        selectedIcon: { "id": 16777270, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         text: '任务日志',
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
@@ -696,8 +696,8 @@ class MainPage extends ViewPU {
                         return {
                             index: 2,
                             current: this.currentPage,
-                            icon: { "id": 16777267, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
-                            selectedIcon: { "id": 16777268, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            icon: { "id": 16777269, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            selectedIcon: { "id": 16777270, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             text: '任务日志',
                             currentPage: this.currentPage,
                             showSidebar: this.showSidebar,
@@ -710,8 +710,8 @@ class MainPage extends ViewPU {
                     this.updateStateVarsOfChildByElmtId(elmtId, {
                         index: 2,
                         current: this.currentPage,
-                        icon: { "id": 16777267, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
-                        selectedIcon: { "id": 16777268, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777269, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        selectedIcon: { "id": 16777270, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         text: '任务日志',
                         showSidebar: this.showSidebar
                     });
@@ -726,8 +726,8 @@ class MainPage extends ViewPU {
                     NavigationItem(this, {
                         index: 3,
                         current: this.currentPage,
-                        icon: { "id": 16777234, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
-                        selectedIcon: { "id": 16777235, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777235, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        selectedIcon: { "id": 16777236, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         text: '知识库',
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
@@ -738,8 +738,8 @@ class MainPage extends ViewPU {
                         return {
                             index: 3,
                             current: this.currentPage,
-                            icon: { "id": 16777234, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
-                            selectedIcon: { "id": 16777235, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            icon: { "id": 16777235, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            selectedIcon: { "id": 16777236, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             text: '知识库',
                             currentPage: this.currentPage,
                             showSidebar: this.showSidebar,
@@ -752,8 +752,8 @@ class MainPage extends ViewPU {
                     this.updateStateVarsOfChildByElmtId(elmtId, {
                         index: 3,
                         current: this.currentPage,
-                        icon: { "id": 16777234, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
-                        selectedIcon: { "id": 16777235, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777235, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        selectedIcon: { "id": 16777236, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         text: '知识库',
                         showSidebar: this.showSidebar
                     });
@@ -768,8 +768,8 @@ class MainPage extends ViewPU {
                     NavigationItem(this, {
                         index: 4,
                         current: this.currentPage,
-                        icon: { "id": 16777263, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
-                        selectedIcon: { "id": 16777264, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777265, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        selectedIcon: { "id": 16777266, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         text: '系统设置',
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
@@ -780,8 +780,8 @@ class MainPage extends ViewPU {
                         return {
                             index: 4,
                             current: this.currentPage,
-                            icon: { "id": 16777263, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
-                            selectedIcon: { "id": 16777264, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            icon: { "id": 16777265, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            selectedIcon: { "id": 16777266, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             text: '系统设置',
                             currentPage: this.currentPage,
                             showSidebar: this.showSidebar,
@@ -794,8 +794,8 @@ class MainPage extends ViewPU {
                     this.updateStateVarsOfChildByElmtId(elmtId, {
                         index: 4,
                         current: this.currentPage,
-                        icon: { "id": 16777263, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
-                        selectedIcon: { "id": 16777264, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777265, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        selectedIcon: { "id": 16777266, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         text: '系统设置',
                         showSidebar: this.showSidebar
                     });

@@ -12,8 +12,6 @@ import preferences from "@ohos:data.preferences";
 import router from "@ohos:router";
 //持久化存储在本地的用户登录信息名称，准备用于退出登录时找到并删除登录信息数据
 const PREFERENCES_FILE_NAME = 'login_prefs';
-const KEY_SESSION_TOKEN = 'session_token';
-const KEY_SESSION_EXPIRY = 'session_expiry';
 export class SystemSetting extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -99,9 +97,8 @@ export class SystemSetting extends ViewPU {
                         try {
                             //获取应用的 preferences 实例
                             const prefs = await preferences.getPreferences(getContext(this), PREFERENCES_FILE_NAME);
-                            //删除存储的登录令牌和过期时间
-                            await prefs.delete(KEY_SESSION_TOKEN);
-                            await prefs.delete(KEY_SESSION_EXPIRY);
+                            //删除存储的登录令牌token
+                            await prefs.delete('token');
                             //确保改动已写入磁盘
                             await prefs.flush();
                             this.addLog('error', '退出了系统登录', true);
@@ -208,7 +205,7 @@ export class SystemSetting extends ViewPU {
             });
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Image.create({ "id": 16777229, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+            Image.create({ "id": 16777230, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
             Image.width(28);
             Image.height(28);
             Image.fillColor(Color.White);

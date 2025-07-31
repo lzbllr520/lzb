@@ -458,13 +458,13 @@ export class Conveyor1 extends ViewPU {
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
-            Stack.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(309:5)", "entry");
+            Stack.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(306:5)", "entry");
             Stack.width('100%');
             Stack.height('100%');
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create({ space: 20 });
-            Row.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(310:7)", "entry");
+            Row.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(307:7)", "entry");
             Row.padding(20);
             Row.width('100%');
             Row.height('100%');
@@ -474,7 +474,7 @@ export class Conveyor1 extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             //基础信息卡片
             Column.create();
-            Column.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(312:9)", "entry");
+            Column.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(309:9)", "entry");
             //基础信息卡片
             Column.width('30%');
             //基础信息卡片
@@ -500,7 +500,7 @@ export class Conveyor1 extends ViewPU {
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(313:11)", "entry");
+            Column.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(310:11)", "entry");
             Column.width('90%');
             Column.height('30%');
             Column.alignItems(HorizontalAlign.Center);
@@ -508,7 +508,7 @@ export class Conveyor1 extends ViewPU {
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.avatar);
-            Image.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(314:13)", "entry");
+            Image.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(311:13)", "entry");
             Context.animation({ duration: 200, curve: Curve.EaseInOut });
             Image.width(150);
             Image.height(100);
@@ -525,7 +525,7 @@ export class Conveyor1 extends ViewPU {
         Column.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create({ space: 20 });
-            Column.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(333:11)", "entry");
+            Column.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(330:11)", "entry");
             Column.width('100%');
             Column.height('70%');
             Column.alignItems(HorizontalAlign.Center);
@@ -535,7 +535,7 @@ export class Conveyor1 extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             //传送带名称
             Row.create();
-            Row.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(336:13)", "entry");
+            Row.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(333:13)", "entry");
             //传送带名称
             Row.width('100%');
             //传送带名称
@@ -545,7 +545,7 @@ export class Conveyor1 extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('名称：');
-            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(337:15)", "entry");
+            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(334:15)", "entry");
             Text.fontWeight(FontWeight.Bold);
             Text.fontSize(20);
             Text.fontColor(Color.White);
@@ -553,7 +553,7 @@ export class Conveyor1 extends ViewPU {
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('传送带001');
-            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(341:15)", "entry");
+            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(338:15)", "entry");
             Text.fontColor(Color.White);
         }, Text);
         Text.pop();
@@ -562,7 +562,7 @@ export class Conveyor1 extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             //传送带状态
             Row.create();
-            Row.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(349:13)", "entry");
+            Row.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(346:13)", "entry");
             //传送带状态
             Row.width('100%');
             //传送带状态
@@ -572,7 +572,7 @@ export class Conveyor1 extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('状态：');
-            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(350:15)", "entry");
+            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(347:15)", "entry");
             Text.fontWeight(FontWeight.Bold);
             Text.fontSize(20);
             Text.fontColor(Color.White);
@@ -580,13 +580,13 @@ export class Conveyor1 extends ViewPU {
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.data.statusText);
-            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(354:15)", "entry");
+            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(351:15)", "entry");
             Text.fontColor(Color.White);
         }, Text);
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Circle.create();
-            Circle.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(356:15)", "entry");
+            Circle.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(353:15)", "entry");
             Circle.margin({ left: 10 });
             Circle.width(16);
             Circle.height(16);
@@ -597,7 +597,7 @@ export class Conveyor1 extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             //传送带速度
             Row.create();
-            Row.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(367:13)", "entry");
+            Row.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(364:13)", "entry");
             //传送带速度
             Row.width('100%');
             //传送带速度
@@ -607,7 +607,7 @@ export class Conveyor1 extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('运行速度：');
-            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(368:15)", "entry");
+            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(365:15)", "entry");
             Text.fontWeight(FontWeight.Bold);
             Text.fontSize(20);
             Text.fontColor(Color.White);
@@ -615,7 +615,7 @@ export class Conveyor1 extends ViewPU {
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.data.speedValue + '  %');
-            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(372:15)", "entry");
+            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(369:15)", "entry");
             Text.fontColor(Color.White);
         }, Text);
         Text.pop();
@@ -624,7 +624,7 @@ export class Conveyor1 extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             //传送带负载状态
             Row.create();
-            Row.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(380:13)", "entry");
+            Row.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(377:13)", "entry");
             //传送带负载状态
             Row.width('100%');
             //传送带负载状态
@@ -634,7 +634,7 @@ export class Conveyor1 extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('负载：');
-            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(381:15)", "entry");
+            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(378:15)", "entry");
             Text.fontWeight(FontWeight.Bold);
             Text.fontSize(20);
             Text.fontColor(Color.White);
@@ -642,7 +642,7 @@ export class Conveyor1 extends ViewPU {
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.data.loadText);
-            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(385:15)", "entry");
+            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(382:15)", "entry");
             Text.fontColor(Color.White);
         }, Text);
         Text.pop();
@@ -652,7 +652,7 @@ export class Conveyor1 extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create({ "id": 16777228, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                        Image.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(388:17)", "entry");
+                        Image.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(385:17)", "entry");
                         Image.width(20);
                         Image.height(20);
                         Image.margin({ left: 10 });
@@ -663,7 +663,7 @@ export class Conveyor1 extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create({ "id": 16777243, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                        Image.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(393:17)", "entry");
+                        Image.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(390:17)", "entry");
                         Image.width(20);
                         Image.height(20);
                         Image.margin({ left: 10 });
@@ -677,7 +677,7 @@ export class Conveyor1 extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             //控制按钮 (已添加点击和悬浮动画)
             Row.create();
-            Row.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(404:13)", "entry");
+            Row.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(401:13)", "entry");
             Context.animation({ duration: 150, curve: Curve.EaseOut });
             //控制按钮 (已添加点击和悬浮动画)
             Row.width('80%');
@@ -713,10 +713,6 @@ export class Conveyor1 extends ViewPU {
             Row.onHover((isHover: boolean) => {
                 this.isHover = isHover;
             });
-            Gesture.create(GesturePriority.Low);
-            LongPressGesture.create();
-            LongPressGesture.pop();
-            Gesture.pop();
             //控制按钮 (已添加点击和悬浮动画)
             Row.onTouch((event: TouchEvent) => {
                 event.stopPropagation();
@@ -771,14 +767,14 @@ export class Conveyor1 extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create({ "id": 16777220, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                        Image.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(406:17)", "entry");
+                        Image.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(403:17)", "entry");
                         Image.width(22);
                         Image.height(22);
                         Image.fillColor(Color.White);
                     }, Image);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('停止');
-                        Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(408:17)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(405:17)", "entry");
                         Text.fontSize(18);
                         Text.fontWeight(FontWeight.Bold);
                         Text.fontColor(Color.White);
@@ -791,14 +787,14 @@ export class Conveyor1 extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create({ "id": 16777249, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                        Image.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(410:17)", "entry");
+                        Image.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(407:17)", "entry");
                         Image.width(24);
                         Image.height(24);
                         Image.fillColor(Color.White);
                     }, Image);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('启动');
-                        Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(412:17)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(409:17)", "entry");
                         Text.fontSize(18);
                         Text.fontWeight(FontWeight.Bold);
                         Text.fontColor(Color.White);
@@ -817,7 +813,7 @@ export class Conveyor1 extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             //速度调节卡片
             Column.create({ space: 20 });
-            Column.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(527:9)", "entry");
+            Column.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(521:9)", "entry");
             //速度调节卡片
             Column.width('65%');
             //速度调节卡片
@@ -863,7 +859,7 @@ export class Conveyor1 extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new McGaugeChart(this, { options: this.chartOptions }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Conveyor1.ets", line: 529, col: 13 });
+                                let componentCall = new McGaugeChart(this, { options: this.chartOptions }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Conveyor1.ets", line: 523, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -890,12 +886,8 @@ export class Conveyor1 extends ViewPU {
         If.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
-            Row.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(545:11)", "entry");
+            Row.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(539:11)", "entry");
             Context.animation({ duration: 250, curve: Curve.EaseInOut });
-            Gesture.create(GesturePriority.Low);
-            LongPressGesture.create();
-            LongPressGesture.pop();
-            Gesture.pop();
             Row.width('90%');
             Row.height(60);
             Row.justifyContent(FlexAlign.SpaceBetween);
@@ -915,7 +907,7 @@ export class Conveyor1 extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             // 减速按钮
             Button.createWithChild({ type: ButtonType.Circle, stateEffect: true });
-            Button.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(547:13)", "entry");
+            Button.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(541:13)", "entry");
             // 减速按钮
             Button.width(50);
             // 减速按钮
@@ -937,7 +929,7 @@ export class Conveyor1 extends ViewPU {
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('-');
-            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(548:15)", "entry");
+            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(542:15)", "entry");
             Text.fontSize(26);
             Text.fontWeight(FontWeight.Bold);
             Text.fontColor(Color.White);
@@ -948,7 +940,7 @@ export class Conveyor1 extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             // 当前速度值显示
             Row.create();
-            Row.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(568:13)", "entry");
+            Row.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(562:13)", "entry");
             // 当前速度值显示
             Row.justifyContent(FlexAlign.Center);
             // 当前速度值显示
@@ -956,7 +948,7 @@ export class Conveyor1 extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             TextInput.create({ text: this.speedInputText });
-            TextInput.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(569:15)", "entry");
+            TextInput.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(563:15)", "entry");
             TextInput.type(InputType.Number);
             TextInput.maxLength(3);
             TextInput.fontSize(28);
@@ -972,7 +964,7 @@ export class Conveyor1 extends ViewPU {
         }, TextInput);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('%');
-            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(583:15)", "entry");
+            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(577:15)", "entry");
             Text.fontSize(28);
             Text.fontWeight(FontWeight.Bold);
             Text.fontColor(Color.White);
@@ -983,7 +975,7 @@ export class Conveyor1 extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             // 加速按钮
             Button.createWithChild({ type: ButtonType.Circle, stateEffect: true });
-            Button.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(593:13)", "entry");
+            Button.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(587:13)", "entry");
             // 加速按钮
             Button.width(50);
             // 加速按钮
@@ -1005,7 +997,7 @@ export class Conveyor1 extends ViewPU {
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('+');
-            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(594:15)", "entry");
+            Text.debugLine("entry/src/main/ets/view/device/Conveyor1.ets(588:15)", "entry");
             Text.fontSize(28);
             Text.fontWeight(FontWeight.Bold);
             Text.fontColor(Color.White);

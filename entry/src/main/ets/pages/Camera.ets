@@ -148,7 +148,6 @@ struct CameraPage {
     }
   }
 
-
   setupPhotoCallbacks(): void {
     if (!this.photoOutput) return;
     this.photoOutput.on('photoAvailable', (err, photo) => {
@@ -253,7 +252,6 @@ struct CameraPage {
   goBack(): void {
     router.back();
   }
-
 
    //重拍照片/返回相机预览
    //清理已捕获的资源并切换回相机预览界面

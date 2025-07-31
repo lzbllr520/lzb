@@ -7,7 +7,7 @@ import promptAction from "@ohos:promptAction";
 import type window from "@ohos:window";
 import type { BusinessError as BusinessError } from "@ohos:base";
 import preferences from "@ohos:data.preferences";
-// 【新增】从Login.ets移动过来的常量
+//从Login.ets移动过来的常量
 const PREFERENCES_FILE_NAME = 'login_prefs';
 const KEY_SESSION_TOKEN = 'session_token';
 const KEY_SESSION_EXPIRY = 'session_expiry';
@@ -39,7 +39,7 @@ export default class EntryAbility extends UIAbility {
     }
     async onWindowStageCreate(windowStage: window.WindowStage): Promise<void> {
         const isLoggedIn = await this.checkLoginSession();
-        // 步骤2: 根据登录状态决定要加载的初始页面
+        //根据登录状态决定要加载的初始页面
         const initialPage = isLoggedIn ? 'pages/Index' : 'pages/Login';
         console.info(`[EntryAbility] User is ${isLoggedIn ? 'logged in' : 'not logged in'}. Loading page: ${initialPage}`);
         if (initialPage === 'pages/Index') {
@@ -47,7 +47,7 @@ export default class EntryAbility extends UIAbility {
         }
         // 设置应用要加载的初始页面
         // 设置应用要加载的初始页面
-        windowStage.loadContent("pages/RoboticArmWorkRangeView", (err) => {
+        windowStage.loadContent(initialPage, (err) => {
             if (err.code) {
                 console.error('Failed to load the content. Cause:' + JSON.stringify(err));
                 return;
@@ -59,7 +59,7 @@ export default class EntryAbility extends UIAbility {
         try {
             windowClass = windowStage.getMainWindowSync(); // 使用同步方法获取窗口，代码更简洁
             console.info('Succeeded in obtaining the main window.');
-            // 2. 实现沉浸式效果 - 方式一：隐藏状态栏和导航栏
+            //实现沉浸式效果 - 方式一：隐藏状态栏和导航栏
             // 参数为空数组 [] 表示隐藏状态栏和导航栏。
             // 如果只想隐藏状态栏，传入 ['status']
             // 如果只想隐藏导航栏，传入 ['navigation']
@@ -75,15 +75,12 @@ export default class EntryAbility extends UIAbility {
         }
     }
     onWindowStageDestroy(): void {
-        // Main window is destroyed, release UI related resources
         hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onWindowStageDestroy');
     }
     onForeground(): void {
-        // Ability has brought to foreground
         hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onForeground');
     }
     onBackground(): void {
-        // Ability has back to background
         hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onBackground');
     }
 }

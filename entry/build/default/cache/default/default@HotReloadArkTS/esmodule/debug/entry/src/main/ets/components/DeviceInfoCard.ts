@@ -54,7 +54,7 @@ export class DeviceInfoCard extends ViewPU {
             this.__title.set('');
         }
         if (params.icon === undefined) {
-            this.__icon.set({ "id": 16777236, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+            this.__icon.set({ "id": 16777237, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
         }
         if (params.temperature === undefined) {
             this.__temperature.set(0);

@@ -481,7 +481,7 @@ export class Dolly extends ViewPU {
         Column.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             // 居中显示的、放大的图片
-            Image.create({ "id": 16777238, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+            Image.create({ "id": 16777239, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
             // 居中显示的、放大的图片
             Image.width('50%');
             // 居中显示的、放大的图片
@@ -652,7 +652,7 @@ export class Dolly extends ViewPU {
                         if (this.data.loadText === '有物品') {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create({ "id": 16777231, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                                    Image.create({ "id": 16777232, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                                     Image.width(20);
                                     Image.height(20);
                                     Image.margin({ left: 10 });
@@ -662,7 +662,7 @@ export class Dolly extends ViewPU {
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create({ "id": 16777255, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                                    Image.create({ "id": 16777257, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                                     Image.width(20);
                                     Image.height(20);
                                     Image.margin({ left: 10 });
@@ -761,7 +761,7 @@ export class Dolly extends ViewPU {
                         if (this.data.statusText === '运行中' || this.data.statusText === '空闲中') {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create({ "id": 16777266, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                                    Image.create({ "id": 16777268, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                                     Image.width(22);
                                     Image.height(22);
                                     Image.fillColor(Color.White);
@@ -779,7 +779,7 @@ export class Dolly extends ViewPU {
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create({ "id": 16777265, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                                    Image.create({ "id": 16777267, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                                     Image.width(24);
                                     Image.height(24);
                                     Image.fillColor(Color.White);
@@ -852,7 +852,7 @@ export class Dolly extends ViewPU {
                     //地图位置
                     //全屏按钮
                     ActionButton(this, {
-                        icon: { "id": 16777245, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777247, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         click: () => {
                             Context.animateTo({
                                 duration: 800,
@@ -876,7 +876,7 @@ export class Dolly extends ViewPU {
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
-                            icon: { "id": 16777245, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            icon: { "id": 16777247, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             click: () => {
                                 Context.animateTo({
                                     duration: 800,
@@ -902,7 +902,7 @@ export class Dolly extends ViewPU {
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(elmtId, {
-                        icon: { "id": 16777245, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }
+                        icon: { "id": 16777247, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }
                     });
                 }
             }, { name: "ActionButton" });
@@ -928,14 +928,14 @@ export class Dolly extends ViewPU {
                     let componentCall = new 
                     //向左按钮
                     DirectionalButton(this, {
-                        icon: { "id": 16777241, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777242, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         onPress: () => { this.startMove('向左'); },
                         onRelease: () => { this.stopMove('向左'); }
                     }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 580, col: 17 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
-                            icon: { "id": 16777241, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            icon: { "id": 16777242, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             onPress: () => { this.startMove('向左'); },
                             onRelease: () => { this.stopMove('向左'); }
                         };
@@ -944,7 +944,7 @@ export class Dolly extends ViewPU {
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(elmtId, {
-                        icon: { "id": 16777241, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }
+                        icon: { "id": 16777242, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }
                     });
                 }
             }, { name: "DirectionalButton" });
@@ -955,14 +955,14 @@ export class Dolly extends ViewPU {
                     let componentCall = new 
                     //向右按钮
                     DirectionalButton(this, {
-                        icon: { "id": 16777242, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777243, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         onPress: () => { this.startMove('向右'); },
                         onRelease: () => { this.stopMove('向右'); }
                     }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 587, col: 17 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
-                            icon: { "id": 16777242, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            icon: { "id": 16777243, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             onPress: () => { this.startMove('向右'); },
                             onRelease: () => { this.stopMove('向右'); }
                         };
@@ -971,7 +971,7 @@ export class Dolly extends ViewPU {
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(elmtId, {
-                        icon: { "id": 16777242, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }
+                        icon: { "id": 16777243, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }
                     });
                 }
             }, { name: "DirectionalButton" });
@@ -994,14 +994,14 @@ export class Dolly extends ViewPU {
                     let componentCall = new 
                     //向前按钮
                     DirectionalButton(this, {
-                        icon: { "id": 16777243, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777245, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         onPress: () => { this.startMove('向前'); },
                         onRelease: () => { this.stopMove('向前'); }
                     }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 600, col: 17 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
-                            icon: { "id": 16777243, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            icon: { "id": 16777245, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             onPress: () => { this.startMove('向前'); },
                             onRelease: () => { this.stopMove('向前'); }
                         };
@@ -1010,7 +1010,7 @@ export class Dolly extends ViewPU {
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(elmtId, {
-                        icon: { "id": 16777243, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }
+                        icon: { "id": 16777245, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }
                     });
                 }
             }, { name: "DirectionalButton" });
@@ -1021,14 +1021,14 @@ export class Dolly extends ViewPU {
                     let componentCall = new 
                     //急停按钮
                     DirectionalButton(this, {
-                        icon: { "id": 16777278, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777244, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         onPress: () => { this.startMove('停止'); },
                         onRelease: () => { this.stopMove('停止'); }
                     }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 607, col: 17 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
-                            icon: { "id": 16777278, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            icon: { "id": 16777244, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             onPress: () => { this.startMove('停止'); },
                             onRelease: () => { this.stopMove('停止'); }
                         };
@@ -1037,7 +1037,7 @@ export class Dolly extends ViewPU {
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(elmtId, {
-                        icon: { "id": 16777278, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }
+                        icon: { "id": 16777244, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }
                     });
                 }
             }, { name: "DirectionalButton" });
@@ -1048,14 +1048,14 @@ export class Dolly extends ViewPU {
                     let componentCall = new 
                     //向后按钮
                     DirectionalButton(this, {
-                        icon: { "id": 16777239, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777240, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         onPress: () => { this.startMove('向后'); },
                         onRelease: () => { this.stopMove('向后'); }
                     }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 614, col: 17 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
-                            icon: { "id": 16777239, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            icon: { "id": 16777240, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             onPress: () => { this.startMove('向后'); },
                             onRelease: () => { this.stopMove('向后'); }
                         };
@@ -1064,7 +1064,7 @@ export class Dolly extends ViewPU {
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(elmtId, {
-                        icon: { "id": 16777239, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }
+                        icon: { "id": 16777240, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }
                     });
                 }
             }, { name: "DirectionalButton" });
@@ -1259,8 +1259,8 @@ class DirectionalButton extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Context.animation({ curve: Curve.EaseOut, duration: 150 });
-            Row.width(50);
-            Row.height(50);
+            Row.width(70);
+            Row.height(70);
             Row.borderRadius(16);
             Row.justifyContent(FlexAlign.Center);
             Row.backgroundColor('rgba(45, 50, 65, 0.45)');
@@ -1286,8 +1286,8 @@ class DirectionalButton extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.icon);
-            Image.width(20);
-            Image.height(20);
+            Image.width(30);
+            Image.height(30);
             Image.fillColor(Color.White);
         }, Image);
         Row.pop();

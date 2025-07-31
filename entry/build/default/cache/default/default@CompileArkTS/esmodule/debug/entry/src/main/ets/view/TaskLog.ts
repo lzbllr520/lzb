@@ -105,11 +105,11 @@ export class TaskLog extends ViewPU {
     private getLevelStyle(level: 'info' | 'warning' | 'error'): LevelStyle {
         switch (level) {
             case 'info':
-                return { icon: { "id": 16777251, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, color: Color.White };
+                return { icon: { "id": 16777253, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, color: Color.White };
             case 'warning':
-                return { icon: { "id": 16777252, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, color: Color.Yellow };
+                return { icon: { "id": 16777254, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, color: Color.Yellow };
             case 'error':
-                return { icon: { "id": 16777250, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, color: Color.Red };
+                return { icon: { "id": 16777252, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, color: Color.Red };
         }
     }
     initialRender() {
@@ -134,7 +134,7 @@ export class TaskLog extends ViewPU {
             Row.border({ width: 1.5, color: 'rgba(255, 255, 255, 0.2)' });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Image.create({ "id": 16777262, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+            Image.create({ "id": 16777264, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
             Image.width(20);
             Image.height(20);
             Image.fillColor(Color.Gray);

@@ -23,7 +23,7 @@ interface RobotArm1_Params {
     idleTimer?: number;
     isPreviewVisible?: boolean;
 }
-import type { RobotArmState } from '../../model/RobotArmState';
+import { RobotArmState } from "@normalized:N&&&entry/src/main/ets/model/RobotArmState&";
 import { RoboticArmWorkRangeView } from "@normalized:N&&&entry/src/main/ets/components/RoboticArmWorkRangeView&";
 export class RobotArm1 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
@@ -357,6 +357,11 @@ export class RobotArm1 extends ViewPU {
             this.data.statusText = '运行中';
         }
     }
+    //在画布中控制机械臂的运行状态
+    private handleCanvasInteraction(): void {
+        this.activateArm();
+        this.resetIdleTimer();
+    }
     private resetIdleTimer() {
         if (this.idleTimer !== -1) {
             clearTimeout(this.idleTimer);
@@ -379,7 +384,7 @@ export class RobotArm1 extends ViewPU {
     private buildImagePreview(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
-            Stack.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(189:5)", "entry");
+            Stack.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(193:5)", "entry");
             Stack.width('100%');
             Stack.height('100%');
             Stack.alignContent(Alignment.Center);
@@ -387,7 +392,7 @@ export class RobotArm1 extends ViewPU {
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(190:7)", "entry");
+            Column.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(194:7)", "entry");
             Column.width('100%');
             Column.height('100%');
             Column.backgroundColor('rgba(0, 0, 0, 0.7)');
@@ -398,7 +403,7 @@ export class RobotArm1 extends ViewPU {
         Column.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create({ "id": 16777264, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-            Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(198:7)", "entry");
+            Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(202:7)", "entry");
             Image.width('50%');
             Image.objectFit(ImageFit.Contain);
             Image.borderRadius(16);
@@ -406,64 +411,16 @@ export class RobotArm1 extends ViewPU {
         }, Image);
         Stack.pop();
     }
-    // 新增：用于构建“区域A”的UI
-    private buildRegionA(parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Stack.create();
-            Stack.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(213:5)", "entry");
-            Stack.width('100%');
-            Stack.height('100%');
-            Stack.clip(true);
-        }, Stack);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Column.create();
-            Column.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(214:7)", "entry");
-            Column.width('100%');
-            Column.height('100%');
-            Column.justifyContent(FlexAlign.Center);
-            Column.alignItems(HorizontalAlign.Center);
-            Column.backdropBlur(12);
-            Column.backgroundColor('rgba(10, 10, 15, 0.3)');
-            Column.borderRadius(16);
-            Column.border({
-                width: 1.5,
-                color: 'rgba(255, 255, 255, 0.15)'
-            });
-            Column.shadow({
-                radius: 30,
-                color: 'rgba(173, 216, 230, 0.2)',
-                offsetX: 0,
-                offsetY: 0
-            });
-        }, Column);
-        {
-            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                if (isInitialRender) {
-                    let componentCall = new RoboticArmWorkRangeView(this, {}, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 215, col: 9 });
-                    ViewPU.create(componentCall);
-                    let paramsLambda = () => {
-                        return {};
-                    };
-                    componentCall.paramsGenerator_ = paramsLambda;
-                }
-                else {
-                    this.updateStateVarsOfChildByElmtId(elmtId, {});
-                }
-            }, { name: "RoboticArmWorkRangeView" });
-        }
-        Column.pop();
-        Stack.pop();
-    }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
-            Stack.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(242:5)", "entry");
+            Stack.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(214:5)", "entry");
             Stack.width('100%');
             Stack.height('100%');
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create({ space: 20 });
-            Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(243:7)", "entry");
+            Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(215:7)", "entry");
             Row.padding(20);
             Row.width('100%');
             Row.height('100%');
@@ -477,7 +434,7 @@ export class RobotArm1 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //基础信息展示
                         Stack.create();
-                        Stack.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(246:11)", "entry");
+                        Stack.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(218:11)", "entry");
                         //基础信息展示
                         Stack.width('30%');
                         //基础信息展示
@@ -491,7 +448,7 @@ export class RobotArm1 extends ViewPU {
                     }, Stack);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
-                        Column.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(247:13)", "entry");
+                        Column.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(219:13)", "entry");
                         Column.width('100%');
                         Column.height('100%');
                         Column.backdropBlur(12);
@@ -509,26 +466,21 @@ export class RobotArm1 extends ViewPU {
                         });
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        //... (内容与原来一致，此处省略以保持简洁)
                         //模型展示
                         Column.create();
-                        Column.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(250:15)", "entry");
-                        //... (内容与原来一致，此处省略以保持简洁)
+                        Column.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(221:15)", "entry");
                         //模型展示
                         Column.width('90%');
-                        //... (内容与原来一致，此处省略以保持简洁)
                         //模型展示
                         Column.height('30%');
-                        //... (内容与原来一致，此处省略以保持简洁)
                         //模型展示
                         Column.alignItems(HorizontalAlign.Center);
-                        //... (内容与原来一致，此处省略以保持简洁)
                         //模型展示
                         Column.justifyContent(FlexAlign.Center);
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create(this.avatar);
-                        Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(251:17)", "entry");
+                        Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(222:17)", "entry");
                         Context.animation({ duration: 200, curve: Curve.EaseInOut });
                         Image.width(150);
                         Image.height(120);
@@ -542,13 +494,12 @@ export class RobotArm1 extends ViewPU {
                         });
                         Context.animation(null);
                     }, Image);
-                    //... (内容与原来一致，此处省略以保持简洁)
                     //模型展示
                     Column.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //信息展示
                         Column.create({ space: 20 });
-                        Column.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(271:15)", "entry");
+                        Column.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(242:15)", "entry");
                         //信息展示
                         Column.width('100%');
                         //信息展示
@@ -563,7 +514,7 @@ export class RobotArm1 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //机械臂名称
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(274:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(244:17)", "entry");
                         //机械臂名称
                         Row.width('100%');
                         //机械臂名称
@@ -573,7 +524,7 @@ export class RobotArm1 extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('名称：');
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(275:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(245:19)", "entry");
                         Text.fontWeight(FontWeight.Bold);
                         Text.fontSize(20);
                         Text.fontColor(Color.White);
@@ -581,7 +532,7 @@ export class RobotArm1 extends ViewPU {
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('机械臂001');
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(279:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(249:19)", "entry");
                         Text.fontColor(Color.White);
                     }, Text);
                     Text.pop();
@@ -590,7 +541,7 @@ export class RobotArm1 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //机械臂状态
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(287:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(257:17)", "entry");
                         //机械臂状态
                         Row.width('100%');
                         //机械臂状态
@@ -600,7 +551,7 @@ export class RobotArm1 extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('运作状态：');
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(288:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(258:19)", "entry");
                         Text.fontWeight(FontWeight.Bold);
                         Text.fontSize(20);
                         Text.fontColor(Color.White);
@@ -608,13 +559,13 @@ export class RobotArm1 extends ViewPU {
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.data.statusText);
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(292:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(262:19)", "entry");
                         Text.fontColor(Color.White);
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Circle.create();
-                        Circle.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(294:19)", "entry");
+                        Circle.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(264:19)", "entry");
                         Circle.margin({ left: 10 });
                         Circle.width(16);
                         Circle.height(16);
@@ -625,7 +576,7 @@ export class RobotArm1 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //末端状态
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(305:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(275:17)", "entry");
                         //末端状态
                         Row.width('100%');
                         //末端状态
@@ -635,7 +586,7 @@ export class RobotArm1 extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('末端状态：');
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(306:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(276:19)", "entry");
                         Text.fontWeight(FontWeight.Bold);
                         Text.fontSize(20);
                         Text.fontColor(Color.White);
@@ -643,7 +594,7 @@ export class RobotArm1 extends ViewPU {
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.data.endStatusText);
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(310:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(280:19)", "entry");
                         Text.fontColor(Color.White);
                     }, Text);
                     Text.pop();
@@ -652,7 +603,7 @@ export class RobotArm1 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //负载状态
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(318:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(288:17)", "entry");
                         //负载状态
                         Row.width('100%');
                         //负载状态
@@ -662,7 +613,7 @@ export class RobotArm1 extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('负载：');
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(319:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(289:19)", "entry");
                         Text.fontWeight(FontWeight.Bold);
                         Text.fontSize(20);
                         Text.fontColor(Color.White);
@@ -670,7 +621,7 @@ export class RobotArm1 extends ViewPU {
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.data.loadText);
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(323:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(293:19)", "entry");
                         Text.fontColor(Color.White);
                     }, Text);
                     Text.pop();
@@ -680,7 +631,7 @@ export class RobotArm1 extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Image.create({ "id": 16777228, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                                    Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(326:21)", "entry");
+                                    Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(296:21)", "entry");
                                     Image.width(20);
                                     Image.height(20);
                                     Image.margin({ left: 10 });
@@ -691,7 +642,7 @@ export class RobotArm1 extends ViewPU {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Image.create({ "id": 16777243, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                                    Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(331:21)", "entry");
+                                    Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(301:21)", "entry");
                                     Image.width(20);
                                     Image.height(20);
                                     Image.margin({ left: 10 });
@@ -705,7 +656,7 @@ export class RobotArm1 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //控制按钮
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(342:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(312:17)", "entry");
                         Context.animation({ duration: 150, curve: Curve.EaseOut });
                         //控制按钮
                         Row.width('80%');
@@ -741,10 +692,6 @@ export class RobotArm1 extends ViewPU {
                         Row.onHover((isHover: boolean) => {
                             this.isHover = isHover;
                         });
-                        Gesture.create(GesturePriority.Low);
-                        LongPressGesture.create();
-                        LongPressGesture.pop();
-                        Gesture.pop();
                         //控制按钮
                         Row.onTouch((event: TouchEvent) => {
                             event.stopPropagation();
@@ -753,10 +700,9 @@ export class RobotArm1 extends ViewPU {
                             }
                             if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                                 this.isPressed = false;
-                                // 1. 判断当前状态，准备不同的对话框信息
+                                //判断当前状态，准备不同的对话框信息
                                 const isCurrentlyRunning = this.data.statusText === '运行中' || this.data.statusText === '空闲中';
                                 const message = isCurrentlyRunning ? '您确定要关闭一号机械臂吗？' : '您确定要启动一号机械臂吗？';
-                                // 2. 显示确认对话框
                                 AlertDialog.show({
                                     title: '操作确认',
                                     message: message,
@@ -775,11 +721,11 @@ export class RobotArm1 extends ViewPU {
                                             fontColor: Color.Red,
                                             action: () => {
                                                 if (isCurrentlyRunning) {
-                                                    this.data.statusText = '离线中';
-                                                    this.data.endStatusText = '释放';
-                                                    this.data.xValue = 0;
-                                                    this.data.yValue = 0;
-                                                    this.data.zValue = 0;
+                                                    //创建一个新的、干净的 RobotArmState 实例
+                                                    const newData = new RobotArmState();
+                                                    //将这个全新的、准备好的对象赋值给 this.data
+                                                    //因为原来的RobotArmState对象初始值就是关闭的状态
+                                                    this.data = newData;
                                                     this.showSystemToast('关闭成功');
                                                     //关闭时清除定时器
                                                     if (this.idleTimer !== -1) {
@@ -807,14 +753,14 @@ export class RobotArm1 extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Image.create({ "id": 16777220, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                                    Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(344:21)", "entry");
+                                    Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(314:21)", "entry");
                                     Image.width(22);
                                     Image.height(22);
                                     Image.fillColor(Color.White);
                                 }, Image);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Text.create('停止');
-                                    Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(346:21)", "entry");
+                                    Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(316:21)", "entry");
                                     Text.fontSize(18);
                                     Text.fontWeight(FontWeight.Bold);
                                     Text.fontColor(Color.White);
@@ -827,14 +773,14 @@ export class RobotArm1 extends ViewPU {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Image.create({ "id": 16777249, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                                    Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(348:21)", "entry");
+                                    Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(318:21)", "entry");
                                     Image.width(24);
                                     Image.height(24);
                                     Image.fillColor(Color.White);
                                 }, Image);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Text.create('启动');
-                                    Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(350:21)", "entry");
+                                    Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(320:21)", "entry");
                                     Text.fontSize(18);
                                     Text.fontWeight(FontWeight.Bold);
                                     Text.fontColor(Color.White);
@@ -859,7 +805,7 @@ export class RobotArm1 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //地图信息卡片
                         Stack.create();
-                        Stack.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(481:11)", "entry");
+                        Stack.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(445:11)", "entry");
                         //地图信息卡片
                         Stack.width(this.data.mapCardWidth);
                         //地图信息卡片
@@ -873,7 +819,7 @@ export class RobotArm1 extends ViewPU {
                     }, Stack);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
-                        Column.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(482:13)", "entry");
+                        Column.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(446:13)", "entry");
                         Column.width('100%');
                         Column.height('100%');
                         Column.justifyContent(FlexAlign.Center);
@@ -894,7 +840,7 @@ export class RobotArm1 extends ViewPU {
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('机械臂动态位置面板');
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(483:15)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(447:15)", "entry");
                         Text.fontColor(Color.White);
                         Text.fontSize(24);
                     }, Text);
@@ -909,7 +855,7 @@ export class RobotArm1 extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             //控制区域
             Stack.create({ alignContent: Alignment.TopEnd });
-            Stack.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(514:9)", "entry");
+            Stack.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(478:9)", "entry");
             //控制区域
             Stack.width(this.data.controlCardWidth);
             //控制区域
@@ -917,10 +863,60 @@ export class RobotArm1 extends ViewPU {
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            // 根据 isRegionAVisible 的值，决定显示控制面板还是区域A
+            // 根据 isRegionAVisible 的值，决定显示按钮调节还是量角器调节
             if (this.data.isRegionAVisible) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.buildRegionA.bind(this)();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Stack.create();
+                        Stack.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(481:13)", "entry");
+                        Stack.width('100%');
+                        Stack.height('100%');
+                        Stack.clip(true);
+                    }, Stack);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Column.create();
+                        Column.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(482:15)", "entry");
+                        Column.width('100%');
+                        Column.height('100%');
+                        Column.justifyContent(FlexAlign.Center);
+                        Column.alignItems(HorizontalAlign.Center);
+                        Column.backdropBlur(12);
+                        Column.backgroundColor('rgba(10, 10, 15, 0.3)');
+                        Column.borderRadius(16);
+                        Column.border({
+                            width: 1.5,
+                            color: 'rgba(255, 255, 255, 0.15)'
+                        });
+                        Column.shadow({
+                            radius: 30,
+                            color: 'rgba(173, 216, 230, 0.2)',
+                            offsetX: 0,
+                            offsetY: 0
+                        });
+                    }, Column);
+                    {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new RoboticArmWorkRangeView(this, {
+                                    data: this.__data,
+                                    onActivate: this.handleCanvasInteraction.bind(this)
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 483, col: 17 });
+                                ViewPU.create(componentCall);
+                                let paramsLambda = () => {
+                                    return {
+                                        data: this.data,
+                                        onActivate: this.handleCanvasInteraction.bind(this)
+                                    };
+                                };
+                                componentCall.paramsGenerator_ = paramsLambda;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                            }
+                        }, { name: "RoboticArmWorkRangeView" });
+                    }
+                    Column.pop();
+                    Stack.pop();
                 });
             }
             else {
@@ -928,7 +924,7 @@ export class RobotArm1 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         // 原有的控制面板UI
                         Column.create({ space: 30 });
-                        Column.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(520:13)", "entry");
+                        Column.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(511:13)", "entry");
                         // 原有的控制面板UI
                         Column.justifyContent(FlexAlign.Center);
                         // 原有的控制面板UI
@@ -957,12 +953,8 @@ export class RobotArm1 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //控制x轴（左右）
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(522:15)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(513:15)", "entry");
                         Context.animation({ duration: 250, curve: Curve.EaseInOut });
-                        Gesture.create(GesturePriority.Low);
-                        LongPressGesture.create();
-                        LongPressGesture.pop();
-                        Gesture.pop();
                         //控制x轴（左右）
                         Row.width('90%');
                         //控制x轴（左右）
@@ -992,11 +984,11 @@ export class RobotArm1 extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(523:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(514:17)", "entry");
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Button.createWithChild({ type: ButtonType.Circle, stateEffect: true });
-                        Button.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(524:19)", "entry");
+                        Button.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(515:19)", "entry");
                         Button.width(this.button_size);
                         Button.height(this.button_size);
                         Button.backgroundColor(Color.Transparent);
@@ -1016,14 +1008,14 @@ export class RobotArm1 extends ViewPU {
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create({ "id": 16777257, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                        Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(525:21)", "entry");
+                        Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(516:21)", "entry");
                         Image.width(this.button_icon_size);
                         Image.height(this.button_icon_size);
                     }, Image);
                     Button.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('左');
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(548:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(539:19)", "entry");
                         Text.fontColor(Color.White);
                         Text.fontSize(this.button_icon_size);
                     }, Text);
@@ -1032,7 +1024,7 @@ export class RobotArm1 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //数值显示
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(554:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(545:17)", "entry");
                         //数值显示
                         Row.justifyContent(FlexAlign.Center);
                         //数值显示
@@ -1040,7 +1032,7 @@ export class RobotArm1 extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.data.xValue + '');
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(555:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(546:19)", "entry");
                         Text.fontSize(this.button_icon_size);
                         Text.fontWeight(FontWeight.Bold);
                         Text.width(85);
@@ -1054,18 +1046,18 @@ export class RobotArm1 extends ViewPU {
                     Row.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(567:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(558:17)", "entry");
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('右');
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(568:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(559:19)", "entry");
                         Text.fontColor(Color.White);
                         Text.fontSize(this.button_icon_size);
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Button.createWithChild({ type: ButtonType.Circle, stateEffect: true });
-                        Button.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(572:19)", "entry");
+                        Button.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(563:19)", "entry");
                         Button.width(this.button_size);
                         Button.height(this.button_size);
                         Button.backgroundColor(Color.Transparent);
@@ -1085,7 +1077,7 @@ export class RobotArm1 extends ViewPU {
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create({ "id": 16777256, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                        Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(573:21)", "entry");
+                        Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(564:21)", "entry");
                         Image.width(this.button_icon_size);
                         Image.height(this.button_icon_size);
                     }, Image);
@@ -1096,12 +1088,8 @@ export class RobotArm1 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //y控制（前后）
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(619:15)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(606:15)", "entry");
                         Context.animation({ duration: 250, curve: Curve.EaseInOut });
-                        Gesture.create(GesturePriority.Low);
-                        LongPressGesture.create();
-                        LongPressGesture.pop();
-                        Gesture.pop();
                         //y控制（前后）
                         Row.width('90%');
                         //y控制（前后）
@@ -1131,11 +1119,11 @@ export class RobotArm1 extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(620:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(607:17)", "entry");
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Button.createWithChild({ type: ButtonType.Circle, stateEffect: true });
-                        Button.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(621:19)", "entry");
+                        Button.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(608:19)", "entry");
                         Button.width(this.button_size);
                         Button.height(this.button_size);
                         Button.backgroundColor(Color.Transparent);
@@ -1155,14 +1143,14 @@ export class RobotArm1 extends ViewPU {
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create({ "id": 16777257, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                        Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(622:21)", "entry");
+                        Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(609:21)", "entry");
                         Image.width(this.button_icon_size);
                         Image.height(this.button_icon_size);
                     }, Image);
                     Button.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('前');
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(645:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(632:19)", "entry");
                         Text.fontColor(Color.White);
                         Text.fontSize(this.button_icon_size);
                     }, Text);
@@ -1171,7 +1159,7 @@ export class RobotArm1 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //数值显示
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(651:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(638:17)", "entry");
                         //数值显示
                         Row.justifyContent(FlexAlign.Center);
                         //数值显示
@@ -1179,7 +1167,7 @@ export class RobotArm1 extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.data.yValue + '');
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(652:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(639:19)", "entry");
                         Text.fontSize(this.button_icon_size);
                         Text.fontWeight(FontWeight.Bold);
                         Text.width(85);
@@ -1193,18 +1181,18 @@ export class RobotArm1 extends ViewPU {
                     Row.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(664:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(651:17)", "entry");
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('后');
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(665:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(652:19)", "entry");
                         Text.fontColor(Color.White);
                         Text.fontSize(this.button_icon_size);
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Button.createWithChild({ type: ButtonType.Circle, stateEffect: true });
-                        Button.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(669:19)", "entry");
+                        Button.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(656:19)", "entry");
                         Button.width(this.button_size);
                         Button.height(this.button_size);
                         Button.backgroundColor(Color.Transparent);
@@ -1224,7 +1212,7 @@ export class RobotArm1 extends ViewPU {
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create({ "id": 16777256, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                        Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(670:21)", "entry");
+                        Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(657:21)", "entry");
                         Image.width(this.button_icon_size);
                         Image.height(this.button_icon_size);
                     }, Image);
@@ -1235,12 +1223,8 @@ export class RobotArm1 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //z轴控制（上下）
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(716:15)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(699:15)", "entry");
                         Context.animation({ duration: 250, curve: Curve.EaseInOut });
-                        Gesture.create(GesturePriority.Low);
-                        LongPressGesture.create();
-                        LongPressGesture.pop();
-                        Gesture.pop();
                         //z轴控制（上下）
                         Row.width('90%');
                         //z轴控制（上下）
@@ -1270,11 +1254,11 @@ export class RobotArm1 extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(717:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(700:17)", "entry");
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Button.createWithChild({ type: ButtonType.Circle, stateEffect: true });
-                        Button.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(718:19)", "entry");
+                        Button.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(701:19)", "entry");
                         Button.width(this.button_size);
                         Button.height(this.button_size);
                         Button.backgroundColor(Color.Transparent);
@@ -1294,14 +1278,14 @@ export class RobotArm1 extends ViewPU {
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create({ "id": 16777257, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                        Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(719:21)", "entry");
+                        Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(702:21)", "entry");
                         Image.width(this.button_icon_size);
                         Image.height(this.button_icon_size);
                     }, Image);
                     Button.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('上');
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(742:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(725:19)", "entry");
                         Text.fontColor(Color.White);
                         Text.fontSize(this.button_icon_size);
                     }, Text);
@@ -1310,7 +1294,7 @@ export class RobotArm1 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //数值显示
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(748:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(731:17)", "entry");
                         //数值显示
                         Row.justifyContent(FlexAlign.Center);
                         //数值显示
@@ -1318,7 +1302,7 @@ export class RobotArm1 extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.data.zValue + '');
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(749:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(732:19)", "entry");
                         Text.fontSize(this.button_icon_size);
                         Text.fontWeight(FontWeight.Bold);
                         Text.width(85);
@@ -1332,18 +1316,18 @@ export class RobotArm1 extends ViewPU {
                     Row.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(761:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(744:17)", "entry");
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('下');
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(762:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(745:19)", "entry");
                         Text.fontColor(Color.White);
                         Text.fontSize(this.button_icon_size);
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Button.createWithChild({ type: ButtonType.Circle, stateEffect: true });
-                        Button.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(766:19)", "entry");
+                        Button.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(749:19)", "entry");
                         Button.width(this.button_size);
                         Button.height(this.button_size);
                         Button.backgroundColor(Color.Transparent);
@@ -1363,7 +1347,7 @@ export class RobotArm1 extends ViewPU {
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create({ "id": 16777256, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                        Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(767:21)", "entry");
+                        Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(750:21)", "entry");
                         Image.width(this.button_icon_size);
                         Image.height(this.button_icon_size);
                     }, Image);
@@ -1374,7 +1358,7 @@ export class RobotArm1 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //控制末端的释放和抓取
                         Button.createWithChild();
-                        Button.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(814:15)", "entry");
+                        Button.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(792:15)", "entry");
                         Context.animation({ duration: 250, curve: Curve.EaseInOut });
                         //控制末端的释放和抓取
                         Button.width(this.catch_size_width);
@@ -1415,14 +1399,14 @@ export class RobotArm1 extends ViewPU {
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create({ space: 10 });
-                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(815:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(793:17)", "entry");
                         Row.justifyContent(FlexAlign.Center);
                         Row.alignItems(VerticalAlign.Center);
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         // 根据状态显示不同文本
                         Text.create(this.data.endStatusText === '释放' ? '点击抓取' : '点击释放');
-                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(817:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(795:19)", "entry");
                         // 根据状态显示不同文本
                         Text.fontSize(this.catch_font_size);
                         // 根据状态显示不同文本
@@ -1451,31 +1435,30 @@ export class RobotArm1 extends ViewPU {
             this.observeComponentCreation2((elmtId, isInitialRender) => {
                 if (isInitialRender) {
                     let componentCall = new 
-                    // 新增：切换按钮
+                    //切换按钮
                     ActionButton(this, {
                         // 请替换为您的图标资源
                         icon: { "id": 16777224, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         click: () => {
                             Context.animateTo({ duration: 800, curve: Curve.EaseInOut }, () => {
                                 if (this.data.isInfoCardVisible) {
-                                    if (this.data.controlCardWidth === '50%') {
-                                        this.data.controlCardWidth = '30%';
-                                        this.data.mapCardWidth = '65%';
+                                    if (this.data.controlCardWidth === '60%') {
+                                        this.data.controlCardWidth = '35%';
+                                        this.data.mapCardWidth = '60%';
                                         this.data.isRegionAVisible = false;
                                     }
                                     else {
-                                        this.data.controlCardWidth = '50%';
-                                        this.data.mapCardWidth = '45%';
+                                        this.data.controlCardWidth = '60%';
+                                        this.data.mapCardWidth = '35%';
                                         this.data.isRegionAVisible = true;
                                     }
                                 }
                                 else {
-                                    // 直接在60%的区域内切换显示区域A
                                     this.data.isRegionAVisible = !this.data.isRegionAVisible;
                                 }
                             });
                         }
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 874, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 851, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -1484,19 +1467,18 @@ export class RobotArm1 extends ViewPU {
                             click: () => {
                                 Context.animateTo({ duration: 800, curve: Curve.EaseInOut }, () => {
                                     if (this.data.isInfoCardVisible) {
-                                        if (this.data.controlCardWidth === '50%') {
-                                            this.data.controlCardWidth = '30%';
-                                            this.data.mapCardWidth = '65%';
+                                        if (this.data.controlCardWidth === '60%') {
+                                            this.data.controlCardWidth = '35%';
+                                            this.data.mapCardWidth = '60%';
                                             this.data.isRegionAVisible = false;
                                         }
                                         else {
-                                            this.data.controlCardWidth = '50%';
-                                            this.data.mapCardWidth = '45%';
+                                            this.data.controlCardWidth = '60%';
+                                            this.data.mapCardWidth = '35%';
                                             this.data.isRegionAVisible = true;
                                         }
                                     }
                                     else {
-                                        // 直接在60%的区域内切换显示区域A
                                         this.data.isRegionAVisible = !this.data.isRegionAVisible;
                                     }
                                 });
@@ -1533,7 +1515,7 @@ export class RobotArm1 extends ViewPU {
                                 // 每次点击全屏按钮时，都重置A区域的状态，以保证逻辑清晰
                                 this.data.isRegionAVisible = false;
                                 if (this.data.isInfoCardVisible) {
-                                    // 进入分屏模式，固定为 65/30 布局
+                                    // 进入分屏模式
                                     this.data.mapCardWidth = '65%';
                                     this.data.controlCardWidth = '30%';
                                     this.button_size = 30;
@@ -1543,7 +1525,7 @@ export class RobotArm1 extends ViewPU {
                                     this.catch_font_size = 15;
                                 }
                                 else {
-                                    // 返回默认模式，恢复 60% 控制卡片
+                                    // 返回默认模式
                                     this.data.controlCardWidth = '60%';
                                     this.button_size = 50;
                                     this.button_icon_size = 28;
@@ -1553,7 +1535,7 @@ export class RobotArm1 extends ViewPU {
                                 }
                             });
                         }
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 902, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 877, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -1567,7 +1549,7 @@ export class RobotArm1 extends ViewPU {
                                     // 每次点击全屏按钮时，都重置A区域的状态，以保证逻辑清晰
                                     this.data.isRegionAVisible = false;
                                     if (this.data.isInfoCardVisible) {
-                                        // 进入分屏模式，固定为 65/30 布局
+                                        // 进入分屏模式
                                         this.data.mapCardWidth = '65%';
                                         this.data.controlCardWidth = '30%';
                                         this.button_size = 30;
@@ -1577,7 +1559,7 @@ export class RobotArm1 extends ViewPU {
                                         this.catch_font_size = 15;
                                     }
                                     else {
-                                        // 返回默认模式，恢复 60% 控制卡片
+                                        // 返回默认模式
                                         this.data.controlCardWidth = '60%';
                                         this.button_size = 50;
                                         this.button_icon_size = 28;
@@ -1664,7 +1646,7 @@ class ActionButton extends ViewPU {
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
-            Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(970:5)", "entry");
+            Row.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(941:5)", "entry");
             Context.animation({ duration: 150, curve: Curve.EaseOut });
             Row.width(44);
             Row.height(44);
@@ -1689,7 +1671,7 @@ class ActionButton extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.icon);
-            Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(971:7)", "entry");
+            Image.debugLine("entry/src/main/ets/view/device/RobotArm1.ets(942:7)", "entry");
             Image.width(22);
             Image.height(22);
             Image.fillColor(Color.White);

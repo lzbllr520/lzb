@@ -23,7 +23,8 @@ interface RobotArm3_Params {
     idleTimer?: number;
     isPreviewVisible?: boolean;
 }
-import type { RobotArmState } from '../../model/RobotArmState';
+import { RobotArmState } from "@normalized:N&&&entry/src/main/ets/model/RobotArmState&";
+import { RoboticArmWorkRangeView } from "@normalized:N&&&entry/src/main/ets/components/RoboticArmWorkRangeView&";
 export class RobotArm3 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -394,49 +395,12 @@ export class RobotArm3 extends ViewPU {
         }, Column);
         Column.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Image.create({ "id": 16777260, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+            Image.create({ "id": 16777262, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
             Image.width('50%');
             Image.objectFit(ImageFit.Contain);
             Image.borderRadius(16);
             Image.hitTestBehavior(HitTestMode.Block);
         }, Image);
-        Stack.pop();
-    }
-    // 新增：用于构建“区域A”的UI
-    private buildRegionA(parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Stack.create();
-            Stack.width('100%');
-            Stack.height('100%');
-            Stack.clip(true);
-        }, Stack);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Column.create();
-            Column.width('100%');
-            Column.height('100%');
-            Column.justifyContent(FlexAlign.Center);
-            Column.alignItems(HorizontalAlign.Center);
-            Column.backdropBlur(12);
-            Column.backgroundColor('rgba(10, 10, 15, 0.3)');
-            Column.borderRadius(16);
-            Column.border({
-                width: 1.5,
-                color: 'rgba(255, 255, 255, 0.15)'
-            });
-            Column.shadow({
-                radius: 30,
-                color: 'rgba(173, 216, 230, 0.2)',
-                offsetX: 0,
-                offsetY: 0
-            });
-        }, Column);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create('这里是区域A');
-            Text.fontColor(Color.White);
-            Text.fontSize(24);
-        }, Text);
-        Text.pop();
-        Column.pop();
         Stack.pop();
     }
     initialRender() {
@@ -490,19 +454,14 @@ export class RobotArm3 extends ViewPU {
                         });
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        //... (内容与原来一致，此处省略以保持简洁)
                         //模型展示
                         Column.create();
-                        //... (内容与原来一致，此处省略以保持简洁)
                         //模型展示
                         Column.width('90%');
-                        //... (内容与原来一致，此处省略以保持简洁)
                         //模型展示
                         Column.height('30%');
-                        //... (内容与原来一致，此处省略以保持简洁)
                         //模型展示
                         Column.alignItems(HorizontalAlign.Center);
-                        //... (内容与原来一致，此处省略以保持简洁)
                         //模型展示
                         Column.justifyContent(FlexAlign.Center);
                     }, Column);
@@ -521,7 +480,6 @@ export class RobotArm3 extends ViewPU {
                         });
                         Context.animation(null);
                     }, Image);
-                    //... (内容与原来一致，此处省略以保持简洁)
                     //模型展示
                     Column.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -556,7 +514,7 @@ export class RobotArm3 extends ViewPU {
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create('机械臂003');
+                        Text.create('机械臂002');
                         Text.fontColor(Color.White);
                     }, Text);
                     Text.pop();
@@ -644,7 +602,7 @@ export class RobotArm3 extends ViewPU {
                         if (this.data.loadText === '有物品') {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create({ "id": 16777231, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                                    Image.create({ "id": 16777232, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                                     Image.width(20);
                                     Image.height(20);
                                     Image.margin({ left: 10 });
@@ -654,7 +612,7 @@ export class RobotArm3 extends ViewPU {
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create({ "id": 16777255, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                                    Image.create({ "id": 16777257, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                                     Image.width(20);
                                     Image.height(20);
                                     Image.margin({ left: 10 });
@@ -703,10 +661,6 @@ export class RobotArm3 extends ViewPU {
                         Row.onHover((isHover: boolean) => {
                             this.isHover = isHover;
                         });
-                        Gesture.create(GesturePriority.Low);
-                        LongPressGesture.create();
-                        LongPressGesture.pop();
-                        Gesture.pop();
                         //控制按钮
                         Row.onTouch((event: TouchEvent) => {
                             event.stopPropagation();
@@ -715,10 +669,9 @@ export class RobotArm3 extends ViewPU {
                             }
                             if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                                 this.isPressed = false;
-                                // 1. 判断当前状态，准备不同的对话框信息
+                                //判断当前状态，准备不同的对话框信息
                                 const isCurrentlyRunning = this.data.statusText === '运行中' || this.data.statusText === '空闲中';
                                 const message = isCurrentlyRunning ? '您确定要关闭三号机械臂吗？' : '您确定要启动三号机械臂吗？';
-                                // 2. 显示确认对话框
                                 AlertDialog.show({
                                     title: '操作确认',
                                     message: message,
@@ -737,11 +690,11 @@ export class RobotArm3 extends ViewPU {
                                             fontColor: Color.Red,
                                             action: () => {
                                                 if (isCurrentlyRunning) {
-                                                    this.data.statusText = '离线中';
-                                                    this.data.endStatusText = '释放';
-                                                    this.data.xValue = 0;
-                                                    this.data.yValue = 0;
-                                                    this.data.zValue = 0;
+                                                    //创建一个新的、干净的 RobotArmState 实例
+                                                    const newData = new RobotArmState();
+                                                    //将这个全新的、准备好的对象赋值给 this.data
+                                                    //因为原来的RobotArmState对象初始值就是关闭的状态
+                                                    this.data = newData;
                                                     this.showSystemToast('关闭成功');
                                                     //关闭时清除定时器
                                                     if (this.idleTimer !== -1) {
@@ -768,7 +721,7 @@ export class RobotArm3 extends ViewPU {
                         if (this.data.statusText === '运行中' || this.data.statusText === '空闲中') {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create({ "id": 16777266, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                                    Image.create({ "id": 16777268, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                                     Image.width(22);
                                     Image.height(22);
                                     Image.fillColor(Color.White);
@@ -786,7 +739,7 @@ export class RobotArm3 extends ViewPU {
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create({ "id": 16777265, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                                    Image.create({ "id": 16777267, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                                     Image.width(24);
                                     Image.height(24);
                                     Image.fillColor(Color.White);
@@ -871,10 +824,58 @@ export class RobotArm3 extends ViewPU {
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            // 根据 isRegionAVisible 的值，决定显示控制面板还是区域A
+            // 根据 isRegionAVisible 的值，决定显示按钮调节还是量角器调节
             if (this.data.isRegionAVisible) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.buildRegionA.bind(this)();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Stack.create();
+                        Stack.width('100%');
+                        Stack.height('100%');
+                        Stack.clip(true);
+                    }, Stack);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Column.create();
+                        Column.width('100%');
+                        Column.height('100%');
+                        Column.justifyContent(FlexAlign.Center);
+                        Column.alignItems(HorizontalAlign.Center);
+                        Column.backdropBlur(12);
+                        Column.backgroundColor('rgba(10, 10, 15, 0.3)');
+                        Column.borderRadius(16);
+                        Column.border({
+                            width: 1.5,
+                            color: 'rgba(255, 255, 255, 0.15)'
+                        });
+                        Column.shadow({
+                            radius: 30,
+                            color: 'rgba(173, 216, 230, 0.2)',
+                            offsetX: 0,
+                            offsetY: 0
+                        });
+                    }, Column);
+                    {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new RoboticArmWorkRangeView(this, {
+                                    data: this.__data,
+                                    onActivate: this.activateArm.bind(this)
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm3.ets", line: 478, col: 17 });
+                                ViewPU.create(componentCall);
+                                let paramsLambda = () => {
+                                    return {
+                                        data: this.data,
+                                        onActivate: this.activateArm.bind(this)
+                                    };
+                                };
+                                componentCall.paramsGenerator_ = paramsLambda;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                            }
+                        }, { name: "RoboticArmWorkRangeView" });
+                    }
+                    Column.pop();
+                    Stack.pop();
                 });
             }
             else {
@@ -911,10 +912,6 @@ export class RobotArm3 extends ViewPU {
                         //控制x轴（左右）
                         Row.create();
                         Context.animation({ duration: 250, curve: Curve.EaseInOut });
-                        Gesture.create(GesturePriority.Low);
-                        LongPressGesture.create();
-                        LongPressGesture.pop();
-                        Gesture.pop();
                         //控制x轴（左右）
                         Row.width('90%');
                         //控制x轴（左右）
@@ -965,7 +962,7 @@ export class RobotArm3 extends ViewPU {
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777249, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777251, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Image.width(this.button_icon_size);
                         Image.height(this.button_icon_size);
                     }, Image);
@@ -1027,7 +1024,7 @@ export class RobotArm3 extends ViewPU {
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777259, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777261, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Image.width(this.button_icon_size);
                         Image.height(this.button_icon_size);
                     }, Image);
@@ -1039,10 +1036,6 @@ export class RobotArm3 extends ViewPU {
                         //y控制（前后）
                         Row.create();
                         Context.animation({ duration: 250, curve: Curve.EaseInOut });
-                        Gesture.create(GesturePriority.Low);
-                        LongPressGesture.create();
-                        LongPressGesture.pop();
-                        Gesture.pop();
                         //y控制（前后）
                         Row.width('90%');
                         //y控制（前后）
@@ -1093,7 +1086,7 @@ export class RobotArm3 extends ViewPU {
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777249, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777251, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Image.width(this.button_icon_size);
                         Image.height(this.button_icon_size);
                     }, Image);
@@ -1155,7 +1148,7 @@ export class RobotArm3 extends ViewPU {
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777259, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777261, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Image.width(this.button_icon_size);
                         Image.height(this.button_icon_size);
                     }, Image);
@@ -1167,10 +1160,6 @@ export class RobotArm3 extends ViewPU {
                         //z轴控制（上下）
                         Row.create();
                         Context.animation({ duration: 250, curve: Curve.EaseInOut });
-                        Gesture.create(GesturePriority.Low);
-                        LongPressGesture.create();
-                        LongPressGesture.pop();
-                        Gesture.pop();
                         //z轴控制（上下）
                         Row.width('90%');
                         //z轴控制（上下）
@@ -1221,7 +1210,7 @@ export class RobotArm3 extends ViewPU {
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777249, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777251, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Image.width(this.button_icon_size);
                         Image.height(this.button_icon_size);
                     }, Image);
@@ -1283,7 +1272,7 @@ export class RobotArm3 extends ViewPU {
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777259, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777261, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Image.width(this.button_icon_size);
                         Image.height(this.button_icon_size);
                     }, Image);
@@ -1368,54 +1357,50 @@ export class RobotArm3 extends ViewPU {
             this.observeComponentCreation2((elmtId, isInitialRender) => {
                 if (isInitialRender) {
                     let componentCall = new 
-                    // 新增：切换按钮
+                    //切换按钮
                     ActionButton(this, {
                         // 请替换为您的图标资源
-                        icon: { "id": 16777230, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777231, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         click: () => {
                             Context.animateTo({ duration: 800, curve: Curve.EaseInOut }, () => {
-                                if (this.data.isInfoCardVisible) { // 当前是分屏模式
-                                    // 如果已经是45/45的A区域模式，则切换回65/30的控制模式
-                                    if (this.data.controlCardWidth === '45%') {
-                                        this.data.controlCardWidth = '30%';
-                                        this.data.mapCardWidth = '65%';
+                                if (this.data.isInfoCardVisible) {
+                                    if (this.data.controlCardWidth === '60%') {
+                                        this.data.controlCardWidth = '35%';
+                                        this.data.mapCardWidth = '60%';
                                         this.data.isRegionAVisible = false;
                                     }
-                                    else { // 否则，从65/30的控制模式切换至45/45的A区域模式
-                                        this.data.controlCardWidth = '45%';
-                                        this.data.mapCardWidth = '45%';
+                                    else {
+                                        this.data.controlCardWidth = '60%';
+                                        this.data.mapCardWidth = '35%';
                                         this.data.isRegionAVisible = true;
                                     }
                                 }
-                                else { // 当前是默认模式（60%控制卡片）
-                                    // 直接在60%的区域内切换显示区域A
+                                else {
                                     this.data.isRegionAVisible = !this.data.isRegionAVisible;
                                 }
                             });
                         }
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm3.ets", line: 877, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm3.ets", line: 846, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
                             // 请替换为您的图标资源
-                            icon: { "id": 16777230, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            icon: { "id": 16777231, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             click: () => {
                                 Context.animateTo({ duration: 800, curve: Curve.EaseInOut }, () => {
-                                    if (this.data.isInfoCardVisible) { // 当前是分屏模式
-                                        // 如果已经是45/45的A区域模式，则切换回65/30的控制模式
-                                        if (this.data.controlCardWidth === '45%') {
-                                            this.data.controlCardWidth = '30%';
-                                            this.data.mapCardWidth = '65%';
+                                    if (this.data.isInfoCardVisible) {
+                                        if (this.data.controlCardWidth === '60%') {
+                                            this.data.controlCardWidth = '35%';
+                                            this.data.mapCardWidth = '60%';
                                             this.data.isRegionAVisible = false;
                                         }
-                                        else { // 否则，从65/30的控制模式切换至45/45的A区域模式
-                                            this.data.controlCardWidth = '45%';
-                                            this.data.mapCardWidth = '45%';
+                                        else {
+                                            this.data.controlCardWidth = '60%';
+                                            this.data.mapCardWidth = '35%';
                                             this.data.isRegionAVisible = true;
                                         }
                                     }
-                                    else { // 当前是默认模式（60%控制卡片）
-                                        // 直接在60%的区域内切换显示区域A
+                                    else {
                                         this.data.isRegionAVisible = !this.data.isRegionAVisible;
                                     }
                                 });
@@ -1442,7 +1427,7 @@ export class RobotArm3 extends ViewPU {
                     let componentCall = new 
                     // 原有的全屏按钮
                     ActionButton(this, {
-                        icon: { "id": 16777245, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777247, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         click: () => {
                             Context.animateTo({
                                 duration: 800,
@@ -1452,7 +1437,7 @@ export class RobotArm3 extends ViewPU {
                                 // 每次点击全屏按钮时，都重置A区域的状态，以保证逻辑清晰
                                 this.data.isRegionAVisible = false;
                                 if (this.data.isInfoCardVisible) {
-                                    // 进入分屏模式，固定为 65/30 布局
+                                    // 进入分屏模式
                                     this.data.mapCardWidth = '65%';
                                     this.data.controlCardWidth = '30%';
                                     this.button_size = 30;
@@ -1462,7 +1447,7 @@ export class RobotArm3 extends ViewPU {
                                     this.catch_font_size = 15;
                                 }
                                 else {
-                                    // 返回默认模式，恢复 60% 控制卡片
+                                    // 返回默认模式
                                     this.data.controlCardWidth = '60%';
                                     this.button_size = 50;
                                     this.button_icon_size = 28;
@@ -1472,11 +1457,11 @@ export class RobotArm3 extends ViewPU {
                                 }
                             });
                         }
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm3.ets", line: 906, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm3.ets", line: 872, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
-                            icon: { "id": 16777245, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            icon: { "id": 16777247, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             click: () => {
                                 Context.animateTo({
                                     duration: 800,
@@ -1486,7 +1471,7 @@ export class RobotArm3 extends ViewPU {
                                     // 每次点击全屏按钮时，都重置A区域的状态，以保证逻辑清晰
                                     this.data.isRegionAVisible = false;
                                     if (this.data.isInfoCardVisible) {
-                                        // 进入分屏模式，固定为 65/30 布局
+                                        // 进入分屏模式
                                         this.data.mapCardWidth = '65%';
                                         this.data.controlCardWidth = '30%';
                                         this.button_size = 30;
@@ -1496,7 +1481,7 @@ export class RobotArm3 extends ViewPU {
                                         this.catch_font_size = 15;
                                     }
                                     else {
-                                        // 返回默认模式，恢复 60% 控制卡片
+                                        // 返回默认模式
                                         this.data.controlCardWidth = '60%';
                                         this.button_size = 50;
                                         this.button_icon_size = 28;

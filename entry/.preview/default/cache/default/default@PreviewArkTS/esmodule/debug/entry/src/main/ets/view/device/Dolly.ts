@@ -1,55 +1,78 @@
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
+interface DirectionalButton_Params {
+    icon?: Resource;
+    onPress?: () => void;
+    onRelease?: () => void;
+    isPressed?: boolean;
+}
 interface ActionButton_Params {
     icon?: Resource;
     click?: () => void;
     isPressed?: boolean;
 }
-interface RockerControl_Params {
-    handleX?: number;
-    handleY?: number;
-    onDirectionChange?: (direction: string) => void;
-    rockerBaseSize?: number;
-    rockerHandleSize?: number;
-}
 interface Dolly_Params {
+    controller?: WebviewController;
+    holdTimers?: Map<string, number>;
     addLog?: (level: 'info' | 'warning' | 'error', message: string, shouldSave: boolean) => void;
     data?: DollyState;
     isPressed?: boolean;
     isHover?: boolean;
     avatar?: Resource;
-    rockerDirection?: string;
-    idleTimer?: number;
     isInfoCardVisible?: boolean;
     controlCardWidth?: string;
-    rockerBaseSize?: number;
-    rockerHandleSize?: number;
+    ws?: webSocket.WebSocket | null;
+    isWsConnected?: boolean;
     isPreviewVisible?: boolean;
 }
 import type { DollyState } from "../../model/DollyState";
+import webSocket from "@ohos:net.webSocket";
+import type { BusinessError as BusinessError } from "@ohos:base";
+import webview from "@ohos:web.webview";
+//为ROS指令定义三个类型接口
+interface TwistVector {
+    x: number;
+    y: number;
+    z: number;
+}
+interface TwistMessage {
+    linear: TwistVector;
+    angular: TwistVector;
+}
+interface RosCommand {
+    op: string;
+    topic: string;
+    msg: TwistMessage;
+}
 export class Dolly extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
         if (typeof paramsLambda === "function") {
             this.paramsGenerator_ = paramsLambda;
         }
+        this.controller = new webview.WebviewController();
+        this.__holdTimers = new ObservedPropertyObjectPU(new Map(), this, "holdTimers");
         this.addLog = () => { };
         this.__data = new SynchedPropertyObjectTwoWayPU(params.data, this, "data");
         this.__isPressed = new ObservedPropertySimplePU(false, this, "isPressed");
         this.__isHover = new ObservedPropertySimplePU(false, this, "isHover");
         this.__avatar = new SynchedPropertyObjectTwoWayPU(params.avatar, this, "avatar");
-        this.__rockerDirection = new ObservedPropertySimplePU('stop', this, "rockerDirection");
-        this.idleTimer = -1;
         this.__isInfoCardVisible = new ObservedPropertySimplePU(false, this, "isInfoCardVisible");
         this.__controlCardWidth = new ObservedPropertySimplePU('65%', this, "controlCardWidth");
-        this.__rockerBaseSize = new ObservedPropertySimplePU(250, this, "rockerBaseSize");
-        this.__rockerHandleSize = new ObservedPropertySimplePU(80, this, "rockerHandleSize");
+        this.ws = null;
+        this.__isWsConnected = new ObservedPropertySimplePU(false, this, "isWsConnected");
         this.__isPreviewVisible = new ObservedPropertySimplePU(false, this, "isPreviewVisible");
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params: Dolly_Params) {
+        if (params.controller !== undefined) {
+            this.controller = params.controller;
+        }
+        if (params.holdTimers !== undefined) {
+            this.holdTimers = params.holdTimers;
+        }
         if (params.addLog !== undefined) {
             this.addLog = params.addLog;
         }
@@ -59,23 +82,17 @@ export class Dolly extends ViewPU {
         if (params.isHover !== undefined) {
             this.isHover = params.isHover;
         }
-        if (params.rockerDirection !== undefined) {
-            this.rockerDirection = params.rockerDirection;
-        }
-        if (params.idleTimer !== undefined) {
-            this.idleTimer = params.idleTimer;
-        }
         if (params.isInfoCardVisible !== undefined) {
             this.isInfoCardVisible = params.isInfoCardVisible;
         }
         if (params.controlCardWidth !== undefined) {
             this.controlCardWidth = params.controlCardWidth;
         }
-        if (params.rockerBaseSize !== undefined) {
-            this.rockerBaseSize = params.rockerBaseSize;
+        if (params.ws !== undefined) {
+            this.ws = params.ws;
         }
-        if (params.rockerHandleSize !== undefined) {
-            this.rockerHandleSize = params.rockerHandleSize;
+        if (params.isWsConnected !== undefined) {
+            this.isWsConnected = params.isWsConnected;
         }
         if (params.isPreviewVisible !== undefined) {
             this.isPreviewVisible = params.isPreviewVisible;
@@ -84,30 +101,151 @@ export class Dolly extends ViewPU {
     updateStateVars(params: Dolly_Params) {
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__holdTimers.purgeDependencyOnElmtId(rmElmtId);
         this.__data.purgeDependencyOnElmtId(rmElmtId);
         this.__isPressed.purgeDependencyOnElmtId(rmElmtId);
         this.__isHover.purgeDependencyOnElmtId(rmElmtId);
         this.__avatar.purgeDependencyOnElmtId(rmElmtId);
-        this.__rockerDirection.purgeDependencyOnElmtId(rmElmtId);
         this.__isInfoCardVisible.purgeDependencyOnElmtId(rmElmtId);
         this.__controlCardWidth.purgeDependencyOnElmtId(rmElmtId);
-        this.__rockerBaseSize.purgeDependencyOnElmtId(rmElmtId);
-        this.__rockerHandleSize.purgeDependencyOnElmtId(rmElmtId);
+        this.__isWsConnected.purgeDependencyOnElmtId(rmElmtId);
         this.__isPreviewVisible.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
+        this.__holdTimers.aboutToBeDeleted();
         this.__data.aboutToBeDeleted();
         this.__isPressed.aboutToBeDeleted();
         this.__isHover.aboutToBeDeleted();
         this.__avatar.aboutToBeDeleted();
-        this.__rockerDirection.aboutToBeDeleted();
         this.__isInfoCardVisible.aboutToBeDeleted();
         this.__controlCardWidth.aboutToBeDeleted();
-        this.__rockerBaseSize.aboutToBeDeleted();
-        this.__rockerHandleSize.aboutToBeDeleted();
+        this.__isWsConnected.aboutToBeDeleted();
         this.__isPreviewVisible.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
+    }
+    private controller: WebviewController;
+    private __holdTimers: ObservedPropertyObjectPU<Map<string, number>>;
+    get holdTimers() {
+        return this.__holdTimers.get();
+    }
+    set holdTimers(newValue: Map<string, number>) {
+        this.__holdTimers.set(newValue);
+    }
+    //小车运动逻辑
+    private startMove(direction: string) {
+        // 规则1: 如果【停止】按钮正被按住，任何其他方向键都无效
+        if (direction !== '停止' && this.holdTimers.has('停止')) {
+            console.info('急停状态中，已忽略其他方向指令');
+            return;
+        }
+        //如果按下的是【停止】按钮
+        if (direction === '停止') {
+            // 立即清除所有正在运行的方向定时器
+            this.holdTimers.forEach((timerId, dir) => {
+                if (dir !== '停止') {
+                    clearInterval(timerId);
+                }
+            });
+            this.holdTimers.clear(); // 清空Map，只留下【停止】
+            // 立即发送停止指令，这是实现“立即”响应的关键
+            this.move('停止');
+            console.info('急停指令已发送');
+            this.data.statusText = '空闲中';
+            // 启动一个专门的【停止】定时器，持续发送停止指令以确保最高优先级
+            const timerId = setInterval(() => {
+                this.move('停止');
+            }, 200);
+            this.holdTimers.set('停止', timerId);
+            return; // 【停止】指令的逻辑到此结束
+        }
+        const allDirections = ['向前', '向后', '向左', '向右'];
+        allDirections.forEach(dir => {
+            if (dir !== direction && this.holdTimers.has(dir)) {
+                console.info(`方向冲突：正在按下【${direction}】，自动松开【${dir}】。`);
+                this.stopMove(dir); // 调用 stopMove 来清除旧方向的定时器
+            }
+        });
+        // 如果当前方向的定时器已在运行，则不重复启动
+        if (this.holdTimers.has(direction)) {
+            return;
+        }
+        // 启动新方向的定时器
+        this.data.statusText = '运行中';
+        this.move(direction);
+        const timerId = setInterval(() => {
+            this.move(direction);
+        }, 100);
+        this.holdTimers.set(direction, timerId);
+    }
+    //小车停止逻辑
+    private stopMove(direction: string) {
+        // 检查并清除当前松开方向的定时器
+        if (this.holdTimers.has(direction)) {
+            const timerId = this.holdTimers.get(direction);
+            clearInterval(timerId);
+            this.holdTimers.delete(direction);
+            if (this.holdTimers.size === 0) {
+                this.sendCommand(0.0, 0.0);
+                this.data.statusText = '空闲中';
+                console.info("所有按键已松开，发送最终停止指令。");
+            }
+        }
+    }
+    private move(direction: string) {
+        const speed = 2.0; // 定义前进/后退的基础速度
+        const turnSpeed = 2.0; // 定义左转/右转的基础角速度
+        let linearX = 0.0;
+        let angularZ = 0.0;
+        switch (direction) {
+            case '向前':
+                linearX = speed;
+                break;
+            case '向后':
+                linearX = -speed;
+                break;
+            case '向左':
+                angularZ = turnSpeed;
+                break;
+            case '向右':
+                angularZ = -turnSpeed;
+                break;
+            case '停止':
+                // '停止'按钮会直接发送 0,0 速度
+                linearX = 0.0;
+                angularZ = 0.0;
+                break;
+        }
+        this.sendCommand(linearX, angularZ);
+    }
+    //指令发送函数
+    private sendCommand(linearX: number, angularZ: number) {
+        if (this.ws && this.isWsConnected) {
+            const rosCmd: RosCommand = {
+                op: "publish",
+                topic: "/cmd_vel",
+                msg: {
+                    linear: { x: linearX, y: 0.0, z: 0.0 },
+                    angular: { x: 0.0, y: 0.0, z: angularZ }
+                }
+            };
+            const cmdJson = JSON.stringify(rosCmd);
+            this.ws.send(cmdJson)
+                .then((success) => {
+                if (success) {
+                    console.info(`指令已提交发送: ${cmdJson}`);
+                }
+                else {
+                    console.info(`指令提交发送失败: ${cmdJson}`);
+                }
+            })
+                .catch((err: BusinessError) => {
+                console.info(`发送指令时出错. Code: ${err.code}, message: ${err.message}`);
+            });
+        }
+        else {
+            console.info("WebSocket 未连接，无法发送指令。");
+        }
     }
     private addLog: (level: 'info' | 'warning' | 'error', message: string, shouldSave: boolean) => void;
     private __data: SynchedPropertySimpleOneWayPU<DollyState>;
@@ -140,16 +278,6 @@ export class Dolly extends ViewPU {
     set avatar(newValue: Resource) {
         this.__avatar.set(newValue);
     }
-    //用于追踪遥感方向的状态
-    private __rockerDirection: ObservedPropertySimplePU<string>; // 'up', 'down', 'left', 'right', 'stop'
-    get rockerDirection() {
-        return this.__rockerDirection.get();
-    }
-    set rockerDirection(newValue: string) {
-        this.__rockerDirection.set(newValue);
-    }
-    //用来存储30s内无遥感操作定时器ID
-    private idleTimer: number;
     //基础信息展示卡片动画控制器
     private __isInfoCardVisible: ObservedPropertySimplePU<boolean>;
     get isInfoCardVisible() {
@@ -158,7 +286,7 @@ export class Dolly extends ViewPU {
     set isInfoCardVisible(newValue: boolean) {
         this.__isInfoCardVisible.set(newValue);
     }
-    //用来控制遥感和卡片尺寸的控制器
+    //控制卡片宽度控制
     private __controlCardWidth: ObservedPropertySimplePU<string>;
     get controlCardWidth() {
         return this.__controlCardWidth.get();
@@ -166,25 +294,97 @@ export class Dolly extends ViewPU {
     set controlCardWidth(newValue: string) {
         this.__controlCardWidth.set(newValue);
     }
-    private __rockerBaseSize: ObservedPropertySimplePU<number>;
-    get rockerBaseSize() {
-        return this.__rockerBaseSize.get();
+    //用于持有WebSocket客户端实例的变量
+    private ws: webSocket.WebSocket | null;
+    //用于跟踪WebSocket连接状态的变量
+    private __isWsConnected: ObservedPropertySimplePU<boolean>;
+    get isWsConnected() {
+        return this.__isWsConnected.get();
     }
-    set rockerBaseSize(newValue: number) {
-        this.__rockerBaseSize.set(newValue);
+    set isWsConnected(newValue: boolean) {
+        this.__isWsConnected.set(newValue);
     }
-    private __rockerHandleSize: ObservedPropertySimplePU<number>;
-    get rockerHandleSize() {
-        return this.__rockerHandleSize.get();
+    //WebSocket: 封装了创建、监听和连接WebSocket的完整逻辑
+    private initializeWebSocket() {
+        //创建 WebSocket 实例
+        this.ws = webSocket.createWebSocket();
+        console.info('成功创建WebSocket实例');
+        //下面进行WebSocket实例的初始化
+        // 监听连接成功事件
+        this.ws.on('open', (err) => {
+            if (!err) {
+                this.isWsConnected = true;
+                console.info("连接成功");
+            }
+            else {
+                console.info(`连接失败. Code: ${err.code}, message: ${err.message}`);
+            }
+        });
+        // 监听接收到消息事件
+        this.ws.on('message', (err, value) => {
+            if (!err) {
+                console.info("收到回显信息: " + value);
+            }
+            else {
+                console.info(`收到回显信息失败. Code: ${err.code}, message: ${err.message}`);
+            }
+        });
+        // 监听连接关闭事件
+        this.ws.on('close', (err, value) => {
+            this.isWsConnected = false;
+            if (!err) {
+                console.info(`连接已关闭: ${value.code}, reason: ${value.reason}`);
+            }
+            else {
+                console.info(`连接关闭失败. Code: ${err.code}, message: ${err.message}`);
+            }
+        });
+        // 监听错误事件
+        this.ws.on('error', (err) => {
+            this.isWsConnected = false;
+            console.error(`发生错误: ${err.code}, message: ${err.message}`);
+        });
+        //发起连接
+        const url = "ws://192.168.2.19:9090";
+        this.ws.connect(url, (err) => {
+            if (!err) {
+                console.info("发起连接请求");
+            }
+            else {
+                console.error(`连接请求失败. Code: ${err.code}, message: ${err.message}`);
+            }
+        });
     }
-    set rockerHandleSize(newValue: number) {
-        this.__rockerHandleSize.set(newValue);
+    //页面初始化时执行
+    aboutToAppear() {
+        this.initializeWebSocket();
     }
+    //页面销毁时执行
     onDisappear() {
-        //页面销毁时，清除原来的定时器
-        if (this.idleTimer !== -1) {
-            clearTimeout(this.idleTimer);
+        //在界面销毁前确保让其急停
+        this.sendCommand(0.0, 0.0);
+        if (this.ws) {
+            // 移除所有事件监听，防止在后台触发回调导致应用异常
+            this.ws.off('open');
+            this.ws.off('message');
+            this.ws.off('close');
+            this.ws.off('error');
+            // 发起关闭请求
+            this.ws.close()
+                .then(() => {
+                console.info("连接关闭成功");
+            })
+                .catch((err: BusinessError) => {
+                console.info(`连接关闭失败. Code: ${err.code}, message: ${err.message}`);
+            });
+            this.ws = null; // 将WebSocket实例置空
+            this.isWsConnected = false;
         }
+        // 清理所有可能正在运行的定时器
+        this.holdTimers.forEach((timerId) => {
+            clearInterval(timerId);
+        });
+        this.holdTimers.clear();
     }
     private getStatusColor(): Color {
         switch (this.data.statusText) {
@@ -248,12 +448,12 @@ export class Dolly extends ViewPU {
     set isPreviewVisible(newValue: boolean) {
         this.__isPreviewVisible.set(newValue);
     }
-    //预览层
+    //图片预览层
     private buildImagePreview(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             // 使用Stack作为根布局，以实现覆盖效果
             Stack.create();
-            Stack.debugLine("entry/src/main/ets/view/device/Dolly.ets(102:5)", "entry");
+            Stack.debugLine("entry/src/main/ets/view/device/Dolly.ets(328:5)", "entry");
             // 使用Stack作为根布局，以实现覆盖效果
             Stack.width('100%');
             // 使用Stack作为根布局，以实现覆盖效果
@@ -266,7 +466,7 @@ export class Dolly extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             // 半透明背景遮罩，本身就作为可点击关闭的区域
             Column.create();
-            Column.debugLine("entry/src/main/ets/view/device/Dolly.ets(104:7)", "entry");
+            Column.debugLine("entry/src/main/ets/view/device/Dolly.ets(330:7)", "entry");
             // 半透明背景遮罩，本身就作为可点击关闭的区域
             Column.width('100%');
             // 半透明背景遮罩，本身就作为可点击关闭的区域
@@ -284,7 +484,7 @@ export class Dolly extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             // 居中显示的、放大的图片
             Image.create({ "id": 16777265, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-            Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(114:7)", "entry");
+            Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(340:7)", "entry");
             // 居中显示的、放大的图片
             Image.width('50%');
             // 居中显示的、放大的图片
@@ -300,13 +500,13 @@ export class Dolly extends ViewPU {
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
-            Stack.debugLine("entry/src/main/ets/view/device/Dolly.ets(129:5)", "entry");
+            Stack.debugLine("entry/src/main/ets/view/device/Dolly.ets(355:5)", "entry");
             Stack.width('100%');
             Stack.height('100%');
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create({ space: 20 });
-            Row.debugLine("entry/src/main/ets/view/device/Dolly.ets(130:7)", "entry");
+            Row.debugLine("entry/src/main/ets/view/device/Dolly.ets(356:7)", "entry");
             Row.padding(20);
             Row.width('100%');
             Row.height('100%');
@@ -320,7 +520,7 @@ export class Dolly extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Stack.create();
-                        Stack.debugLine("entry/src/main/ets/view/device/Dolly.ets(133:11)", "entry");
+                        Stack.debugLine("entry/src/main/ets/view/device/Dolly.ets(359:11)", "entry");
                         Stack.width('30%');
                         Stack.height('100%');
                         Stack.clip(true);
@@ -329,7 +529,7 @@ export class Dolly extends ViewPU {
                     }, Stack);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
-                        Column.debugLine("entry/src/main/ets/view/device/Dolly.ets(134:13)", "entry");
+                        Column.debugLine("entry/src/main/ets/view/device/Dolly.ets(360:13)", "entry");
                         Column.width('100%');
                         Column.height('100%');
                         Column.backdropBlur(12);
@@ -348,7 +548,7 @@ export class Dolly extends ViewPU {
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
-                        Column.debugLine("entry/src/main/ets/view/device/Dolly.ets(135:15)", "entry");
+                        Column.debugLine("entry/src/main/ets/view/device/Dolly.ets(361:15)", "entry");
                         Column.width('90%');
                         Column.height('30%');
                         Column.alignItems(HorizontalAlign.Center);
@@ -356,7 +556,7 @@ export class Dolly extends ViewPU {
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create(this.avatar);
-                        Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(136:17)", "entry");
+                        Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(362:17)", "entry");
                         Context.animation({ duration: 200, curve: Curve.EaseInOut });
                         Image.width(170);
                         Image.height(100);
@@ -373,7 +573,7 @@ export class Dolly extends ViewPU {
                     Column.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create({ space: 20 });
-                        Column.debugLine("entry/src/main/ets/view/device/Dolly.ets(155:15)", "entry");
+                        Column.debugLine("entry/src/main/ets/view/device/Dolly.ets(381:15)", "entry");
                         Column.width('100%');
                         Column.height('70%');
                         Column.alignItems(HorizontalAlign.Center);
@@ -383,7 +583,7 @@ export class Dolly extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //小车名称
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/Dolly.ets(157:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/Dolly.ets(383:17)", "entry");
                         //小车名称
                         Row.width('100%');
                         //小车名称
@@ -393,7 +593,7 @@ export class Dolly extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('名称：');
-                        Text.debugLine("entry/src/main/ets/view/device/Dolly.ets(158:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/Dolly.ets(384:19)", "entry");
                         Text.fontWeight(FontWeight.Bold);
                         Text.fontSize(20);
                         Text.fontColor(Color.White);
@@ -401,7 +601,7 @@ export class Dolly extends ViewPU {
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('小车001');
-                        Text.debugLine("entry/src/main/ets/view/device/Dolly.ets(162:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/Dolly.ets(388:19)", "entry");
                         Text.fontColor(Color.White);
                     }, Text);
                     Text.pop();
@@ -410,7 +610,7 @@ export class Dolly extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //小车运行状态
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/Dolly.ets(170:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/Dolly.ets(396:17)", "entry");
                         //小车运行状态
                         Row.width('100%');
                         //小车运行状态
@@ -420,7 +620,7 @@ export class Dolly extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('状态：');
-                        Text.debugLine("entry/src/main/ets/view/device/Dolly.ets(171:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/Dolly.ets(397:19)", "entry");
                         Text.fontWeight(FontWeight.Bold);
                         Text.fontSize(20);
                         Text.fontColor(Color.White);
@@ -428,13 +628,13 @@ export class Dolly extends ViewPU {
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.data.statusText);
-                        Text.debugLine("entry/src/main/ets/view/device/Dolly.ets(175:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/Dolly.ets(401:19)", "entry");
                         Text.fontColor(Color.White);
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Circle.create();
-                        Circle.debugLine("entry/src/main/ets/view/device/Dolly.ets(177:19)", "entry");
+                        Circle.debugLine("entry/src/main/ets/view/device/Dolly.ets(403:19)", "entry");
                         Circle.margin({ left: 10 });
                         Circle.width(16);
                         Circle.height(16);
@@ -445,7 +645,7 @@ export class Dolly extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //小车负载状态
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/Dolly.ets(188:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/Dolly.ets(414:17)", "entry");
                         //小车负载状态
                         Row.width('100%');
                         //小车负载状态
@@ -455,7 +655,7 @@ export class Dolly extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('负载：');
-                        Text.debugLine("entry/src/main/ets/view/device/Dolly.ets(189:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/Dolly.ets(415:19)", "entry");
                         Text.fontWeight(FontWeight.Bold);
                         Text.fontSize(20);
                         Text.fontColor(Color.White);
@@ -463,7 +663,7 @@ export class Dolly extends ViewPU {
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.data.loadText);
-                        Text.debugLine("entry/src/main/ets/view/device/Dolly.ets(193:19)", "entry");
+                        Text.debugLine("entry/src/main/ets/view/device/Dolly.ets(419:19)", "entry");
                         Text.fontColor(Color.White);
                     }, Text);
                     Text.pop();
@@ -473,7 +673,7 @@ export class Dolly extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Image.create({ "id": 16777228, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                                    Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(196:21)", "entry");
+                                    Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(422:21)", "entry");
                                     Image.width(20);
                                     Image.height(20);
                                     Image.margin({ left: 10 });
@@ -484,7 +684,7 @@ export class Dolly extends ViewPU {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Image.create({ "id": 16777243, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                                    Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(201:21)", "entry");
+                                    Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(427:21)", "entry");
                                     Image.width(20);
                                     Image.height(20);
                                     Image.margin({ left: 10 });
@@ -498,7 +698,7 @@ export class Dolly extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //控制启动按钮
                         Row.create();
-                        Row.debugLine("entry/src/main/ets/view/device/Dolly.ets(212:17)", "entry");
+                        Row.debugLine("entry/src/main/ets/view/device/Dolly.ets(438:17)", "entry");
                         Context.animation({ duration: 150, curve: Curve.EaseOut });
                         //控制启动按钮
                         Row.width('80%');
@@ -534,10 +734,6 @@ export class Dolly extends ViewPU {
                         Row.onHover((isHover: boolean) => {
                             this.isHover = isHover;
                         });
-                        Gesture.create(GesturePriority.Low);
-                        LongPressGesture.create();
-                        LongPressGesture.pop();
-                        Gesture.pop();
                         //控制启动按钮
                         Row.onTouch((event: TouchEvent) => {
                             event.stopPropagation();
@@ -565,11 +761,6 @@ export class Dolly extends ViewPU {
                                             fontColor: Color.Red,
                                             action: () => {
                                                 if (isCurrentlyRunning) {
-                                                    //关闭时先清除原来的定时器
-                                                    if (this.idleTimer !== -1) {
-                                                        clearTimeout(this.idleTimer);
-                                                        this.idleTimer = -1;
-                                                    }
                                                     this.data.statusText = '离线中';
                                                     this.showSystemToast('关闭成功');
                                                     this.addLog('warning', '关闭了小车，停止了对小车的操作。', true);
@@ -594,14 +785,14 @@ export class Dolly extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Image.create({ "id": 16777220, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                                    Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(214:21)", "entry");
+                                    Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(440:21)", "entry");
                                     Image.width(22);
                                     Image.height(22);
                                     Image.fillColor(Color.White);
                                 }, Image);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Text.create('停止');
-                                    Text.debugLine("entry/src/main/ets/view/device/Dolly.ets(216:21)", "entry");
+                                    Text.debugLine("entry/src/main/ets/view/device/Dolly.ets(442:21)", "entry");
                                     Text.fontSize(18);
                                     Text.fontWeight(FontWeight.Bold);
                                     Text.fontColor(Color.White);
@@ -614,14 +805,14 @@ export class Dolly extends ViewPU {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Image.create({ "id": 16777249, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                                    Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(218:21)", "entry");
+                                    Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(444:21)", "entry");
                                     Image.width(24);
                                     Image.height(24);
                                     Image.fillColor(Color.White);
                                 }, Image);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Text.create('启动');
-                                    Text.debugLine("entry/src/main/ets/view/device/Dolly.ets(220:21)", "entry");
+                                    Text.debugLine("entry/src/main/ets/view/device/Dolly.ets(446:21)", "entry");
                                     Text.fontSize(18);
                                     Text.fontWeight(FontWeight.Bold);
                                     Text.fontColor(Color.White);
@@ -639,68 +830,27 @@ export class Dolly extends ViewPU {
                     Stack.pop();
                 });
             }
+            // 小车控制卡片
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        //地图信息卡片
-                        Stack.create();
-                        Stack.debugLine("entry/src/main/ets/view/device/Dolly.ets(327:11)", "entry");
-                        //地图信息卡片
-                        Stack.width('60%');
-                        //地图信息卡片
-                        Stack.height('100%');
-                        //地图信息卡片
-                        Stack.clip(true);
-                        //地图信息卡片
-                        Stack.offset({ x: this.isInfoCardVisible ? 0 : '-120%' });
-                        //地图信息卡片
-                        Stack.opacity(this.isInfoCardVisible ? 1 : 0);
-                    }, Stack);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Column.create();
-                        Column.debugLine("entry/src/main/ets/view/device/Dolly.ets(328:13)", "entry");
-                        Column.width('100%');
-                        Column.height('100%');
-                        Column.justifyContent(FlexAlign.Center);
-                        Column.alignItems(HorizontalAlign.Center);
-                        Column.backdropBlur(12);
-                        Column.backgroundColor('rgba(10, 10, 15, 0.3)');
-                        Column.borderRadius(16);
-                        Column.border({
-                            width: 1.5,
-                            color: 'rgba(255, 255, 255, 0.15)'
-                        });
-                        Column.shadow({
-                            radius: 30,
-                            color: 'rgba(173, 216, 230, 0.2)',
-                            offsetX: 0,
-                            offsetY: 0
-                        });
-                    }, Column);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create('小车地图面板');
-                        Text.debugLine("entry/src/main/ets/view/device/Dolly.ets(329:15)", "entry");
-                        Text.fontColor(Color.White);
-                        Text.fontSize(24);
-                    }, Text);
-                    Text.pop();
-                    Column.pop();
-                    //地图信息卡片
-                    Stack.pop();
                 });
             }
         }, If);
         If.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // 小车控制卡片——遥感控制器
+            // 小车控制卡片
             Stack.create({ alignContent: Alignment.TopEnd });
-            Stack.debugLine("entry/src/main/ets/view/device/Dolly.ets(360:9)", "entry");
-            // 小车控制卡片——遥感控制器
+            Stack.debugLine("entry/src/main/ets/view/device/Dolly.ets(546:9)", "entry");
+            // 小车控制卡片
             Stack.width(this.controlCardWidth);
+            // 小车控制卡片
+            Stack.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
+            // 小车控制卡片
+            Stack.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.4);
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.debugLine("entry/src/main/ets/view/device/Dolly.ets(361:11)", "entry");
+            Column.debugLine("entry/src/main/ets/view/device/Dolly.ets(547:11)", "entry");
             Context.animation(null);
             Column.justifyContent(FlexAlign.Center);
             Column.alignItems(HorizontalAlign.Center);
@@ -722,109 +872,15 @@ export class Dolly extends ViewPU {
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             __Common__.create();
-            __Common__.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
-            __Common__.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.5);
+            __Common__.position({ top: 10, right: 20 });
         }, __Common__);
         {
             this.observeComponentCreation2((elmtId, isInitialRender) => {
                 if (isInitialRender) {
                     let componentCall = new 
-                    // 在这里调用新的遥感组件
-                    RockerControl(this, {
-                        //传入尺寸
-                        rockerBaseSize: this.rockerBaseSize,
-                        rockerHandleSize: this.rockerHandleSize,
-                        // 传递一个回调函数，当遥感方向改变时，会调用这个函数
-                        // 并将新的方向作为参数传进来
-                        onDirectionChange: (direction: string) => {
-                            // 更新父组件的状态
-                            this.rockerDirection = direction;
-                            // 你可以在这里根据direction发送具体的命令
-                            //只要遥感有任何操作，就清除旧的“返回空闲状态”的定时器
-                            if (this.idleTimer !== -1) {
-                                clearTimeout(this.idleTimer);
-                                this.idleTimer = -1;
-                            }
-                            if (direction !== 'stop') {
-                                // 并且当前状态是“空闲中”，则立即切换为“运行中”
-                                if (this.data.statusText === '空闲中') {
-                                    this.data.statusText = '运行中';
-                                }
-                            }
-                            //如果遥感已回到中心 (方向是 'stop')
-                            else {
-                                // 并且当前状态是“运行中”，则启动一个30秒的倒计时
-                                if (this.data.statusText === '运行中') {
-                                    this.idleTimer = setTimeout(() => {
-                                        // 30秒后，如果状态仍然是“运行中”，则切换回“空闲中”
-                                        if (this.data.statusText === '运行中') {
-                                            this.data.statusText = '空闲中';
-                                        }
-                                    }, 10000); // 30000毫秒 = 30秒
-                                }
-                            }
-                        }
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 363, col: 13 });
-                    ViewPU.create(componentCall);
-                    let paramsLambda = () => {
-                        return {
-                            //传入尺寸
-                            rockerBaseSize: this.rockerBaseSize,
-                            rockerHandleSize: this.rockerHandleSize,
-                            // 传递一个回调函数，当遥感方向改变时，会调用这个函数
-                            // 并将新的方向作为参数传进来
-                            onDirectionChange: (direction: string) => {
-                                // 更新父组件的状态
-                                this.rockerDirection = direction;
-                                // 你可以在这里根据direction发送具体的命令
-                                //只要遥感有任何操作，就清除旧的“返回空闲状态”的定时器
-                                if (this.idleTimer !== -1) {
-                                    clearTimeout(this.idleTimer);
-                                    this.idleTimer = -1;
-                                }
-                                if (direction !== 'stop') {
-                                    // 并且当前状态是“空闲中”，则立即切换为“运行中”
-                                    if (this.data.statusText === '空闲中') {
-                                        this.data.statusText = '运行中';
-                                    }
-                                }
-                                //如果遥感已回到中心 (方向是 'stop')
-                                else {
-                                    // 并且当前状态是“运行中”，则启动一个30秒的倒计时
-                                    if (this.data.statusText === '运行中') {
-                                        this.idleTimer = setTimeout(() => {
-                                            // 30秒后，如果状态仍然是“运行中”，则切换回“空闲中”
-                                            if (this.data.statusText === '运行中') {
-                                                this.data.statusText = '空闲中';
-                                            }
-                                        }, 10000); // 30000毫秒 = 30秒
-                                    }
-                                }
-                            }
-                        };
-                    };
-                    componentCall.paramsGenerator_ = paramsLambda;
-                }
-                else {
-                    this.updateStateVarsOfChildByElmtId(elmtId, {
-                        //传入尺寸
-                        rockerBaseSize: this.rockerBaseSize,
-                        rockerHandleSize: this.rockerHandleSize
-                    });
-                }
-            }, { name: "RockerControl" });
-        }
-        __Common__.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            __Common__.create();
-            __Common__.position({ top: 10, right: 20 });
-            __Common__.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
-            __Common__.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.4);
-        }, __Common__);
-        {
-            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                if (isInitialRender) {
-                    let componentCall = new ActionButton(this, {
+                    //地图位置
+                    //全屏按钮
+                    ActionButton(this, {
                         icon: { "id": 16777263, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         click: () => {
                             Context.animateTo({
@@ -833,23 +889,19 @@ export class Dolly extends ViewPU {
                             }, () => {
                                 // 1. 先更新状态
                                 this.isInfoCardVisible = !this.isInfoCardVisible;
-                                // 2. 根据更新后的状态，修改所有需要动画的属性
+                                //根据更新后的状态，修改所有需要动画的属性
                                 // 所有这些变更都会被这一个 animateTo 捕获并同时应用动画
                                 if (this.isInfoCardVisible) {
                                     // 折叠视图的状态
-                                    this.controlCardWidth = '35%';
-                                    this.rockerBaseSize = 180;
-                                    this.rockerHandleSize = 50;
+                                    this.controlCardWidth = '100%';
                                 }
                                 else {
                                     // 展开视图的状态
                                     this.controlCardWidth = '65%';
-                                    this.rockerBaseSize = 250;
-                                    this.rockerHandleSize = 80;
                                 }
                             });
                         }
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 404, col: 13 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 552, col: 13 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -861,19 +913,15 @@ export class Dolly extends ViewPU {
                                 }, () => {
                                     // 1. 先更新状态
                                     this.isInfoCardVisible = !this.isInfoCardVisible;
-                                    // 2. 根据更新后的状态，修改所有需要动画的属性
+                                    //根据更新后的状态，修改所有需要动画的属性
                                     // 所有这些变更都会被这一个 animateTo 捕获并同时应用动画
                                     if (this.isInfoCardVisible) {
                                         // 折叠视图的状态
-                                        this.controlCardWidth = '35%';
-                                        this.rockerBaseSize = 180;
-                                        this.rockerHandleSize = 50;
+                                        this.controlCardWidth = '100%';
                                     }
                                     else {
                                         // 展开视图的状态
                                         this.controlCardWidth = '65%';
-                                        this.rockerBaseSize = 250;
-                                        this.rockerHandleSize = 80;
                                     }
                                 });
                             }
@@ -882,13 +930,184 @@ export class Dolly extends ViewPU {
                     componentCall.paramsGenerator_ = paramsLambda;
                 }
                 else {
-                    this.updateStateVarsOfChildByElmtId(elmtId, {});
+                    this.updateStateVarsOfChildByElmtId(elmtId, {
+                        icon: { "id": 16777263, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }
+                    });
                 }
             }, { name: "ActionButton" });
         }
         __Common__.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            //方向控制按钮
+            Row.create();
+            Row.debugLine("entry/src/main/ets/view/device/Dolly.ets(576:13)", "entry");
+            //方向控制按钮
+            Row.width('100%');
+            //方向控制按钮
+            Row.padding({ left: 20, right: 20 });
+            //方向控制按钮
+            Row.position({ bottom: 10 });
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // 左下角按钮组 (向左, 向右)
+            Row.create({ space: 20 });
+            Row.debugLine("entry/src/main/ets/view/device/Dolly.ets(578:15)", "entry");
+        }, Row);
+        {
+            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                if (isInitialRender) {
+                    let componentCall = new 
+                    //向左按钮
+                    DirectionalButton(this, {
+                        icon: { "id": 16777259, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        onPress: () => { this.startMove('向左'); },
+                        onRelease: () => { this.stopMove('向左'); }
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 580, col: 17 });
+                    ViewPU.create(componentCall);
+                    let paramsLambda = () => {
+                        return {
+                            icon: { "id": 16777259, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            onPress: () => { this.startMove('向左'); },
+                            onRelease: () => { this.stopMove('向左'); }
+                        };
+                    };
+                    componentCall.paramsGenerator_ = paramsLambda;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(elmtId, {
+                        icon: { "id": 16777259, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }
+                    });
+                }
+            }, { name: "DirectionalButton" });
+        }
+        {
+            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                if (isInitialRender) {
+                    let componentCall = new 
+                    //向右按钮
+                    DirectionalButton(this, {
+                        icon: { "id": 16777260, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        onPress: () => { this.startMove('向右'); },
+                        onRelease: () => { this.stopMove('向右'); }
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 587, col: 17 });
+                    ViewPU.create(componentCall);
+                    let paramsLambda = () => {
+                        return {
+                            icon: { "id": 16777260, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            onPress: () => { this.startMove('向右'); },
+                            onRelease: () => { this.stopMove('向右'); }
+                        };
+                    };
+                    componentCall.paramsGenerator_ = paramsLambda;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(elmtId, {
+                        icon: { "id": 16777260, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }
+                    });
+                }
+            }, { name: "DirectionalButton" });
+        }
+        // 左下角按钮组 (向左, 向右)
+        Row.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // 间隔，将左右按钮组推到两边
+            Blank.create();
+            Blank.debugLine("entry/src/main/ets/view/device/Dolly.ets(595:15)", "entry");
+        }, Blank);
+        // 间隔，将左右按钮组推到两边
+        Blank.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // 右下角按钮组 (向前, 向后)
+            Column.create({ space: 20 });
+            Column.debugLine("entry/src/main/ets/view/device/Dolly.ets(598:15)", "entry");
+        }, Column);
+        {
+            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                if (isInitialRender) {
+                    let componentCall = new 
+                    //向前按钮
+                    DirectionalButton(this, {
+                        icon: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        onPress: () => { this.startMove('向前'); },
+                        onRelease: () => { this.stopMove('向前'); }
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 600, col: 17 });
+                    ViewPU.create(componentCall);
+                    let paramsLambda = () => {
+                        return {
+                            icon: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            onPress: () => { this.startMove('向前'); },
+                            onRelease: () => { this.stopMove('向前'); }
+                        };
+                    };
+                    componentCall.paramsGenerator_ = paramsLambda;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(elmtId, {
+                        icon: { "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }
+                    });
+                }
+            }, { name: "DirectionalButton" });
+        }
+        {
+            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                if (isInitialRender) {
+                    let componentCall = new 
+                    //急停按钮
+                    DirectionalButton(this, {
+                        icon: { "id": 16777278, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        onPress: () => { this.startMove('停止'); },
+                        onRelease: () => { this.stopMove('停止'); }
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 607, col: 17 });
+                    ViewPU.create(componentCall);
+                    let paramsLambda = () => {
+                        return {
+                            icon: { "id": 16777278, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            onPress: () => { this.startMove('停止'); },
+                            onRelease: () => { this.stopMove('停止'); }
+                        };
+                    };
+                    componentCall.paramsGenerator_ = paramsLambda;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(elmtId, {
+                        icon: { "id": 16777278, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }
+                    });
+                }
+            }, { name: "DirectionalButton" });
+        }
+        {
+            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                if (isInitialRender) {
+                    let componentCall = new 
+                    //向后按钮
+                    DirectionalButton(this, {
+                        icon: { "id": 16777272, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        onPress: () => { this.startMove('向后'); },
+                        onRelease: () => { this.stopMove('向后'); }
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 614, col: 17 });
+                    ViewPU.create(componentCall);
+                    let paramsLambda = () => {
+                        return {
+                            icon: { "id": 16777272, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            onPress: () => { this.startMove('向后'); },
+                            onRelease: () => { this.stopMove('向后'); }
+                        };
+                    };
+                    componentCall.paramsGenerator_ = paramsLambda;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(elmtId, {
+                        icon: { "id": 16777272, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }
+                    });
+                }
+            }, { name: "DirectionalButton" });
+        }
+        // 右下角按钮组 (向前, 向后)
         Column.pop();
-        // 小车控制卡片——遥感控制器
+        //方向控制按钮
+        Row.pop();
+        Column.pop();
+        // 小车控制卡片
         Stack.pop();
         Row.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -910,220 +1129,19 @@ export class Dolly extends ViewPU {
         this.updateDirtyElements();
     }
 }
-class RockerControl extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
-            this.paramsGenerator_ = paramsLambda;
-        }
-        this.__handleX = new ObservedPropertySimplePU(0, this, "handleX");
-        this.__handleY = new ObservedPropertySimplePU(0, this, "handleY");
-        this.onDirectionChange = () => { };
-        this.__rockerBaseSize = new SynchedPropertySimpleOneWayPU(params.rockerBaseSize, this, "rockerBaseSize");
-        this.__rockerHandleSize = new SynchedPropertySimpleOneWayPU(params.rockerHandleSize, this, "rockerHandleSize");
-        this.setInitiallyProvidedValue(params);
-        this.finalizeConstruction();
-    }
-    setInitiallyProvidedValue(params: RockerControl_Params) {
-        if (params.handleX !== undefined) {
-            this.handleX = params.handleX;
-        }
-        if (params.handleY !== undefined) {
-            this.handleY = params.handleY;
-        }
-        if (params.onDirectionChange !== undefined) {
-            this.onDirectionChange = params.onDirectionChange;
-        }
-        if (params.rockerBaseSize === undefined) {
-            this.__rockerBaseSize.set(250);
-        }
-        if (params.rockerHandleSize === undefined) {
-            this.__rockerHandleSize.set(80);
-        }
-    }
-    updateStateVars(params: RockerControl_Params) {
-        this.__rockerBaseSize.reset(params.rockerBaseSize);
-        this.__rockerHandleSize.reset(params.rockerHandleSize);
-    }
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.__handleX.purgeDependencyOnElmtId(rmElmtId);
-        this.__handleY.purgeDependencyOnElmtId(rmElmtId);
-        this.__rockerBaseSize.purgeDependencyOnElmtId(rmElmtId);
-        this.__rockerHandleSize.purgeDependencyOnElmtId(rmElmtId);
-    }
-    aboutToBeDeleted() {
-        this.__handleX.aboutToBeDeleted();
-        this.__handleY.aboutToBeDeleted();
-        this.__rockerBaseSize.aboutToBeDeleted();
-        this.__rockerHandleSize.aboutToBeDeleted();
-        SubscriberManager.Get().delete(this.id__());
-        this.aboutToBeDeletedInternal();
-    }
-    private __handleX: ObservedPropertySimplePU<number>;
-    get handleX() {
-        return this.__handleX.get();
-    }
-    set handleX(newValue: number) {
-        this.__handleX.set(newValue);
-    }
-    private __handleY: ObservedPropertySimplePU<number>;
-    get handleY() {
-        return this.__handleY.get();
-    }
-    set handleY(newValue: number) {
-        this.__handleY.set(newValue);
-    }
-    private onDirectionChange: (direction: string) => void;
-    private __rockerBaseSize: SynchedPropertySimpleOneWayPU<number>;
-    get rockerBaseSize() {
-        return this.__rockerBaseSize.get();
-    }
-    set rockerBaseSize(newValue: number) {
-        this.__rockerBaseSize.set(newValue);
-    }
-    private __rockerHandleSize: SynchedPropertySimpleOneWayPU<number>;
-    get rockerHandleSize() {
-        return this.__rockerHandleSize.get();
-    }
-    set rockerHandleSize(newValue: number) {
-        this.__rockerHandleSize.set(newValue);
-    }
-    initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Stack.create({ alignContent: Alignment.Center });
-            Stack.debugLine("entry/src/main/ets/view/device/Dolly.ets(486:5)", "entry");
-            Context.animation({ duration: 800, curve: Curve.EaseInOut });
-            Stack.width(this.rockerBaseSize);
-            Stack.height(this.rockerBaseSize);
-            Context.animation(null);
-            Gesture.create(GesturePriority.Low);
-            PanGesture.create();
-            PanGesture.onActionUpdate((event: GestureEvent) => {
-                let x = event.offsetX;
-                let y = event.offsetY;
-                const R = this.rockerBaseSize / 2;
-                const distance = Math.sqrt(x * x + y * y);
-                if (distance > R) {
-                    x = (x / distance) * R;
-                    y = (y / distance) * R;
-                }
-                this.handleX = x;
-                this.handleY = y;
-                this.updateDirection(x, y);
-            });
-            PanGesture.onActionEnd(() => {
-                this.handleX = 0;
-                this.handleY = 0;
-                this.updateDirection(0, 0);
-            });
-            PanGesture.onActionCancel(() => {
-                this.handleX = 0;
-                this.handleY = 0;
-                this.updateDirection(0, 0);
-            });
-            PanGesture.pop();
-            Gesture.pop();
-        }, Stack);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Circle.create();
-            Circle.debugLine("entry/src/main/ets/view/device/Dolly.ets(487:7)", "entry");
-            Context.animation({ duration: 800, curve: Curve.EaseInOut });
-            Circle.width(this.rockerBaseSize);
-            Circle.height(this.rockerBaseSize);
-            Circle.fill('rgba(255, 255, 255, 0.16)');
-            Context.animation(null);
-        }, Circle);
-        this.DirectionIcons.bind(this)();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Circle.create();
-            Circle.debugLine("entry/src/main/ets/view/device/Dolly.ets(490:7)", "entry");
-            Context.animation({
-                duration: 100,
-                curve: Curve.EaseOut,
-                playMode: PlayMode.Normal
-            });
-            Circle.width(this.rockerHandleSize);
-            Circle.height(this.rockerHandleSize);
-            Circle.fill('rgba(255, 255, 255, 0.25)');
-            Circle.offset({ x: this.handleX, y: this.handleY });
-            Context.animation(null);
-        }, Circle);
-        Stack.pop();
-    }
-    updateDirection(x: number, y: number) {
-        const deadZone = this.rockerBaseSize * 0.1;
-        if (Math.abs(x) < deadZone && Math.abs(y) < deadZone) {
-            this.onDirectionChange('stop');
-            return;
-        }
-        const angle = Math.atan2(y, x) * (180 / Math.PI);
-        if (angle > -135 && angle < -45) {
-            this.onDirectionChange('up');
-        }
-        else if (angle > 45 && angle < 135) {
-            this.onDirectionChange('down');
-        }
-        else if (angle > -45 && angle < 45) {
-            this.onDirectionChange('right');
-        }
-        else {
-            this.onDirectionChange('left');
-        }
-    }
-    DirectionIcons(parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Image.create({ "id": 16777271, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-            Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(547:5)", "entry");
-            Image.width(25);
-            Image.height(25);
-            Image.opacity(0.4);
-            Image.offset({ y: -this.rockerBaseSize / 2 + 20 });
-        }, Image);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Image.create({ "id": 16777272, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-            Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(548:5)", "entry");
-            Image.width(25);
-            Image.height(25);
-            Image.opacity(0.4);
-            Image.offset({ y: this.rockerBaseSize / 2 - 20 });
-        }, Image);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Image.create({ "id": 16777259, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-            Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(549:5)", "entry");
-            Image.width(25);
-            Image.height(25);
-            Image.opacity(0.4);
-            Image.offset({ x: -this.rockerBaseSize / 2 + 20 });
-        }, Image);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Image.create({ "id": 16777260, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-            Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(550:5)", "entry");
-            Image.width(25);
-            Image.height(25);
-            Image.opacity(0.4);
-            Image.offset({ x: this.rockerBaseSize / 2 - 20 });
-        }, Image);
-    }
-    rerender() {
-        this.updateDirtyElements();
-    }
-}
 class ActionButton extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
         if (typeof paramsLambda === "function") {
             this.paramsGenerator_ = paramsLambda;
         }
-        this.icon = undefined;
-        this.click = undefined;
+        this.__icon = new SynchedPropertyObjectOneWayPU(params.icon, this, "icon");
+        this.click = () => { };
         this.__isPressed = new ObservedPropertySimplePU(false, this, "isPressed");
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params: ActionButton_Params) {
-        if (params.icon !== undefined) {
-            this.icon = params.icon;
-        }
         if (params.click !== undefined) {
             this.click = params.click;
         }
@@ -1132,16 +1150,25 @@ class ActionButton extends ViewPU {
         }
     }
     updateStateVars(params: ActionButton_Params) {
+        this.__icon.reset(params.icon);
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__icon.purgeDependencyOnElmtId(rmElmtId);
         this.__isPressed.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
+        this.__icon.aboutToBeDeleted();
         this.__isPressed.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-    private icon: Resource;
+    private __icon: SynchedPropertySimpleOneWayPU<Resource>;
+    get icon() {
+        return this.__icon.get();
+    }
+    set icon(newValue: Resource) {
+        this.__icon.set(newValue);
+    }
     private click: () => void;
     private __isPressed: ObservedPropertySimplePU<boolean>;
     get isPressed() {
@@ -1153,7 +1180,7 @@ class ActionButton extends ViewPU {
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
-            Row.debugLine("entry/src/main/ets/view/device/Dolly.ets(562:5)", "entry");
+            Row.debugLine("entry/src/main/ets/view/device/Dolly.ets(674:5)", "entry");
             Context.animation({ duration: 150, curve: Curve.EaseOut });
             Row.width(44);
             Row.height(44);
@@ -1178,9 +1205,126 @@ class ActionButton extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.icon);
-            Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(563:7)", "entry");
+            Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(675:7)", "entry");
             Image.width(22);
             Image.height(22);
+            Image.fillColor(Color.White);
+        }, Image);
+        Row.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+class DirectionalButton extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.__icon = new SynchedPropertyObjectOneWayPU(params.icon, this, "icon");
+        this.onPress = () => { };
+        this.onRelease = () => { };
+        this.__isPressed = new ObservedPropertySimplePU(false, this, "isPressed");
+        this.setInitiallyProvidedValue(params);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params: DirectionalButton_Params) {
+        if (params.onPress !== undefined) {
+            this.onPress = params.onPress;
+        }
+        if (params.onRelease !== undefined) {
+            this.onRelease = params.onRelease;
+        }
+        if (params.isPressed !== undefined) {
+            this.isPressed = params.isPressed;
+        }
+    }
+    updateStateVars(params: DirectionalButton_Params) {
+        this.__icon.reset(params.icon);
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__icon.purgeDependencyOnElmtId(rmElmtId);
+        this.__isPressed.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.__icon.aboutToBeDeleted();
+        this.__isPressed.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    private __icon: SynchedPropertySimpleOneWayPU<Resource>;
+    get icon() {
+        return this.__icon.get();
+    }
+    set icon(newValue: Resource) {
+        this.__icon.set(newValue);
+    }
+    private onPress: () => void;
+    private onRelease: () => void;
+    private __isPressed: ObservedPropertySimplePU<boolean>;
+    get isPressed() {
+        return this.__isPressed.get();
+    }
+    set isPressed(newValue: boolean) {
+        this.__isPressed.set(newValue);
+    }
+    //用于根据按压状态生成不同阴影的辅助方法
+    private getShadow(): ShadowOptions {
+        if (this.isPressed) {
+            // 按下时的阴影：更小、更贴近，模拟“按下去”的效果
+            return {
+                radius: 8,
+                color: 'rgba(0, 0, 0, 0.4)',
+                offsetX: 2,
+                offsetY: 2
+            };
+        }
+        else {
+            // 默认的悬浮阴影：更宽、更深，产生立体感
+            return {
+                radius: 12,
+                color: 'rgba(0, 0, 0, 0.35)',
+                offsetX: 0,
+                offsetY: 5
+            };
+        }
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Row.create();
+            Row.debugLine("entry/src/main/ets/view/device/Dolly.ets(734:5)", "entry");
+            Context.animation({ curve: Curve.EaseOut, duration: 150 });
+            Row.width(70);
+            Row.height(70);
+            Row.borderRadius(16);
+            Row.justifyContent(FlexAlign.Center);
+            Row.backgroundColor('rgba(45, 50, 65, 0.45)');
+            Row.backdropBlur(12);
+            Row.border({
+                width: 1.5,
+                color: 'rgba(255, 255, 255, 0.2)'
+            });
+            Row.shadow(this.getShadow());
+            Row.scale(this.isPressed ? { x: 0.9, y: 0.9 } : { x: 1.0, y: 1.0 });
+            Context.animation(null);
+            Row.onTouch((event: TouchEvent) => {
+                event.stopPropagation();
+                if (event.type === TouchType.Down) {
+                    this.isPressed = true;
+                    this.onPress();
+                }
+                if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+                    this.isPressed = false;
+                    this.onRelease();
+                }
+            });
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Image.create(this.icon);
+            Image.debugLine("entry/src/main/ets/view/device/Dolly.ets(735:7)", "entry");
+            Image.width(30);
+            Image.height(30);
             Image.fillColor(Color.White);
         }, Image);
         Row.pop();

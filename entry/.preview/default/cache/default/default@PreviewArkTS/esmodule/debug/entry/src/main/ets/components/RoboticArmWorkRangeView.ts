@@ -6,16 +6,13 @@ interface RoboticArmWorkRangeView_Params {
     centerX?: number;
     centerY?: number;
     radius?: number;
-    currentPos?: Point;
-    targetPos?: Point;
+    data?: RobotArmState;
+    //控制空闲中和运行中状态
+    onActivate?: () => void;
     displayCurrentPos?: Point;
     displayTargetPos?: Point;
 }
-// 定义一个坐标点类型
-interface Point {
-    x: number;
-    y: number;
-}
+import type { Point, RobotArmState } from '.././model/RobotArmState';
 export class RoboticArmWorkRangeView extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -24,10 +21,10 @@ export class RoboticArmWorkRangeView extends ViewPU {
         }
         this.context = new CanvasRenderingContext2D();
         this.centerX = 450;
-        this.centerY = 300;
+        this.centerY = 210;
         this.radius = 180;
-        this.__currentPos = new ObservedPropertyObjectPU({ x: 0, y: 0 }, this, "currentPos");
-        this.__targetPos = new ObservedPropertyObjectPU({ x: 0, y: 0 }, this, "targetPos");
+        this.__data = new SynchedPropertyObjectTwoWayPU(params.data, this, "data");
+        this.onActivate = () => { };
         this.__displayCurrentPos = new ObservedPropertyObjectPU({ x: 0, y: 0 }, this, "displayCurrentPos");
         this.__displayTargetPos = new ObservedPropertyObjectPU({ x: 0, y: 0 }, this, "displayTargetPos");
         this.setInitiallyProvidedValue(params);
@@ -48,11 +45,8 @@ export class RoboticArmWorkRangeView extends ViewPU {
         if (params.radius !== undefined) {
             this.radius = params.radius;
         }
-        if (params.currentPos !== undefined) {
-            this.currentPos = params.currentPos;
-        }
-        if (params.targetPos !== undefined) {
-            this.targetPos = params.targetPos;
+        if (params.onActivate !== undefined) {
+            this.onActivate = params.onActivate;
         }
         if (params.displayCurrentPos !== undefined) {
             this.displayCurrentPos = params.displayCurrentPos;
@@ -64,14 +58,12 @@ export class RoboticArmWorkRangeView extends ViewPU {
     updateStateVars(params: RoboticArmWorkRangeView_Params) {
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.__currentPos.purgeDependencyOnElmtId(rmElmtId);
-        this.__targetPos.purgeDependencyOnElmtId(rmElmtId);
+        this.__data.purgeDependencyOnElmtId(rmElmtId);
         this.__displayCurrentPos.purgeDependencyOnElmtId(rmElmtId);
         this.__displayTargetPos.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
-        this.__currentPos.aboutToBeDeleted();
-        this.__targetPos.aboutToBeDeleted();
+        this.__data.aboutToBeDeleted();
         this.__displayCurrentPos.aboutToBeDeleted();
         this.__displayTargetPos.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
@@ -84,21 +76,16 @@ export class RoboticArmWorkRangeView extends ViewPU {
     private readonly centerY: number;
     // 量角器主半径 (单位: vp)
     private readonly radius: number;
-    //最终目标位置状态：这些变量存储点的最终位置，在点击时立即更新。
-    private __currentPos: ObservedPropertyObjectPU<Point>;
-    get currentPos() {
-        return this.__currentPos.get();
+    //提升状态信息
+    private __data: SynchedPropertySimpleOneWayPU<RobotArmState>;
+    get data() {
+        return this.__data.get();
     }
-    set currentPos(newValue: Point) {
-        this.__currentPos.set(newValue);
+    set data(newValue: RobotArmState) {
+        this.__data.set(newValue);
     }
-    private __targetPos: ObservedPropertyObjectPU<Point>;
-    get targetPos() {
-        return this.__targetPos.get();
-    }
-    set targetPos(newValue: Point) {
-        this.__targetPos.set(newValue);
-    }
+    //控制空闲中和运行中状态
+    private onActivate: () => void;
     //动画显示位置状态：这些变量用于在动画过程中实时更新并绘制在画布上。
     // @Watch 会监控它们的变化，并在每一帧触发 redraw。
     private __displayCurrentPos: ObservedPropertyObjectPU<Point>;
@@ -114,6 +101,37 @@ export class RoboticArmWorkRangeView extends ViewPU {
     }
     set displayTargetPos(newValue: Point) {
         this.__displayTargetPos.set(newValue);
+    }
+    aboutToUpdate() {
+        this.syncPositions();
+    }
+    //将同步逻辑提取到一个独立的函数中，供 aboutToAppear 和 aboutToUpdate 调用。
+    private syncPositions() {
+        const initialCurrentPhysical = this.dataToPhysical(this.data.currentPos);
+        const initialTargetPhysical = this.dataToPhysical(this.data.targetPos);
+        // 检查一下，只有在物理坐标确实发生变化时才更新，避免不必要的UI刷新循环
+        if (this.displayCurrentPos.x !== initialCurrentPhysical.x || this.displayCurrentPos.y !== initialCurrentPhysical.y) {
+            this.displayCurrentPos = initialCurrentPhysical;
+        }
+        if (this.displayTargetPos.x !== initialTargetPhysical.x || this.displayTargetPos.y !== initialTargetPhysical.y) {
+            this.displayTargetPos = initialTargetPhysical;
+        }
+    }
+    //初始化时重新绘制点的坐标
+    aboutToAppear() {
+        // 将 this.data 中存储的【数据坐标】转换为【物理坐标】
+        const initialCurrentPhysical = this.dataToPhysical(this.data.currentPos);
+        const initialTargetPhysical = this.dataToPhysical(this.data.targetPos);
+        //直接设置用于绘图的局部状态，让点在正确的位置上首次亮相
+        this.displayCurrentPos = initialCurrentPhysical;
+        this.displayTargetPos = initialTargetPhysical;
+    }
+    //用于初始化时根据物理点位来计算真是需要的点位
+    private dataToPhysical(dataCoords: Point): Point {
+        const maxDataValue = 250;
+        const physicalX = dataCoords.x * (this.radius / maxDataValue);
+        const physicalY = dataCoords.y * (this.radius / maxDataValue);
+        return { x: physicalX, y: physicalY };
     }
     //将逻辑坐标 (中心为0,0) 转换为画布坐标
     private logicalToCanvas(logicalCoords: Point): Point {
@@ -267,44 +285,198 @@ export class RoboticArmWorkRangeView extends ViewPU {
         this.context.fill();
         this.context.stroke();
     }
-    // 组件UI构建与交互
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(197:5)", "entry");
+            Column.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(231:5)", "entry");
             Column.width('100%');
             Column.height('100%');
             Column.justifyContent(FlexAlign.Center);
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Stack.create({ alignContent: Alignment.Start });
+            Stack.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(232:7)", "entry");
+            Stack.width('100%');
+            Stack.height(80);
+        }, Stack);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            //使用 Path 绘制 L 形的边框
+            Path.create();
+            Path.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(234:9)", "entry");
+            //使用 Path 绘制 L 形的边框
+            Path.width(60);
+            //使用 Path 绘制 L 形的边框
+            Path.height(60);
+            //使用 Path 绘制 L 形的边框
+            Path.commands('M 5 5 L 5 55 L 55 55');
+            //使用 Path 绘制 L 形的边框
+            Path.stroke(Color.White);
+            //使用 Path 绘制 L 形的边框
+            Path.strokeWidth(2);
+        }, Path);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            //放置 X 轴的文字
+            // 这部分代码也保持不变，因为它的坐标是相对于Stack左上角的
+            Text.create('X /mm');
+            Text.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(243:9)", "entry");
+            //放置 X 轴的文字
+            // 这部分代码也保持不变，因为它的坐标是相对于Stack左上角的
+            Text.fontSize(12);
+            //放置 X 轴的文字
+            // 这部分代码也保持不变，因为它的坐标是相对于Stack左上角的
+            Text.fontColor(Color.White);
+            //放置 X 轴的文字
+            // 这部分代码也保持不变，因为它的坐标是相对于Stack左上角的
+            Text.position({ x: 0, y: -5 });
+        }, Text);
+        //放置 X 轴的文字
+        // 这部分代码也保持不变，因为它的坐标是相对于Stack左上角的
+        Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            //放置 Y 轴的文字
+            // 这部分代码也保持不变
+            Text.create('Y /mm');
+            Text.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(250:9)", "entry");
+            //放置 Y 轴的文字
+            // 这部分代码也保持不变
+            Text.fontSize(12);
+            //放置 Y 轴的文字
+            // 这部分代码也保持不变
+            Text.fontColor(Color.White);
+            //放置 Y 轴的文字
+            // 这部分代码也保持不变
+            Text.position({ x: 45, y: 40 });
+        }, Text);
+        //放置 Y 轴的文字
+        // 这部分代码也保持不变
+        Text.pop();
+        Stack.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Canvas.create(this.context);
-            Canvas.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(198:7)", "entry");
+            Canvas.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(258:7)", "entry");
             Canvas.width('900vp');
-            Canvas.height('600vp');
+            Canvas.height('290vp');
             Canvas.onReady(() => {
                 this.redraw();
             });
             Canvas.onClick((event: ClickEvent) => {
-                // 将点击的画布坐标转换为逻辑坐标
-                const clickedLogicalX = this.centerY - event.y;
-                const clickedLogicalY = event.x - this.centerX;
-                //确定并立即更新最终的目标位置
-                //    - 新的 "当前点" 应该是旧的 "目标点"
-                //    - 新的 "目标点" 应该是刚点击的位置
-                this.currentPos = this.targetPos;
-                this.targetPos = { x: clickedLogicalX, y: clickedLogicalY };
-                //使用 animateTo 驱动 "显示位置" 的变化，产生动画
-                Context.animateTo({
-                    duration: 400,
-                    curve: Curve.EaseInOut
-                }, () => {
-                    // 让 display...Pos 从当前值过渡到新的最终值
-                    this.displayCurrentPos = this.currentPos;
-                    this.displayTargetPos = this.targetPos;
-                });
+                //计算【物理】逻辑坐标 (相对于中心点)
+                const clickedPhysicalX = this.centerY - event.y;
+                const clickedPhysicalY = event.x - this.centerX;
+                //边界值计算
+                const distance = Math.sqrt(clickedPhysicalX ** 2 + clickedPhysicalY ** 2);
+                //使用正确的参数计算角度
+                const angleRad = Math.atan2(clickedPhysicalX, clickedPhysicalY);
+                let angleDeg = angleRad * 180 / Math.PI;
+                //将角度归一化到 [0, 360) 范围，以便于比较
+                if (angleDeg < 0) {
+                    angleDeg += 360;
+                }
+                //在归一化后的角度上进行边界检查
+                const lowerBound = 345; // 相当于 -15°
+                const upperBound = 195;
+                if (distance <= this.radius && (angleDeg >= lowerBound || angleDeg <= upperBound)) {
+                    this.onActivate();
+                    //如果在范围内，执行原有逻辑
+                    //计算正确的【数据坐标】用于存储
+                    const maxDataValue = 250;
+                    const scaledForDisplayX = clickedPhysicalX * (maxDataValue / this.radius);
+                    const scaledForDisplayY = clickedPhysicalY * (maxDataValue / this.radius);
+                    //更新数据模型，必须使用【数据坐标】
+                    this.data.currentPos = this.data.targetPos;
+                    this.data.targetPos = { x: scaledForDisplayX, y: scaledForDisplayY };
+                    //触发UI动画，必须使用【物理坐标】
+                    Context.animateTo({
+                        duration: 400,
+                        curve: Curve.EaseInOut
+                    }, () => {
+                        this.displayCurrentPos = this.displayTargetPos;
+                        this.displayTargetPos = { x: clickedPhysicalX, y: clickedPhysicalY };
+                    });
+                }
+                else {
+                    // 超出有效范围，不执行任何操作。
+                }
             });
         }, Canvas);
         Canvas.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            //修正下方坐标显示，使其直接从 this.data 读取
+            Row.create({ space: 15 });
+            Row.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(314:7)", "entry");
+            //修正下方坐标显示，使其直接从 this.data 读取
+            Row.margin({ top: 20 });
+            //修正下方坐标显示，使其直接从 this.data 读取
+            Row.width('100%');
+            //修正下方坐标显示，使其直接从 this.data 读取
+            Row.borderRadius(8);
+            //修正下方坐标显示，使其直接从 this.data 读取
+            Row.justifyContent(FlexAlign.Center);
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Row.create({ space: 5 });
+            Row.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(315:9)", "entry");
+            Row.alignItems(VerticalAlign.Center);
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Circle.create({ width: 13, height: 13 });
+            Circle.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(316:11)", "entry");
+            Circle.fill('#088107');
+        }, Circle);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('当前坐标:');
+            Text.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(317:11)", "entry");
+            Text.fontSize(12);
+            Text.fontColor('#E9ECEF');
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            //从 this.data.currentPos 读取
+            Text.create(`(x: ${this.data.currentPos.x.toFixed(2)}, y: ${this.data.currentPos.y.toFixed(2)})`);
+            Text.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(321:11)", "entry");
+            //从 this.data.currentPos 读取
+            Text.fontSize(12);
+            //从 this.data.currentPos 读取
+            Text.fontWeight(FontWeight.Bold);
+            //从 this.data.currentPos 读取
+            Text.fontColor('#F8F9FA');
+        }, Text);
+        //从 this.data.currentPos 读取
+        Text.pop();
+        Row.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Row.create({ space: 5 });
+            Row.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(328:9)", "entry");
+            Row.alignItems(VerticalAlign.Center);
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Circle.create({ width: 13, height: 13 });
+            Circle.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(329:11)", "entry");
+            Circle.fill('#7F007F');
+        }, Circle);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('目标坐标:');
+            Text.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(330:11)", "entry");
+            Text.fontSize(12);
+            Text.fontColor('#E9ECEF');
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            //从 this.data.targetPos 读取
+            Text.create(`(x: ${this.data.targetPos.x.toFixed(2)}, y: ${this.data.targetPos.y.toFixed(2)})`);
+            Text.debugLine("entry/src/main/ets/components/RoboticArmWorkRangeView.ets(334:11)", "entry");
+            //从 this.data.targetPos 读取
+            Text.fontSize(12);
+            //从 this.data.targetPos 读取
+            Text.fontWeight(FontWeight.Bold);
+            //从 this.data.targetPos 读取
+            Text.fontColor('#F8F9FA');
+        }, Text);
+        //从 this.data.targetPos 读取
+        Text.pop();
+        Row.pop();
+        //修正下方坐标显示，使其直接从 this.data 读取
+        Row.pop();
         Column.pop();
     }
     rerender() {

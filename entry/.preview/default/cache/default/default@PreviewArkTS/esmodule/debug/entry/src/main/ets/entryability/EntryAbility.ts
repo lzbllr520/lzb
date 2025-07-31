@@ -9,18 +9,14 @@ import type { BusinessError as BusinessError } from "@ohos:base";
 import preferences from "@ohos:data.preferences";
 //从Login.ets移动过来的常量
 const PREFERENCES_FILE_NAME = 'login_prefs';
-const KEY_SESSION_TOKEN = 'session_token';
-const KEY_SESSION_EXPIRY = 'session_expiry';
 const DOMAIN = 0x0000;
 export default class EntryAbility extends UIAbility {
     private async checkLoginSession(): Promise<boolean> {
         try {
             // 注意：在Ability中，直接使用 this.context
             const prefs = await preferences.getPreferences(this.context, PREFERENCES_FILE_NAME);
-            const token = await prefs.get(KEY_SESSION_TOKEN, '');
-            const expiry = await prefs.get(KEY_SESSION_EXPIRY, 0);
-            if (token && expiry > Date.now()) {
-                console.info('[EntryAbility] Valid session found.');
+            const token = await prefs.get('token', '');
+            if (token) {
                 return true;
             }
         }
@@ -46,8 +42,7 @@ export default class EntryAbility extends UIAbility {
             promptAction.showToast({ message: '欢迎回来，admin先生', bottom: '80%', duration: 1000 });
         }
         // 设置应用要加载的初始页面
-        // 设置应用要加载的初始页面
-        windowStage.loadContent("pages/Test", (err) => {
+        windowStage.loadContent(initialPage, (err) => {
             if (err.code) {
                 console.error('Failed to load the content. Cause:' + JSON.stringify(err));
                 return;

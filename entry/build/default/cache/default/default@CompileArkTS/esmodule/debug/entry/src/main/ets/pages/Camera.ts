@@ -444,7 +444,7 @@ class CameraPage extends ViewPU {
                         Button.onClick(() => this.goBack());
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777248, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777250, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Image.width(24);
                         Image.height(24);
                         Image.fillColor(Color.White);

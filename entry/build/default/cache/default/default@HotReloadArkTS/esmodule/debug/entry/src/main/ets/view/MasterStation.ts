@@ -45,12 +45,12 @@ export class MasterStation extends ViewPU {
             this.paramsGenerator_ = paramsLambda;
         }
         this.__deviceList = new ObservedPropertyObjectPU([
-            new DeviceStatus("传送带 #1", { "id": 16777233, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, 32, 45, 55, false, '离线中'),
-            new DeviceStatus("传送带 #2", { "id": 16777233, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, 35, 48, 58, false, '离线中'),
-            new DeviceStatus("小车 #1", { "id": 16777240, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, 41, 50, 40, false, '离线中'),
-            new DeviceStatus("机械臂 #1", { "id": 16777261, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, 58, 65, 68, false, '离线中'),
-            new DeviceStatus("机械臂 #2", { "id": 16777261, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, 62, 66, 71, false, '离线中'),
-            new DeviceStatus("机械臂 #3", { "id": 16777261, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, 55, 63, 65, false, '离线中')
+            new DeviceStatus("传送带 #1", { "id": 16777234, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, 32, 45, 55, false, '离线中'),
+            new DeviceStatus("传送带 #2", { "id": 16777234, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, 35, 48, 58, false, '离线中'),
+            new DeviceStatus("小车 #1", { "id": 16777241, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, 41, 50, 40, false, '离线中'),
+            new DeviceStatus("机械臂 #1", { "id": 16777263, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, 58, 65, 68, false, '离线中'),
+            new DeviceStatus("机械臂 #2", { "id": 16777263, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, 62, 66, 71, false, '离线中'),
+            new DeviceStatus("机械臂 #3", { "id": 16777263, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, 55, 63, 65, false, '离线中')
         ], this, "deviceList");
         this.__conveyorData1 = new SynchedPropertyObjectTwoWayPU(params.conveyorData1, this, "conveyorData1");
         this.__conveyorData2 = new SynchedPropertyObjectTwoWayPU(params.conveyorData2, this, "conveyorData2");

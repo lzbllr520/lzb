@@ -622,7 +622,6 @@ export struct Dolly {
             .width('100%')
             .padding({ left: 20, right: 20 }) // 控制按钮与卡片左右的间距
             .position({ bottom: 10 }) // 将按钮行固定在卡片底部
-
           }
           .animation({ duration: 300, curve: Curve.EaseInOut }) // 为使能/禁用的透明度变化添加动画
           .justifyContent(FlexAlign.Center) // 居中显示遥感
@@ -734,12 +733,12 @@ struct DirectionalButton {
   build() {
     Row() {
       Image(this.icon)
-        .width(20)
-        .height(20)
+        .width(30)
+        .height(30)
         .fillColor(Color.White)
     }
-    .width(50)
-    .height(50)
+    .width(70)
+    .height(70)
     .borderRadius(16) // 使用圆角来匹配界面的卡片风格
     .justifyContent(FlexAlign.Center)
     .backgroundColor('rgba(45, 50, 65, 0.45)') // 略带蓝调的深灰色，有一定透明度

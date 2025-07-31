@@ -4,8 +4,6 @@ import { router } from '@kit.ArkUI';
 
 //持久化存储在本地的用户登录信息名称，准备用于退出登录时找到并删除登录信息数据
 const PREFERENCES_FILE_NAME = 'login_prefs';
-const KEY_SESSION_TOKEN = 'session_token';
-const KEY_SESSION_EXPIRY = 'session_expiry';
 
 @Component
 export struct SystemSetting {
@@ -44,9 +42,8 @@ export struct SystemSetting {
             try {
               //获取应用的 preferences 实例
               const prefs = await preferences.getPreferences(getContext(this), PREFERENCES_FILE_NAME);
-              //删除存储的登录令牌和过期时间
-              await prefs.delete(KEY_SESSION_TOKEN);
-              await prefs.delete(KEY_SESSION_EXPIRY);
+              //删除存储的登录令牌token
+              await prefs.delete('token');
               //确保改动已写入磁盘
               await prefs.flush();
 

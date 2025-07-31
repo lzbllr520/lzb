@@ -395,7 +395,7 @@ export class RobotArm3 extends ViewPU {
         }, Column);
         Column.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Image.create({ "id": 16777260, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+            Image.create({ "id": 16777262, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
             Image.width('50%');
             Image.objectFit(ImageFit.Contain);
             Image.borderRadius(16);
@@ -602,7 +602,7 @@ export class RobotArm3 extends ViewPU {
                         if (this.data.loadText === '有物品') {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create({ "id": 16777231, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                                    Image.create({ "id": 16777232, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                                     Image.width(20);
                                     Image.height(20);
                                     Image.margin({ left: 10 });
@@ -612,7 +612,7 @@ export class RobotArm3 extends ViewPU {
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create({ "id": 16777255, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                                    Image.create({ "id": 16777257, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                                     Image.width(20);
                                     Image.height(20);
                                     Image.margin({ left: 10 });
@@ -721,7 +721,7 @@ export class RobotArm3 extends ViewPU {
                         if (this.data.statusText === '运行中' || this.data.statusText === '空闲中') {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create({ "id": 16777266, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                                    Image.create({ "id": 16777268, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                                     Image.width(22);
                                     Image.height(22);
                                     Image.fillColor(Color.White);
@@ -739,7 +739,7 @@ export class RobotArm3 extends ViewPU {
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create({ "id": 16777265, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                                    Image.create({ "id": 16777267, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                                     Image.width(24);
                                     Image.height(24);
                                     Image.fillColor(Color.White);
@@ -962,7 +962,7 @@ export class RobotArm3 extends ViewPU {
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777249, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777251, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Image.width(this.button_icon_size);
                         Image.height(this.button_icon_size);
                     }, Image);
@@ -1024,7 +1024,7 @@ export class RobotArm3 extends ViewPU {
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777259, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777261, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Image.width(this.button_icon_size);
                         Image.height(this.button_icon_size);
                     }, Image);
@@ -1086,7 +1086,7 @@ export class RobotArm3 extends ViewPU {
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777249, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777251, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Image.width(this.button_icon_size);
                         Image.height(this.button_icon_size);
                     }, Image);
@@ -1148,7 +1148,7 @@ export class RobotArm3 extends ViewPU {
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777259, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777261, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Image.width(this.button_icon_size);
                         Image.height(this.button_icon_size);
                     }, Image);
@@ -1210,7 +1210,7 @@ export class RobotArm3 extends ViewPU {
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777249, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777251, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Image.width(this.button_icon_size);
                         Image.height(this.button_icon_size);
                     }, Image);
@@ -1272,7 +1272,7 @@ export class RobotArm3 extends ViewPU {
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777259, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777261, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Image.width(this.button_icon_size);
                         Image.height(this.button_icon_size);
                     }, Image);
@@ -1360,7 +1360,7 @@ export class RobotArm3 extends ViewPU {
                     //切换按钮
                     ActionButton(this, {
                         // 请替换为您的图标资源
-                        icon: { "id": 16777230, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777231, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         click: () => {
                             Context.animateTo({ duration: 800, curve: Curve.EaseInOut }, () => {
                                 if (this.data.isInfoCardVisible) {
@@ -1385,7 +1385,7 @@ export class RobotArm3 extends ViewPU {
                     let paramsLambda = () => {
                         return {
                             // 请替换为您的图标资源
-                            icon: { "id": 16777230, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            icon: { "id": 16777231, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             click: () => {
                                 Context.animateTo({ duration: 800, curve: Curve.EaseInOut }, () => {
                                     if (this.data.isInfoCardVisible) {
@@ -1427,7 +1427,7 @@ export class RobotArm3 extends ViewPU {
                     let componentCall = new 
                     // 原有的全屏按钮
                     ActionButton(this, {
-                        icon: { "id": 16777245, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        icon: { "id": 16777247, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         click: () => {
                             Context.animateTo({
                                 duration: 800,
@@ -1461,7 +1461,7 @@ export class RobotArm3 extends ViewPU {
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
-                            icon: { "id": 16777245, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            icon: { "id": 16777247, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             click: () => {
                                 Context.animateTo({
                                     duration: 800,

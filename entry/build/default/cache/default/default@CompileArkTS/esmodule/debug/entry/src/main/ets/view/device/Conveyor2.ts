@@ -439,7 +439,7 @@ export class Conveyor2 extends ViewPU {
         Column.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             // 居中显示的、放大的图片
-            Image.create({ "id": 16777232, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+            Image.create({ "id": 16777233, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
             // 居中显示的、放大的图片
             Image.width('50%');
             // 居中显示的、放大的图片
@@ -629,7 +629,7 @@ export class Conveyor2 extends ViewPU {
             if (this.data.loadText === '有物品') {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777231, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777232, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Image.width(20);
                         Image.height(20);
                         Image.margin({ left: 10 });
@@ -639,7 +639,7 @@ export class Conveyor2 extends ViewPU {
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777255, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777257, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Image.width(20);
                         Image.height(20);
                         Image.margin({ left: 10 });
@@ -688,10 +688,6 @@ export class Conveyor2 extends ViewPU {
             Row.onHover((isHover: boolean) => {
                 this.isHover = isHover;
             });
-            Gesture.create(GesturePriority.Low);
-            LongPressGesture.create();
-            LongPressGesture.pop();
-            Gesture.pop();
             //控制按钮 (已添加点击和悬浮动画)
             Row.onTouch((event: TouchEvent) => {
                 event.stopPropagation();
@@ -745,7 +741,7 @@ export class Conveyor2 extends ViewPU {
             if (this.data.statusText === '运行中') {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777266, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777268, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Image.width(22);
                         Image.height(22);
                         Image.fillColor(Color.White);
@@ -763,7 +759,7 @@ export class Conveyor2 extends ViewPU {
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777265, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+                        Image.create({ "id": 16777267, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
                         Image.width(24);
                         Image.height(24);
                         Image.fillColor(Color.White);
@@ -833,7 +829,7 @@ export class Conveyor2 extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new McGaugeChart(this, { options: this.chartOptions }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Conveyor2.ets", line: 518, col: 13 });
+                                let componentCall = new McGaugeChart(this, { options: this.chartOptions }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Conveyor2.ets", line: 515, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -861,10 +857,6 @@ export class Conveyor2 extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Context.animation({ duration: 250, curve: Curve.EaseInOut });
-            Gesture.create(GesturePriority.Low);
-            LongPressGesture.create();
-            LongPressGesture.pop();
-            Gesture.pop();
             Row.width('90%');
             Row.height(60);
             Row.justifyContent(FlexAlign.SpaceBetween);
