@@ -1,4 +1,4 @@
-import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
+import { AbilityConstant, common, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { promptAction, window } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
@@ -11,6 +11,9 @@ import {checkApiStatus} from '../service/Request'
 const PREFERENCES_FILE_NAME = 'login_prefs';
 
 const DOMAIN = 0x0000;
+
+//导出一个context全局变量来使用
+export let globalAbilityContext: common.UIAbilityContext;
 
 export default class EntryAbility extends UIAbility {
 
@@ -30,6 +33,8 @@ export default class EntryAbility extends UIAbility {
   }
 
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+    //为全局的context赋值
+    globalAbilityContext = this.context;
     this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
   }
@@ -39,8 +44,9 @@ export default class EntryAbility extends UIAbility {
   }
 
   async  onWindowStageCreate(windowStage: window.WindowStage): Promise<void> {
-    let  initialPage=''
+    /*let  initialPage=''
     const isConnect:boolean=await checkApiStatus()
+
     if (!isConnect) {
       initialPage='pages/NetError'
     }else {
@@ -54,12 +60,10 @@ export default class EntryAbility extends UIAbility {
 
     if (initialPage==='pages/NetError'){
       promptAction.showToast({ message: '应用无法与服务器连接' ,bottom:'80%',duration:1000});
-    }
-
-
+    }*/
 
     // 设置应用要加载的初始页面
-    windowStage.loadContent(initialPage, (err) => {
+    windowStage.loadContent('pages/Index', (err) => {
       if (err.code) {
         console.error('Failed to load the content. Cause:' + JSON.stringify(err));
         return;

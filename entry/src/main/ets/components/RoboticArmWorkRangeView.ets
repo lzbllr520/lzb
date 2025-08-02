@@ -318,7 +318,7 @@ export  struct RoboticArmWorkRangeView {
             .fontSize(12)
             .fontColor('#E9ECEF')
           //从 this.data.currentPos 读取
-          Text(`(x: ${this.data.currentPos.x.toFixed(2)}, y: ${this.data.currentPos.y.toFixed(2)})`)
+          Text(`(x: ${this.data.currentPos.x.toFixed(2)}, y: ${this.data.currentPos.y.toFixed(2)}`)
             .fontSize(12)
             .fontWeight(FontWeight.Bold)
             .fontColor('#F8F9FA')
@@ -331,7 +331,7 @@ export  struct RoboticArmWorkRangeView {
             .fontSize(12)
             .fontColor('#E9ECEF')
           //从 this.data.targetPos 读取
-          Text(`(x: ${this.data.targetPos.x.toFixed(2)}, y: ${this.data.targetPos.y.toFixed(2)})`)
+          Text(`(x: ${this.data.targetPos.x.toFixed(2)}, y: ${this.data.targetPos.y.toFixed(2)}`)
             .fontSize(12)
             .fontWeight(FontWeight.Bold)
             .fontColor('#F8F9FA')

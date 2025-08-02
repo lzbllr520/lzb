@@ -1,6 +1,7 @@
 
 import { McGaugeChart, Options } from '@mcui/mccharts'
 import { ConveyorState } from '../../model/ConveyorState'
+import { promptAction } from '@kit.ArkUI';
 
 @Component
 export struct Conveyor1 {
@@ -328,7 +329,6 @@ export struct Conveyor1 {
           .justifyContent(FlexAlign.Center)
 
           Column({space:20}){
-
             //传送带名称
             Row(){
               Text('名称：')
@@ -518,10 +518,10 @@ export struct Conveyor1 {
         })
 
         //速度调节卡片
-        Column({space:20}){
+        Column({space:10}){
           if (this.isChartVisible) {
             McGaugeChart({ options: this.chartOptions })
-              .height(320)
+              .height(300)
               .width(320)
               // 使用 .combine() 组合动画，这是正确的写法
               .transition(
@@ -536,6 +536,46 @@ export struct Conveyor1 {
                   })
               )
           }
+
+
+          Row(){
+            //选择传送带运动方向
+            Select([
+              { value: '正向' },
+              { value: '反向' }
+            ])
+              .optionWidth(90)
+              .menuBackgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+              .menuBackgroundColor(Color.Transparent)
+              .onSelect((event) => {
+                const newDirection = event.valueOf() === 0 ? '正向' : '反向';
+                if (this.data.direction !== newDirection) {
+                  this.data.direction = newDirection;
+                }
+              })
+              .selected(this.data.direction === '正向' ? 0 : 1)
+              .value(this.data.direction)
+              .width('20%')
+              .height(50)
+              .backgroundColor('rgba(255, 255, 255, 0.2)')
+              .borderRadius(25)
+              .fontColor(Color.White) // 设置选中项的字体颜色
+              .border({
+                width: 1.5,
+                color: 'rgba(255, 255, 255, 0.3)'
+              })
+              // 同样，只有在运行时才启用，并有透明度变化
+              .enabled(this.data.statusText === '运行中')
+              .opacity(this.data.statusText === '运行中' ? 1.0 : 0.4)
+              .animation({ duration: 250, curve: Curve.EaseInOut })
+
+
+
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.SpaceAround)
+
+
           Row() {
             // 减速按钮
             Button({ type: ButtonType.Circle, stateEffect: true }) {
@@ -607,7 +647,6 @@ export struct Conveyor1 {
           .width('90%') // 控制条宽度
           .height(60)   // 控制条高度
           .justifyContent(FlexAlign.SpaceBetween) // 两端对齐，中间自适应
-          .margin({ top: 20 })
           //为整个控制条应用磨砂玻璃风格
           .backgroundColor('rgba(255, 255, 255, 0.2)')
           .borderRadius(30) // 使用大的圆角形成“胶囊”形状

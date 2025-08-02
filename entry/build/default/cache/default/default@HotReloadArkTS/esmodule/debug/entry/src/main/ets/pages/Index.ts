@@ -606,7 +606,7 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 310, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 314, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -648,7 +648,7 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 322, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 326, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -690,7 +690,7 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 334, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 338, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -732,7 +732,7 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 346, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 350, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -774,7 +774,7 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 358, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 362, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -824,28 +824,10 @@ class MainPage extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new MasterStation(this, {
-                                    conveyorData1: this.__conveyorData1,
-                                    conveyorData2: this.__conveyorData2,
-                                    dollyData: this.__dollyData,
-                                    robot1Data: this.__robot1Data,
-                                    robot2Data: this.__robot2Data,
-                                    robot3Data: this.__robot3Data,
-                                    isLineRunning: this.__isLineRunning,
-                                    addLog: this.addLog.bind(this)
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 390, col: 13 });
+                                let componentCall = new MasterStation(this, {}, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 394, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
-                                    return {
-                                        conveyorData1: this.conveyorData1,
-                                        conveyorData2: this.conveyorData2,
-                                        dollyData: this.dollyData,
-                                        robot1Data: this.robot1Data,
-                                        robot2Data: this.robot2Data,
-                                        robot3Data: this.robot3Data,
-                                        isLineRunning: this.isLineRunning,
-                                        addLog: this.addLog.bind(this)
-                                    };
+                                    return {};
                                 };
                                 componentCall.paramsGenerator_ = paramsLambda;
                             }
@@ -876,7 +858,7 @@ class MainPage extends ViewPU {
                                     onIndexChange: (index: number) => {
                                         this.deviceManagerIndex = index;
                                     }
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 401, col: 13 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 396, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -913,7 +895,7 @@ class MainPage extends ViewPU {
                                 let componentCall = new TaskLog(this, {
                                     allLogItems: this.allLogItems,
                                     clearAllLogs: this.clearAllLogs.bind(this)
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 418, col: 13 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 413, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -937,7 +919,7 @@ class MainPage extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new DataStatics(this, {}, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 423, col: 13 });
+                                let componentCall = new DataStatics(this, {}, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 418, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {};
@@ -959,7 +941,7 @@ class MainPage extends ViewPU {
                                 let componentCall = new SystemSetting(this, {
                                     addLog: this.addLog.bind(this),
                                     avatar: this.__userAvatar
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 425, col: 13 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 420, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {

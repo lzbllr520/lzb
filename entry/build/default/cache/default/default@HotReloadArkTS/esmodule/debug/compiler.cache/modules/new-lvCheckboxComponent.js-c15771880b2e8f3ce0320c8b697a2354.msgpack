@@ -1,375 +1,0 @@
-Ôr@Ÿªassertions¤code´customTransformCache¬dependencies¢id¤meta±moduleSideEffects¬originalCode±originalSourcemap«resolvedIds®sourcemapChainµsyntheticNamedExportsµtransformDependencies®transformFiles¨cacheAstÔrAÚ¹if (!("finalizeConstruction" in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
-}
-import { lvText } from '../domain/LvText';
-import { lvFootnoteController } from './controller/lvFootnoteController';
-import { lvCompositeComponent } from './lvCompositeComponent';
-export class lvCheckboxComponent extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
-            this.paramsGenerator_ = paramsLambda;
-        }
-        this.o = new ObservedPropertySimplePU("", this, "text");
-        this.g1 = new ObservedPropertyObjectPU(lvText, this, "nText");
-        this.h1 = new ObservedPropertyObjectPU(null, this, "dialogController");
-        this.setInitiallyProvidedValue(params);
-        this.finalizeConstruction();
-    }
-    setInitiallyProvidedValue(params) {
-        if (params.text !== undefined) {
-            this.text = params.text;
-        }
-        if (params.nText !== undefined) {
-            this.nText = params.nText;
-        }
-        if (params.dialogController !== undefined) {
-            this.dialogController = params.dialogController;
-        }
-    }
-    updateStateVars(params) {
-    }
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.o.purgeDependencyOnElmtId(rmElmtId);
-        this.g1.purgeDependencyOnElmtId(rmElmtId);
-        this.h1.purgeDependencyOnElmtId(rmElmtId);
-    }
-    aboutToBeDeleted() {
-        this.o.aboutToBeDeleted();
-        this.g1.aboutToBeDeleted();
-        this.h1.aboutToBeDeleted();
-        SubscriberManager.Get().delete(this.id__());
-        this.aboutToBeDeletedInternal();
-    }
-    get text() {
-        return this.o.get();
-    }
-    set text(newValue) {
-        this.o.set(newValue);
-    }
-    get nText() {
-        return this.g1.get();
-    }
-    set nText(newValue) {
-        this.g1.set(newValue);
-    }
-    get dialogController() {
-        return this.h1.get();
-    }
-    set dialogController(newValue) {
-        this.h1.set(newValue);
-    }
-    initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Toggle.create({
-                type: ToggleType.Checkbox,
-                isOn: (this.text.split('- [')[1].split(']')[0] == 'X' || this.text.split('- [')[1].split(']')[0] == 'x') ?
-                    true : false
-            });
-            Toggle.enabled(false);
-        }, Toggle);
-        Toggle.pop();
-        {
-            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                if (isInitialRender) {
-                    let componentCall = new lvCompositeComponent(this, {
-                        footnoteController: lvFootnoteController,
-                        text: this.text.split('- [')[1].split(']')[1],
-                        dialogController: this.dialogController
-                    }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/utils/lvCheckboxComponent.ets", line: 19, f1: 7 });
-                    ViewPU.create(componentCall);
-                    let paramsLambda = () => {
-                        return {
-                            footnoteController: lvFootnoteController,
-                            text: this.text.split('- [')[1].split(']')[1],
-                            dialogController: this.dialogController
-                        };
-                    };
-                    componentCall.paramsGenerator_ = paramsLambda;
-                }
-                else {
-                    this.updateStateVarsOfChildByElmtId(elmtId, {
-                        footnoteController: lvFootnoteController
-                    });
-                }
-            }, { name: "lvCompositeComponent" });
-        }
-        Row.pop();
-    }
-    rerender() {
-        this.updateDirtyElements();
-    }
-}
-Â“Ù˜D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\domain\LvText.jsÙ°D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\controller\lvFootnoteController.jsÙ¥D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvCompositeComponent.jsÙ¤D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvCheckboxComponent.jsÔrB˜±isLocalDependency¯isNodeEntryFile§pkgPath§pkgNameªpkgVersion±belongProjectPath±dependencyPkgInfo¨commonjsÂÂÙgD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in´@luvi/lv-markdown-in¦2.0.15ºD:\apps\deveco\tzb2025jbgsÔrC’§pkgNameªpkgVersion´@luvi/lv-markdown-in¦2.0.15ÔrD’¯hasNamedExportsªisCommonJSÃÂÃÚ¹if (!("finalizeConstruction" in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
-}
-import { lvText } from '../domain/LvText';
-import { lvFootnoteController } from './controller/lvFootnoteController';
-import { lvCompositeComponent } from './lvCompositeComponent';
-export class lvCheckboxComponent extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
-            this.paramsGenerator_ = paramsLambda;
-        }
-        this.o = new ObservedPropertySimplePU("", this, "text");
-        this.g1 = new ObservedPropertyObjectPU(lvText, this, "nText");
-        this.h1 = new ObservedPropertyObjectPU(null, this, "dialogController");
-        this.setInitiallyProvidedValue(params);
-        this.finalizeConstruction();
-    }
-    setInitiallyProvidedValue(params) {
-        if (params.text !== undefined) {
-            this.text = params.text;
-        }
-        if (params.nText !== undefined) {
-            this.nText = params.nText;
-        }
-        if (params.dialogController !== undefined) {
-            this.dialogController = params.dialogController;
-        }
-    }
-    updateStateVars(params) {
-    }
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.o.purgeDependencyOnElmtId(rmElmtId);
-        this.g1.purgeDependencyOnElmtId(rmElmtId);
-        this.h1.purgeDependencyOnElmtId(rmElmtId);
-    }
-    aboutToBeDeleted() {
-        this.o.aboutToBeDeleted();
-        this.g1.aboutToBeDeleted();
-        this.h1.aboutToBeDeleted();
-        SubscriberManager.Get().delete(this.id__());
-        this.aboutToBeDeletedInternal();
-    }
-    get text() {
-        return this.o.get();
-    }
-    set text(newValue) {
-        this.o.set(newValue);
-    }
-    get nText() {
-        return this.g1.get();
-    }
-    set nText(newValue) {
-        this.g1.set(newValue);
-    }
-    get dialogController() {
-        return this.h1.get();
-    }
-    set dialogController(newValue) {
-        this.h1.set(newValue);
-    }
-    initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Toggle.create({
-                type: ToggleType.Checkbox,
-                isOn: (this.text.split('- [')[1].split(']')[0] == 'X' || this.text.split('- [')[1].split(']')[0] == 'x') ?
-                    true : false
-            });
-            Toggle.enabled(false);
-        }, Toggle);
-        Toggle.pop();
-        {
-            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                if (isInitialRender) {
-                    let componentCall = new lvCompositeComponent(this, {
-                        footnoteController: lvFootnoteController,
-                        text: this.text.split('- [')[1].split(']')[1],
-                        dialogController: this.dialogController
-                    }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/utils/lvCheckboxComponent.ets", line: 19, f1: 7 });
-                    ViewPU.create(componentCall);
-                    let paramsLambda = () => {
-                        return {
-                            footnoteController: lvFootnoteController,
-                            text: this.text.split('- [')[1].split(']')[1],
-                            dialogController: this.dialogController
-                        };
-                    };
-                    componentCall.paramsGenerator_ = paramsLambda;
-                }
-                else {
-                    this.updateStateVarsOfChildByElmtId(elmtId, {
-                        footnoteController: lvFootnoteController
-                    });
-                }
-            }, { name: "lvCompositeComponent" });
-        }
-        Row.pop();
-    }
-    rerender() {
-        this.updateDirtyElements();
-    }
-}
-ÔrE•§version¨mappings¥names§sources®sourcesContentÜ j‘”    ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”  	 ‘”  
- ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”    ‘”  ! ‘”  " ‘”  # ‘”  $ ‘”  % ‘”  & ‘”  ' ‘”  ( ‘”  ) ‘”  * ‘”  + ‘”  , ‘”  - ‘”  . ‘”  / ‘”  0 ‘”  1 ‘”  2 ‘”  3 ‘”  4 ‘”  5 ‘”  6 ‘”  7 ‘”  8 ‘”  9 ‘”  : ‘”  ; ‘”  < ‘”  = ‘”  > ‘”  ? ‘”  Ì@ ‘”  ÌA ‘”  ÌB ‘”  ÌC ‘”  ÌD ‘”  ÌE ‘”  ÌF ‘”  ÌG ‘”  ÌH ‘”  ÌI ‘”  ÌJ ‘”  ÌK ‘”  ÌL ‘”  ÌM ‘”  ÌN ‘”  ÌO ‘”  ÌP ‘”  ÌQ ‘”  ÌR ‘”  ÌS ‘”  ÌT ‘”  ÌU ‘”  ÌV ‘”  ÌW ‘”  ÌX ‘”  ÌY ‘”  ÌZ ‘”  Ì[ ‘”  Ì\ ‘”  Ì] ‘”  Ì^ ‘”  Ì_ ‘”  Ì` ‘”  Ìa ‘”  Ìb ‘”  Ìc ‘”  Ìd ‘”  Ìe ‘”  Ìf ‘”  Ìg ‘”  Ìh ‘Ù¤D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvCheckboxComponent.js‘Ú¹if (!("finalizeConstruction" in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
-}
-import { lvText } from '../domain/LvText';
-import { lvFootnoteController } from './controller/lvFootnoteController';
-import { lvCompositeComponent } from './lvCompositeComponent';
-export class lvCheckboxComponent extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
-            this.paramsGenerator_ = paramsLambda;
-        }
-        this.o = new ObservedPropertySimplePU("", this, "text");
-        this.g1 = new ObservedPropertyObjectPU(lvText, this, "nText");
-        this.h1 = new ObservedPropertyObjectPU(null, this, "dialogController");
-        this.setInitiallyProvidedValue(params);
-        this.finalizeConstruction();
-    }
-    setInitiallyProvidedValue(params) {
-        if (params.text !== undefined) {
-            this.text = params.text;
-        }
-        if (params.nText !== undefined) {
-            this.nText = params.nText;
-        }
-        if (params.dialogController !== undefined) {
-            this.dialogController = params.dialogController;
-        }
-    }
-    updateStateVars(params) {
-    }
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.o.purgeDependencyOnElmtId(rmElmtId);
-        this.g1.purgeDependencyOnElmtId(rmElmtId);
-        this.h1.purgeDependencyOnElmtId(rmElmtId);
-    }
-    aboutToBeDeleted() {
-        this.o.aboutToBeDeleted();
-        this.g1.aboutToBeDeleted();
-        this.h1.aboutToBeDeleted();
-        SubscriberManager.Get().delete(this.id__());
-        this.aboutToBeDeletedInternal();
-    }
-    get text() {
-        return this.o.get();
-    }
-    set text(newValue) {
-        this.o.set(newValue);
-    }
-    get nText() {
-        return this.g1.get();
-    }
-    set nText(newValue) {
-        this.g1.set(newValue);
-    }
-    get dialogController() {
-        return this.h1.get();
-    }
-    set dialogController(newValue) {
-        this.h1.set(newValue);
-    }
-    initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Toggle.create({
-                type: ToggleType.Checkbox,
-                isOn: (this.text.split('- [')[1].split(']')[0] == 'X' || this.text.split('- [')[1].split(']')[0] == 'x') ?
-                    true : false
-            });
-            Toggle.enabled(false);
-        }, Toggle);
-        Toggle.pop();
-        {
-            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                if (isInitialRender) {
-                    let componentCall = new lvCompositeComponent(this, {
-                        footnoteController: lvFootnoteController,
-                        text: this.text.split('- [')[1].split(']')[1],
-                        dialogController: this.dialogController
-                    }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/utils/lvCheckboxComponent.ets", line: 19, f1: 7 });
-                    ViewPU.create(componentCall);
-                    let paramsLambda = () => {
-                        return {
-                            footnoteController: lvFootnoteController,
-                            text: this.text.split('- [')[1].split(']')[1],
-                            dialogController: this.dialogController
-                        };
-                    };
-                    componentCall.paramsGenerator_ = paramsLambda;
-                }
-                else {
-                    this.updateStateVarsOfChildByElmtId(elmtId, {
-                        footnoteController: lvFootnoteController
-                    });
-                }
-            }, { name: "lvCompositeComponent" });
-        }
-        Row.pop();
-    }
-    rerender() {
-        this.updateDirtyElements();
-    }
-}
-ÔrF“°../domain/LvText¶./lvCompositeComponentÙ!./controller/lvFootnoteControllerÔrG—ªassertions¨external¢id¤meta±moduleSideEffectsªresolvedByµsyntheticNamedExportsAÂÙ˜D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\domain\LvText.jsAÃªoh-resolveÂGAÂÙ¥D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvCompositeComponent.jsAÃªoh-resolveÂGAÂÙ°D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\controller\lvFootnoteController.jsAÃªoh-resolveÂ‘ÔrH’§missing¦pluginÃ¦genAbcÂÔ  ÔrI”²dynamicImportCache¹exportAllDeclarationCache»exportNamedDeclarationCache«importCache‘ÔrJ–¤type¥start£end«declarationªspecifiers¦source¶ExportNamedDeclarationÍ1Í¸ÔrK–¤type¥start£end¢idªsuperClass¤body°ClassDeclarationÍ8Í¸ÔrL”¤type¥start£end¤nameªIdentifierÍ>ÍQ³lvCheckboxComponentLªIdentifierÍZÍ`¦ViewPUÔrM”¤type¥start£end¤body©ClassBodyÍaÍ¸ÔrN˜¤type¥start£end¦static¨computed£key¤kind¥value°MethodDefinitionÍgÍ¡ÂÂLªIdentifierÍgÍr«constructor«constructorÔrO™¤type¥start£end¢idªexpression©generator¥async¦params¤body²FunctionExpressionÍrÍ¡ÀÂÂÂ–LªIdentifierÍsÍy¦parentLªIdentifierÍ{Í¦paramsLªIdentifierÍƒÍ‘®__localStorageÔrP•¤type¥start£end¤left¥right±AssignmentPatternÍ“ÍLªIdentifierÍ“Í™¦elmtIdÔrQ–¤type¥start£end¨operator¦prefix¨argument¯UnaryExpressionÍœÍ¡-ÃÔrR•¤type¥start£end¥value£raw§LiteralÍÍ¡1P±AssignmentPatternÍ Í¸LªIdentifierÍ Í¬¬paramsLambdaLªIdentifierÍ¯Í¸©undefinedLªIdentifierÍºÍÃ©extraInfoM®BlockStatementÍÅÍ¡—ÔrS”¤type¥start£endªexpression³ExpressionStatementÍÏÍ ÔrT–¤type¥start£end¦callee©arguments¨optional®CallExpressionÍÏÍÿÔrU“¤type¥start£end¥SuperÍÏÍÔ”LªIdentifierÍÕÍÛ¦parentLªIdentifierÍİÍë®__localStorageLªIdentifierÍíÍó¦elmtIdLªIdentifierÍõÍş©extraInfoÂÔrV–¤type¥start£end¤testªconsequent©alternate«IfStatementÍ	ÍnÔrW–¤type¥start£end¤left¨operator¥right°BinaryExpressionÍÍ/Q¯UnaryExpressionÍÍ ¦typeofÃLªIdentifierÍÍ ¬paramsLambda£===R§LiteralÍ%Í/¨functionª"function"M®BlockStatementÍ1Ín‘S³ExpressionStatementÍ?ÍdÔrX–¤type¥start£end¨operator¤left¥right´AssignmentExpressionÍ?Íc¡=ÔrY—¤type¥start£end¦object¨property¨computed¨optional°MemberExpressionÍ?ÍTU®ThisExpressionÍ?ÍCLªIdentifierÍDÍT°paramsGenerator_ÂÂLªIdentifierÍWÍc¬paramsLambdaÀS³ExpressionStatementÍwÍ¯X´AssignmentExpressionÍwÍ®¡=Y°MemberExpressionÍwÍ}U®ThisExpressionÍwÍ{LªIdentifierÍ|Í}¡oÂÂÔrZ•¤type¥start£end¦callee©arguments­NewExpressionÍ€Í®LªIdentifierÍ„Íœ¸ObservedPropertySimplePU“R§LiteralÍÍŸ ¢""U®ThisExpressionÍ¡Í¥R§LiteralÍ§Í­¤text¦"text"S³ExpressionStatementÍ¸ÍöX´AssignmentExpressionÍ¸Íõ¡=Y°MemberExpressionÍ¸Í¿U®ThisExpressionÍ¸Í¼LªIdentifierÍ½Í¿¢g1ÂÂZ­NewExpressionÍÂÍõLªIdentifierÍÆÍŞ¸ObservedPropertyObjectPU“LªIdentifierÍßÍå¦lvTextU®ThisExpressionÍçÍëR§LiteralÍíÍô¥nText§"nText"S³ExpressionStatementÍÿÍFX´AssignmentExpressionÍÿÍE¡=Y°MemberExpressionÍÿÍU®ThisExpressionÍÿÍLªIdentifierÍÍ¢h1ÂÂZ­NewExpressionÍ	ÍELªIdentifierÍÍ%¸ObservedPropertyObjectPU“R§LiteralÍ&Í*À¤nullU®ThisExpressionÍ,Í0R§LiteralÍ2ÍD°dialogController²"dialogController"S³ExpressionStatementÍOÍvT®CallExpressionÍOÍuY°MemberExpressionÍOÍmU®ThisExpressionÍOÍSLªIdentifierÍTÍm¹setInitiallyProvidedValueÂÂ‘LªIdentifierÍnÍt¦paramsÂS³ExpressionStatementÍÍ›T®CallExpressionÍÍšY°MemberExpressionÍÍ˜U®ThisExpressionÍÍƒLªIdentifierÍ„Í˜´finalizeConstructionÂÂÂN°MethodDefinitionÍ¦ÍşÂÂLªIdentifierÍ¦Í¿¹setInitiallyProvidedValue¦methodO²FunctionExpressionÍ¿ÍşÀÂÂÂ‘LªIdentifierÍÀÍÆ¦paramsM®BlockStatementÍÈÍş“V«IfStatementÍÒÍ!W°BinaryExpressionÍÖÍïY°MemberExpressionÍÖÍáLªIdentifierÍÖÍÜ¦paramsLªIdentifierÍİÍá¤textÂÂ£!==LªIdentifierÍæÍï©undefinedM®BlockStatementÍñÍ!‘S³ExpressionStatementÍÿÍX´AssignmentExpressionÍÿÍ¡=Y°MemberExpressionÍÿÍU®ThisExpressionÍÿÍLªIdentifierÍÍ¤textÂÂY°MemberExpressionÍÍLªIdentifierÍÍ¦paramsLªIdentifierÍÍ¤textÂÂÀV«IfStatementÍ*Í|W°BinaryExpressionÍ.ÍHY°MemberExpressionÍ.Í:LªIdentifierÍ.Í4¦paramsLªIdentifierÍ5Í:¥nTextÂÂ£!==LªIdentifierÍ?ÍH©undefinedM®BlockStatementÍJÍ|‘S³ExpressionStatementÍXÍrX´AssignmentExpressionÍXÍq¡=Y°MemberExpressionÍXÍbU®ThisExpressionÍXÍ\LªIdentifierÍ]Íb¥nTextÂÂY°MemberExpressionÍeÍqLªIdentifierÍeÍk¦paramsLªIdentifierÍlÍq¥nTextÂÂÀV«IfStatementÍ…ÍøW°BinaryExpressionÍ‰Í®Y°MemberExpressionÍ‰Í LªIdentifierÍ‰Í¦paramsLªIdentifierÍÍ °dialogControllerÂÂ£!==LªIdentifierÍ¥Í®©undefinedM®BlockStatementÍ°Íø‘S³ExpressionStatementÍ¾ÍîX´AssignmentExpressionÍ¾Íí¡=Y°MemberExpressionÍ¾ÍÓU®ThisExpressionÍ¾ÍÂLªIdentifierÍÃÍÓ°dialogControllerÂÂY°MemberExpressionÍÖÍíLªIdentifierÍÖÍÜ¦paramsLªIdentifierÍİÍí°dialogControllerÂÂÀN°MethodDefinitionÍÍ"ÂÂLªIdentifierÍÍ¯updateStateVars¦methodO²FunctionExpressionÍÍ"ÀÂÂÂ‘LªIdentifierÍÍ¦paramsM®BlockStatementÍÍ"N°MethodDefinitionÍ'ÍòÂÂLªIdentifierÍ'ÍHÙ!purgeVariableDependenciesOnElmtId¦methodO²FunctionExpressionÍHÍòÀÂÂÂ‘LªIdentifierÍIÍQ¨rmElmtIdM®BlockStatementÍSÍò“S³ExpressionStatementÍ]Í†T®CallExpressionÍ]Í…Y°MemberExpressionÍ]Í{Y°MemberExpressionÍ]ÍcU®ThisExpressionÍ]ÍaLªIdentifierÍbÍc¡oÂÂLªIdentifierÍdÍ{·purgeDependencyOnElmtIdÂÂ‘LªIdentifierÍ|Í„¨rmElmtIdÂS³ExpressionStatementÍÍ¹T®CallExpressionÍÍ¸Y°MemberExpressionÍÍ®Y°MemberExpressionÍÍ–U®ThisExpressionÍÍ“LªIdentifierÍ”Í–¢g1ÂÂLªIdentifierÍ—Í®·purgeDependencyOnElmtIdÂÂ‘LªIdentifierÍ¯Í·¨rmElmtIdÂS³ExpressionStatementÍÂÍìT®CallExpressionÍÂÍëY°MemberExpressionÍÂÍáY°MemberExpressionÍÂÍÉU®ThisExpressionÍÂÍÆLªIdentifierÍÇÍÉ¢h1ÂÂLªIdentifierÍÊÍá·purgeDependencyOnElmtIdÂÂ‘LªIdentifierÍâÍê¨rmElmtIdÂN°MethodDefinitionÍ÷ÍÚÂÂLªIdentifierÍ÷Í°aboutToBeDeleted¦methodO²FunctionExpressionÍÍÚÀÂÂÂM®BlockStatementÍ
-ÍÚ•S³ExpressionStatementÍÍ.T®CallExpressionÍÍ-Y°MemberExpressionÍÍ+Y°MemberExpressionÍÍU®ThisExpressionÍÍLªIdentifierÍÍ¡oÂÂLªIdentifierÍÍ+°aboutToBeDeletedÂÂÂS³ExpressionStatementÍ7ÍRT®CallExpressionÍ7ÍQY°MemberExpressionÍ7ÍOY°MemberExpressionÍ7Í>U®ThisExpressionÍ7Í;LªIdentifierÍ<Í>¢g1ÂÂLªIdentifierÍ?ÍO°aboutToBeDeletedÂÂÂS³ExpressionStatementÍ[ÍvT®CallExpressionÍ[ÍuY°MemberExpressionÍ[ÍsY°MemberExpressionÍ[ÍbU®ThisExpressionÍ[Í_LªIdentifierÍ`Íb¢h1ÂÂLªIdentifierÍcÍs°aboutToBeDeletedÂÂÂS³ExpressionStatementÍÍ«T®CallExpressionÍÍªY°MemberExpressionÍÍT®CallExpressionÍÍ–Y°MemberExpressionÍÍ”LªIdentifierÍÍ±SubscriberManagerLªIdentifierÍ‘Í”£GetÂÂÂLªIdentifierÍ—Í¦deleteÂÂ‘T®CallExpressionÍÍ©Y°MemberExpressionÍÍ§U®ThisExpressionÍÍ¢LªIdentifierÍ£Í§¤id__ÂÂÂÂS³ExpressionStatementÍ´ÍÔT®CallExpressionÍ´ÍÓY°MemberExpressionÍ´ÍÑU®ThisExpressionÍ´Í¸LªIdentifierÍ¹ÍÑ¸aboutToBeDeletedInternalÂÂÂN°MethodDefinitionÍßÍÂÂLªIdentifierÍãÍç¤text£getO²FunctionExpressionÍçÍÀÂÂÂM®BlockStatementÍêÍ‘Ôr[”¤type¥start£end¨argument¯ReturnStatementÍôÍT®CallExpressionÍûÍY°MemberExpressionÍûÍY°MemberExpressionÍûÍU®ThisExpressionÍûÍÿLªIdentifierÍ Í¡oÂÂLªIdentifierÍÍ£getÂÂÂN°MethodDefinitionÍÍKÂÂLªIdentifierÍÍ¤text£setO²FunctionExpressionÍÍKÀÂÂÂ‘LªIdentifierÍÍ$¨newValueM®BlockStatementÍ&ÍK‘S³ExpressionStatementÍ0ÍET®CallExpressionÍ0ÍDY°MemberExpressionÍ0Í:Y°MemberExpressionÍ0Í6U®ThisExpressionÍ0Í4LªIdentifierÍ5Í6¡oÂÂLªIdentifierÍ7Í:£setÂÂ‘LªIdentifierÍ;ÍC¨newValueÂN°MethodDefinitionÍPÍÂÂLªIdentifierÍTÍY¥nText£getO²FunctionExpressionÍYÍÀÂÂÂM®BlockStatementÍ\Í‘[¯ReturnStatementÍfÍ{T®CallExpressionÍmÍzY°MemberExpressionÍmÍxY°MemberExpressionÍmÍtU®ThisExpressionÍmÍqLªIdentifierÍrÍt¢g1ÂÂLªIdentifierÍuÍx£getÂÂÂN°MethodDefinitionÍ†ÍÀÂÂLªIdentifierÍŠÍ¥nText£setO²FunctionExpressionÍÍÀÀÂÂÂ‘LªIdentifierÍÍ˜¨newValueM®BlockStatementÍšÍÀ‘S³ExpressionStatementÍ¤ÍºT®CallExpressionÍ¤Í¹Y°MemberExpressionÍ¤Í¯Y°MemberExpressionÍ¤Í«U®ThisExpressionÍ¤Í¨LªIdentifierÍ©Í«¢g1ÂÂLªIdentifierÍ¬Í¯£setÂÂ‘LªIdentifierÍ°Í¸¨newValueÂN°MethodDefinitionÍÅÍÂÂLªIdentifierÍÉÍÙ°dialogController£getO²FunctionExpressionÍÙÍÀÂÂÂM®BlockStatementÍÜÍ‘[¯ReturnStatementÍæÍûT®CallExpressionÍíÍúY°MemberExpressionÍíÍøY°MemberExpressionÍíÍôU®ThisExpressionÍíÍñLªIdentifierÍòÍô¢h1ÂÂLªIdentifierÍõÍø£getÂÂÂN°MethodDefinitionÍÍKÂÂLªIdentifierÍ
-Í°dialogController£setO²FunctionExpressionÍÍKÀÂÂÂ‘LªIdentifierÍÍ#¨newValueM®BlockStatementÍ%ÍK‘S³ExpressionStatementÍ/ÍET®CallExpressionÍ/ÍDY°MemberExpressionÍ/Í:Y°MemberExpressionÍ/Í6U®ThisExpressionÍ/Í3LªIdentifierÍ4Í6¢h1ÂÂLªIdentifierÍ7Í:£setÂÂ‘LªIdentifierÍ;ÍC¨newValueÂN°MethodDefinitionÍPÍ{ÂÂLªIdentifierÍPÍ]­initialRender¦methodO²FunctionExpressionÍ]Í{ÀÂÂÂM®BlockStatementÍ`Í{•S³ExpressionStatementÍjÍÒT®CallExpressionÍjÍÑY°MemberExpressionÍjÍˆU®ThisExpressionÍjÍnLªIdentifierÍoÍˆ¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍ‰ÍËÀÂÂÂ’LªIdentifierÍŠÍ¦elmtIdLªIdentifierÍ’Í¡¯isInitialRenderM®BlockStatementÍ¦ÍË‘S³ExpressionStatementÍ´ÍÁT®CallExpressionÍ´ÍÀY°MemberExpressionÍ´Í¾LªIdentifierÍ´Í·£RowLªIdentifierÍ¸Í¾¦createÂÂÂLªIdentifierÍÍÍĞ£RowÂS³ExpressionStatementÍÛÍ
-BT®CallExpressionÍÛÍ
-AY°MemberExpressionÍÛÍùU®ThisExpressionÍÛÍßLªIdentifierÍàÍù¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍúÍ
-8ÀÂÂÂ’LªIdentifierÍûÍ	¦elmtIdLªIdentifierÍ	Í	¯isInitialRenderM®BlockStatementÍ	Í
-8’S³ExpressionStatementÍ	%Í
-T®CallExpressionÍ	%Í
-
-Y°MemberExpressionÍ	%Í	2LªIdentifierÍ	%Í	+¦ToggleLªIdentifierÍ	,Í	2¦createÂÂ‘Ôr\”¤type¥start£endªproperties°ObjectExpressionÍ	3Í
-	’Ôr]™¤type¥start£end¦method©shorthand¨computed£key¥value¤kind¨PropertyÍ	EÍ	^ÂÂÂLªIdentifierÍ	EÍ	I¤typeY°MemberExpressionÍ	KÍ	^LªIdentifierÍ	KÍ	UªToggleTypeLªIdentifierÍ	VÍ	^¨CheckboxÂÂ¤init]¨PropertyÍ	pÍ	ûÂÂÂLªIdentifierÍ	pÍ	t¤isOnVµConditionalExpressionÍ	vÍ	ûW±LogicalExpressionÍ	wÍ	×W°BinaryExpressionÍ	wÍ	¥Y°MemberExpressionÍ	wÍ	T®CallExpressionÍ	wÍ	›Y°MemberExpressionÍ	wÍ	–Y°MemberExpressionÍ	wÍ	T®CallExpressionÍ	wÍ	Y°MemberExpressionÍ	wÍ	†Y°MemberExpressionÍ	wÍ	€U®ThisExpressionÍ	wÍ	{LªIdentifierÍ	|Í	€¤textÂÂLªIdentifierÍ	Í	†¥splitÂÂ‘R§LiteralÍ	‡Í	Œ£- [¥'- ['ÂR§LiteralÍ	Í	¡1ÃÂLªIdentifierÍ	‘Í	–¥splitÂÂ‘R§LiteralÍ	—Í	š¡]£']'ÂR§LiteralÍ	œÍ	 ¡0ÃÂ¢==R§LiteralÍ	¢Í	¥¡X£'X'¢||W°BinaryExpressionÍ	©Í	×Y°MemberExpressionÍ	©Í	ĞT®CallExpressionÍ	©Í	ÍY°MemberExpressionÍ	©Í	ÈY°MemberExpressionÍ	©Í	ÂT®CallExpressionÍ	©Í	¿Y°MemberExpressionÍ	©Í	¸Y°MemberExpressionÍ	©Í	²U®ThisExpressionÍ	©Í	­LªIdentifierÍ	®Í	²¤textÂÂLªIdentifierÍ	³Í	¸¥splitÂÂ‘R§LiteralÍ	¹Í	¾£- [¥'- ['ÂR§LiteralÍ	ÀÍ	Á¡1ÃÂLªIdentifierÍ	ÃÍ	È¥splitÂÂ‘R§LiteralÍ	ÉÍ	Ì¡]£']'ÂR§LiteralÍ	ÎÍ	Ï ¡0ÃÂ¢==R§LiteralÍ	ÔÍ	×¡x£'x'R§LiteralÍ	ïÍ	óÃ¤trueR§LiteralÍ	öÍ	ûÂ¥false¤initÂS³ExpressionStatementÍ
-Í
-.T®CallExpressionÍ
-Í
--Y°MemberExpressionÍ
-Í
-&LªIdentifierÍ
-Í
-¦ToggleLªIdentifierÍ
-Í
-&§enabledÂÂ‘R§LiteralÍ
-'Í
-,Â¥falseÂLªIdentifierÍ
-:Í
-@¦ToggleÂS³ExpressionStatementÍ
-KÍ
-XT®CallExpressionÍ
-KÍ
-WY°MemberExpressionÍ
-KÍ
-ULªIdentifierÍ
-KÍ
-Q¦ToggleLªIdentifierÍ
-RÍ
-U£popÂÂÂM®BlockStatementÍ
-aÍb‘S³ExpressionStatementÍ
-oÍXT®CallExpressionÍ
-oÍWY°MemberExpressionÍ
-oÍ
-U®ThisExpressionÍ
-oÍ
-sLªIdentifierÍ
-tÍ
-¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍ
-Í4ÀÂÂÂ’LªIdentifierÍ
-Í
-•¦elmtIdLªIdentifierÍ
-—Í
-¦¯isInitialRenderM®BlockStatementÍ
-«Í4‘V«IfStatementÍ
-½Í&LªIdentifierÍ
-ÁÍ
-Ğ¯isInitialRenderM®BlockStatementÍ
-ÒÍb”Ôr^•¤type¥start£end¬declarations¤kind³VariableDeclarationÍ
-èÍ„‘Ôr_•¤type¥start£end¢id¤init²VariableDeclaratorÍ
-ìÍƒLªIdentifierÍ
-ìÍ
-ù­componentCallZ­NewExpressionÍ
-üÍƒLªIdentifierÍ Í´lvCompositeComponent–U®ThisExpressionÍÍ\°ObjectExpressionÍÍû“]¨PropertyÍ5Í]ÂÂÂLªIdentifierÍ5ÍG²footnoteControllerLªIdentifierÍIÍ]´lvFootnoteController¤init]¨PropertyÍwÍ¤ÂÂÂLªIdentifierÍwÍ{¤textY°MemberExpressionÍ}Í¤T®CallExpressionÍ}Í¡Y°MemberExpressionÍ}ÍœY°MemberExpressionÍ}Í–T®CallExpressionÍ}Í“Y°MemberExpressionÍ}ÍŒY°MemberExpressionÍ}Í†U®ThisExpressionÍ}ÍLªIdentifierÍ‚Í†¤textÂÂLªIdentifierÍ‡ÍŒ¥splitÂÂ‘R§LiteralÍÍ’£- [¥'- ['ÂR§LiteralÍ”Í•¡1ÃÂLªIdentifierÍ—Íœ¥splitÂÂ‘R§LiteralÍÍ ¡]£']'ÂR§LiteralÍ¢Í£¡1ÃÂ¤init]¨PropertyÍ¾ÍåÂÂÂLªIdentifierÍ¾ÍÎ°dialogControllerY°MemberExpressionÍĞÍåU®ThisExpressionÍĞÍÔLªIdentifierÍÕÍå°dialogControllerÂÂ¤initLªIdentifierÍıÍ©undefinedLªIdentifierÍÍ¦elmtIdO·ArrowFunctionExpressionÍÍÀÂÂÂM®BlockStatementÍÍ\°ObjectExpressionÍÍ‚“]¨PropertyÍÍoÂÂÂLªIdentifierÍÍ!¤pageR§LiteralÍ#ÍoÙJlvMarkdownIn/src/main/ets/lv-markdown-in/lib/utils/lvCheckboxComponent.etsÙL"lvMarkdownIn/src/main/ets/lv-markdown-in/lib/utils/lvCheckboxComponent.ets"¤init]¨PropertyÍqÍyÂÂÂLªIdentifierÍqÍu¤lineR§LiteralÍwÍy¢19¤init]¨PropertyÍ{Í€ÂÂÂLªIdentifierÍ{Í}¢f1R§LiteralÍÍ€¡7¤init£letS³ExpressionStatementÍ™Í¶T®CallExpressionÍ™ÍµY°MemberExpressionÍ™Í¦LªIdentifierÍ™ÍŸ¦ViewPULªIdentifierÍ Í¦¦createÂÂ‘LªIdentifierÍ§Í´­componentCallÂ^³VariableDeclarationÍËÍ‘_²VariableDeclaratorÍÏÍLªIdentifierÍÏÍÛ¬paramsLambdaO·ArrowFunctionExpressionÍŞÍÀÂÂÂM®BlockStatementÍäÍ‘[¯ReturnStatementÍşÍö\°ObjectExpressionÍÍõ“]¨PropertyÍ#ÍKÂÂÂLªIdentifierÍ#Í5²footnoteControllerLªIdentifierÍ7ÍK´lvFootnoteController¤init]¨PropertyÍiÍ–ÂÂÂLªIdentifierÍiÍm¤textY°MemberExpressionÍoÍ–T®CallExpressionÍoÍ“Y°MemberExpressionÍoÍY°MemberExpressionÍoÍˆT®CallExpressionÍoÍ…Y°MemberExpressionÍoÍ~Y°MemberExpressionÍoÍxU®ThisExpressionÍoÍsLªIdentifierÍtÍx¤textÂÂLªIdentifierÍyÍ~¥splitÂÂ‘R§LiteralÍÍ„£- [¥'- ['ÂR§LiteralÍ†Í‡¡1ÃÂLªIdentifierÍ‰Í¥splitÂÂ‘R§LiteralÍÍ’¡]£']'ÂR§LiteralÍ”Í•¡1ÃÂ¤init]¨PropertyÍ´ÍÛÂÂÂLªIdentifierÍ´ÍÄ°dialogControllerY°MemberExpressionÍÆÍÛU®ThisExpressionÍÆÍÊLªIdentifierÍËÍÛ°dialogControllerÂÂ¤init£letS³ExpressionStatementÍ"ÍPX´AssignmentExpressionÍ"ÍO¡=Y°MemberExpressionÍ"Í@LªIdentifierÍ"Í/­componentCallLªIdentifierÍ0Í@°paramsGenerator_ÂÂLªIdentifierÍCÍO¬paramsLambdaM®BlockStatementÍxÍ&‘S³ExpressionStatementÍÍT®CallExpressionÍÍY°MemberExpressionÍÍ±U®ThisExpressionÍÍ’LªIdentifierÍ“Í±¾updateStateVarsOfChildByElmtIdÂÂ’LªIdentifierÍ²Í¸¦elmtId\°ObjectExpressionÍºÍ‘]¨PropertyÍÔÍüÂÂÂLªIdentifierÍÔÍæ²footnoteControllerLªIdentifierÍèÍü´lvFootnoteController¤initÂ\°ObjectExpressionÍ6ÍV‘]¨PropertyÍ8ÍTÂÂÂLªIdentifierÍ8Í<¤nameR§LiteralÍ>ÍT´lvCompositeComponent¶"lvCompositeComponent"¤initÂS³ExpressionStatementÍkÍuT®CallExpressionÍkÍtY°MemberExpressionÍkÍrLªIdentifierÍkÍn£RowLªIdentifierÍoÍr£popÂÂÂN°MethodDefinitionÍ€Í¶ÂÂLªIdentifierÍ€Íˆ¨rerender¦methodO²FunctionExpressionÍˆÍ¶ÀÂÂÂM®BlockStatementÍ‹Í¶‘S³ExpressionStatementÍ•Í°T®CallExpressionÍ•Í¯Y°MemberExpressionÍ•Í­U®ThisExpressionÍ•Í™LªIdentifierÍšÍ­³updateDirtyElementsÂÂÂÀ“Ôr`•¤type¥start£endªspecifiers¦source±ImportDeclarationÌ}Ì§‘Ôra•¤type¥start£end¨imported¥local¯ImportSpecifierÌ†ÌŒLªIdentifierÌ†ÌŒ¦lvTextLªIdentifierÌ†ÌŒ¦lvTextR§LiteralÌ”Ì¦°../domain/LvText²'../domain/LvText'`±ImportDeclarationÌ¨Ìñ‘a¯ImportSpecifierÌ±ÌÅLªIdentifierÌ±ÌÅ´lvFootnoteControllerLªIdentifierÌ±ÌÅ´lvFootnoteControllerR§LiteralÌÍÌğÙ!./controller/lvFootnoteControllerÙ#'./controller/lvFootnoteController'`±ImportDeclarationÌòÍ0‘a¯ImportSpecifierÌûÍLªIdentifierÌûÍ´lvCompositeComponentLªIdentifierÌûÍ´lvCompositeComponentR§LiteralÍÍ/¶./lvCompositeComponent¸'./lvCompositeComponent'

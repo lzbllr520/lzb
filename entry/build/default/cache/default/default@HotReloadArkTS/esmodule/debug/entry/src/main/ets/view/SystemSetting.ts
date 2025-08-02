@@ -10,6 +10,7 @@ interface SystemSetting_Params {
 import promptAction from "@ohos:promptAction";
 import preferences from "@ohos:data.preferences";
 import router from "@ohos:router";
+import type common from "@ohos:app.ability.common";
 //持久化存储在本地的用户登录信息名称，准备用于退出登录时找到并删除登录信息数据
 const PREFERENCES_FILE_NAME = 'login_prefs';
 export class SystemSetting extends ViewPU {
@@ -111,6 +112,33 @@ export class SystemSetting extends ViewPU {
                             console.error('Failed to clear login session', e);
                             promptAction.showToast({ message: '退出登录时发生错误' });
                         }
+                    }
+                }
+            ]
+        });
+    }
+    //退出应用确认和执行函数
+    private showExitDialog() {
+        // 获取UIAbility的上下文，用于调用terminateSelf方法
+        const context = getContext(this) as common.UIAbilityContext;
+        //操作确认弹出框
+        AlertDialog.show({
+            title: '操作确认',
+            message: '是否退出应用',
+            autoCancel: true,
+            alignment: DialogAlignment.Center,
+            buttons: [
+                {
+                    value: '取消',
+                    action: () => {
+                        // 用户点击取消，不做任何事
+                    }
+                },
+                {
+                    value: '确认',
+                    fontColor: Color.Red,
+                    action: () => {
+                        context.terminateSelf();
                     }
                 }
             ]
@@ -246,6 +274,39 @@ export class SystemSetting extends ViewPU {
             });
         }, Button);
         //退出登录按钮
+        Button.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            //退出应用按钮
+            Button.createWithLabel('退出应用');
+            //退出应用按钮
+            Button.width('100%');
+            //退出应用按钮
+            Button.height(48);
+            //退出应用按钮
+            Button.fontSize(20);
+            //退出应用按钮
+            Button.fontWeight(FontWeight.Bold);
+            //退出应用按钮
+            Button.opacity(0.8);
+            //退出应用按钮
+            Button.backgroundColor('rgba(255, 80, 80, 0.4)');
+            //退出应用按钮
+            Button.border({
+                width: 1,
+                color: 'rgba(255, 255, 255, 0.3)'
+            });
+            //退出应用按钮
+            Button.type(ButtonType.Capsule);
+            //退出应用按钮
+            Button.backgroundColor(Color.Orange);
+            //退出应用按钮
+            Button.margin({ top: 30 });
+            //退出应用按钮
+            Button.onClick(() => {
+                this.showExitDialog();
+            });
+        }, Button);
+        //退出应用按钮
         Button.pop();
         Column.pop();
     }

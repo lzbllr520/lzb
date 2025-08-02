@@ -422,7 +422,7 @@ export class RoboticArmWorkRangeView extends ViewPU {
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             //从 this.data.currentPos 读取
-            Text.create(`(x: ${this.data.currentPos.x.toFixed(2)}, y: ${this.data.currentPos.y.toFixed(2)})`);
+            Text.create(`(x: ${this.data.currentPos.x.toFixed(2)}, y: ${this.data.currentPos.y.toFixed(2)}`);
             //从 this.data.currentPos 读取
             Text.fontSize(12);
             //从 this.data.currentPos 读取
@@ -449,7 +449,7 @@ export class RoboticArmWorkRangeView extends ViewPU {
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             //从 this.data.targetPos 读取
-            Text.create(`(x: ${this.data.targetPos.x.toFixed(2)}, y: ${this.data.targetPos.y.toFixed(2)})`);
+            Text.create(`(x: ${this.data.targetPos.x.toFixed(2)}, y: ${this.data.targetPos.y.toFixed(2)}`);
             //从 this.data.targetPos 读取
             Text.fontSize(12);
             //从 this.data.targetPos 读取

@@ -14,6 +14,9 @@ import {DollyState} from '../model/DollyState'
 import preferences from '@ohos.data.preferences';
 
 import promptAction from '@ohos.promptAction';
+import { AxiosResponse } from '@ohos/axios'
+import { getAllServers } from '../service/Request'
+import { globalAbilityContext } from '../entryability/EntryAbility'
 
 //日志接口
 interface LogEntry {
@@ -239,6 +242,7 @@ struct MainPage {
   //页面的初始生命周期
   async aboutToAppear() {
     try {
+
       //先加载本地的日志到应用中
       this.loadLogs()
 
@@ -387,16 +391,7 @@ struct MainPage {
         // 内容区域
         Column() {
           if (this.currentPage === 0) {
-            MasterStation({
-              conveyorData1:this.conveyorData1,
-              conveyorData2:this.conveyorData2,
-              dollyData:this.dollyData,
-              robot1Data:this.robot1Data,
-              robot2Data:this.robot2Data,
-              robot3Data:this.robot3Data,
-              isLineRunning:this.isLineRunning,
-              addLog: this.addLog.bind(this)
-            })
+            MasterStation()
           } else if (this.currentPage === 1) {
             DeviceManager({
               currentIndex: this.deviceManagerIndex,

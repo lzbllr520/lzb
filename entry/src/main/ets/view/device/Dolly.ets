@@ -733,12 +733,12 @@ struct DirectionalButton {
   build() {
     Row() {
       Image(this.icon)
-        .width(30)
-        .height(30)
+        .width(40)
+        .height(40)
         .fillColor(Color.White)
     }
-    .width(70)
-    .height(70)
+    .width(80)
+    .height(80)
     .borderRadius(16) // 使用圆角来匹配界面的卡片风格
     .justifyContent(FlexAlign.Center)
     .backgroundColor('rgba(45, 50, 65, 0.45)') // 略带蓝调的深灰色，有一定透明度
