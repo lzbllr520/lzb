@@ -14,9 +14,9 @@ import {DollyState} from '../model/DollyState'
 import preferences from '@ohos.data.preferences';
 
 import promptAction from '@ohos.promptAction';
-import { AxiosResponse } from '@ohos/axios'
 import { getAllServers } from '../service/Request'
-import { globalAbilityContext } from '../entryability/EntryAbility'
+
+import {Server} from '../model/ServerState'
 
 //日志接口
 interface LogEntry {
@@ -198,35 +198,6 @@ struct MainPage {
   @State dollyAvatar:Resource | undefined = undefined;
   @State robotArmAvatar:Resource | undefined = undefined;
 
-
-  private showExitDialog() {
-    // 获取UIAbility的上下文，用于调用terminateSelf方法
-    const context = getContext(this) as common.UIAbilityContext;
-    //确认操作弹窗
-    AlertDialog.show({
-      title: '操作确认',
-      message: '是否退出应用',
-      autoCancel: true, // 点击对话框外部可取消
-      alignment: DialogAlignment.Center,
-      buttons: [
-        {
-          value: '取消',
-          action: () => {
-            // 用户点击取消
-          }
-        },
-        {
-          value: '确认',
-          fontColor: Color.Red, // 将确认按钮设为红色以示警示
-          action: () => {
-            //确认操作执行的内容
-            context.terminateSelf();
-          }
-        }
-      ]
-    });
-  }
-
   @State currentPage: number = 0 // 当前页面索引，默认为0
   @State showSidebar: boolean = true  // 控制侧边栏显示
   private context = getContext(this) as common.UIAbilityContext // 获取应用上下文
@@ -239,19 +210,22 @@ struct MainPage {
     this.showSidebar = !this.showSidebar
   }
 
+  @State servers:Server[]|null=[]
+
   //页面的初始生命周期
   async aboutToAppear() {
     try {
+      //获取所有服务器
+      const servers:Server[]|null=await getAllServers()
+      this.servers=servers
 
       //先加载本地的日志到应用中
       this.loadLogs()
-
       //先将图像信息状态提升，这样就不用每次切换页面都去重新加载了
       this.userAvatar = $r('app.media.user');
       this.conveyorAvatar=$r('app.media.conveyor')
       this.dollyAvatar=$r('app.media.dolly')
       this.robotArmAvatar=$r('app.media.robotArm')
-
       //获取窗口对象
       const win = await window.getLastWindow(this.context);
       //背景缓慢显示动画控制代码
@@ -391,7 +365,17 @@ struct MainPage {
         // 内容区域
         Column() {
           if (this.currentPage === 0) {
-            MasterStation()
+            MasterStation({
+              servers:this.servers??[],
+              conveyorData1:this.conveyorData1,
+              conveyorData2:this.conveyorData2,
+              dollyData:this.dollyData,
+              robot1Data:this.robot1Data,
+              robot2Data:this.robot2Data,
+              robot3Data:this.robot3Data,
+              addLog: this.addLog.bind(this),
+              isLineRunning:this.isLineRunning
+            })
           } else if (this.currentPage === 1) {
             DeviceManager({
               currentIndex: this.deviceManagerIndex,

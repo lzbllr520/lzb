@@ -24,9 +24,6 @@ interface RobotArm1_Params {
     catch_font_size2?: number;
     con_width2?: string;
     con_height2?: number;
-    holdTimerJump?: number;
-    holdTimerZZ?: number;
-    holdTimerRR?: number;
     isPressed?: boolean;
     isHover?: boolean;
     idleTimer?: number;
@@ -57,9 +54,6 @@ export class RobotArm1 extends ViewPU {
         this.__catch_font_size2 = new ObservedPropertySimplePU(20, this, "catch_font_size2");
         this.__con_width2 = new ObservedPropertySimplePU('95%', this, "con_width2");
         this.__con_height2 = new ObservedPropertySimplePU(40, this, "con_height2");
-        this.__holdTimerJump = new ObservedPropertySimplePU(-1, this, "holdTimerJump");
-        this.__holdTimerZZ = new ObservedPropertySimplePU(-1, this, "holdTimerZZ");
-        this.__holdTimerRR = new ObservedPropertySimplePU(-1, this, "holdTimerRR");
         this.__isPressed = new ObservedPropertySimplePU(false, this, "isPressed");
         this.__isHover = new ObservedPropertySimplePU(false, this, "isHover");
         this.__idleTimer = new ObservedPropertySimplePU(-1, this, "idleTimer");
@@ -113,15 +107,6 @@ export class RobotArm1 extends ViewPU {
         if (params.con_height2 !== undefined) {
             this.con_height2 = params.con_height2;
         }
-        if (params.holdTimerJump !== undefined) {
-            this.holdTimerJump = params.holdTimerJump;
-        }
-        if (params.holdTimerZZ !== undefined) {
-            this.holdTimerZZ = params.holdTimerZZ;
-        }
-        if (params.holdTimerRR !== undefined) {
-            this.holdTimerRR = params.holdTimerRR;
-        }
         if (params.isPressed !== undefined) {
             this.isPressed = params.isPressed;
         }
@@ -154,9 +139,6 @@ export class RobotArm1 extends ViewPU {
         this.__catch_font_size2.purgeDependencyOnElmtId(rmElmtId);
         this.__con_width2.purgeDependencyOnElmtId(rmElmtId);
         this.__con_height2.purgeDependencyOnElmtId(rmElmtId);
-        this.__holdTimerJump.purgeDependencyOnElmtId(rmElmtId);
-        this.__holdTimerZZ.purgeDependencyOnElmtId(rmElmtId);
-        this.__holdTimerRR.purgeDependencyOnElmtId(rmElmtId);
         this.__isPressed.purgeDependencyOnElmtId(rmElmtId);
         this.__isHover.purgeDependencyOnElmtId(rmElmtId);
         this.__idleTimer.purgeDependencyOnElmtId(rmElmtId);
@@ -179,9 +161,6 @@ export class RobotArm1 extends ViewPU {
         this.__catch_font_size2.aboutToBeDeleted();
         this.__con_width2.aboutToBeDeleted();
         this.__con_height2.aboutToBeDeleted();
-        this.__holdTimerJump.aboutToBeDeleted();
-        this.__holdTimerZZ.aboutToBeDeleted();
-        this.__holdTimerRR.aboutToBeDeleted();
         this.__isPressed.aboutToBeDeleted();
         this.__isHover.aboutToBeDeleted();
         this.__idleTimer.aboutToBeDeleted();
@@ -304,118 +283,46 @@ export class RobotArm1 extends ViewPU {
         this.__con_height2.set(newValue);
     }
     private increaseSpeedX() {
-        this.data.xValue++;
+        this.data.xValue += this.data.step_xyz;
     }
     private decreaseSpeedX() {
-        this.data.xValue--;
+        this.data.xValue -= this.data.step_xyz;
     }
     private increaseSpeedY() {
-        this.data.yValue++;
+        this.data.yValue += this.data.step_xyz;
     }
     private decreaseSpeedY() {
-        this.data.yValue--;
+        this.data.yValue -= this.data.step_xyz;
     }
     private increaseSpeedZ() {
-        this.data.zValue++;
+        this.data.zValue += this.data.step_xyz;
     }
     private decreaseSpeedZ() {
-        this.data.zValue--;
+        this.data.zValue -= this.data.step_xyz;
     }
     private increaseSpeedR() {
-        this.data.rValue++;
+        this.data.rValue += this.data.step_r;
     }
     private decreaseSpeedR() {
-        this.data.rValue--;
-    }
-    private __holdTimerJump: ObservedPropertySimplePU<number>;
-    get holdTimerJump() {
-        return this.__holdTimerJump.get();
-    }
-    set holdTimerJump(newValue: number) {
-        this.__holdTimerJump.set(newValue);
+        this.data.rValue -= this.data.step_r;
     }
     private increaseSpeedJump() {
-        if (this.data.jumpValue < 100) {
-            this.data.jumpValue++;
-        }
-        else {
-            if (this.holdTimerJump !== -1) {
-                clearInterval(this.holdTimerJump);
-                this.holdTimerJump = -1;
-            }
-        }
+        this.data.jumpValue++;
     }
     private decreaseSpeedJump() {
-        if (this.data.jumpValue > -100) {
-            this.data.jumpValue--;
-        }
-        else {
-            // 如果已达最小值，清除定时器
-            if (this.holdTimerJump !== -1) {
-                clearInterval(this.holdTimerJump);
-                this.holdTimerJump = -1;
-            }
-        }
-    }
-    private __holdTimerZZ: ObservedPropertySimplePU<number>;
-    get holdTimerZZ() {
-        return this.__holdTimerZZ.get();
-    }
-    set holdTimerZZ(newValue: number) {
-        this.__holdTimerZZ.set(newValue);
+        this.data.jumpValue--;
     }
     private increaseSpeedZZ() {
-        if (this.data.zzValue < 100) {
-            this.data.zzValue++;
-        }
-        else {
-            if (this.holdTimerZZ !== -1) {
-                clearInterval(this.holdTimerZZ);
-                this.holdTimerZZ = -1;
-            }
-        }
+        this.data.zzValue++;
     }
     private decreaseSpeedZZ() {
-        if (this.data.zzValue > -100) {
-            this.data.zzValue--;
-        }
-        else {
-            // 如果已达最小值，清除定时器
-            if (this.holdTimerZZ !== -1) {
-                clearInterval(this.holdTimerZZ);
-                this.holdTimerZZ = -1;
-            }
-        }
-    }
-    private __holdTimerRR: ObservedPropertySimplePU<number>;
-    get holdTimerRR() {
-        return this.__holdTimerRR.get();
-    }
-    set holdTimerRR(newValue: number) {
-        this.__holdTimerRR.set(newValue);
+        this.data.zzValue--;
     }
     private increaseSpeedRR() {
-        if (this.data.rrValue < 100) {
-            this.data.rrValue++;
-        }
-        else {
-            if (this.holdTimerRR !== -1) {
-                clearInterval(this.holdTimerRR);
-                this.holdTimerRR = -1;
-            }
-        }
+        this.data.rrValue++;
     }
     private decreaseSpeedRR() {
-        if (this.data.rrValue > -100) {
-            this.data.rrValue--;
-        }
-        else {
-            // 如果已达最小值，清除定时器
-            if (this.holdTimerRR !== -1) {
-                clearInterval(this.holdTimerRR);
-                this.holdTimerRR = -1;
-            }
-        }
+        this.data.rrValue--;
     }
     // 用于控制按钮按压动画的状态
     private __isPressed: ObservedPropertySimplePU<boolean>;
@@ -490,12 +397,6 @@ export class RobotArm1 extends ViewPU {
         this.__idleTimer.set(newValue);
     }
     onDisappear() {
-        if (this.holdTimerJump !== -1)
-            clearInterval(this.holdTimerJump);
-        if (this.holdTimerZZ !== -1)
-            clearInterval(this.holdTimerZZ);
-        if (this.holdTimerRR !== -1)
-            clearInterval(this.holdTimerRR);
         // 清理 setTimeout 创建的定时器
         if (this.idleTimer !== -1)
             clearTimeout(this.idleTimer);
@@ -990,18 +891,10 @@ export class RobotArm1 extends ViewPU {
                         Button.width(this.button_size2);
                         Button.height(this.button_size2);
                         Button.backgroundColor(Color.Transparent);
-                        Button.onTouch((event: TouchEvent) => {
-                            event.stopPropagation();
-                            if (event.type === TouchType.Down) {
-                                this.activateArm();
-                                this.decreaseSpeedJump();
-                                this.holdTimerJump = setInterval(() => { this.decreaseSpeedJump(); }, 120);
-                                this.resetIdleTimer();
-                            }
-                            if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-                                clearInterval(this.holdTimerJump);
-                                this.holdTimerJump = -1;
-                            }
+                        Button.onClick(() => {
+                            this.activateArm();
+                            this.decreaseSpeedJump();
+                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1048,18 +941,10 @@ export class RobotArm1 extends ViewPU {
                         Button.width(this.button_size2);
                         Button.height(this.button_size2);
                         Button.backgroundColor(Color.Transparent);
-                        Button.onTouch((event: TouchEvent) => {
-                            event.stopPropagation();
-                            if (event.type === TouchType.Down) {
-                                this.activateArm();
-                                this.increaseSpeedJump();
-                                this.holdTimerJump = setInterval(() => { this.increaseSpeedJump(); }, 120);
-                                this.resetIdleTimer();
-                            }
-                            if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-                                clearInterval(this.holdTimerJump);
-                                this.holdTimerJump = -1;
-                            }
+                        Button.onClick(() => {
+                            this.activateArm();
+                            this.increaseSpeedJump();
+                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1107,18 +992,10 @@ export class RobotArm1 extends ViewPU {
                         Button.width(this.button_size2);
                         Button.height(this.button_size2);
                         Button.backgroundColor(Color.Transparent);
-                        Button.onTouch((event: TouchEvent) => {
-                            event.stopPropagation();
-                            if (event.type === TouchType.Down) {
-                                this.activateArm();
-                                this.decreaseSpeedZZ();
-                                this.holdTimerZZ = setInterval(() => { this.decreaseSpeedZZ(); }, 120);
-                                this.resetIdleTimer();
-                            }
-                            if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-                                clearInterval(this.holdTimerZZ);
-                                this.holdTimerZZ = -1;
-                            }
+                        Button.onClick(() => {
+                            this.activateArm();
+                            this.decreaseSpeedZZ();
+                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1169,18 +1046,10 @@ export class RobotArm1 extends ViewPU {
                         Button.width(this.button_size2);
                         Button.height(this.button_size2);
                         Button.backgroundColor(Color.Transparent);
-                        Button.onTouch((event: TouchEvent) => {
-                            event.stopPropagation();
-                            if (event.type === TouchType.Down) {
-                                this.activateArm();
-                                this.increaseSpeedZZ();
-                                this.holdTimerZZ = setInterval(() => { this.increaseSpeedZZ(); }, 120);
-                                this.resetIdleTimer();
-                            }
-                            if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-                                clearInterval(this.holdTimerZZ);
-                                this.holdTimerZZ = -1;
-                            }
+                        Button.onClick(() => {
+                            this.activateArm();
+                            this.increaseSpeedZZ();
+                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1227,18 +1096,10 @@ export class RobotArm1 extends ViewPU {
                         Button.width(this.button_size2);
                         Button.height(this.button_size2);
                         Button.backgroundColor(Color.Transparent);
-                        Button.onTouch((event: TouchEvent) => {
-                            event.stopPropagation();
-                            if (event.type === TouchType.Down) {
-                                this.activateArm();
-                                this.decreaseSpeedRR();
-                                this.holdTimerRR = setInterval(() => { this.decreaseSpeedRR(); }, 120);
-                                this.resetIdleTimer();
-                            }
-                            if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-                                clearInterval(this.holdTimerRR);
-                                this.holdTimerRR = -1;
-                            }
+                        Button.onClick(() => {
+                            this.activateArm();
+                            this.decreaseSpeedRR();
+                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1289,18 +1150,10 @@ export class RobotArm1 extends ViewPU {
                         Button.width(this.button_size2);
                         Button.height(this.button_size2);
                         Button.backgroundColor(Color.Transparent);
-                        Button.onTouch((event: TouchEvent) => {
-                            event.stopPropagation();
-                            if (event.type === TouchType.Down) {
-                                this.activateArm();
-                                this.increaseSpeedRR();
-                                this.holdTimerRR = setInterval(() => { this.increaseSpeedRR(); }, 120);
-                                this.resetIdleTimer();
-                            }
-                            if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-                                clearInterval(this.holdTimerRR);
-                                this.holdTimerRR = -1;
-                            }
+                        Button.onClick(() => {
+                            this.activateArm();
+                            this.increaseSpeedRR();
+                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1493,7 +1346,7 @@ export class RobotArm1 extends ViewPU {
                                 let componentCall = new RoboticArmWorkRangeView(this, {
                                     data: this.__data,
                                     onActivate: this.activateArm.bind(this)
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 876, col: 17 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 765, col: 17 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -2233,7 +2086,7 @@ export class RobotArm1 extends ViewPU {
                                 this.data.isInfoCardVisible = !this.data.isInfoCardVisible;
                             });
                         }
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 1374, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 1263, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {

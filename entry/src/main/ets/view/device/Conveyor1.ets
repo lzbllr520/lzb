@@ -1,7 +1,6 @@
 
 import { McGaugeChart, Options } from '@mcui/mccharts'
 import { ConveyorState } from '../../model/ConveyorState'
-import { promptAction } from '@kit.ArkUI';
 
 @Component
 export struct Conveyor1 {
@@ -541,21 +540,21 @@ export struct Conveyor1 {
           Row(){
             //选择传送带运动方向
             Select([
-              { value: '正向' },
-              { value: '反向' }
+              { value: '正向运行' },
+              { value: '反向运行' }
             ])
               .optionWidth(90)
               .menuBackgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
               .menuBackgroundColor(Color.Transparent)
               .onSelect((event) => {
-                const newDirection = event.valueOf() === 0 ? '正向' : '反向';
+                const newDirection = event.valueOf() === 0 ? '正向运行' : '反向运行';
                 if (this.data.direction !== newDirection) {
                   this.data.direction = newDirection;
                 }
               })
-              .selected(this.data.direction === '正向' ? 0 : 1)
+              .selected(this.data.direction === '正向运行' ? 0 : 1)
               .value(this.data.direction)
-              .width('20%')
+              .width('40%')
               .height(50)
               .backgroundColor('rgba(255, 255, 255, 0.2)')
               .borderRadius(25)
@@ -569,6 +568,34 @@ export struct Conveyor1 {
               .opacity(this.data.statusText === '运行中' ? 1.0 : 0.4)
               .animation({ duration: 250, curve: Curve.EaseInOut })
 
+            Select([
+              { value: '正常停止' },
+              { value: '急停' }
+            ])
+              .optionWidth(180)
+              .menuBackgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+              .menuBackgroundColor(Color.Transparent)
+              .onSelect((event) => {
+                const newStopMethod = event.valueOf() === 0 ? '正常停止' : '急停';
+                if (this.data.stopMethod !== newStopMethod) {
+                  this.data.stopMethod = newStopMethod
+                }
+              })
+              .selected(this.data.direction === '正常停止' ? 0 : 1)
+              .value(this.data.stopMethod)
+              .width('40%')
+              .height(50)
+              .backgroundColor('rgba(255, 255, 255, 0.2)')
+              .borderRadius(25)
+              .fontColor(Color.White) // 设置选中项的字体颜色
+              .border({
+                width: 1.5,
+                color: 'rgba(255, 255, 255, 0.3)'
+              })
+              // 同样，只有在运行时才启用，并有透明度变化
+              .enabled(this.data.statusText === '运行中')
+              .opacity(this.data.statusText === '运行中' ? 1.0 : 0.4)
+              .animation({ duration: 250, curve: Curve.EaseInOut })
 
 
           }

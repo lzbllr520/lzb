@@ -32,6 +32,7 @@ interface MainPage_Params {
     showSidebar?: boolean;
     context?;
     isSidebarButtonPressed?: boolean;
+    servers?: Server[] | null;
     bgOpacity?: number;
 }
 import { MasterStation } from "@normalized:N&&&entry/src/main/ets/view/MasterStation&";
@@ -46,6 +47,8 @@ import { ConveyorState } from "@normalized:N&&&entry/src/main/ets/model/Conveyor
 import { DollyState } from "@normalized:N&&&entry/src/main/ets/model/DollyState&";
 import preferences from "@ohos:data.preferences";
 import promptAction from "@ohos:promptAction";
+import { getAllServers } from "@normalized:N&&&entry/src/main/ets/service/Request&";
+import type { Server } from '../model/ServerState';
 //日志接口
 interface LogEntry {
     id: number;
@@ -84,6 +87,9 @@ class MainPage extends ViewPU {
         this.__isSidebarButtonPressed = new ObservedPropertySimplePU(false
         //侧边栏的显示与隐藏
         , this, "isSidebarButtonPressed");
+        this.__servers = new ObservedPropertyObjectPU([]
+        //页面的初始生命周期
+        , this, "servers");
         this.__bgOpacity = new ObservedPropertySimplePU(0, this, "bgOpacity");
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
@@ -140,6 +146,9 @@ class MainPage extends ViewPU {
         if (params.isSidebarButtonPressed !== undefined) {
             this.isSidebarButtonPressed = params.isSidebarButtonPressed;
         }
+        if (params.servers !== undefined) {
+            this.servers = params.servers;
+        }
         if (params.bgOpacity !== undefined) {
             this.bgOpacity = params.bgOpacity;
         }
@@ -163,6 +172,7 @@ class MainPage extends ViewPU {
         this.__currentPage.purgeDependencyOnElmtId(rmElmtId);
         this.__showSidebar.purgeDependencyOnElmtId(rmElmtId);
         this.__isSidebarButtonPressed.purgeDependencyOnElmtId(rmElmtId);
+        this.__servers.purgeDependencyOnElmtId(rmElmtId);
         this.__bgOpacity.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
@@ -182,6 +192,7 @@ class MainPage extends ViewPU {
         this.__currentPage.aboutToBeDeleted();
         this.__showSidebar.aboutToBeDeleted();
         this.__isSidebarButtonPressed.aboutToBeDeleted();
+        this.__servers.aboutToBeDeleted();
         this.__bgOpacity.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
@@ -414,33 +425,6 @@ class MainPage extends ViewPU {
     set robotArmAvatar(newValue: Resource | undefined) {
         this.__robotArmAvatar.set(newValue);
     }
-    private showExitDialog() {
-        // 获取UIAbility的上下文，用于调用terminateSelf方法
-        const context = getContext(this) as common.UIAbilityContext;
-        //确认操作弹窗
-        AlertDialog.show({
-            title: '操作确认',
-            message: '是否退出应用',
-            autoCancel: true,
-            alignment: DialogAlignment.Center,
-            buttons: [
-                {
-                    value: '取消',
-                    action: () => {
-                        // 用户点击取消
-                    }
-                },
-                {
-                    value: '确认',
-                    fontColor: Color.Red,
-                    action: () => {
-                        //确认操作执行的内容
-                        context.terminateSelf();
-                    }
-                }
-            ]
-        });
-    }
     private __currentPage: ObservedPropertySimplePU<number>; // 当前页面索引，默认为0
     get currentPage() {
         return this.__currentPage.get();
@@ -468,9 +452,19 @@ class MainPage extends ViewPU {
     toggleSidebar() {
         this.showSidebar = !this.showSidebar;
     }
+    private __servers: ObservedPropertyObjectPU<Server[] | null>;
+    get servers() {
+        return this.__servers.get();
+    }
+    set servers(newValue: Server[] | null) {
+        this.__servers.set(newValue);
+    }
     //页面的初始生命周期
     async aboutToAppear() {
         try {
+            //获取所有服务器
+            const servers: Server[] | null = await getAllServers();
+            this.servers = servers;
             //先加载本地的日志到应用中
             this.loadLogs();
             //先将图像信息状态提升，这样就不用每次切换页面都去重新加载了
@@ -505,7 +499,7 @@ class MainPage extends ViewPU {
             Stack.height('100%');
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Image.create({ "id": 16777273, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+            Image.create({ "id": 16777274, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
             Image.width('100%');
             Image.height('100%');
             Image.objectFit(ImageFit.Cover);
@@ -606,7 +600,7 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 314, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 288, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -648,7 +642,7 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 326, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 300, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -690,7 +684,7 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 338, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 312, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -732,7 +726,7 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 350, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 324, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -774,7 +768,7 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 362, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 336, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -824,15 +818,37 @@ class MainPage extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new MasterStation(this, {}, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 394, col: 13 });
+                                let componentCall = new MasterStation(this, {
+                                    servers: this.servers ?? [],
+                                    conveyorData1: this.__conveyorData1,
+                                    conveyorData2: this.__conveyorData2,
+                                    dollyData: this.__dollyData,
+                                    robot1Data: this.__robot1Data,
+                                    robot2Data: this.__robot2Data,
+                                    robot3Data: this.__robot3Data,
+                                    addLog: this.addLog.bind(this),
+                                    isLineRunning: this.__isLineRunning
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 368, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
-                                    return {};
+                                    return {
+                                        servers: this.servers ?? [],
+                                        conveyorData1: this.conveyorData1,
+                                        conveyorData2: this.conveyorData2,
+                                        dollyData: this.dollyData,
+                                        robot1Data: this.robot1Data,
+                                        robot2Data: this.robot2Data,
+                                        robot3Data: this.robot3Data,
+                                        addLog: this.addLog.bind(this),
+                                        isLineRunning: this.isLineRunning
+                                    };
                                 };
                                 componentCall.paramsGenerator_ = paramsLambda;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                    servers: this.servers ?? []
+                                });
                             }
                         }, { name: "MasterStation" });
                     }
@@ -858,7 +874,7 @@ class MainPage extends ViewPU {
                                     onIndexChange: (index: number) => {
                                         this.deviceManagerIndex = index;
                                     }
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 396, col: 13 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 380, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -895,7 +911,7 @@ class MainPage extends ViewPU {
                                 let componentCall = new TaskLog(this, {
                                     allLogItems: this.allLogItems,
                                     clearAllLogs: this.clearAllLogs.bind(this)
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 413, col: 13 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 397, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -919,7 +935,7 @@ class MainPage extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new DataStatics(this, {}, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 418, col: 13 });
+                                let componentCall = new DataStatics(this, {}, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 402, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {};
@@ -941,7 +957,7 @@ class MainPage extends ViewPU {
                                 let componentCall = new SystemSetting(this, {
                                     addLog: this.addLog.bind(this),
                                     avatar: this.__userAvatar
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 420, col: 13 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 404, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {

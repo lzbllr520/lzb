@@ -1259,8 +1259,8 @@ class DirectionalButton extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Context.animation({ curve: Curve.EaseOut, duration: 150 });
-            Row.width(50);
-            Row.height(50);
+            Row.width(80);
+            Row.height(80);
             Row.borderRadius(16);
             Row.justifyContent(FlexAlign.Center);
             Row.backgroundColor('rgba(45, 50, 65, 0.45)');
@@ -1286,8 +1286,8 @@ class DirectionalButton extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.icon);
-            Image.width(20);
-            Image.height(20);
+            Image.width(40);
+            Image.height(40);
             Image.fillColor(Color.White);
         }, Image);
         Row.pop();

@@ -1,0 +1,2236 @@
+Ôr@Ÿªassertions¤code´customTransformCache¬dependencies¢id¤meta±moduleSideEffects¬originalCode±originalSourcemap«resolvedIds®sourcemapChainµsyntheticNamedExportsµtransformDependencies®transformFiles¨cacheAstÔrAÚ”úif (!("finalizeConstruction" in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+}
+import { LV_MD_CONTENT_TYPE, LV_MD_DATA_TYPE } from './utils/constant';
+import { WebControl } from './webControl';
+import { ImgControl } from './imgControl';
+import { determineTitle } from './utils/determine/detTitle';
+import { determineImg } from './utils/determine/detImg';
+import { determineQuote } from './utils/determine/detQuote';
+import { determineLine } from './utils/determine/detLine';
+import { determineTable } from './utils/determine/detTable';
+import { determineCode } from './utils/determine/detCode';
+import { determineCheckbox } from './utils/determine/detCheckbox';
+import { determineTabulate } from './utils/determine/detTabulate';
+import { determineHTMLIMG, determineHTMLFONT } from './utils/determine/detHTMLEL';
+import { lvTitleComponent } from './utils/lvTitleComponent';
+import { lvCompositeComponent } from './utils/lvCompositeComponent';
+import { lvTableComponent } from './utils/lvTableComponent';
+import { lvCodeComponent } from './utils/lvCodeComponent';
+import { lvImgComponent } from './utils/lvImgComponent';
+import lvLineBuilder from './utils/lvLineBuilder';
+import { lvQuoteComponent } from './utils/lvQuoteComponent';
+import { lvCheckboxComponent } from './utils/lvCheckboxComponent';
+import { lvTabulateComponent } from './utils/lvTabulateComponent';
+import { lvHTMLImgComponent } from './utils/lvHTMLImgComponent';
+import { lvHTMLFontComponent } from './utils/lvHTMLFontComponent';
+import buffer from "@ohos.buffer";
+import fs from "@ohos.file.fs";
+import { lvFootnoteView } from './utils/lvFootnoteComponent';
+import { LvFootnoteController } from './utils/controller/lvFootnoteController';
+import { html2md } from '@luvi/html2md';
+export default class lvMarkdownIn extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.o = new SynchedPropertySimpleOneWayPU(params.text, this, "text");
+        this.t = new SynchedPropertySimpleOneWayPU(params.loadMode, this, "loadMode");
+        this.u = new SynchedPropertySimpleOneWayPU(params.rawfilePath, this, "rawfilePath");
+        this.a1 = new SynchedPropertySimpleOneWayPU(params.sandboxPath, this, "sandboxPath");
+        this.b1 = new ObservedPropertyObjectPU(null, this, "context");
+        this.loadCallBack = {
+            success(msg) {
+            },
+            fail(msg) {
+            }
+        };
+        this.c1 = new ObservedPropertySimplePU(new Date().getTime(), this, "cge");
+        this.d1 = new ObservedPropertyObjectPU([], this, "resultData");
+        this.e1 = new ObservedPropertyObjectPU(new LvFootnoteController(), this, "footnoteController");
+        this.startTime = new Date().getTime();
+        this.dialogController = new CustomDialogController({
+            builder: () => {
+                let jsDialog = new WebControl(this, {}, undefined, -1, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 78, f1: 14 });
+                jsDialog.setController(this.dialogController);
+                ViewPU.create(jsDialog);
+                let paramsLambda = () => {
+                    return {};
+                };
+                jsDialog.paramsGenerator_ = paramsLambda;
+            },
+            alignment: DialogAlignment.Bottom,
+            customStyle: true
+        }, this);
+        this.imgController = new CustomDialogController({
+            builder: () => {
+                let jsDialog = new ImgControl(this, {}, undefined, -1, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 83, f1: 14 });
+                jsDialog.setController(this.imgController);
+                ViewPU.create(jsDialog);
+                let paramsLambda = () => {
+                    return {};
+                };
+                jsDialog.paramsGenerator_ = paramsLambda;
+            },
+            customStyle: true
+        }, this);
+        this.setInitiallyProvidedValue(params);
+        this.declareWatch("text", this.textChange);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params) {
+        if (params.loadMode === undefined) {
+            this.t.set("text");
+        }
+        if (params.context !== undefined) {
+            this.context = params.context;
+        }
+        if (params.loadCallBack !== undefined) {
+            this.loadCallBack = params.loadCallBack;
+        }
+        if (params.cge !== undefined) {
+            this.cge = params.cge;
+        }
+        if (params.resultData !== undefined) {
+            this.resultData = params.resultData;
+        }
+        if (params.footnoteController !== undefined) {
+            this.footnoteController = params.footnoteController;
+        }
+        if (params.startTime !== undefined) {
+            this.startTime = params.startTime;
+        }
+        if (params.dialogController !== undefined) {
+            this.dialogController = params.dialogController;
+        }
+        if (params.imgController !== undefined) {
+            this.imgController = params.imgController;
+        }
+    }
+    updateStateVars(params) {
+        this.o.reset(params.text);
+        this.t.reset(params.loadMode);
+        this.u.reset(params.rawfilePath);
+        this.a1.reset(params.sandboxPath);
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.o.purgeDependencyOnElmtId(rmElmtId);
+        this.t.purgeDependencyOnElmtId(rmElmtId);
+        this.u.purgeDependencyOnElmtId(rmElmtId);
+        this.a1.purgeDependencyOnElmtId(rmElmtId);
+        this.b1.purgeDependencyOnElmtId(rmElmtId);
+        this.c1.purgeDependencyOnElmtId(rmElmtId);
+        this.d1.purgeDependencyOnElmtId(rmElmtId);
+        this.e1.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.o.aboutToBeDeleted();
+        this.t.aboutToBeDeleted();
+        this.u.aboutToBeDeleted();
+        this.a1.aboutToBeDeleted();
+        this.b1.aboutToBeDeleted();
+        this.c1.aboutToBeDeleted();
+        this.d1.aboutToBeDeleted();
+        this.e1.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    get text() {
+        return this.o.get();
+    }
+    set text(newValue) {
+        this.o.set(newValue);
+    }
+    get loadMode() {
+        return this.t.get();
+    }
+    set loadMode(newValue) {
+        this.t.set(newValue);
+    }
+    get rawfilePath() {
+        return this.u.get();
+    }
+    set rawfilePath(newValue) {
+        this.u.set(newValue);
+    }
+    get sandboxPath() {
+        return this.a1.get();
+    }
+    set sandboxPath(newValue) {
+        this.a1.set(newValue);
+    }
+    get context() {
+        return this.b1.get();
+    }
+    set context(newValue) {
+        this.b1.set(newValue);
+    }
+    get cge() {
+        return this.c1.get();
+    }
+    set cge(newValue) {
+        this.c1.set(newValue);
+    }
+    get resultData() {
+        return this.d1.get();
+    }
+    set resultData(newValue) {
+        this.d1.set(newValue);
+    }
+    get footnoteController() {
+        return this.e1.get();
+    }
+    set footnoteController(newValue) {
+        this.e1.set(newValue);
+    }
+    textChange() {
+        if (this.loadMode == "text") {
+            this._readText();
+        }
+    }
+    cBack(type, code, message) {
+        if (type == "success") {
+            if (this.loadCallBack.success) {
+                this.loadCallBack?.success({ code: code, message: message });
+            }
+        }
+        if (type == "fail") {
+            if (this.loadCallBack.fail) {
+                this.loadCallBack?.fail({ code: code, message: message });
+            }
+        }
+    }
+    aboutToAppear() {
+        this.startTime = new Date().getTime();
+        if (this.loadMode == "text") {
+            this._readText();
+        }
+        if (this.loadMode == "rawfile") {
+            this._loadRawfile();
+        }
+        if (this.loadMode == "sandbox") {
+            this._loadSandbox();
+        }
+    }
+    _loadRawfile() {
+        if (!this.rawfilePath && this.loadCallBack.fail) {
+            this.cBack("fail", "50011", "The rawfile resource file is incorrect.");
+            return;
+        }
+        if (!this.context) {
+            this.cBack("fail", "50030", "The context is incorrect.");
+            return;
+        }
+        try {
+            let q1 = this.context?.resourceManager.getRawFileContentSync(this.rawfilePath);
+            let s1 = buffer.from(q1).buffer;
+            let t1 = new buffer.Blob([s1]);
+            let u1 = t1.text();
+            u1.then((str) => {
+                this._readText(str);
+            });
+        }
+        catch (error) {
+            this.cBack("fail", "50012", "The resourceManager getRawFileContentSync is error, " +
+                JSON.stringify(error));
+        }
+    }
+    _loadSandbox() {
+        if (!this.sandboxPath) {
+            this.cBack("fail", "50021", "The sandbox file is incorrect.");
+            return;
+        }
+        try {
+            let p1 = {
+                offset: 0,
+                length: 0,
+                encoding: 'utf-8'
+            };
+            let stat = fs.statSync(this.sandboxPath);
+            p1.length = stat.size;
+            let str = fs.readTextSync(this.sandboxPath, p1);
+            this._readText(str);
+        }
+        catch (error) {
+            this.cBack("fail", "50022", "The fileIo readText is error, " +
+                JSON.stringify(error));
+        }
+    }
+    _readText(text = this.text) {
+        const i1 = html2md(text);
+        console.log("luvi > " + i1);
+        let j1 = -1;
+        let k1 = i1.split('\n').map((item) => {
+            if (j1 < 0) {
+                if (determineCode(item)) {
+                    ++j1;
+                    return LV_MD_CONTENT_TYPE.CODE;
+                }
+                if (determineTable(item)) {
+                    return LV_MD_CONTENT_TYPE.TABLE;
+                }
+                return LV_MD_CONTENT_TYPE.TEXT;
+            }
+            else {
+                if (determineCode(item)) {
+                    j1 = -1;
+                    return LV_MD_CONTENT_TYPE.TEXT;
+                }
+                else {
+                    return LV_MD_CONTENT_TYPE.CODE;
+                }
+            }
+        });
+        let l1 = [];
+        let m1 = "";
+        let n1 = "";
+        i1.split('\n').forEach((item, o1) => {
+            if (k1[o1] == LV_MD_CONTENT_TYPE.TEXT) {
+                if (m1 != "") {
+                    m1 += item + '\n';
+                    l1.push([LV_MD_CONTENT_TYPE.CODE, m1]);
+                    m1 = "";
+                }
+                else if (n1 != "") {
+                    n1 += item + '\n';
+                    l1.push([LV_MD_CONTENT_TYPE.TABLE, n1]);
+                    n1 = "";
+                }
+                else {
+                    if (determineTitle(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.TITLE, item.trim()]);
+                    }
+                    else if (determineImg(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.IMG, item.trim()]);
+                    }
+                    else if (determineQuote(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.QUOTE, item.trim()]);
+                    }
+                    else if (determineLine(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.LINE, item.trim()]);
+                    }
+                    else if (determineCheckbox(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.CHECKBOX, item.trim()]);
+                    }
+                    else if (o1 > 0 && determineTabulate(item, i1.split('\n')[o1 - 1], i1.split('\n')[o1 + 1])) {
+                        return l1.push([LV_MD_CONTENT_TYPE.TABULATE, item]);
+                    }
+                    else if (determineHTMLIMG(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.HTMLIMG, item]);
+                    }
+                    else if (determineHTMLFONT(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.HTMLFONT, item]);
+                    }
+                    else {
+                        return l1.push([LV_MD_CONTENT_TYPE.TEXT, item.trim()]);
+                    }
+                }
+            }
+            else if (k1[o1] == LV_MD_CONTENT_TYPE.TABLE) {
+                n1 += item + '\n';
+            }
+            else {
+                m1 += item + '\n';
+            }
+            return item;
+        });
+        this.resultData = l1;
+        this.cBack("success", "20000", "Component Load Success.");
+        const endTime = new Date().getTime();
+        const elapsedTime = endTime - this.startTime;
+        console.log(`lv-markdown-in execution time is: ${elapsedTime} ms`);
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            List.create();
+            List.edgeEffect(EdgeEffect.None);
+            List.scrollBar(BarState.Off);
+        }, List);
+        {
+            const itemCreation = (elmtId, isInitialRender) => {
+                ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+                itemCreation2(elmtId, isInitialRender);
+                if (!isInitialRender) {
+                    ListItem.pop();
+                }
+                ViewStackProcessor.StopGetAccessRecording();
+            };
+            const itemCreation2 = (elmtId, isInitialRender) => {
+                ListItem.create(deepRenderFunction, true);
+            };
+            const deepRenderFunction = (elmtId, isInitialRender) => {
+                itemCreation(elmtId, isInitialRender);
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    Column.create();
+                    Column.alignItems(HorizontalAlign.Start);
+                    Column.width('100%');
+                }, Column);
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    ForEach.create();
+                    const forEachItemGenFunction = _item => {
+                        const item = _item;
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            Row.create();
+                            Row.margin({ top: !item[1] ? 10 : 5 });
+                        }, Row);
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.TEXT) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvCompositeComponent(this, {
+                                                    text: item[LV_MD_DATA_TYPE.MSG],
+                                                    dialogController: this.dialogController,
+                                                    footnoteController: this.footnoteController
+                                                }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 245, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.dialogController,
+                                                        footnoteController: this.footnoteController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                                    footnoteController: this.footnoteController
+                                                });
+                                            }
+                                        }, { name: "lvCompositeComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.TITLE) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvTitleComponent(this, { text: item[LV_MD_DATA_TYPE.MSG], dialogController: this.dialogController }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 252, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.dialogController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvTitleComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.CODE) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvCodeComponent(this, { text: item[LV_MD_DATA_TYPE.MSG] }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 255, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG]
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvCodeComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.IMG) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvImgComponent(this, { text: item[LV_MD_DATA_TYPE.MSG], dialogController: this.imgController }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 258, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.imgController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvImgComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.HTMLIMG) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvHTMLImgComponent(this, { text: item[LV_MD_DATA_TYPE.MSG], dialogController: this.imgController }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 261, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.imgController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvHTMLImgComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.HTMLFONT) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvHTMLFontComponent(this, { text: item[LV_MD_DATA_TYPE.MSG] }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 264, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG]
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvHTMLFontComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.QUOTE) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvQuoteComponent(this, {
+                                                    text: item[LV_MD_DATA_TYPE.MSG],
+                                                    dialogController: this.dialogController,
+                                                }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 267, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.dialogController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvQuoteComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.LINE) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    lvLineBuilder.bind(this)();
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.TABLE) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvTableComponent(this, {
+                                                    text: item[LV_MD_DATA_TYPE.MSG],
+                                                    dialogController: this.dialogController,
+                                                }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 276, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.dialogController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvTableComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.CHECKBOX) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvCheckboxComponent(this, {
+                                                    text: item[LV_MD_DATA_TYPE.MSG],
+                                                    dialogController: this.dialogController,
+                                                }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 282, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.dialogController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvCheckboxComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.TABULATE) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvTabulateComponent(this, {
+                                                    text: item[LV_MD_DATA_TYPE.MSG],
+                                                    dialogController: this.dialogController,
+                                                }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 288, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.dialogController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvTabulateComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        Row.pop();
+                    };
+                    this.forEachUpdateFunction(elmtId, this.resultData, forEachItemGenFunction);
+                }, ForEach);
+                ForEach.pop();
+                {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        if (isInitialRender) {
+                            let componentCall = new lvFootnoteView(this, { dialogController: this.dialogController }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 296, f1: 13 });
+                            ViewPU.create(componentCall);
+                            let paramsLambda = () => {
+                                return {
+                                    dialogController: this.dialogController
+                                };
+                            };
+                            componentCall.paramsGenerator_ = paramsLambda;
+                        }
+                        else {
+                            this.updateStateVarsOfChildByElmtId(elmtId, {});
+                        }
+                    }, { name: "lvFootnoteView" });
+                }
+                Column.pop();
+                ListItem.pop();
+            };
+            this.observeComponentCreation2(itemCreation2, ListItem);
+            ListItem.pop();
+        }
+        List.pop();
+        Column.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+ÂÜ ÙŸD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\constant\index.jsÙ›D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\webControl\index.jsÙ›D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\imgControl\index.jsÙ£D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\determine\detTitle.jsÙ¡D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\determine\detImg.jsÙ£D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\determine\detQuote.jsÙ¢D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\determine\detLine.jsÙ£D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\determine\detTable.jsÙ¢D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\determine\detCode.jsÙ¦D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\determine\detCheckbox.jsÙ¦D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\determine\detTabulate.jsÙ¤D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\determine\detHTMLEL.jsÙ¡D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvTitleComponent.jsÙ¥D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvCompositeComponent.jsÙ¡D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvTableComponent.jsÙ D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvCodeComponent.jsÙŸD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvImgComponent.jsÙD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvLineBuilder.jsÙ¡D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvQuoteComponent.jsÙ¤D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvCheckboxComponent.jsÙ¤D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvTabulateComponent.jsÙ£D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvHTMLImgComponent.jsÙ¤D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvHTMLFontComponent.jsÙ| hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.buffer.d.tsÙ} hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.file.fs.d.tsÙ¤D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvFootnoteComponent.jsÙ°D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\controller\lvFootnoteController.jsÙbD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+html2md@1.0.3\oh_modules\@luvi\html2md\Index.etsÙD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\Index.jsÔrB˜±isLocalDependency¯isNodeEntryFile§pkgPath§pkgNameªpkgVersion±belongProjectPath±dependencyPkgInfo¨commonjsÂÂÙgD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in´@luvi/lv-markdown-in¦2.0.15ºD:\apps\deveco\tzb2025jbgsÔrC’§pkgNameªpkgVersion´@luvi/lv-markdown-in¦2.0.15ÔrD’°hasDefaultExportªisCommonJSÃÂÃÚ”úif (!("finalizeConstruction" in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+}
+import { LV_MD_CONTENT_TYPE, LV_MD_DATA_TYPE } from './utils/constant';
+import { WebControl } from './webControl';
+import { ImgControl } from './imgControl';
+import { determineTitle } from './utils/determine/detTitle';
+import { determineImg } from './utils/determine/detImg';
+import { determineQuote } from './utils/determine/detQuote';
+import { determineLine } from './utils/determine/detLine';
+import { determineTable } from './utils/determine/detTable';
+import { determineCode } from './utils/determine/detCode';
+import { determineCheckbox } from './utils/determine/detCheckbox';
+import { determineTabulate } from './utils/determine/detTabulate';
+import { determineHTMLIMG, determineHTMLFONT } from './utils/determine/detHTMLEL';
+import { lvTitleComponent } from './utils/lvTitleComponent';
+import { lvCompositeComponent } from './utils/lvCompositeComponent';
+import { lvTableComponent } from './utils/lvTableComponent';
+import { lvCodeComponent } from './utils/lvCodeComponent';
+import { lvImgComponent } from './utils/lvImgComponent';
+import lvLineBuilder from './utils/lvLineBuilder';
+import { lvQuoteComponent } from './utils/lvQuoteComponent';
+import { lvCheckboxComponent } from './utils/lvCheckboxComponent';
+import { lvTabulateComponent } from './utils/lvTabulateComponent';
+import { lvHTMLImgComponent } from './utils/lvHTMLImgComponent';
+import { lvHTMLFontComponent } from './utils/lvHTMLFontComponent';
+import buffer from "@ohos.buffer";
+import fs from "@ohos.file.fs";
+import { lvFootnoteView } from './utils/lvFootnoteComponent';
+import { LvFootnoteController } from './utils/controller/lvFootnoteController';
+import { html2md } from '@luvi/html2md';
+export default class lvMarkdownIn extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.o = new SynchedPropertySimpleOneWayPU(params.text, this, "text");
+        this.t = new SynchedPropertySimpleOneWayPU(params.loadMode, this, "loadMode");
+        this.u = new SynchedPropertySimpleOneWayPU(params.rawfilePath, this, "rawfilePath");
+        this.a1 = new SynchedPropertySimpleOneWayPU(params.sandboxPath, this, "sandboxPath");
+        this.b1 = new ObservedPropertyObjectPU(null, this, "context");
+        this.loadCallBack = {
+            success(msg) {
+            },
+            fail(msg) {
+            }
+        };
+        this.c1 = new ObservedPropertySimplePU(new Date().getTime(), this, "cge");
+        this.d1 = new ObservedPropertyObjectPU([], this, "resultData");
+        this.e1 = new ObservedPropertyObjectPU(new LvFootnoteController(), this, "footnoteController");
+        this.startTime = new Date().getTime();
+        this.dialogController = new CustomDialogController({
+            builder: () => {
+                let jsDialog = new WebControl(this, {}, undefined, -1, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 78, f1: 14 });
+                jsDialog.setController(this.dialogController);
+                ViewPU.create(jsDialog);
+                let paramsLambda = () => {
+                    return {};
+                };
+                jsDialog.paramsGenerator_ = paramsLambda;
+            },
+            alignment: DialogAlignment.Bottom,
+            customStyle: true
+        }, this);
+        this.imgController = new CustomDialogController({
+            builder: () => {
+                let jsDialog = new ImgControl(this, {}, undefined, -1, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 83, f1: 14 });
+                jsDialog.setController(this.imgController);
+                ViewPU.create(jsDialog);
+                let paramsLambda = () => {
+                    return {};
+                };
+                jsDialog.paramsGenerator_ = paramsLambda;
+            },
+            customStyle: true
+        }, this);
+        this.setInitiallyProvidedValue(params);
+        this.declareWatch("text", this.textChange);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params) {
+        if (params.loadMode === undefined) {
+            this.t.set("text");
+        }
+        if (params.context !== undefined) {
+            this.context = params.context;
+        }
+        if (params.loadCallBack !== undefined) {
+            this.loadCallBack = params.loadCallBack;
+        }
+        if (params.cge !== undefined) {
+            this.cge = params.cge;
+        }
+        if (params.resultData !== undefined) {
+            this.resultData = params.resultData;
+        }
+        if (params.footnoteController !== undefined) {
+            this.footnoteController = params.footnoteController;
+        }
+        if (params.startTime !== undefined) {
+            this.startTime = params.startTime;
+        }
+        if (params.dialogController !== undefined) {
+            this.dialogController = params.dialogController;
+        }
+        if (params.imgController !== undefined) {
+            this.imgController = params.imgController;
+        }
+    }
+    updateStateVars(params) {
+        this.o.reset(params.text);
+        this.t.reset(params.loadMode);
+        this.u.reset(params.rawfilePath);
+        this.a1.reset(params.sandboxPath);
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.o.purgeDependencyOnElmtId(rmElmtId);
+        this.t.purgeDependencyOnElmtId(rmElmtId);
+        this.u.purgeDependencyOnElmtId(rmElmtId);
+        this.a1.purgeDependencyOnElmtId(rmElmtId);
+        this.b1.purgeDependencyOnElmtId(rmElmtId);
+        this.c1.purgeDependencyOnElmtId(rmElmtId);
+        this.d1.purgeDependencyOnElmtId(rmElmtId);
+        this.e1.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.o.aboutToBeDeleted();
+        this.t.aboutToBeDeleted();
+        this.u.aboutToBeDeleted();
+        this.a1.aboutToBeDeleted();
+        this.b1.aboutToBeDeleted();
+        this.c1.aboutToBeDeleted();
+        this.d1.aboutToBeDeleted();
+        this.e1.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    get text() {
+        return this.o.get();
+    }
+    set text(newValue) {
+        this.o.set(newValue);
+    }
+    get loadMode() {
+        return this.t.get();
+    }
+    set loadMode(newValue) {
+        this.t.set(newValue);
+    }
+    get rawfilePath() {
+        return this.u.get();
+    }
+    set rawfilePath(newValue) {
+        this.u.set(newValue);
+    }
+    get sandboxPath() {
+        return this.a1.get();
+    }
+    set sandboxPath(newValue) {
+        this.a1.set(newValue);
+    }
+    get context() {
+        return this.b1.get();
+    }
+    set context(newValue) {
+        this.b1.set(newValue);
+    }
+    get cge() {
+        return this.c1.get();
+    }
+    set cge(newValue) {
+        this.c1.set(newValue);
+    }
+    get resultData() {
+        return this.d1.get();
+    }
+    set resultData(newValue) {
+        this.d1.set(newValue);
+    }
+    get footnoteController() {
+        return this.e1.get();
+    }
+    set footnoteController(newValue) {
+        this.e1.set(newValue);
+    }
+    textChange() {
+        if (this.loadMode == "text") {
+            this._readText();
+        }
+    }
+    cBack(type, code, message) {
+        if (type == "success") {
+            if (this.loadCallBack.success) {
+                this.loadCallBack?.success({ code: code, message: message });
+            }
+        }
+        if (type == "fail") {
+            if (this.loadCallBack.fail) {
+                this.loadCallBack?.fail({ code: code, message: message });
+            }
+        }
+    }
+    aboutToAppear() {
+        this.startTime = new Date().getTime();
+        if (this.loadMode == "text") {
+            this._readText();
+        }
+        if (this.loadMode == "rawfile") {
+            this._loadRawfile();
+        }
+        if (this.loadMode == "sandbox") {
+            this._loadSandbox();
+        }
+    }
+    _loadRawfile() {
+        if (!this.rawfilePath && this.loadCallBack.fail) {
+            this.cBack("fail", "50011", "The rawfile resource file is incorrect.");
+            return;
+        }
+        if (!this.context) {
+            this.cBack("fail", "50030", "The context is incorrect.");
+            return;
+        }
+        try {
+            let q1 = this.context?.resourceManager.getRawFileContentSync(this.rawfilePath);
+            let s1 = buffer.from(q1).buffer;
+            let t1 = new buffer.Blob([s1]);
+            let u1 = t1.text();
+            u1.then((str) => {
+                this._readText(str);
+            });
+        }
+        catch (error) {
+            this.cBack("fail", "50012", "The resourceManager getRawFileContentSync is error, " +
+                JSON.stringify(error));
+        }
+    }
+    _loadSandbox() {
+        if (!this.sandboxPath) {
+            this.cBack("fail", "50021", "The sandbox file is incorrect.");
+            return;
+        }
+        try {
+            let p1 = {
+                offset: 0,
+                length: 0,
+                encoding: 'utf-8'
+            };
+            let stat = fs.statSync(this.sandboxPath);
+            p1.length = stat.size;
+            let str = fs.readTextSync(this.sandboxPath, p1);
+            this._readText(str);
+        }
+        catch (error) {
+            this.cBack("fail", "50022", "The fileIo readText is error, " +
+                JSON.stringify(error));
+        }
+    }
+    _readText(text = this.text) {
+        const i1 = html2md(text);
+        console.log("luvi > " + i1);
+        let j1 = -1;
+        let k1 = i1.split('\n').map((item) => {
+            if (j1 < 0) {
+                if (determineCode(item)) {
+                    ++j1;
+                    return LV_MD_CONTENT_TYPE.CODE;
+                }
+                if (determineTable(item)) {
+                    return LV_MD_CONTENT_TYPE.TABLE;
+                }
+                return LV_MD_CONTENT_TYPE.TEXT;
+            }
+            else {
+                if (determineCode(item)) {
+                    j1 = -1;
+                    return LV_MD_CONTENT_TYPE.TEXT;
+                }
+                else {
+                    return LV_MD_CONTENT_TYPE.CODE;
+                }
+            }
+        });
+        let l1 = [];
+        let m1 = "";
+        let n1 = "";
+        i1.split('\n').forEach((item, o1) => {
+            if (k1[o1] == LV_MD_CONTENT_TYPE.TEXT) {
+                if (m1 != "") {
+                    m1 += item + '\n';
+                    l1.push([LV_MD_CONTENT_TYPE.CODE, m1]);
+                    m1 = "";
+                }
+                else if (n1 != "") {
+                    n1 += item + '\n';
+                    l1.push([LV_MD_CONTENT_TYPE.TABLE, n1]);
+                    n1 = "";
+                }
+                else {
+                    if (determineTitle(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.TITLE, item.trim()]);
+                    }
+                    else if (determineImg(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.IMG, item.trim()]);
+                    }
+                    else if (determineQuote(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.QUOTE, item.trim()]);
+                    }
+                    else if (determineLine(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.LINE, item.trim()]);
+                    }
+                    else if (determineCheckbox(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.CHECKBOX, item.trim()]);
+                    }
+                    else if (o1 > 0 && determineTabulate(item, i1.split('\n')[o1 - 1], i1.split('\n')[o1 + 1])) {
+                        return l1.push([LV_MD_CONTENT_TYPE.TABULATE, item]);
+                    }
+                    else if (determineHTMLIMG(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.HTMLIMG, item]);
+                    }
+                    else if (determineHTMLFONT(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.HTMLFONT, item]);
+                    }
+                    else {
+                        return l1.push([LV_MD_CONTENT_TYPE.TEXT, item.trim()]);
+                    }
+                }
+            }
+            else if (k1[o1] == LV_MD_CONTENT_TYPE.TABLE) {
+                n1 += item + '\n';
+            }
+            else {
+                m1 += item + '\n';
+            }
+            return item;
+        });
+        this.resultData = l1;
+        this.cBack("success", "20000", "Component Load Success.");
+        const endTime = new Date().getTime();
+        const elapsedTime = endTime - this.startTime;
+        console.log(`lv-markdown-in execution time is: ${elapsedTime} ms`);
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            List.create();
+            List.edgeEffect(EdgeEffect.None);
+            List.scrollBar(BarState.Off);
+        }, List);
+        {
+            const itemCreation = (elmtId, isInitialRender) => {
+                ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+                itemCreation2(elmtId, isInitialRender);
+                if (!isInitialRender) {
+                    ListItem.pop();
+                }
+                ViewStackProcessor.StopGetAccessRecording();
+            };
+            const itemCreation2 = (elmtId, isInitialRender) => {
+                ListItem.create(deepRenderFunction, true);
+            };
+            const deepRenderFunction = (elmtId, isInitialRender) => {
+                itemCreation(elmtId, isInitialRender);
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    Column.create();
+                    Column.alignItems(HorizontalAlign.Start);
+                    Column.width('100%');
+                }, Column);
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    ForEach.create();
+                    const forEachItemGenFunction = _item => {
+                        const item = _item;
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            Row.create();
+                            Row.margin({ top: !item[1] ? 10 : 5 });
+                        }, Row);
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.TEXT) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvCompositeComponent(this, {
+                                                    text: item[LV_MD_DATA_TYPE.MSG],
+                                                    dialogController: this.dialogController,
+                                                    footnoteController: this.footnoteController
+                                                }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 245, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.dialogController,
+                                                        footnoteController: this.footnoteController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                                    footnoteController: this.footnoteController
+                                                });
+                                            }
+                                        }, { name: "lvCompositeComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.TITLE) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvTitleComponent(this, { text: item[LV_MD_DATA_TYPE.MSG], dialogController: this.dialogController }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 252, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.dialogController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvTitleComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.CODE) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvCodeComponent(this, { text: item[LV_MD_DATA_TYPE.MSG] }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 255, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG]
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvCodeComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.IMG) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvImgComponent(this, { text: item[LV_MD_DATA_TYPE.MSG], dialogController: this.imgController }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 258, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.imgController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvImgComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.HTMLIMG) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvHTMLImgComponent(this, { text: item[LV_MD_DATA_TYPE.MSG], dialogController: this.imgController }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 261, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.imgController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvHTMLImgComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.HTMLFONT) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvHTMLFontComponent(this, { text: item[LV_MD_DATA_TYPE.MSG] }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 264, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG]
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvHTMLFontComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.QUOTE) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvQuoteComponent(this, {
+                                                    text: item[LV_MD_DATA_TYPE.MSG],
+                                                    dialogController: this.dialogController,
+                                                }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 267, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.dialogController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvQuoteComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.LINE) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    lvLineBuilder.bind(this)();
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.TABLE) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvTableComponent(this, {
+                                                    text: item[LV_MD_DATA_TYPE.MSG],
+                                                    dialogController: this.dialogController,
+                                                }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 276, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.dialogController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvTableComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.CHECKBOX) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvCheckboxComponent(this, {
+                                                    text: item[LV_MD_DATA_TYPE.MSG],
+                                                    dialogController: this.dialogController,
+                                                }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 282, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.dialogController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvCheckboxComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.TABULATE) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvTabulateComponent(this, {
+                                                    text: item[LV_MD_DATA_TYPE.MSG],
+                                                    dialogController: this.dialogController,
+                                                }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 288, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.dialogController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvTabulateComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        Row.pop();
+                    };
+                    this.forEachUpdateFunction(elmtId, this.resultData, forEachItemGenFunction);
+                }, ForEach);
+                ForEach.pop();
+                {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        if (isInitialRender) {
+                            let componentCall = new lvFootnoteView(this, { dialogController: this.dialogController }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 296, f1: 13 });
+                            ViewPU.create(componentCall);
+                            let paramsLambda = () => {
+                                return {
+                                    dialogController: this.dialogController
+                                };
+                            };
+                            componentCall.paramsGenerator_ = paramsLambda;
+                        }
+                        else {
+                            this.updateStateVarsOfChildByElmtId(elmtId, {});
+                        }
+                    }, { name: "lvFootnoteView" });
+                }
+                Column.pop();
+                ListItem.pop();
+            };
+            this.observeComponentCreation2(itemCreation2, ListItem);
+            ListItem.pop();
+        }
+        List.pop();
+        Column.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+ÔrE•§version¨mappings¥names§sources®sourcesContentÜé‘”    ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”  	 ‘”  
+ ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”    ‘”  ! ‘”  " ‘”  # ‘”  $ ‘”  % ‘”  & ‘”  ' ‘”  ( ‘”  ) ‘”  * ‘”  + ‘”  , ‘”  - ‘”  . ‘”  / ‘”  0 ‘”  1 ‘”  2 ‘”  3 ‘”  4 ‘”  5 ‘”  6 ‘”  7 ‘”  8 ‘”  9 ‘”  : ‘”  ; ‘”  < ‘”  = ‘”  > ‘”  ? ‘”  Ì@ ‘”  ÌA ‘”  ÌB ‘”  ÌC ‘”  ÌD ‘”  ÌE ‘”  ÌF ‘”  ÌG ‘”  ÌH ‘”  ÌI ‘”  ÌJ ‘”  ÌK ‘”  ÌL ‘”  ÌM ‘”  ÌN ‘”  ÌO ‘”  ÌP ‘”  ÌQ ‘”  ÌR ‘”  ÌS ‘”  ÌT ‘”  ÌU ‘”  ÌV ‘”  ÌW ‘”  ÌX ‘”  ÌY ‘”  ÌZ ‘”  Ì[ ‘”  Ì\ ‘”  Ì] ‘”  Ì^ ‘”  Ì_ ‘”  Ì` ‘”  Ìa ‘”  Ìb ‘”  Ìc ‘”  Ìd ‘”  Ìe ‘”  Ìf ‘”  Ìg ‘”  Ìh ‘”  Ìi ‘”  Ìj ‘”  Ìk ‘”  Ìl ‘”  Ìm ‘”  Ìn ‘”  Ìo ‘”  Ìp ‘”  Ìq ‘”  Ìr ‘”  Ìs ‘”  Ìt ‘”  Ìu ‘”  Ìv ‘”  Ìw ‘”  Ìx ‘”  Ìy ‘”  Ìz ‘”  Ì{ ‘”  Ì| ‘”  Ì} ‘”  Ì~ ‘”  Ì ‘”  Ì€ ‘”  Ì ‘”  Ì‚ ‘”  Ìƒ ‘”  Ì„ ‘”  Ì… ‘”  Ì† ‘”  Ì‡ ‘”  Ìˆ ‘”  Ì‰ ‘”  ÌŠ ‘”  Ì‹ ‘”  ÌŒ ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì‘ ‘”  Ì’ ‘”  Ì“ ‘”  Ì” ‘”  Ì• ‘”  Ì– ‘”  Ì— ‘”  Ì˜ ‘”  Ì™ ‘”  Ìš ‘”  Ì› ‘”  Ìœ ‘”  Ì ‘”  Ì ‘”  ÌŸ ‘”  Ì  ‘”  Ì¡ ‘”  Ì¢ ‘”  Ì£ ‘”  Ì¤ ‘”  Ì¥ ‘”  Ì¦ ‘”  Ì§ ‘”  Ì¨ ‘”  Ì© ‘”  Ìª ‘”  Ì« ‘”  Ì¬ ‘”  Ì­ ‘”  Ì® ‘”  Ì¯ ‘”  Ì° ‘”  Ì± ‘”  Ì² ‘”  Ì³ ‘”  Ì´ ‘”  Ìµ ‘”  Ì¶ ‘”  Ì· ‘”  Ì¸ ‘”  Ì¹ ‘”  Ìº ‘”  Ì» ‘”  Ì¼ ‘”  Ì½ ‘”  Ì¾ ‘”  Ì¿ ‘”  ÌÀ ‘”  ÌÁ ‘”  ÌÂ ‘”  ÌÃ ‘”  ÌÄ ‘”  ÌÅ ‘”  ÌÆ ‘”  ÌÇ ‘”  ÌÈ ‘”  ÌÉ ‘”  ÌÊ ‘”  ÌË ‘”  ÌÌ ‘”  ÌÍ ‘”  ÌÎ ‘”  ÌÏ ‘”  ÌĞ ‘”  ÌÑ ‘”  ÌÒ ‘”  ÌÓ ‘”  ÌÔ ‘”  ÌÕ ‘”  ÌÖ ‘”  Ì× ‘”  ÌØ ‘”  ÌÙ ‘”  ÌÚ ‘”  ÌÛ ‘”  ÌÜ ‘”  Ìİ ‘”  ÌŞ ‘”  Ìß ‘”  Ìà ‘”  Ìá ‘”  Ìâ ‘”  Ìã ‘”  Ìä ‘”  Ìå ‘”  Ìæ ‘”  Ìç ‘”  Ìè ‘”  Ìé ‘”  Ìê ‘”  Ìë ‘”  Ìì ‘”  Ìí ‘”  Ìî ‘”  Ìï ‘”  Ìğ ‘”  Ìñ ‘”  Ìò ‘”  Ìó ‘”  Ìô ‘”  Ìõ ‘”  Ìö ‘”  Ì÷ ‘”  Ìø ‘”  Ìù ‘”  Ìú ‘”  Ìû ‘”  Ìü ‘”  Ìı ‘”  Ìş ‘”  Ìÿ ‘”  Í  ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í	 ‘”  Í
+ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í  ‘”  Í! ‘”  Í" ‘”  Í# ‘”  Í$ ‘”  Í% ‘”  Í& ‘”  Í' ‘”  Í( ‘”  Í) ‘”  Í* ‘”  Í+ ‘”  Í, ‘”  Í- ‘”  Í. ‘”  Í/ ‘”  Í0 ‘”  Í1 ‘”  Í2 ‘”  Í3 ‘”  Í4 ‘”  Í5 ‘”  Í6 ‘”  Í7 ‘”  Í8 ‘”  Í9 ‘”  Í: ‘”  Í; ‘”  Í< ‘”  Í= ‘”  Í> ‘”  Í? ‘”  Í@ ‘”  ÍA ‘”  ÍB ‘”  ÍC ‘”  ÍD ‘”  ÍE ‘”  ÍF ‘”  ÍG ‘”  ÍH ‘”  ÍI ‘”  ÍJ ‘”  ÍK ‘”  ÍL ‘”  ÍM ‘”  ÍN ‘”  ÍO ‘”  ÍP ‘”  ÍQ ‘”  ÍR ‘”  ÍS ‘”  ÍT ‘”  ÍU ‘”  ÍV ‘”  ÍW ‘”  ÍX ‘”  ÍY ‘”  ÍZ ‘”  Í[ ‘”  Í\ ‘”  Í] ‘”  Í^ ‘”  Í_ ‘”  Í` ‘”  Ía ‘”  Íb ‘”  Íc ‘”  Íd ‘”  Íe ‘”  Íf ‘”  Íg ‘”  Íh ‘”  Íi ‘”  Íj ‘”  Ík ‘”  Íl ‘”  Ím ‘”  Ín ‘”  Ío ‘”  Íp ‘”  Íq ‘”  Ír ‘”  Ís ‘”  Ít ‘”  Íu ‘”  Ív ‘”  Íw ‘”  Íx ‘”  Íy ‘”  Íz ‘”  Í{ ‘”  Í| ‘”  Í} ‘”  Í~ ‘”  Í ‘”  Í€ ‘”  Í ‘”  Í‚ ‘”  Íƒ ‘”  Í„ ‘”  Í… ‘”  Í† ‘”  Í‡ ‘”  Íˆ ‘”  Í‰ ‘”  ÍŠ ‘”  Í‹ ‘”  ÍŒ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í‘ ‘”  Í’ ‘”  Í“ ‘”  Í” ‘”  Í• ‘”  Í– ‘”  Í— ‘”  Í˜ ‘”  Í™ ‘”  Íš ‘”  Í› ‘”  Íœ ‘”  Í ‘”  Í ‘”  ÍŸ ‘”  Í  ‘”  Í¡ ‘”  Í¢ ‘”  Í£ ‘”  Í¤ ‘”  Í¥ ‘”  Í¦ ‘”  Í§ ‘”  Í¨ ‘”  Í© ‘”  Íª ‘”  Í« ‘”  Í¬ ‘”  Í­ ‘”  Í® ‘”  Í¯ ‘”  Í° ‘”  Í± ‘”  Í² ‘”  Í³ ‘”  Í´ ‘”  Íµ ‘”  Í¶ ‘”  Í· ‘”  Í¸ ‘”  Í¹ ‘”  Íº ‘”  Í» ‘”  Í¼ ‘”  Í½ ‘”  Í¾ ‘”  Í¿ ‘”  ÍÀ ‘”  ÍÁ ‘”  ÍÂ ‘”  ÍÃ ‘”  ÍÄ ‘”  ÍÅ ‘”  ÍÆ ‘”  ÍÇ ‘”  ÍÈ ‘”  ÍÉ ‘”  ÍÊ ‘”  ÍË ‘”  ÍÌ ‘”  ÍÍ ‘”  ÍÎ ‘”  ÍÏ ‘”  ÍĞ ‘”  ÍÑ ‘”  ÍÒ ‘”  ÍÓ ‘”  ÍÔ ‘”  ÍÕ ‘”  ÍÖ ‘”  Í× ‘”  ÍØ ‘”  ÍÙ ‘”  ÍÚ ‘”  ÍÛ ‘”  ÍÜ ‘”  Íİ ‘”  ÍŞ ‘”  Íß ‘”  Íà ‘”  Íá ‘”  Íâ ‘”  Íã ‘”  Íä ‘”  Íå ‘”  Íæ ‘”  Íç ‘”  Íè ‘”  Íé ‘”  Íê ‘”  Íë ‘”  Íì ‘”  Íí ‘”  Íî ‘”  Íï ‘”  Íğ ‘”  Íñ ‘”  Íò ‘”  Íó ‘”  Íô ‘”  Íõ ‘”  Íö ‘”  Í÷ ‘”  Íø ‘”  Íù ‘”  Íú ‘”  Íû ‘”  Íü ‘”  Íı ‘”  Íş ‘”  Íÿ ‘”  Í  ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í	 ‘”  Í
+ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í  ‘”  Í! ‘”  Í" ‘”  Í# ‘”  Í$ ‘”  Í% ‘”  Í& ‘”  Í' ‘”  Í( ‘”  Í) ‘”  Í* ‘”  Í+ ‘”  Í, ‘”  Í- ‘”  Í. ‘”  Í/ ‘”  Í0 ‘”  Í1 ‘”  Í2 ‘”  Í3 ‘”  Í4 ‘”  Í5 ‘”  Í6 ‘”  Í7 ‘”  Í8 ‘”  Í9 ‘”  Í: ‘”  Í; ‘”  Í< ‘”  Í= ‘”  Í> ‘”  Í? ‘”  Í@ ‘”  ÍA ‘”  ÍB ‘”  ÍC ‘”  ÍD ‘”  ÍE ‘”  ÍF ‘”  ÍG ‘”  ÍH ‘”  ÍI ‘”  ÍJ ‘”  ÍK ‘”  ÍL ‘”  ÍM ‘”  ÍN ‘”  ÍO ‘”  ÍP ‘”  ÍQ ‘”  ÍR ‘”  ÍS ‘”  ÍT ‘”  ÍU ‘”  ÍV ‘”  ÍW ‘”  ÍX ‘”  ÍY ‘”  ÍZ ‘”  Í[ ‘”  Í\ ‘”  Í] ‘”  Í^ ‘”  Í_ ‘”  Í` ‘”  Ía ‘”  Íb ‘”  Íc ‘”  Íd ‘”  Íe ‘”  Íf ‘”  Íg ‘”  Íh ‘”  Íi ‘”  Íj ‘”  Ík ‘”  Íl ‘”  Ím ‘”  Ín ‘”  Ío ‘”  Íp ‘”  Íq ‘”  Ír ‘”  Ís ‘”  Ít ‘”  Íu ‘”  Ív ‘”  Íw ‘”  Íx ‘”  Íy ‘”  Íz ‘”  Í{ ‘”  Í| ‘”  Í} ‘”  Í~ ‘”  Í ‘”  Í€ ‘”  Í ‘”  Í‚ ‘”  Íƒ ‘”  Í„ ‘”  Í… ‘”  Í† ‘”  Í‡ ‘”  Íˆ ‘”  Í‰ ‘”  ÍŠ ‘”  Í‹ ‘”  ÍŒ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í‘ ‘”  Í’ ‘”  Í“ ‘”  Í” ‘”  Í• ‘”  Í– ‘”  Í— ‘”  Í˜ ‘”  Í™ ‘”  Íš ‘”  Í› ‘”  Íœ ‘”  Í ‘”  Í ‘”  ÍŸ ‘”  Í  ‘”  Í¡ ‘”  Í¢ ‘”  Í£ ‘”  Í¤ ‘”  Í¥ ‘”  Í¦ ‘”  Í§ ‘”  Í¨ ‘”  Í© ‘”  Íª ‘”  Í« ‘”  Í¬ ‘”  Í­ ‘”  Í® ‘”  Í¯ ‘”  Í° ‘”  Í± ‘”  Í² ‘”  Í³ ‘”  Í´ ‘”  Íµ ‘”  Í¶ ‘”  Í· ‘”  Í¸ ‘”  Í¹ ‘”  Íº ‘”  Í» ‘”  Í¼ ‘”  Í½ ‘”  Í¾ ‘”  Í¿ ‘”  ÍÀ ‘”  ÍÁ ‘”  ÍÂ ‘”  ÍÃ ‘”  ÍÄ ‘”  ÍÅ ‘”  ÍÆ ‘”  ÍÇ ‘”  ÍÈ ‘”  ÍÉ ‘”  ÍÊ ‘”  ÍË ‘”  ÍÌ ‘”  ÍÍ ‘”  ÍÎ ‘”  ÍÏ ‘”  ÍĞ ‘”  ÍÑ ‘”  ÍÒ ‘”  ÍÓ ‘”  ÍÔ ‘”  ÍÕ ‘”  ÍÖ ‘”  Í× ‘”  ÍØ ‘”  ÍÙ ‘”  ÍÚ ‘”  ÍÛ ‘”  ÍÜ ‘”  Íİ ‘”  ÍŞ ‘”  Íß ‘”  Íà ‘”  Íá ‘”  Íâ ‘”  Íã ‘”  Íä ‘”  Íå ‘”  Íæ ‘”  Íç ‘ÙD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\Index.js‘Ú”úif (!("finalizeConstruction" in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+}
+import { LV_MD_CONTENT_TYPE, LV_MD_DATA_TYPE } from './utils/constant';
+import { WebControl } from './webControl';
+import { ImgControl } from './imgControl';
+import { determineTitle } from './utils/determine/detTitle';
+import { determineImg } from './utils/determine/detImg';
+import { determineQuote } from './utils/determine/detQuote';
+import { determineLine } from './utils/determine/detLine';
+import { determineTable } from './utils/determine/detTable';
+import { determineCode } from './utils/determine/detCode';
+import { determineCheckbox } from './utils/determine/detCheckbox';
+import { determineTabulate } from './utils/determine/detTabulate';
+import { determineHTMLIMG, determineHTMLFONT } from './utils/determine/detHTMLEL';
+import { lvTitleComponent } from './utils/lvTitleComponent';
+import { lvCompositeComponent } from './utils/lvCompositeComponent';
+import { lvTableComponent } from './utils/lvTableComponent';
+import { lvCodeComponent } from './utils/lvCodeComponent';
+import { lvImgComponent } from './utils/lvImgComponent';
+import lvLineBuilder from './utils/lvLineBuilder';
+import { lvQuoteComponent } from './utils/lvQuoteComponent';
+import { lvCheckboxComponent } from './utils/lvCheckboxComponent';
+import { lvTabulateComponent } from './utils/lvTabulateComponent';
+import { lvHTMLImgComponent } from './utils/lvHTMLImgComponent';
+import { lvHTMLFontComponent } from './utils/lvHTMLFontComponent';
+import buffer from "@ohos.buffer";
+import fs from "@ohos.file.fs";
+import { lvFootnoteView } from './utils/lvFootnoteComponent';
+import { LvFootnoteController } from './utils/controller/lvFootnoteController';
+import { html2md } from '@luvi/html2md';
+export default class lvMarkdownIn extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.o = new SynchedPropertySimpleOneWayPU(params.text, this, "text");
+        this.t = new SynchedPropertySimpleOneWayPU(params.loadMode, this, "loadMode");
+        this.u = new SynchedPropertySimpleOneWayPU(params.rawfilePath, this, "rawfilePath");
+        this.a1 = new SynchedPropertySimpleOneWayPU(params.sandboxPath, this, "sandboxPath");
+        this.b1 = new ObservedPropertyObjectPU(null, this, "context");
+        this.loadCallBack = {
+            success(msg) {
+            },
+            fail(msg) {
+            }
+        };
+        this.c1 = new ObservedPropertySimplePU(new Date().getTime(), this, "cge");
+        this.d1 = new ObservedPropertyObjectPU([], this, "resultData");
+        this.e1 = new ObservedPropertyObjectPU(new LvFootnoteController(), this, "footnoteController");
+        this.startTime = new Date().getTime();
+        this.dialogController = new CustomDialogController({
+            builder: () => {
+                let jsDialog = new WebControl(this, {}, undefined, -1, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 78, f1: 14 });
+                jsDialog.setController(this.dialogController);
+                ViewPU.create(jsDialog);
+                let paramsLambda = () => {
+                    return {};
+                };
+                jsDialog.paramsGenerator_ = paramsLambda;
+            },
+            alignment: DialogAlignment.Bottom,
+            customStyle: true
+        }, this);
+        this.imgController = new CustomDialogController({
+            builder: () => {
+                let jsDialog = new ImgControl(this, {}, undefined, -1, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 83, f1: 14 });
+                jsDialog.setController(this.imgController);
+                ViewPU.create(jsDialog);
+                let paramsLambda = () => {
+                    return {};
+                };
+                jsDialog.paramsGenerator_ = paramsLambda;
+            },
+            customStyle: true
+        }, this);
+        this.setInitiallyProvidedValue(params);
+        this.declareWatch("text", this.textChange);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params) {
+        if (params.loadMode === undefined) {
+            this.t.set("text");
+        }
+        if (params.context !== undefined) {
+            this.context = params.context;
+        }
+        if (params.loadCallBack !== undefined) {
+            this.loadCallBack = params.loadCallBack;
+        }
+        if (params.cge !== undefined) {
+            this.cge = params.cge;
+        }
+        if (params.resultData !== undefined) {
+            this.resultData = params.resultData;
+        }
+        if (params.footnoteController !== undefined) {
+            this.footnoteController = params.footnoteController;
+        }
+        if (params.startTime !== undefined) {
+            this.startTime = params.startTime;
+        }
+        if (params.dialogController !== undefined) {
+            this.dialogController = params.dialogController;
+        }
+        if (params.imgController !== undefined) {
+            this.imgController = params.imgController;
+        }
+    }
+    updateStateVars(params) {
+        this.o.reset(params.text);
+        this.t.reset(params.loadMode);
+        this.u.reset(params.rawfilePath);
+        this.a1.reset(params.sandboxPath);
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.o.purgeDependencyOnElmtId(rmElmtId);
+        this.t.purgeDependencyOnElmtId(rmElmtId);
+        this.u.purgeDependencyOnElmtId(rmElmtId);
+        this.a1.purgeDependencyOnElmtId(rmElmtId);
+        this.b1.purgeDependencyOnElmtId(rmElmtId);
+        this.c1.purgeDependencyOnElmtId(rmElmtId);
+        this.d1.purgeDependencyOnElmtId(rmElmtId);
+        this.e1.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.o.aboutToBeDeleted();
+        this.t.aboutToBeDeleted();
+        this.u.aboutToBeDeleted();
+        this.a1.aboutToBeDeleted();
+        this.b1.aboutToBeDeleted();
+        this.c1.aboutToBeDeleted();
+        this.d1.aboutToBeDeleted();
+        this.e1.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    get text() {
+        return this.o.get();
+    }
+    set text(newValue) {
+        this.o.set(newValue);
+    }
+    get loadMode() {
+        return this.t.get();
+    }
+    set loadMode(newValue) {
+        this.t.set(newValue);
+    }
+    get rawfilePath() {
+        return this.u.get();
+    }
+    set rawfilePath(newValue) {
+        this.u.set(newValue);
+    }
+    get sandboxPath() {
+        return this.a1.get();
+    }
+    set sandboxPath(newValue) {
+        this.a1.set(newValue);
+    }
+    get context() {
+        return this.b1.get();
+    }
+    set context(newValue) {
+        this.b1.set(newValue);
+    }
+    get cge() {
+        return this.c1.get();
+    }
+    set cge(newValue) {
+        this.c1.set(newValue);
+    }
+    get resultData() {
+        return this.d1.get();
+    }
+    set resultData(newValue) {
+        this.d1.set(newValue);
+    }
+    get footnoteController() {
+        return this.e1.get();
+    }
+    set footnoteController(newValue) {
+        this.e1.set(newValue);
+    }
+    textChange() {
+        if (this.loadMode == "text") {
+            this._readText();
+        }
+    }
+    cBack(type, code, message) {
+        if (type == "success") {
+            if (this.loadCallBack.success) {
+                this.loadCallBack?.success({ code: code, message: message });
+            }
+        }
+        if (type == "fail") {
+            if (this.loadCallBack.fail) {
+                this.loadCallBack?.fail({ code: code, message: message });
+            }
+        }
+    }
+    aboutToAppear() {
+        this.startTime = new Date().getTime();
+        if (this.loadMode == "text") {
+            this._readText();
+        }
+        if (this.loadMode == "rawfile") {
+            this._loadRawfile();
+        }
+        if (this.loadMode == "sandbox") {
+            this._loadSandbox();
+        }
+    }
+    _loadRawfile() {
+        if (!this.rawfilePath && this.loadCallBack.fail) {
+            this.cBack("fail", "50011", "The rawfile resource file is incorrect.");
+            return;
+        }
+        if (!this.context) {
+            this.cBack("fail", "50030", "The context is incorrect.");
+            return;
+        }
+        try {
+            let q1 = this.context?.resourceManager.getRawFileContentSync(this.rawfilePath);
+            let s1 = buffer.from(q1).buffer;
+            let t1 = new buffer.Blob([s1]);
+            let u1 = t1.text();
+            u1.then((str) => {
+                this._readText(str);
+            });
+        }
+        catch (error) {
+            this.cBack("fail", "50012", "The resourceManager getRawFileContentSync is error, " +
+                JSON.stringify(error));
+        }
+    }
+    _loadSandbox() {
+        if (!this.sandboxPath) {
+            this.cBack("fail", "50021", "The sandbox file is incorrect.");
+            return;
+        }
+        try {
+            let p1 = {
+                offset: 0,
+                length: 0,
+                encoding: 'utf-8'
+            };
+            let stat = fs.statSync(this.sandboxPath);
+            p1.length = stat.size;
+            let str = fs.readTextSync(this.sandboxPath, p1);
+            this._readText(str);
+        }
+        catch (error) {
+            this.cBack("fail", "50022", "The fileIo readText is error, " +
+                JSON.stringify(error));
+        }
+    }
+    _readText(text = this.text) {
+        const i1 = html2md(text);
+        console.log("luvi > " + i1);
+        let j1 = -1;
+        let k1 = i1.split('\n').map((item) => {
+            if (j1 < 0) {
+                if (determineCode(item)) {
+                    ++j1;
+                    return LV_MD_CONTENT_TYPE.CODE;
+                }
+                if (determineTable(item)) {
+                    return LV_MD_CONTENT_TYPE.TABLE;
+                }
+                return LV_MD_CONTENT_TYPE.TEXT;
+            }
+            else {
+                if (determineCode(item)) {
+                    j1 = -1;
+                    return LV_MD_CONTENT_TYPE.TEXT;
+                }
+                else {
+                    return LV_MD_CONTENT_TYPE.CODE;
+                }
+            }
+        });
+        let l1 = [];
+        let m1 = "";
+        let n1 = "";
+        i1.split('\n').forEach((item, o1) => {
+            if (k1[o1] == LV_MD_CONTENT_TYPE.TEXT) {
+                if (m1 != "") {
+                    m1 += item + '\n';
+                    l1.push([LV_MD_CONTENT_TYPE.CODE, m1]);
+                    m1 = "";
+                }
+                else if (n1 != "") {
+                    n1 += item + '\n';
+                    l1.push([LV_MD_CONTENT_TYPE.TABLE, n1]);
+                    n1 = "";
+                }
+                else {
+                    if (determineTitle(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.TITLE, item.trim()]);
+                    }
+                    else if (determineImg(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.IMG, item.trim()]);
+                    }
+                    else if (determineQuote(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.QUOTE, item.trim()]);
+                    }
+                    else if (determineLine(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.LINE, item.trim()]);
+                    }
+                    else if (determineCheckbox(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.CHECKBOX, item.trim()]);
+                    }
+                    else if (o1 > 0 && determineTabulate(item, i1.split('\n')[o1 - 1], i1.split('\n')[o1 + 1])) {
+                        return l1.push([LV_MD_CONTENT_TYPE.TABULATE, item]);
+                    }
+                    else if (determineHTMLIMG(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.HTMLIMG, item]);
+                    }
+                    else if (determineHTMLFONT(item)) {
+                        return l1.push([LV_MD_CONTENT_TYPE.HTMLFONT, item]);
+                    }
+                    else {
+                        return l1.push([LV_MD_CONTENT_TYPE.TEXT, item.trim()]);
+                    }
+                }
+            }
+            else if (k1[o1] == LV_MD_CONTENT_TYPE.TABLE) {
+                n1 += item + '\n';
+            }
+            else {
+                m1 += item + '\n';
+            }
+            return item;
+        });
+        this.resultData = l1;
+        this.cBack("success", "20000", "Component Load Success.");
+        const endTime = new Date().getTime();
+        const elapsedTime = endTime - this.startTime;
+        console.log(`lv-markdown-in execution time is: ${elapsedTime} ms`);
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            List.create();
+            List.edgeEffect(EdgeEffect.None);
+            List.scrollBar(BarState.Off);
+        }, List);
+        {
+            const itemCreation = (elmtId, isInitialRender) => {
+                ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+                itemCreation2(elmtId, isInitialRender);
+                if (!isInitialRender) {
+                    ListItem.pop();
+                }
+                ViewStackProcessor.StopGetAccessRecording();
+            };
+            const itemCreation2 = (elmtId, isInitialRender) => {
+                ListItem.create(deepRenderFunction, true);
+            };
+            const deepRenderFunction = (elmtId, isInitialRender) => {
+                itemCreation(elmtId, isInitialRender);
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    Column.create();
+                    Column.alignItems(HorizontalAlign.Start);
+                    Column.width('100%');
+                }, Column);
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    ForEach.create();
+                    const forEachItemGenFunction = _item => {
+                        const item = _item;
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            Row.create();
+                            Row.margin({ top: !item[1] ? 10 : 5 });
+                        }, Row);
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.TEXT) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvCompositeComponent(this, {
+                                                    text: item[LV_MD_DATA_TYPE.MSG],
+                                                    dialogController: this.dialogController,
+                                                    footnoteController: this.footnoteController
+                                                }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 245, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.dialogController,
+                                                        footnoteController: this.footnoteController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                                    footnoteController: this.footnoteController
+                                                });
+                                            }
+                                        }, { name: "lvCompositeComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.TITLE) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvTitleComponent(this, { text: item[LV_MD_DATA_TYPE.MSG], dialogController: this.dialogController }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 252, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.dialogController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvTitleComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.CODE) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvCodeComponent(this, { text: item[LV_MD_DATA_TYPE.MSG] }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 255, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG]
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvCodeComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.IMG) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvImgComponent(this, { text: item[LV_MD_DATA_TYPE.MSG], dialogController: this.imgController }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 258, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.imgController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvImgComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.HTMLIMG) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvHTMLImgComponent(this, { text: item[LV_MD_DATA_TYPE.MSG], dialogController: this.imgController }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 261, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.imgController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvHTMLImgComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.HTMLFONT) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvHTMLFontComponent(this, { text: item[LV_MD_DATA_TYPE.MSG] }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 264, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG]
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvHTMLFontComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.QUOTE) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvQuoteComponent(this, {
+                                                    text: item[LV_MD_DATA_TYPE.MSG],
+                                                    dialogController: this.dialogController,
+                                                }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 267, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.dialogController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvQuoteComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.LINE) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    lvLineBuilder.bind(this)();
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.TABLE) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvTableComponent(this, {
+                                                    text: item[LV_MD_DATA_TYPE.MSG],
+                                                    dialogController: this.dialogController,
+                                                }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 276, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.dialogController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvTableComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.CHECKBOX) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvCheckboxComponent(this, {
+                                                    text: item[LV_MD_DATA_TYPE.MSG],
+                                                    dialogController: this.dialogController,
+                                                }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 282, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.dialogController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvCheckboxComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            If.create();
+                            if (item[LV_MD_DATA_TYPE.FLAG] === LV_MD_CONTENT_TYPE.TABULATE) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new lvTabulateComponent(this, {
+                                                    text: item[LV_MD_DATA_TYPE.MSG],
+                                                    dialogController: this.dialogController,
+                                                }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 288, f1: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        text: item[LV_MD_DATA_TYPE.MSG],
+                                                        dialogController: this.dialogController
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "lvTabulateComponent" });
+                                    }
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        Row.pop();
+                    };
+                    this.forEachUpdateFunction(elmtId, this.resultData, forEachItemGenFunction);
+                }, ForEach);
+                ForEach.pop();
+                {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        if (isInitialRender) {
+                            let componentCall = new lvFootnoteView(this, { dialogController: this.dialogController }, undefined, elmtId, () => { }, { page: "lvMarkdownIn/src/main/ets/lv-markdown-in/lib/Index.ets", line: 296, f1: 13 });
+                            ViewPU.create(componentCall);
+                            let paramsLambda = () => {
+                                return {
+                                    dialogController: this.dialogController
+                                };
+                            };
+                            componentCall.paramsGenerator_ = paramsLambda;
+                        }
+                        else {
+                            this.updateStateVarsOfChildByElmtId(elmtId, {});
+                        }
+                    }, { name: "lvFootnoteView" });
+                }
+                Column.pop();
+                ListItem.pop();
+            };
+            this.observeComponentCreation2(itemCreation2, ListItem);
+            ListItem.pop();
+        }
+        List.pop();
+        Column.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+ÔrFÜ ¬@ohos.buffer­@ohos.file.fs­@luvi/html2md°./utils/constantº./utils/determine/detTitle¸./utils/determine/detImg¬./imgControl¹./utils/determine/detLineº./utils/determine/detQuote¬./webControl½./utils/determine/detCheckboxº./utils/determine/detTable¹./utils/determine/detCode»./utils/determine/detHTMLEL¸./utils/lvTitleComponent½./utils/determine/detTabulate¼./utils/lvCompositeComponent¶./utils/lvImgComponent·./utils/lvCodeComponentµ./utils/lvLineBuilder¸./utils/lvQuoteComponentÙ'./utils/controller/lvFootnoteController¸./utils/lvTableComponent»./utils/lvCheckboxComponent»./utils/lvTabulateComponent»./utils/lvHTMLFontComponentº./utils/lvHTMLImgComponent»./utils/lvFootnoteComponentÔrG—ªassertions¨external¢id¤meta±moduleSideEffectsªresolvedByµsyntheticNamedExportsAÃÙ| hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.buffer.d.tsAÃªoh-resolveÂGAÃÙ} hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.file.fs.d.tsAÃªoh-resolveÂGAÂÙbD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+html2md@1.0.3\oh_modules\@luvi\html2md\Index.etsAÃªoh-resolveÂGAÂÙŸD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\constant\index.jsAÃªoh-resolveÂGAÂÙ£D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\determine\detTitle.jsAÃªoh-resolveÂGAÂÙ¡D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\determine\detImg.jsAÃªoh-resolveÂGAÂÙ›D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\imgControl\index.jsAÃªoh-resolveÂGAÂÙ¢D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\determine\detLine.jsAÃªoh-resolveÂGAÂÙ£D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\determine\detQuote.jsAÃªoh-resolveÂGAÂÙ›D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\webControl\index.jsAÃªoh-resolveÂGAÂÙ¦D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\determine\detCheckbox.jsAÃªoh-resolveÂGAÂÙ£D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\determine\detTable.jsAÃªoh-resolveÂGAÂÙ¢D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\determine\detCode.jsAÃªoh-resolveÂGAÂÙ¤D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\determine\detHTMLEL.jsAÃªoh-resolveÂGAÂÙ¡D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvTitleComponent.jsAÃªoh-resolveÂGAÂÙ¦D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\determine\detTabulate.jsAÃªoh-resolveÂGAÂÙ¥D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvCompositeComponent.jsAÃªoh-resolveÂGAÂÙŸD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvImgComponent.jsAÃªoh-resolveÂGAÂÙ D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvCodeComponent.jsAÃªoh-resolveÂGAÂÙD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvLineBuilder.jsAÃªoh-resolveÂGAÂÙ¡D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvQuoteComponent.jsAÃªoh-resolveÂGAÂÙ°D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\controller\lvFootnoteController.jsAÃªoh-resolveÂGAÂÙ¡D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvTableComponent.jsAÃªoh-resolveÂGAÂÙ¤D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvCheckboxComponent.jsAÃªoh-resolveÂGAÂÙ¤D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvTabulateComponent.jsAÃªoh-resolveÂGAÂÙ¤D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvHTMLFontComponent.jsAÃªoh-resolveÂGAÂÙ£D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvHTMLImgComponent.jsAÃªoh-resolveÂGAÂÙ¤D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvFootnoteComponent.jsAÃªoh-resolveÂ‘ÔrH’§missing¦pluginÃ¦genAbcÂÔ  ÔrI”²dynamicImportCache¹exportAllDeclarationCache»exportNamedDeclarationCache«importCacheÜ ÔrJ•¤type¥start£endªspecifiers¦source±ImportDeclarationÌ}ÌÄ’ÔrK•¤type¥start£end¨imported¥local¯ImportSpecifierÌ†Ì˜ÔrL”¤type¥start£end¤nameªIdentifierÌ†Ì˜²LV_MD_CONTENT_TYPELªIdentifierÌ†Ì˜²LV_MD_CONTENT_TYPEK¯ImportSpecifierÌšÌ©LªIdentifierÌšÌ©¯LV_MD_DATA_TYPELªIdentifierÌšÌ©¯LV_MD_DATA_TYPEÔrM•¤type¥start£end¥value£raw§LiteralÌ±ÌÃ°./utils/constant²'./utils/constant'J±ImportDeclarationÌÅÌï‘K¯ImportSpecifierÌÎÌØLªIdentifierÌÎÌØªWebControlLªIdentifierÌÎÌØªWebControlM§LiteralÌàÌî¬./webControl®'./webControl'J±ImportDeclarationÌğÍ‘K¯ImportSpecifierÌùÍLªIdentifierÌùÍªImgControlLªIdentifierÌùÍªImgControlM§LiteralÍÍ¬./imgControl®'./imgControl'J±ImportDeclarationÍÍW‘K¯ImportSpecifierÍ$Í2LªIdentifierÍ$Í2®determineTitleLªIdentifierÍ$Í2®determineTitleM§LiteralÍ:ÍVº./utils/determine/detTitle¼'./utils/determine/detTitle'J±ImportDeclarationÍXÍ‘K¯ImportSpecifierÍaÍmLªIdentifierÍaÍm¬determineImgLªIdentifierÍaÍm¬determineImgM§LiteralÍuÍ¸./utils/determine/detImgº'./utils/determine/detImg'J±ImportDeclarationÍ‘ÍÍ‘K¯ImportSpecifierÍšÍ¨LªIdentifierÍšÍ¨®determineQuoteLªIdentifierÍšÍ¨®determineQuoteM§LiteralÍ°ÍÌº./utils/determine/detQuote¼'./utils/determine/detQuote'J±ImportDeclarationÍÎÍ‘K¯ImportSpecifierÍ×ÍäLªIdentifierÍ×Íä­determineLineLªIdentifierÍ×Íä­determineLineM§LiteralÍìÍ¹./utils/determine/detLine»'./utils/determine/detLine'J±ImportDeclarationÍ	ÍE‘K¯ImportSpecifierÍÍ LªIdentifierÍÍ ®determineTableLªIdentifierÍÍ ®determineTableM§LiteralÍ(ÍDº./utils/determine/detTable¼'./utils/determine/detTable'J±ImportDeclarationÍFÍ€‘K¯ImportSpecifierÍOÍ\LªIdentifierÍOÍ\­determineCodeLªIdentifierÍOÍ\­determineCodeM§LiteralÍdÍ¹./utils/determine/detCode»'./utils/determine/detCode'J±ImportDeclarationÍÍÃ‘K¯ImportSpecifierÍŠÍ›LªIdentifierÍŠÍ›±determineCheckboxLªIdentifierÍŠÍ›±determineCheckboxM§LiteralÍ£ÍÂ½./utils/determine/detCheckbox¿'./utils/determine/detCheckbox'J±ImportDeclarationÍÄÍ‘K¯ImportSpecifierÍÍÍŞLªIdentifierÍÍÍŞ±determineTabulateLªIdentifierÍÍÍŞ±determineTabulateM§LiteralÍæÍ½./utils/determine/detTabulate¿'./utils/determine/detTabulate'J±ImportDeclarationÍÍY’K¯ImportSpecifierÍÍ LªIdentifierÍÍ °determineHTMLIMGLªIdentifierÍÍ °determineHTMLIMGK¯ImportSpecifierÍ"Í3LªIdentifierÍ"Í3±determineHTMLFONTLªIdentifierÍ"Í3±determineHTMLFONTM§LiteralÍ;ÍX»./utils/determine/detHTMLEL½'./utils/determine/detHTMLEL'J±ImportDeclarationÍZÍ–‘K¯ImportSpecifierÍcÍsLªIdentifierÍcÍs°lvTitleComponentLªIdentifierÍcÍs°lvTitleComponentM§LiteralÍ{Í•¸./utils/lvTitleComponentº'./utils/lvTitleComponent'J±ImportDeclarationÍ—ÍÛ‘K¯ImportSpecifierÍ Í´LªIdentifierÍ Í´´lvCompositeComponentLªIdentifierÍ Í´´lvCompositeComponentM§LiteralÍ¼ÍÚ¼./utils/lvCompositeComponent¾'./utils/lvCompositeComponent'J±ImportDeclarationÍÜÍ‘K¯ImportSpecifierÍåÍõLªIdentifierÍåÍõ°lvTableComponentLªIdentifierÍåÍõ°lvTableComponentM§LiteralÍıÍ¸./utils/lvTableComponentº'./utils/lvTableComponent'J±ImportDeclarationÍÍS‘K¯ImportSpecifierÍ"Í1LªIdentifierÍ"Í1¯lvCodeComponentLªIdentifierÍ"Í1¯lvCodeComponentM§LiteralÍ9ÍR·./utils/lvCodeComponent¹'./utils/lvCodeComponent'J±ImportDeclarationÍTÍŒ‘K¯ImportSpecifierÍ]ÍkLªIdentifierÍ]Ík®lvImgComponentLªIdentifierÍ]Ík®lvImgComponentM§LiteralÍsÍ‹¶./utils/lvImgComponent¸'./utils/lvImgComponent'J±ImportDeclarationÍÍ¿‘ÔrN”¤type¥start£end¥local¶ImportDefaultSpecifierÍ”Í¡LªIdentifierÍ”Í¡­lvLineBuilderM§LiteralÍ§Í¾µ./utils/lvLineBuilder·'./utils/lvLineBuilder'J±ImportDeclarationÍÀÍü‘K¯ImportSpecifierÍÉÍÙLªIdentifierÍÉÍÙ°lvQuoteComponentLªIdentifierÍÉÍÙ°lvQuoteComponentM§LiteralÍáÍû¸./utils/lvQuoteComponentº'./utils/lvQuoteComponent'J±ImportDeclarationÍıÍ?‘K¯ImportSpecifierÍÍLªIdentifierÍÍ³lvCheckboxComponentLªIdentifierÍÍ³lvCheckboxComponentM§LiteralÍ!Í>»./utils/lvCheckboxComponent½'./utils/lvCheckboxComponent'J±ImportDeclarationÍ@Í‚‘K¯ImportSpecifierÍIÍ\LªIdentifierÍIÍ\³lvTabulateComponentLªIdentifierÍIÍ\³lvTabulateComponentM§LiteralÍdÍ»./utils/lvTabulateComponent½'./utils/lvTabulateComponent'J±ImportDeclarationÍƒÍÃ‘K¯ImportSpecifierÍŒÍLªIdentifierÍŒÍ²lvHTMLImgComponentLªIdentifierÍŒÍ²lvHTMLImgComponentM§LiteralÍ¦ÍÂº./utils/lvHTMLImgComponent¼'./utils/lvHTMLImgComponent'J±ImportDeclarationÍÄÍ‘K¯ImportSpecifierÍÍÍàLªIdentifierÍÍÍà³lvHTMLFontComponentLªIdentifierÍÍÍà³lvHTMLFontComponentM§LiteralÍèÍ»./utils/lvHTMLFontComponent½'./utils/lvHTMLFontComponent'J±ImportDeclarationÍÍ)‘N¶ImportDefaultSpecifierÍÍLªIdentifierÍÍ¦bufferM§LiteralÍÍ(¬@ohos.buffer®"@ohos.buffer"J±ImportDeclarationÍ*ÍI‘N¶ImportDefaultSpecifierÍ1Í3LªIdentifierÍ1Í3¢fsM§LiteralÍ9ÍH­@ohos.file.fs¯"@ohos.file.fs"J±ImportDeclarationÍJÍ‡‘K¯ImportSpecifierÍSÍaLªIdentifierÍSÍa®lvFootnoteViewLªIdentifierÍSÍa®lvFootnoteViewM§LiteralÍiÍ†»./utils/lvFootnoteComponent½'./utils/lvFootnoteComponent'J±ImportDeclarationÍˆÍ×‘K¯ImportSpecifierÍ‘Í¥LªIdentifierÍ‘Í¥´LvFootnoteControllerLªIdentifierÍ‘Í¥´LvFootnoteControllerM§LiteralÍ­ÍÖÙ'./utils/controller/lvFootnoteControllerÙ)'./utils/controller/lvFootnoteController'J±ImportDeclarationÍØÍ ‘K¯ImportSpecifierÍáÍèLªIdentifierÍáÍè§html2mdLªIdentifierÍáÍè§html2mdM§LiteralÍğÍÿ­@luvi/html2md¯'@luvi/html2md'

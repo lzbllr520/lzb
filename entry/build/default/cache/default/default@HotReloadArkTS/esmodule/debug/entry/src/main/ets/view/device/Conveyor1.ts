@@ -862,8 +862,8 @@ export class Conveyor1 extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             //选择传送带运动方向
             Select.create([
-                { value: '正向' },
-                { value: '反向' }
+                { value: '正向运行' },
+                { value: '反向运行' }
             ]);
             Context.animation({ duration: 250, curve: Curve.EaseInOut });
             //选择传送带运动方向
@@ -874,17 +874,17 @@ export class Conveyor1 extends ViewPU {
             Select.menuBackgroundColor(Color.Transparent);
             //选择传送带运动方向
             Select.onSelect((event) => {
-                const newDirection = event.valueOf() === 0 ? '正向' : '反向';
+                const newDirection = event.valueOf() === 0 ? '正向运行' : '反向运行';
                 if (this.data.direction !== newDirection) {
                     this.data.direction = newDirection;
                 }
             });
             //选择传送带运动方向
-            Select.selected(this.data.direction === '正向' ? 0 : 1);
+            Select.selected(this.data.direction === '正向运行' ? 0 : 1);
             //选择传送带运动方向
             Select.value(this.data.direction);
             //选择传送带运动方向
-            Select.width('20%');
+            Select.width('40%');
             //选择传送带运动方向
             Select.height(50);
             //选择传送带运动方向
@@ -905,6 +905,37 @@ export class Conveyor1 extends ViewPU {
             Context.animation(null);
         }, Select);
         //选择传送带运动方向
+        Select.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Select.create([
+                { value: '正常停止' },
+                { value: '急停' }
+            ]);
+            Context.animation({ duration: 250, curve: Curve.EaseInOut });
+            Select.optionWidth(180);
+            Select.menuBackgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
+            Select.menuBackgroundColor(Color.Transparent);
+            Select.onSelect((event) => {
+                const newStopMethod = event.valueOf() === 0 ? '正常停止' : '急停';
+                if (this.data.stopMethod !== newStopMethod) {
+                    this.data.stopMethod = newStopMethod;
+                }
+            });
+            Select.selected(this.data.direction === '正常停止' ? 0 : 1);
+            Select.value(this.data.stopMethod);
+            Select.width('40%');
+            Select.height(50);
+            Select.backgroundColor('rgba(255, 255, 255, 0.2)');
+            Select.borderRadius(25);
+            Select.fontColor(Color.White);
+            Select.border({
+                width: 1.5,
+                color: 'rgba(255, 255, 255, 0.3)'
+            });
+            Select.enabled(this.data.statusText === '运行中');
+            Select.opacity(this.data.statusText === '运行中' ? 1.0 : 0.4);
+            Context.animation(null);
+        }, Select);
         Select.pop();
         Row.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {

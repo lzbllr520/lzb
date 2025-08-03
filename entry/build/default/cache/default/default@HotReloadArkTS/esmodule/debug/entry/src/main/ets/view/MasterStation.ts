@@ -2,178 +2,257 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
 interface MasterStation_Params {
-    cardData?: CardInfo[];
+    currentIndex?: number;
+    servers?: Server[];
+    controller?: TabsController;
+    isLineRunning?: boolean;
+    addLog?: (level: 'info' | 'warning' | 'error', message: string, shouldSave: boolean) => void;
+    conveyorData1?: ConveyorState;
+    conveyorData2?: ConveyorState;
+    dollyData?: DollyState;
+    robot1Data?: RobotArmState;
+    robot2Data?: RobotArmState;
+    robot3Data?: RobotArmState;
 }
-interface InfoCard_Params {
-    title?: string;
-    description?: string;
-    isPressed?: boolean;
-}
-//定义卡片的数据模型
-interface CardInfo {
-    id: string;
-    title: string;
-    description: string;
-}
-class InfoCard extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
-            this.paramsGenerator_ = paramsLambda;
-        }
-        this.title = '';
-        this.description = '';
-        this.__isPressed = new ObservedPropertySimplePU(false, this, "isPressed");
-        this.setInitiallyProvidedValue(params);
-        this.finalizeConstruction();
-    }
-    setInitiallyProvidedValue(params: InfoCard_Params) {
-        if (params.title !== undefined) {
-            this.title = params.title;
-        }
-        if (params.description !== undefined) {
-            this.description = params.description;
-        }
-        if (params.isPressed !== undefined) {
-            this.isPressed = params.isPressed;
-        }
-    }
-    updateStateVars(params: InfoCard_Params) {
-    }
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.__isPressed.purgeDependencyOnElmtId(rmElmtId);
-    }
-    aboutToBeDeleted() {
-        this.__isPressed.aboutToBeDeleted();
-        SubscriberManager.Get().delete(this.id__());
-        this.aboutToBeDeletedInternal();
-    }
-    private title: string;
-    private description: string;
-    private __isPressed: ObservedPropertySimplePU<boolean>;
-    get isPressed() {
-        return this.__isPressed.get();
-    }
-    set isPressed(newValue: boolean) {
-        this.__isPressed.set(newValue);
-    }
-    initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // 1. 将根组件从 Column 改为 Row，以实现水平布局
-            Row.create();
-            Context.animation({
-                duration: 200,
-                curve: Curve.EaseInOut
-            });
-            // 1. 将根组件从 Column 改为 Row，以实现水平布局
-            Row.padding(20);
-            // 1. 将根组件从 Column 改为 Row，以实现水平布局
-            Row.width('100%');
-            // 1. 将根组件从 Column 改为 Row，以实现水平布局
-            Row.backdropBlur(12);
-            // 1. 将根组件从 Column 改为 Row，以实现水平布局
-            Row.backgroundColor('rgba(10, 10, 15, 0.3)');
-            // 1. 将根组件从 Column 改为 Row，以实现水平布局
-            Row.borderRadius(16);
-            // 1. 将根组件从 Column 改为 Row，以实现水平布局
-            Row.border({
-                width: 1.5,
-                color: 'rgba(255, 255, 255, 0.15)'
-            });
-            // 1. 将根组件从 Column 改为 Row，以实现水平布局
-            Row.shadow({
-                radius: 30,
-                color: 'rgba(173, 216, 230, 0.2)',
-                offsetX: 0,
-                offsetY: 0
-            });
-            // 1. 将根组件从 Column 改为 Row，以实现水平布局
-            Row.scale({ x: this.isPressed ? 0.96 : 1.0, y: this.isPressed ? 0.96 : 1.0 });
-            Context.animation(null);
-            // 1. 将根组件从 Column 改为 Row，以实现水平布局
-            Row.onTouch((event: TouchEvent) => {
-                if (event.type === TouchType.Down) {
-                    this.isPressed = true;
-                }
-                if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-                    this.isPressed = false;
-                }
-            });
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // 2. 左侧的文本区域
-            Column.create();
-            // 2. 左侧的文本区域
-            Column.alignItems(HorizontalAlign.Start);
-            // 2. 左侧的文本区域
-            Column.layoutWeight(1);
-            // 2. 左侧的文本区域
-            Column.margin({ right: 16 });
-        }, Column);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create(this.title);
-            Text.fontSize(18);
-            Text.fontWeight(FontWeight.Bold);
-            Text.fontColor(Color.White);
-            Text.margin({ bottom: 8 });
-        }, Text);
-        Text.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create(this.description);
-            Text.fontSize(14);
-            Text.fontColor('rgba(255, 255, 255, 0.75)');
-            Text.lineHeight(20);
-        }, Text);
-        Text.pop();
-        // 2. 左侧的文本区域
-        Column.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // 3. 右侧的箭头图标。我们用 Text 组件来模拟，方便调整样式
-            Text.create('＞');
-            // 3. 右侧的箭头图标。我们用 Text 组件来模拟，方便调整样式
-            Text.fontSize(30);
-            // 3. 右侧的箭头图标。我们用 Text 组件来模拟，方便调整样式
-            Text.fontColor('rgba(255, 255, 255, 0.75)');
-        }, Text);
-        // 3. 右侧的箭头图标。我们用 Text 组件来模拟，方便调整样式
-        Text.pop();
-        // 1. 将根组件从 Column 改为 Row，以实现水平布局
-        Row.pop();
-    }
-    rerender() {
-        this.updateDirtyElements();
-    }
-}
+import { ServerInfoView } from "@normalized:N&&&entry/src/main/ets/components/ServerInfoView&";
+import type { Server } from '../model/ServerState';
+import { IconTab } from "@normalized:N&&&entry/src/main/ets/components/IconTab&";
+import type { ConveyorState } from '../model/ConveyorState';
+import type { DollyState } from '../model/DollyState';
+import type { RobotArmState } from '../model/RobotArmState';
 export class MasterStation extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
         if (typeof paramsLambda === "function") {
             this.paramsGenerator_ = paramsLambda;
         }
-        this.cardData = [
-            { id: '1', title: 'VOC传感器', description: '动态获取VOC浓度、甲醛浓度、二氧化碳浓度、温度、湿度这些和环境有关的数据信息并实时展示。' },
-            { id: '2', title: '噪声传感器', description: '一次开发，多端部署。鸿蒙的分布式技术让应用无缝流转于手机、平板、手表和智慧屏之间。' },
-            { id: '3', title: '红外传感器', description: '无需安装，即点即用。通过服务卡片，用户可以直接在桌面获取核心服务信息和快捷入口。' },
-            { id: '4', title: '震动传感器', description: '结合背景模糊、半透明材质和柔和光影，创造出层次分明、通透精致的视觉效果。' },
-        ];
+        this.__currentIndex = new ObservedPropertySimplePU(0, this, "currentIndex");
+        this.__servers = new SynchedPropertyObjectOneWayPU(params.servers, this, "servers");
+        this.controller = new TabsController();
+        this.__isLineRunning = new SynchedPropertySimpleTwoWayPU(params.isLineRunning, this, "isLineRunning");
+        this.addLog = () => { };
+        this.__conveyorData1 = new SynchedPropertyObjectTwoWayPU(params.conveyorData1, this, "conveyorData1");
+        this.__conveyorData2 = new SynchedPropertyObjectTwoWayPU(params.conveyorData2, this, "conveyorData2");
+        this.__dollyData = new SynchedPropertyObjectTwoWayPU(params.dollyData, this, "dollyData");
+        this.__robot1Data = new SynchedPropertyObjectTwoWayPU(params.robot1Data, this, "robot1Data");
+        this.__robot2Data = new SynchedPropertyObjectTwoWayPU(params.robot2Data, this, "robot2Data");
+        this.__robot3Data = new SynchedPropertyObjectTwoWayPU(params.robot3Data, this, "robot3Data");
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params: MasterStation_Params) {
-        if (params.cardData !== undefined) {
-            this.cardData = params.cardData;
+        if (params.currentIndex !== undefined) {
+            this.currentIndex = params.currentIndex;
+        }
+        if (params.servers === undefined) {
+            this.__servers.set([]);
+        }
+        if (params.controller !== undefined) {
+            this.controller = params.controller;
+        }
+        if (params.addLog !== undefined) {
+            this.addLog = params.addLog;
         }
     }
     updateStateVars(params: MasterStation_Params) {
+        this.__servers.reset(params.servers);
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__currentIndex.purgeDependencyOnElmtId(rmElmtId);
+        this.__servers.purgeDependencyOnElmtId(rmElmtId);
+        this.__isLineRunning.purgeDependencyOnElmtId(rmElmtId);
+        this.__conveyorData1.purgeDependencyOnElmtId(rmElmtId);
+        this.__conveyorData2.purgeDependencyOnElmtId(rmElmtId);
+        this.__dollyData.purgeDependencyOnElmtId(rmElmtId);
+        this.__robot1Data.purgeDependencyOnElmtId(rmElmtId);
+        this.__robot2Data.purgeDependencyOnElmtId(rmElmtId);
+        this.__robot3Data.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
+        this.__currentIndex.aboutToBeDeleted();
+        this.__servers.aboutToBeDeleted();
+        this.__isLineRunning.aboutToBeDeleted();
+        this.__conveyorData1.aboutToBeDeleted();
+        this.__conveyorData2.aboutToBeDeleted();
+        this.__dollyData.aboutToBeDeleted();
+        this.__robot1Data.aboutToBeDeleted();
+        this.__robot2Data.aboutToBeDeleted();
+        this.__robot3Data.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-    // 创建一个包含多个卡片信息的数组作为数据源
-    private cardData: CardInfo[];
+    private __currentIndex: ObservedPropertySimplePU<number>;
+    get currentIndex() {
+        return this.__currentIndex.get();
+    }
+    set currentIndex(newValue: number) {
+        this.__currentIndex.set(newValue);
+    }
+    private __servers: SynchedPropertySimpleOneWayPU<Server[]>;
+    get servers() {
+        return this.__servers.get();
+    }
+    set servers(newValue: Server[]) {
+        this.__servers.set(newValue);
+    }
+    private controller: TabsController;
+    private __isLineRunning: SynchedPropertySimpleTwoWayPU<boolean>;
+    get isLineRunning() {
+        return this.__isLineRunning.get();
+    }
+    set isLineRunning(newValue: boolean) {
+        this.__isLineRunning.set(newValue);
+    }
+    private addLog: (level: 'info' | 'warning' | 'error', message: string, shouldSave: boolean) => void;
+    private CustomIconTabBar(icon: Resource, isSelected: boolean, parent = null) {
+        {
+            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                if (isInitialRender) {
+                    let componentCall = new IconTab(this, {
+                        icon: icon,
+                        isSelected: isSelected
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/MasterStation.ets", line: 22, col: 5 });
+                    ViewPU.create(componentCall);
+                    let paramsLambda = () => {
+                        return {
+                            icon: icon,
+                            isSelected: isSelected
+                        };
+                    };
+                    componentCall.paramsGenerator_ = paramsLambda;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(elmtId, {
+                        icon: icon,
+                        isSelected: isSelected
+                    });
+                }
+            }, { name: "IconTab" });
+        }
+    }
+    private __conveyorData1: SynchedPropertySimpleOneWayPU<ConveyorState>;
+    get conveyorData1() {
+        return this.__conveyorData1.get();
+    }
+    set conveyorData1(newValue: ConveyorState) {
+        this.__conveyorData1.set(newValue);
+    }
+    private __conveyorData2: SynchedPropertySimpleOneWayPU<ConveyorState>;
+    get conveyorData2() {
+        return this.__conveyorData2.get();
+    }
+    set conveyorData2(newValue: ConveyorState) {
+        this.__conveyorData2.set(newValue);
+    }
+    private __dollyData: SynchedPropertySimpleOneWayPU<DollyState>;
+    get dollyData() {
+        return this.__dollyData.get();
+    }
+    set dollyData(newValue: DollyState) {
+        this.__dollyData.set(newValue);
+    }
+    private __robot1Data: SynchedPropertySimpleOneWayPU<RobotArmState>;
+    get robot1Data() {
+        return this.__robot1Data.get();
+    }
+    set robot1Data(newValue: RobotArmState) {
+        this.__robot1Data.set(newValue);
+    }
+    private __robot2Data: SynchedPropertySimpleOneWayPU<RobotArmState>;
+    get robot2Data() {
+        return this.__robot2Data.get();
+    }
+    set robot2Data(newValue: RobotArmState) {
+        this.__robot2Data.set(newValue);
+    }
+    private __robot3Data: SynchedPropertySimpleOneWayPU<RobotArmState>;
+    get robot3Data() {
+        return this.__robot3Data.get();
+    }
+    set robot3Data(newValue: RobotArmState) {
+        this.__robot3Data.set(newValue);
+    }
+    //停止产线函数
+    private stopLine() {
+        AlertDialog.show({
+            title: '操作确认',
+            message: '是否停止产线运作',
+            autoCancel: true,
+            alignment: DialogAlignment.Center,
+            buttons: [
+                {
+                    value: '取消',
+                    action: () => {
+                        //用户点击取消，不做任何操作
+                    }
+                },
+                {
+                    value: '确认',
+                    fontColor: Color.Red,
+                    action: () => {
+                        this.isLineRunning = false;
+                        this.addLog('warning', '停止产线运行', true);
+                    }
+                }
+            ]
+        });
+    }
+    //启动产线函数
+    private startLine() {
+        AlertDialog.show({
+            title: '操作确认',
+            message: '是否开启产线运作',
+            autoCancel: true,
+            alignment: DialogAlignment.Center,
+            buttons: [
+                {
+                    value: '取消',
+                    action: () => {
+                        //用户点击取消，不做任何操作
+                    }
+                },
+                {
+                    value: '确认',
+                    fontColor: Color.Red,
+                    action: () => {
+                        //将所有独立的 @Link 状态文本放入一个数组中
+                        const allDeviceStatuses = [
+                            this.conveyorData1.statusText,
+                            this.conveyorData2.statusText,
+                            this.dollyData.statusText,
+                            this.robot1Data.statusText,
+                            this.robot2Data.statusText,
+                            this.robot3Data.statusText
+                        ];
+                        //检查这个数组中是否有任何一个状态不是“离线中”
+                        const isAnyDeviceNotOffline = allDeviceStatuses.some(status => status !== '离线中');
+                        if (isAnyDeviceNotOffline) {
+                            //有设备未进入离线状态，无法进入产线运作
+                            //进行弹窗提示
+                            AlertDialog.show({
+                                title: '操作提示',
+                                message: '有设备未进入离线状态，请前往设备管理界面中停止设备运作。',
+                                alignment: DialogAlignment.Center,
+                                autoCancel: true,
+                                buttons: [
+                                    {
+                                        value: '确定',
+                                        action: () => {
+                                            //无需做任何操作
+                                        }
+                                    }
+                                ]
+                            });
+                        }
+                        else {
+                            this.isLineRunning = true;
+                            this.addLog('info', '启动产线运行', true);
+                        }
+                    }
+                }
+            ]
+        });
+    }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
@@ -181,79 +260,123 @@ export class MasterStation extends ViewPU {
             Column.height('100%');
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create('传感器动态数据集');
-            Text.fontSize(34);
-            Text.fontWeight(FontWeight.Bold);
+            Row.create();
+            Row.margin({ top: 20 });
+            Row.width('100%');
+            Row.justifyContent(FlexAlign.SpaceEvenly);
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Button.createWithLabel('启动产线运作');
+            Button.onClick(() => this.startLine());
+            Button.backgroundColor(this.isLineRunning ? Color.Gray : '#28a745');
+            Button.enabled(!this.isLineRunning);
+        }, Button);
+        Button.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Button.createWithLabel('停止产线运作');
+            Button.onClick(() => this.stopLine());
+            Button.backgroundColor(this.isLineRunning ? '#dc3545' : Color.Gray);
+            Button.enabled(this.isLineRunning);
+        }, Button);
+        Button.pop();
+        Row.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            if (!this.servers || this.servers.length === 0) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Column.create();
+                        Column.width('100%');
+                        Column.height('100%');
+                        Column.justifyContent(FlexAlign.Center);
+                    }, Column);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create('暂无服务器');
+                        Text.fontColor(Color.White);
+                        Text.fontWeight(FontWeight.Bolder);
+                        Text.fontSize(30);
+                        Text.opacity(0.8);
+                    }, Text);
+                    Text.pop();
+                    Column.pop();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Tabs.create({
+                            controller: this.controller,
+                            barPosition: BarPosition.End
+                        });
+                        Tabs.vertical(true);
+                        Tabs.barMode(BarMode.Fixed);
+                        Tabs.barWidth(60);
+                        Tabs.animationDuration(300);
+                        Tabs.onChange((index: number) => {
+                            this.currentIndex = index;
+                        });
+                        Tabs.layoutWeight(1);
+                    }, Tabs);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        ForEach.create();
+                        const forEachItemGenFunction = (_item, index: number) => {
+                            const server = _item;
+                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                TabContent.create(() => {
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new ServerInfoView(this, { server: server }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/MasterStation.ets", line: 154, col: 17 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        server: server
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                                    server: server
+                                                });
+                                            }
+                                        }, { name: "ServerInfoView" });
+                                    }
+                                });
+                                TabContent.tabBar({ builder: () => {
+                                        this.CustomIconTabBar.call(this, { "id": 16777280, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, this.currentIndex === index);
+                                    } });
+                            }, TabContent);
+                            TabContent.pop();
+                        };
+                        this.forEachUpdateFunction(elmtId, this.servers, forEachItemGenFunction, (server: Server) => server.id, true, false);
+                    }, ForEach);
+                    ForEach.pop();
+                    Tabs.pop();
+                });
+            }
+        }, If);
+        If.pop();
+        Column.pop();
+    }
+    buildTabBar(name: string, parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+            Column.padding({ left: 10, right: 10, top: 15, bottom: 15 });
+            Column.width('100%');
+            Column.height('100%');
+            Column.justifyContent(FlexAlign.Center);
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(name);
+            Text.fontSize(18);
+            Text.fontWeight(FontWeight.Medium);
             Text.fontColor(Color.White);
-            Text.width('100%');
-            Text.textAlign(TextAlign.Start);
-            Text.padding({ top: 50, left: 20, right: 20, bottom: 10 });
+            Text.maxLines(2);
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.textAlign(TextAlign.Center);
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Stack.create();
-            Stack.width('100%');
-            Stack.layoutWeight(1);
-        }, Stack);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            List.create({ space: 16 });
-            List.width('100%');
-            List.height('100%');
-            List.padding({ left: 16, right: 16, top: 20, bottom: 20 });
-            List.edgeEffect(EdgeEffect.Spring);
-        }, List);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // ForEach 循环和 ListItem 放在这里
-            ForEach.create();
-            const forEachItemGenFunction = _item => {
-                const item = _item;
-                {
-                    const itemCreation = (elmtId, isInitialRender) => {
-                        ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-                        itemCreation2(elmtId, isInitialRender);
-                        if (!isInitialRender) {
-                            ListItem.pop();
-                        }
-                        ViewStackProcessor.StopGetAccessRecording();
-                    };
-                    const itemCreation2 = (elmtId, isInitialRender) => {
-                        ListItem.create(deepRenderFunction, true);
-                    };
-                    const deepRenderFunction = (elmtId, isInitialRender) => {
-                        itemCreation(elmtId, isInitialRender);
-                        {
-                            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                if (isInitialRender) {
-                                    let componentCall = new InfoCard(this, {
-                                        title: item.title,
-                                        description: item.description
-                                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/MasterStation.ets", line: 95, col: 15 });
-                                    ViewPU.create(componentCall);
-                                    let paramsLambda = () => {
-                                        return {
-                                            title: item.title,
-                                            description: item.description
-                                        };
-                                    };
-                                    componentCall.paramsGenerator_ = paramsLambda;
-                                }
-                                else {
-                                    this.updateStateVarsOfChildByElmtId(elmtId, {});
-                                }
-                            }, { name: "InfoCard" });
-                        }
-                        ListItem.pop();
-                    };
-                    this.observeComponentCreation2(itemCreation2, ListItem);
-                    ListItem.pop();
-                }
-            };
-            this.forEachUpdateFunction(elmtId, this.cardData, forEachItemGenFunction, (item: CardInfo) => item.id, false, false);
-        }, ForEach);
-        // ForEach 循环和 ListItem 放在这里
-        ForEach.pop();
-        List.pop();
-        Stack.pop();
         Column.pop();
     }
     rerender() {

@@ -1,4 +1,5 @@
 import type AbilityConstant from "@ohos:app.ability.AbilityConstant";
+import type common from "@ohos:app.ability.common";
 import ConfigurationConstant from "@ohos:app.ability.ConfigurationConstant";
 import UIAbility from "@ohos:app.ability.UIAbility";
 import type Want from "@ohos:app.ability.Want";
@@ -7,20 +8,19 @@ import promptAction from "@ohos:promptAction";
 import type window from "@ohos:window";
 import type { BusinessError as BusinessError } from "@ohos:base";
 import preferences from "@ohos:data.preferences";
+import { checkApiStatus } from "@normalized:N&&&entry/src/main/ets/service/Request&";
 //从Login.ets移动过来的常量
 const PREFERENCES_FILE_NAME = 'login_prefs';
-const KEY_SESSION_TOKEN = 'session_token';
-const KEY_SESSION_EXPIRY = 'session_expiry';
 const DOMAIN = 0x0000;
+//导出一个context全局变量来使用
+export let globalAbilityContext: common.UIAbilityContext;
 export default class EntryAbility extends UIAbility {
     private async checkLoginSession(): Promise<boolean> {
         try {
             // 注意：在Ability中，直接使用 this.context
             const prefs = await preferences.getPreferences(this.context, PREFERENCES_FILE_NAME);
-            const token = await prefs.get(KEY_SESSION_TOKEN, '');
-            const expiry = await prefs.get(KEY_SESSION_EXPIRY, 0);
-            if (token && expiry > Date.now()) {
-                console.info('[EntryAbility] Valid session found.');
+            const token = await prefs.get('token', '');
+            if (token) {
                 return true;
             }
         }
@@ -31,6 +31,8 @@ export default class EntryAbility extends UIAbility {
         return false;
     }
     onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+        //为全局的context赋值
+        globalAbilityContext = this.context;
         this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
         hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
     }
@@ -38,14 +40,21 @@ export default class EntryAbility extends UIAbility {
         hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onDestroy');
     }
     async onWindowStageCreate(windowStage: window.WindowStage): Promise<void> {
-        const isLoggedIn = await this.checkLoginSession();
-        //根据登录状态决定要加载的初始页面
-        const initialPage = isLoggedIn ? 'pages/Index' : 'pages/Login';
-        console.info(`[EntryAbility] User is ${isLoggedIn ? 'logged in' : 'not logged in'}. Loading page: ${initialPage}`);
+        let initialPage = '';
+        const isConnect: boolean = await checkApiStatus();
+        if (!isConnect) {
+            initialPage = 'pages/NetError';
+        }
+        else {
+            const isLoggedIn = await this.checkLoginSession();
+            initialPage = isLoggedIn ? 'pages/Index' : 'pages/Login';
+        }
         if (initialPage === 'pages/Index') {
             promptAction.showToast({ message: '欢迎回来，admin先生', bottom: '80%', duration: 1000 });
         }
-        // 设置应用要加载的初始页面
+        if (initialPage === 'pages/NetError') {
+            promptAction.showToast({ message: '应用无法与服务器连接', bottom: '80%', duration: 1000 });
+        }
         // 设置应用要加载的初始页面
         windowStage.loadContent(initialPage, (err) => {
             if (err.code) {
@@ -54,7 +63,7 @@ export default class EntryAbility extends UIAbility {
             }
             console.info('Succeeded in loading the content.');
         });
-        // 1. 获取应用主窗口
+        //获取应用主窗口
         let windowClass: window.Window | undefined = undefined;
         try {
             windowClass = windowStage.getMainWindowSync(); // 使用同步方法获取窗口，代码更简洁

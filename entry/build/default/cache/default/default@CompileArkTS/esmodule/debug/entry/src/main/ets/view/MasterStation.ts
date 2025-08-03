@@ -2,40 +2,133 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
 interface MasterStation_Params {
-    deviceList?: DeviceStatus[];
-    conveyorData1?: ConveyorState;
-    conveyorData2?: ConveyorState;
-    dollyData?: DollyState;
-    robot1Data?: RobotArmState;
-    robot2Data?: RobotArmState;
-    robot3Data?: RobotArmState;
-    isLineRunning?: boolean;
-    addLog?: (level: 'info' | 'warning' | 'error', message: string, shouldSave: boolean) => void;
+    cardData?: CardInfo[];
+    servers?: Server[];
+    hasLoaded?: boolean;
+    node_id_voc?: string;
+    node_id_voice?: string;
 }
-import { DeviceInfoCard } from "@normalized:N&&&entry/src/main/ets/components/DeviceInfoCard&";
-import type { ConveyorState } from '../model/ConveyorState';
-import type { DollyState } from '../model/DollyState';
-import type { RobotArmState } from '../model/RobotArmState';
-// 定义一个简单的数据模型，实际开发中这些数据应通过ViewModel从后端或传感器获取
-// 定义一个简单的数据模型
-class DeviceStatus {
-    //在类的顶层明确声明所有属性
-    name: string;
-    icon: Resource;
-    temp: number;
-    humidity: number;
-    noise: number;
-    vibration: boolean;
-    status: string;
-    //constructor 只负责接收参数并为已声明的属性赋值
-    constructor(name: string, icon: Resource, temp: number, humidity: number, noise: number, vibration: boolean, status: string) {
-        this.name = name;
-        this.icon = icon;
-        this.temp = temp;
-        this.humidity = humidity;
-        this.noise = noise;
-        this.vibration = vibration;
-        this.status = status;
+interface InfoCard_Params {
+    title?: string;
+    description?: string;
+    isPressed?: boolean;
+}
+import router from "@ohos:router";
+import type { Server, Node } from '../model/ServerState';
+import { getNodeStart, getNodeOther } from "@normalized:N&&&entry/src/main/ets/service/Request&";
+//定义卡片的数据模型
+interface CardInfo {
+    id: string;
+    title: string;
+    description: string;
+}
+class InfoCard extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.title = '';
+        this.description = '';
+        this.__isPressed = new ObservedPropertySimplePU(false, this, "isPressed");
+        this.setInitiallyProvidedValue(params);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params: InfoCard_Params) {
+        if (params.title !== undefined) {
+            this.title = params.title;
+        }
+        if (params.description !== undefined) {
+            this.description = params.description;
+        }
+        if (params.isPressed !== undefined) {
+            this.isPressed = params.isPressed;
+        }
+    }
+    updateStateVars(params: InfoCard_Params) {
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__isPressed.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.__isPressed.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    private title: string;
+    private description: string;
+    private __isPressed: ObservedPropertySimplePU<boolean>;
+    get isPressed() {
+        return this.__isPressed.get();
+    }
+    set isPressed(newValue: boolean) {
+        this.__isPressed.set(newValue);
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Row.create();
+            Context.animation({
+                duration: 200,
+                curve: Curve.EaseInOut
+            });
+            Row.padding(20);
+            Row.width('100%');
+            Row.backdropBlur(12);
+            Row.backgroundColor('rgba(10, 10, 15, 0.3)');
+            Row.borderRadius(16);
+            Row.border({
+                width: 1.5,
+                color: 'rgba(255, 255, 255, 0.15)'
+            });
+            Row.shadow({
+                radius: 30,
+                color: 'rgba(173, 216, 230, 0.2)',
+                offsetX: 0,
+                offsetY: 0
+            });
+            Row.scale({ x: this.isPressed ? 0.96 : 1.0, y: this.isPressed ? 0.96 : 1.0 });
+            Context.animation(null);
+            Row.onTouch((event: TouchEvent) => {
+                if (event.type === TouchType.Down) {
+                    this.isPressed = true;
+                }
+                if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+                    this.isPressed = false;
+                }
+            });
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+            Column.alignItems(HorizontalAlign.Start);
+            Column.layoutWeight(1);
+            Column.margin({ right: 16 });
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(this.title);
+            Text.fontSize(18);
+            Text.fontWeight(FontWeight.Bold);
+            Text.fontColor(Color.White);
+            Text.margin({ bottom: 8 });
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(this.description);
+            Text.fontSize(14);
+            Text.fontColor('rgba(255, 255, 255, 0.75)');
+            Text.lineHeight(20);
+        }, Text);
+        Text.pop();
+        Column.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('＞');
+            Text.fontSize(30);
+            Text.fontColor('rgba(255, 255, 255, 0.75)');
+        }, Text);
+        Text.pop();
+        Row.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
     }
 }
 export class MasterStation extends ViewPU {
@@ -44,350 +137,199 @@ export class MasterStation extends ViewPU {
         if (typeof paramsLambda === "function") {
             this.paramsGenerator_ = paramsLambda;
         }
-        this.__deviceList = new ObservedPropertyObjectPU([
-            new DeviceStatus("传送带 #1", { "id": 16777234, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, 32, 45, 55, false, '离线中'),
-            new DeviceStatus("传送带 #2", { "id": 16777234, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, 35, 48, 58, false, '离线中'),
-            new DeviceStatus("小车 #1", { "id": 16777241, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, 41, 50, 40, false, '离线中'),
-            new DeviceStatus("机械臂 #1", { "id": 16777263, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, 58, 65, 68, false, '离线中'),
-            new DeviceStatus("机械臂 #2", { "id": 16777263, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, 62, 66, 71, false, '离线中'),
-            new DeviceStatus("机械臂 #3", { "id": 16777263, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, 55, 63, 65, false, '离线中')
-        ], this, "deviceList");
-        this.__conveyorData1 = new SynchedPropertyObjectTwoWayPU(params.conveyorData1, this, "conveyorData1");
-        this.__conveyorData2 = new SynchedPropertyObjectTwoWayPU(params.conveyorData2, this, "conveyorData2");
-        this.__dollyData = new SynchedPropertyObjectTwoWayPU(params.dollyData, this, "dollyData");
-        this.__robot1Data = new SynchedPropertyObjectTwoWayPU(params.robot1Data, this, "robot1Data");
-        this.__robot2Data = new SynchedPropertyObjectTwoWayPU(params.robot2Data, this, "robot2Data");
-        this.__robot3Data = new SynchedPropertyObjectTwoWayPU(params.robot3Data, this, "robot3Data");
-        this.__isLineRunning = new SynchedPropertySimpleTwoWayPU(params.isLineRunning, this, "isLineRunning");
-        this.addLog = () => { };
+        this.cardData = [
+            { id: '1', title: 'VOC传感器', description: '动态获取VOC浓度、甲醛浓度、二氧化碳浓度、温度、湿度这些和环境有关的数据信息并实时展示。' },
+            { id: '2', title: '噪声传感器', description: '动态获取并展示当前噪声值。' },
+            { id: '3', title: '红外传感器', description: '待描述。' },
+            { id: '4', title: '震动传感器', description: '待描述。' },
+        ];
+        this.__servers = new SynchedPropertyObjectOneWayPU(params.servers, this, "servers");
+        this.__hasLoaded = new ObservedPropertySimplePU(false, this, "hasLoaded");
+        this.__node_id_voc = new ObservedPropertySimplePU('', this, "node_id_voc");
+        this.__node_id_voice = new ObservedPropertySimplePU('', this, "node_id_voice");
         this.setInitiallyProvidedValue(params);
+        this.declareWatch("servers", this.onServersChange);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params: MasterStation_Params) {
-        if (params.deviceList !== undefined) {
-            this.deviceList = params.deviceList;
+        if (params.cardData !== undefined) {
+            this.cardData = params.cardData;
         }
-        if (params.addLog !== undefined) {
-            this.addLog = params.addLog;
+        if (params.servers === undefined) {
+            this.__servers.set([]
+            //标志位，表示只加载一次
+            );
+        }
+        if (params.hasLoaded !== undefined) {
+            this.hasLoaded = params.hasLoaded;
+        }
+        if (params.node_id_voc !== undefined) {
+            this.node_id_voc = params.node_id_voc;
+        }
+        if (params.node_id_voice !== undefined) {
+            this.node_id_voice = params.node_id_voice;
         }
     }
     updateStateVars(params: MasterStation_Params) {
+        this.__servers.reset(params.servers);
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.__deviceList.purgeDependencyOnElmtId(rmElmtId);
-        this.__conveyorData1.purgeDependencyOnElmtId(rmElmtId);
-        this.__conveyorData2.purgeDependencyOnElmtId(rmElmtId);
-        this.__dollyData.purgeDependencyOnElmtId(rmElmtId);
-        this.__robot1Data.purgeDependencyOnElmtId(rmElmtId);
-        this.__robot2Data.purgeDependencyOnElmtId(rmElmtId);
-        this.__robot3Data.purgeDependencyOnElmtId(rmElmtId);
-        this.__isLineRunning.purgeDependencyOnElmtId(rmElmtId);
+        this.__servers.purgeDependencyOnElmtId(rmElmtId);
+        this.__hasLoaded.purgeDependencyOnElmtId(rmElmtId);
+        this.__node_id_voc.purgeDependencyOnElmtId(rmElmtId);
+        this.__node_id_voice.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
-        this.__deviceList.aboutToBeDeleted();
-        this.__conveyorData1.aboutToBeDeleted();
-        this.__conveyorData2.aboutToBeDeleted();
-        this.__dollyData.aboutToBeDeleted();
-        this.__robot1Data.aboutToBeDeleted();
-        this.__robot2Data.aboutToBeDeleted();
-        this.__robot3Data.aboutToBeDeleted();
-        this.__isLineRunning.aboutToBeDeleted();
+        this.__servers.aboutToBeDeleted();
+        this.__hasLoaded.aboutToBeDeleted();
+        this.__node_id_voc.aboutToBeDeleted();
+        this.__node_id_voice.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-    // 使用@State装饰器使数据成为响应式的，当数据改变时UI会自动更新
-    private __deviceList: ObservedPropertyObjectPU<DeviceStatus[]>;
-    get deviceList() {
-        return this.__deviceList.get();
+    // 创建一个包含多个卡片信息的数组作为数据源
+    private cardData: CardInfo[];
+    private __servers: SynchedPropertySimpleOneWayPU<Server[]>;
+    get servers() {
+        return this.__servers.get();
     }
-    set deviceList(newValue: DeviceStatus[]) {
-        this.__deviceList.set(newValue);
+    set servers(newValue: Server[]) {
+        this.__servers.set(newValue);
     }
-    private __conveyorData1: SynchedPropertySimpleOneWayPU<ConveyorState>;
-    get conveyorData1() {
-        return this.__conveyorData1.get();
+    //标志位，表示只加载一次
+    private __hasLoaded: ObservedPropertySimplePU<boolean>;
+    get hasLoaded() {
+        return this.__hasLoaded.get();
     }
-    set conveyorData1(newValue: ConveyorState) {
-        this.__conveyorData1.set(newValue);
+    set hasLoaded(newValue: boolean) {
+        this.__hasLoaded.set(newValue);
     }
-    private __conveyorData2: SynchedPropertySimpleOneWayPU<ConveyorState>;
-    get conveyorData2() {
-        return this.__conveyorData2.get();
+    private __node_id_voc: ObservedPropertySimplePU<string>;
+    get node_id_voc() {
+        return this.__node_id_voc.get();
     }
-    set conveyorData2(newValue: ConveyorState) {
-        this.__conveyorData2.set(newValue);
+    set node_id_voc(newValue: string) {
+        this.__node_id_voc.set(newValue);
     }
-    private __dollyData: SynchedPropertySimpleOneWayPU<DollyState>;
-    get dollyData() {
-        return this.__dollyData.get();
+    private __node_id_voice: ObservedPropertySimplePU<string>;
+    get node_id_voice() {
+        return this.__node_id_voice.get();
     }
-    set dollyData(newValue: DollyState) {
-        this.__dollyData.set(newValue);
+    set node_id_voice(newValue: string) {
+        this.__node_id_voice.set(newValue);
     }
-    private __robot1Data: SynchedPropertySimpleOneWayPU<RobotArmState>;
-    get robot1Data() {
-        return this.__robot1Data.get();
-    }
-    set robot1Data(newValue: RobotArmState) {
-        this.__robot1Data.set(newValue);
-    }
-    private __robot2Data: SynchedPropertySimpleOneWayPU<RobotArmState>;
-    get robot2Data() {
-        return this.__robot2Data.get();
-    }
-    set robot2Data(newValue: RobotArmState) {
-        this.__robot2Data.set(newValue);
-    }
-    private __robot3Data: SynchedPropertySimpleOneWayPU<RobotArmState>;
-    get robot3Data() {
-        return this.__robot3Data.get();
-    }
-    set robot3Data(newValue: RobotArmState) {
-        this.__robot3Data.set(newValue);
-    }
-    private __isLineRunning: SynchedPropertySimpleTwoWayPU<boolean>;
-    get isLineRunning() {
-        return this.__isLineRunning.get();
-    }
-    set isLineRunning(newValue: boolean) {
-        this.__isLineRunning.set(newValue);
-    }
-    private addLog: (level: 'info' | 'warning' | 'error', message: string, shouldSave: boolean) => void;
-    //停止产线函数
-    private stopLine() {
-        AlertDialog.show({
-            title: '操作确认',
-            message: '是否停止产线运作',
-            autoCancel: true,
-            alignment: DialogAlignment.Center,
-            buttons: [
-                {
-                    value: '取消',
-                    action: () => {
-                        //用户点击取消，不做任何操作
-                    }
-                },
-                {
-                    value: '确认',
-                    fontColor: Color.Red,
-                    action: () => {
-                        this.isLineRunning = false;
-                        // 重置所有设备状态为空闲
-                        this.conveyorData1.statusText = '离线中';
-                        this.conveyorData2.statusText = '离线中';
-                        this.dollyData.statusText = '离线中';
-                        this.robot1Data.statusText = '离线中';
-                        this.robot2Data.statusText = '离线中';
-                        this.robot3Data.statusText = '离线中';
-                        this.deviceList[0].status = '离线中';
-                        this.deviceList[1].status = '离线中';
-                        this.deviceList[2].status = '离线中';
-                        this.deviceList[3].status = '离线中';
-                        this.deviceList[4].status = '离线中';
-                        this.deviceList[5].status = '离线中';
-                        //强制进行页面刷新
-                        this.deviceList = [...this.deviceList];
-                        this.addLog('warning', '停止产线运行', true);
+    async onServersChange(): Promise<void> {
+        if (this.servers && this.servers.length > 0 && !this.hasLoaded) {
+            // 调用数据加载函数
+            const nodes1: Node[] | null = await getNodeStart(this.servers[0].id);
+            if (nodes1 && nodes1.length > 0) {
+                const nodes2: Node[] | null = await getNodeOther(this.servers[0].id, nodes1[3].node_id);
+                if (nodes2 && nodes2.length > 0) {
+                    const nodes3: Node[] | null = await getNodeOther(this.servers[0].id, nodes2[1].node_id);
+                    if (nodes3 && nodes3.length > 0) {
+                        this.node_id_voc = nodes3[1].node_id;
+                        this.node_id_voice = nodes3[2].node_id;
                     }
                 }
-            ]
-        });
-    }
-    //启动产线函数
-    private startLine() {
-        AlertDialog.show({
-            title: '操作确认',
-            message: '是否开启产线运作',
-            autoCancel: true,
-            alignment: DialogAlignment.Center,
-            buttons: [
-                {
-                    value: '取消',
-                    action: () => {
-                        //用户点击取消，不做任何操作
-                    }
-                },
-                {
-                    value: '确认',
-                    fontColor: Color.Red,
-                    action: () => {
-                        //将所有独立的 @Link 状态文本放入一个数组中
-                        const allDeviceStatuses = [
-                            this.conveyorData1.statusText,
-                            this.conveyorData2.statusText,
-                            this.dollyData.statusText,
-                            this.robot1Data.statusText,
-                            this.robot2Data.statusText,
-                            this.robot3Data.statusText
-                        ];
-                        //检查这个数组中是否有任何一个状态不是“离线中”
-                        const isAnyDeviceNotOffline = allDeviceStatuses.some(status => status !== '离线中');
-                        if (isAnyDeviceNotOffline) {
-                            //有设备未进入离线状态，无法进入产线运作
-                            //进行弹窗提示
-                            AlertDialog.show({
-                                title: '操作提示',
-                                message: '有设备未进入离线状态，请前往设备管理界面中停止设备运作。',
-                                alignment: DialogAlignment.Center,
-                                autoCancel: true,
-                                buttons: [
-                                    {
-                                        value: '确定',
-                                        action: () => {
-                                            //无需做任何操作
-                                        }
-                                    }
-                                ]
-                            });
-                        }
-                        else {
-                            this.isLineRunning = true;
-                            // 重置所有设备状态为空闲
-                            this.conveyorData1.statusText = '运行中';
-                            this.conveyorData2.statusText = '运行中';
-                            this.dollyData.statusText = '运行中';
-                            this.robot1Data.statusText = '运行中';
-                            this.robot2Data.statusText = '运行中';
-                            this.robot3Data.statusText = '运行中';
-                            this.deviceList[0].status = '运行中';
-                            this.deviceList[1].status = '运行中';
-                            this.deviceList[2].status = '运行中';
-                            this.deviceList[3].status = '运行中';
-                            this.deviceList[4].status = '运行中';
-                            this.deviceList[5].status = '运行中';
-                            //强制进行页面刷新
-                            this.deviceList = [...this.deviceList];
-                            this.addLog('info', '启动产线运行', true);
-                        }
-                    }
-                }
-            ]
-        });
+            }
+            // 将标志位置为 true，防止重复加载
+            this.hasLoaded = true;
+        }
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.width('100%');
             Column.height('100%');
-            Column.justifyContent(FlexAlign.Start);
-            Column.alignItems(HorizontalAlign.Center);
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-            Row.width('100%');
-            Row.justifyContent(FlexAlign.SpaceEvenly);
-            Row.margin({ top: 20 });
-        }, Row);
+            Text.create((this.servers && this.servers.length > 0 ? this.servers[0].name : 'null') + '——传感器动态数据集');
+            Text.fontSize(34);
+            Text.fontWeight(FontWeight.Bold);
+            Text.fontColor(Color.White);
+            Text.width('100%');
+            Text.textAlign(TextAlign.Start);
+            Text.padding({ top: 50, left: 20, right: 20, bottom: 10 });
+        }, Text);
+        Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Button.createWithLabel('启动产线运作');
-            Button.onClick(() => this.startLine());
-            Button.backgroundColor(this.isLineRunning ? Color.Gray : '#28a745');
-            Button.enabled(!this.isLineRunning);
-        }, Button);
-        Button.pop();
+            Stack.create();
+            Stack.width('100%');
+            Stack.layoutWeight(1);
+        }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Button.createWithLabel('停止产线运作');
-            Button.onClick(() => this.stopLine());
-            Button.backgroundColor(this.isLineRunning ? '#dc3545' : Color.Gray);
-            Button.enabled(this.isLineRunning);
-        }, Button);
-        Button.pop();
-        Row.pop();
+            List.create({ space: 16 });
+            List.width('100%');
+            List.height('100%');
+            List.padding({ left: 16, right: 16, top: 20, bottom: 20 });
+            List.edgeEffect(EdgeEffect.Spring);
+        }, List);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            //使用Grid布局来展示所有设备卡片
-            Grid.create();
-            //使用Grid布局来展示所有设备卡片
-            Grid.columnsTemplate('1fr 1fr');
-            //使用Grid布局来展示所有设备卡片
-            Grid.rowsTemplate('1fr 1fr 1fr');
-            //使用Grid布局来展示所有设备卡片
-            Grid.columnsGap(20);
-            //使用Grid布局来展示所有设备卡片
-            Grid.rowsGap(20);
-            //使用Grid布局来展示所有设备卡片
-            Grid.padding(20);
-            //使用Grid布局来展示所有设备卡片
-            Grid.width('95%');
-            //使用Grid布局来展示所有设备卡片
-            Grid.height('85%');
-        }, Grid);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // 循环渲染设备列表
+            // ForEach 循环和 ListItem 放在这里
             ForEach.create();
             const forEachItemGenFunction = _item => {
                 const item = _item;
                 {
-                    const itemCreation2 = (elmtId, isInitialRender) => {
-                        GridItem.create(() => { }, false);
+                    const itemCreation = (elmtId, isInitialRender) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+                        itemCreation2(elmtId, isInitialRender);
+                        if (!isInitialRender) {
+                            ListItem.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
                     };
-                    const observedDeepRender = () => {
-                        this.observeComponentCreation2(itemCreation2, GridItem);
+                    const itemCreation2 = (elmtId, isInitialRender) => {
+                        ListItem.create(deepRenderFunction, true);
+                        ListItem.onClick(() => {
+                            if (item.title === 'VOC传感器') {
+                                router.pushUrl({
+                                    url: 'pages/SensorInfoVOC',
+                                    params: { title: item.title, id: this.servers[0].id, node_id: this.node_id_voc } // 将卡片标题作为参数传递
+                                });
+                            }
+                            else if (item.title === '噪声传感器') {
+                                router.pushUrl({
+                                    url: 'pages/SensorInfoVoice',
+                                    params: { title: item.title, id: this.servers[0].id, node_id: this.node_id_voice } // 将卡片标题作为参数传递
+                                });
+                            }
+                        });
+                    };
+                    const deepRenderFunction = (elmtId, isInitialRender) => {
+                        itemCreation(elmtId, isInitialRender);
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new 
-                                    // 使用我们封装好的DeviceInfoCard组件
-                                    DeviceInfoCard(this, {
-                                        title: item.name,
-                                        icon: item.icon,
-                                        temperature: item.temp,
-                                        humidity: item.humidity,
-                                        noise: item.noise,
-                                        vibration: item.vibration,
-                                        status: item.status,
-                                        conveyorData1: this.__conveyorData1,
-                                        conveyorData2: this.__conveyorData2,
-                                        dollyData: this.__dollyData,
-                                        robot1Data: this.__robot1Data,
-                                        robot2Data: this.__robot2Data,
-                                        robot3Data: this.__robot3Data,
-                                        isLineRunning: this.__isLineRunning
-                                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/MasterStation.ets", line: 198, col: 13 });
+                                    let componentCall = new InfoCard(this, {
+                                        title: item.title,
+                                        description: item.description
+                                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/MasterStation.ets", line: 123, col: 15 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
-                                            title: item.name,
-                                            icon: item.icon,
-                                            temperature: item.temp,
-                                            humidity: item.humidity,
-                                            noise: item.noise,
-                                            vibration: item.vibration,
-                                            status: item.status,
-                                            conveyorData1: this.conveyorData1,
-                                            conveyorData2: this.conveyorData2,
-                                            dollyData: this.dollyData,
-                                            robot1Data: this.robot1Data,
-                                            robot2Data: this.robot2Data,
-                                            robot3Data: this.robot3Data,
-                                            isLineRunning: this.isLineRunning
+                                            title: item.title,
+                                            description: item.description
                                         };
                                     };
                                     componentCall.paramsGenerator_ = paramsLambda;
                                 }
                                 else {
-                                    this.updateStateVarsOfChildByElmtId(elmtId, {
-                                        title: item.name,
-                                        icon: item.icon,
-                                        temperature: item.temp,
-                                        humidity: item.humidity,
-                                        noise: item.noise,
-                                        vibration: item.vibration,
-                                        status: item.status
-                                    });
+                                    this.updateStateVarsOfChildByElmtId(elmtId, {});
                                 }
-                            }, { name: "DeviceInfoCard" });
+                            }, { name: "InfoCard" });
                         }
-                        GridItem.pop();
+                        ListItem.pop();
                     };
-                    observedDeepRender();
+                    this.observeComponentCreation2(itemCreation2, ListItem);
+                    ListItem.pop();
                 }
             };
-            this.forEachUpdateFunction(elmtId, this.deviceList, forEachItemGenFunction);
+            this.forEachUpdateFunction(elmtId, this.cardData, forEachItemGenFunction, (item: CardInfo) => item.id, false, false);
         }, ForEach);
-        // 循环渲染设备列表
+        // ForEach 循环和 ListItem 放在这里
         ForEach.pop();
-        //使用Grid布局来展示所有设备卡片
-        Grid.pop();
+        List.pop();
+        Stack.pop();
         Column.pop();
     }
     rerender() {

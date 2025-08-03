@@ -44,7 +44,7 @@ export default class EntryAbility extends UIAbility {
   }
 
   async  onWindowStageCreate(windowStage: window.WindowStage): Promise<void> {
-    /*let  initialPage=''
+    let  initialPage=''
     const isConnect:boolean=await checkApiStatus()
 
     if (!isConnect) {
@@ -60,10 +60,10 @@ export default class EntryAbility extends UIAbility {
 
     if (initialPage==='pages/NetError'){
       promptAction.showToast({ message: '应用无法与服务器连接' ,bottom:'80%',duration:1000});
-    }*/
+    }
 
     // 设置应用要加载的初始页面
-    windowStage.loadContent('pages/Index', (err) => {
+    windowStage.loadContent(initialPage, (err) => {
       if (err.code) {
         console.error('Failed to load the content. Cause:' + JSON.stringify(err));
         return;

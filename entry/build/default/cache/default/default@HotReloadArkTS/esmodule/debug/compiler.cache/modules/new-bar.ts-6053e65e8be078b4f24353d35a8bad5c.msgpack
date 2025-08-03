@@ -1,0 +1,1687 @@
+Ôr@Ÿªassertions¤code´customTransformCache¬dependencies¢id¤meta±moduleSideEffects¬originalCode±originalSourcemap«resolvedIds®sourcemapChainµsyntheticNamedExportsµtransformDependencies®transformFiles¨cacheAstÔrAÚVdimport { doUpdate } from '../class/updater.class';
+import { barConfig } from '../config';
+import { deepClone } from '../cRender/plugin/util';
+import { deepMerge, initNeedSeries, mergeSameStackData } from '../util';
+import { getFormatterVal } from '../util/common';
+let callbackSendable = null;
+export function bar(chart, option) {
+    const { xAxis, yAxis, series } = option;
+    callbackSendable = chart.sendableTestClass || {};
+    let bars = [];
+    if (xAxis && yAxis && series) {
+        bars = initNeedSeries(series, barConfig, 'bar');
+        bars = setBarAxis(bars, chart);
+        bars = setBarPositionData(bars, chart);
+        bars = calcBarsPosition(bars, chart);
+    }
+    doUpdate({
+        chart,
+        series: bars.slice(-1),
+        key: 'backgroundBar',
+        getGraphConfig: getBackgroundBarConfig
+    });
+    bars.reverse();
+    doUpdate({
+        chart,
+        series: bars,
+        key: 'bar',
+        getGraphConfig: getBarConfig,
+        getStartGraphConfig: getStartBarConfig,
+        beforeUpdate: beforeUpdateBar
+    });
+    doUpdate({
+        chart,
+        series: bars,
+        key: 'barLabel',
+        getGraphConfig: getLabelConfig
+    });
+}
+function setBarAxis(bars, chart) {
+    const { axisData } = chart;
+    bars.forEach(bar => {
+        let { xAxisIndex, yAxisIndex } = bar;
+        if (typeof xAxisIndex !== 'number')
+            xAxisIndex = 0;
+        if (typeof yAxisIndex !== 'number')
+            yAxisIndex = 0;
+        const xAxis = axisData.find(({ axis, index }) => `${axis}${index}` === `x${xAxisIndex}`);
+        const yAxis = axisData.find(({ axis, index }) => `${axis}${index}` === `y${yAxisIndex}`);
+        const axis = [xAxis, yAxis];
+        const valueAxisIndex = axis.findIndex(({ type }) => type === 'value');
+        bar.valueAxis = axis[valueAxisIndex];
+        bar.labelAxis = axis[1 - valueAxisIndex];
+    });
+    return bars;
+}
+function setBarPositionData(bars, chart) {
+    const labelBarGroup = groupBarByLabelAxis(bars);
+    labelBarGroup.forEach(group => {
+        setBarIndex(group);
+        setBarNum(group);
+        setBarCategoryWidth(group);
+        setBarWidthAndGap(group);
+        setBarAllWidthAndGap(group);
+    });
+    return bars;
+}
+function setBarIndex(bars) {
+    let stacks = getBarStack(bars);
+    stacks = stacks.map(stack => ({ stack, index: -1 }));
+    let currentIndex = 0;
+    bars.forEach(bar => {
+        const { stack } = bar;
+        if (!stack) {
+            bar.barIndex = currentIndex;
+            currentIndex++;
+        }
+        else {
+            const stackData = stacks.find(({ stack: s }) => s === stack);
+            if (stackData.index === -1) {
+                stackData.index = currentIndex;
+                currentIndex++;
+            }
+            bar.barIndex = stackData.index;
+        }
+    });
+}
+function groupBarByLabelAxis(bars) {
+    let labelAxis = bars.map(({ labelAxis: { axis, index } }) => (axis + index));
+    labelAxis = [...new Set(labelAxis)];
+    return labelAxis.map(axisIndex => {
+        return bars.filter(({ labelAxis: { axis, index } }) => (axis + index) === axisIndex);
+    });
+}
+function getBarStack(bars) {
+    const stacks = [];
+    bars.forEach(({ stack }) => {
+        if (stack)
+            stacks.push(stack);
+    });
+    return [...new Set(stacks)];
+}
+function setBarNum(bars) {
+    const barNum = [...new Set(bars.map(({ barIndex }) => barIndex))].length;
+    bars.forEach(bar => (bar.barNum = barNum));
+}
+function setBarCategoryWidth(bars) {
+    const lastBar = bars.slice(-1)[0];
+    const { barStyle: { barCategoryGap }, labelAxis: { tickGap } } = lastBar;
+    let barCategoryWidth = 0;
+    if (typeof barCategoryGap === 'number') {
+        barCategoryWidth = barCategoryGap;
+    }
+    else {
+        barCategoryWidth = (1 - (parseInt(barCategoryGap) / 100)) * tickGap;
+    }
+    bars.forEach(bar => (bar.barCategoryWidth = barCategoryWidth));
+}
+function setBarWidthAndGap(bars) {
+    const { barCategoryWidth, barStyle: { width: barWidth, barGap }, barNum } = bars.slice(-1)[0];
+    let widthAndGap = [];
+    if (typeof barWidth === 'number' || barWidth !== 'auto') {
+        widthAndGap = getBarWidthAndGapWithPercentOrNumber(barCategoryWidth, barWidth, barGap);
+    }
+    else if (barWidth === 'auto') {
+        widthAndGap = getBarWidthAndGapWidthAuto(barCategoryWidth, barWidth, barGap, barNum);
+    }
+    const [width, gap] = widthAndGap;
+    bars.forEach(bar => {
+        bar.barWidth = width;
+        bar.barGap = gap;
+    });
+}
+function getBarWidthAndGapWithPercentOrNumber(barCategoryWidth, barWidth, barGap) {
+    let [width, gap] = [0, 0];
+    if (typeof barWidth === 'number') {
+        width = barWidth;
+    }
+    else {
+        width = parseInt(barWidth) / 100 * barCategoryWidth;
+    }
+    if (typeof barGap === 'number') {
+        gap = barGap;
+    }
+    else {
+        gap = parseInt(barGap) / 100 * width;
+    }
+    return [width, gap];
+}
+function getBarWidthAndGapWidthAuto(barCategoryWidth, barWidth, barGap, barNum) {
+    let [width, gap] = [0, 0];
+    const barItemWidth = barCategoryWidth / barNum;
+    if (typeof barGap === 'number') {
+        gap = barGap;
+        width = barItemWidth - gap;
+    }
+    else {
+        const percent = 10 + parseInt(barGap) / 10;
+        if (percent === 0) {
+            width = barItemWidth * 2;
+            gap = -width;
+        }
+        else {
+            width = barItemWidth / percent * 10;
+            gap = barItemWidth - width;
+        }
+    }
+    return [width, gap];
+}
+function setBarAllWidthAndGap(bars) {
+    const { barGap, barWidth, barNum } = bars.slice(-1)[0];
+    const barAllWidthAndGap = (barGap + barWidth) * barNum - barGap;
+    bars.forEach(bar => (bar.barAllWidthAndGap = barAllWidthAndGap));
+}
+function calcBarsPosition(bars, chart) {
+    bars = calcBarValueAxisCoordinate(bars);
+    bars = calcBarLabelAxisCoordinate(bars);
+    bars = eliminateNullBarLabelAxis(bars);
+    bars = keepSameNumBetweenBarAndData(bars);
+    return bars;
+}
+function calcBarLabelAxisCoordinate(bars) {
+    return bars.map(bar => {
+        const { labelAxis, barAllWidthAndGap, barGap, barWidth, barIndex } = bar;
+        const { tickGap, tickPosition, axis } = labelAxis;
+        const coordinateIndex = axis === 'x' ? 0 : 1;
+        const barLabelAxisPos = tickPosition.map((tick, i) => {
+            const barCategoryStartPos = tickPosition[i][coordinateIndex] - tickGap / 2;
+            const barItemsStartPos = barCategoryStartPos + (tickGap - barAllWidthAndGap) / 2;
+            return barItemsStartPos + (barIndex + 0.5) * barWidth + barIndex * barGap;
+        });
+        return {
+            ...bar,
+            barLabelAxisPos
+        };
+    });
+}
+function calcBarValueAxisCoordinate(bars) {
+    return bars.map(bar => {
+        let data = mergeSameStackData(bar, bars);
+        data = eliminateNonNumberData(bar, data);
+        const { labelAxis } = bar;
+        const { dataZoom } = labelAxis;
+        if (dataZoom && dataZoom.show) {
+            data = data.slice(dataZoom.start, dataZoom.end + 1);
+        }
+        const { axis, minValue, maxValue, linePosition } = bar.valueAxis;
+        const startPos = getValuePos(minValue, maxValue, minValue < 0 ? 0 : minValue, linePosition, axis);
+        const { tickPosition } = labelAxis;
+        const endPos = tickPosition.map((v, index) => getValuePos(minValue, maxValue, data[index] || 0, linePosition, axis));
+        const barValueAxisPos = endPos.map(p => ([startPos, p]));
+        return {
+            ...bar,
+            barValueAxisPos: barValueAxisPos
+        };
+    });
+}
+function eliminateNonNumberData(barItem, barData) {
+    const { data } = barItem;
+    return barData
+        .map((v, i) => Number(v instanceof Object ? v.value : v))
+        .filter(d => d !== null);
+}
+function eliminateNullBarLabelAxis(bars) {
+    return bars.map(bar => {
+        const { barLabelAxisPos, data } = bar;
+        // data.forEach((d, i) => {
+        //   if (typeof d === 'number') return
+        //
+        //   barLabelAxisPos[i] = null
+        // })
+        return {
+            ...bar,
+            barLabelAxisPos: barLabelAxisPos.filter(p => p !== null)
+        };
+    });
+}
+function keepSameNumBetweenBarAndData(bars) {
+    bars.forEach(bar => {
+        const { data, barLabelAxisPos, barValueAxisPos } = bar;
+        const dataNum = data.length;
+        const axisPosNum = barLabelAxisPos.length;
+        if (axisPosNum > dataNum) {
+            barLabelAxisPos.splice(dataNum);
+            barValueAxisPos.splice(dataNum);
+        }
+    });
+    return bars;
+}
+function getValuePos(min, max, value, linePosition, axis) {
+    // if (typeof value !== 'number') return null
+    const valueMinus = max - min;
+    const coordinateIndex = axis === 'x' ? 0 : 1;
+    const posMinus = linePosition[1][coordinateIndex] - linePosition[0][coordinateIndex];
+    value = value < min ? min : value > max ? max : value;
+    let percent = (value - min) / valueMinus;
+    if (valueMinus === 0)
+        percent = 0;
+    const pos = percent * posMinus;
+    return pos + linePosition[0][coordinateIndex];
+}
+function getBackgroundBarConfig(barItem) {
+    const { animationCurve, animationFrame, rLevel } = barItem;
+    const shapes = getBackgroundBarShapes(barItem);
+    const style = getBackgroundBarStyle(barItem);
+    return shapes.map(shape => ({
+        name: 'rect',
+        index: rLevel,
+        visible: barItem.backgroundStyle.show,
+        animationCurve,
+        animationFrame,
+        shape,
+        style
+    }));
+}
+function getBackgroundBarShapes(barItem) {
+    const { labelAxis, valueAxis } = barItem;
+    const { tickPosition } = labelAxis;
+    const { axis, linePosition } = valueAxis;
+    const width = getBackgroundBarWidth(barItem);
+    const haltWidth = width / 2;
+    const posIndex = axis === 'x' ? 0 : 1;
+    const centerPos = tickPosition.map(p => p[1 - posIndex]);
+    const [start, end] = [linePosition[0][posIndex], linePosition[1][posIndex]];
+    return centerPos.map(center => {
+        if (axis === 'x') {
+            return { x: start, y: center - haltWidth, w: end - start, h: width };
+        }
+        else {
+            return { x: center - haltWidth, y: end, w: width, h: start - end };
+        }
+    });
+}
+function getBackgroundBarWidth(barItem) {
+    const { barAllWidthAndGap, barCategoryWidth, backgroundStyle } = barItem;
+    const { width } = backgroundStyle;
+    if (typeof width === 'number')
+        return width;
+    if (width === 'auto')
+        return barAllWidthAndGap;
+    return parseInt(width) / 100 * barCategoryWidth;
+}
+function getBackgroundBarStyle(barItem) {
+    const { color } = barItem.backgroundStyle;
+    return {
+        fill: color
+    };
+}
+function getBarConfig(barItem) {
+    const { barLabelAxisPos, animationCurve, animationFrame, rLevel } = barItem;
+    const name = getBarName(barItem);
+    return barLabelAxisPos.map((foo, i) => ({
+        name,
+        index: rLevel,
+        animationCurve,
+        animationFrame,
+        shape: getBarShape(barItem, i),
+        style: getBarStyle(barItem, i)
+    }));
+}
+function getBarName(barItem) {
+    const { shapeType } = barItem;
+    if (shapeType === 'leftEchelon' || shapeType === 'rightEchelon')
+        return 'polyline';
+    return 'roundRect';
+}
+function getBarShape(barItem, i) {
+    const { shapeType } = barItem;
+    if (shapeType === 'leftEchelon') {
+        return getLeftEchelonShape(barItem, i);
+    }
+    else if (shapeType === 'rightEchelon') {
+        return getRightEchelonShape(barItem, i);
+    }
+    else {
+        return getNormalBarShape(barItem, i);
+    }
+}
+function getLeftEchelonShape(barItem, i) {
+    const { barValueAxisPos, barLabelAxisPos, barWidth, echelonOffset } = barItem;
+    const [start, end] = barValueAxisPos[i];
+    const labelAxisPos = barLabelAxisPos[i];
+    const halfWidth = barWidth / 2;
+    const valueAxis = barItem.valueAxis.axis;
+    const points = [];
+    if (valueAxis === 'x') {
+        points[0] = [end, labelAxisPos - halfWidth];
+        points[1] = [end, labelAxisPos + halfWidth];
+        points[2] = [start, labelAxisPos + halfWidth];
+        points[3] = [start + echelonOffset, labelAxisPos - halfWidth];
+        if (end - start < echelonOffset)
+            points.splice(3, 1);
+    }
+    else {
+        points[0] = [labelAxisPos - halfWidth, end];
+        points[1] = [labelAxisPos + halfWidth, end];
+        points[2] = [labelAxisPos + halfWidth, start];
+        points[3] = [labelAxisPos - halfWidth, start - echelonOffset];
+        if (start - end < echelonOffset)
+            points.splice(3, 1);
+    }
+    return { points, close: true };
+}
+function getRightEchelonShape(barItem, i) {
+    const { barValueAxisPos, barLabelAxisPos, barWidth, echelonOffset } = barItem;
+    const [start, end] = barValueAxisPos[i];
+    const labelAxisPos = barLabelAxisPos[i];
+    const halfWidth = barWidth / 2;
+    const valueAxis = barItem.valueAxis.axis;
+    const points = [];
+    if (valueAxis === 'x') {
+        points[0] = [end, labelAxisPos + halfWidth];
+        points[1] = [end, labelAxisPos - halfWidth];
+        points[2] = [start, labelAxisPos - halfWidth];
+        points[3] = [start + echelonOffset, labelAxisPos + halfWidth];
+        if (end - start < echelonOffset)
+            points.splice(2, 1);
+    }
+    else {
+        points[0] = [labelAxisPos + halfWidth, end];
+        points[1] = [labelAxisPos - halfWidth, end];
+        points[2] = [labelAxisPos - halfWidth, start];
+        points[3] = [labelAxisPos + halfWidth, start - echelonOffset];
+        if (start - end < echelonOffset)
+            points.splice(2, 1);
+    }
+    return { points, close: true };
+}
+function getNormalBarShape(barItem, i) {
+    const { barValueAxisPos, barLabelAxisPos, barWidth, barStyle } = barItem;
+    const { borderRadius } = barStyle;
+    const [start, end] = barValueAxisPos[i];
+    const labelAxisPos = barLabelAxisPos[i];
+    const valueAxis = barItem.valueAxis.axis;
+    const shape = {
+        x: 0,
+        y: 0,
+        w: 0,
+        h: 0,
+        r: null
+    };
+    if (valueAxis === 'x') {
+        shape.x = start;
+        shape.y = labelAxisPos - barWidth / 2;
+        shape.w = end - start;
+        shape.h = barWidth;
+    }
+    else {
+        shape.x = labelAxisPos - barWidth / 2;
+        shape.y = end;
+        shape.w = barWidth;
+        shape.h = start - end;
+    }
+    if (borderRadius) {
+        if (typeof borderRadius === 'boolean') {
+            shape.r = Math.min(Math.abs(shape.w / 2), Math.abs(shape.h / 2));
+        }
+        else if (Array.isArray(borderRadius)) {
+            shape.r = borderRadius.map((r) => {
+                return Math.min(r, Math.abs(shape.w / 2), Math.abs(shape.h / 2));
+            });
+        }
+        else {
+            shape.r = Math.min(borderRadius, Math.abs(shape.w / 2), Math.abs(shape.h / 2));
+        }
+    }
+    else {
+        shape.r = 0;
+    }
+    return shape;
+}
+function getBarStyle(barItem, i) {
+    const { barStyle, gradient, color, independentColor, independentColors, data, labelAxis } = barItem;
+    const { dataZoom: { show, start } } = labelAxis;
+    const dataItem = show ? data[i + start] : data[i];
+    const dataItemColor = dataItem instanceof Object && dataItem.color ? dataItem.color : '';
+    const fillColor = dataItemColor || barStyle.color || color;
+    let gradientColor = dataItemColor ? (Array.isArray(dataItemColor) ? dataItemColor : [dataItemColor]) : deepMerge(Array.isArray(fillColor) ? fillColor : [fillColor], gradient.color);
+    if (fillColor instanceof Array) {
+        // const idtColor = independentColors[i % independentColors.length]
+        gradientColor = fillColor;
+    }
+    if (gradientColor.length === 1)
+        gradientColor.push(gradientColor[0]);
+    const gradientParams = getGradientParams(barItem, i);
+    return deepMerge({
+        gradientColor,
+        gradientParams,
+        gradientType: 'linear',
+        gradientWith: 'fill'
+    }, { stroke: barStyle.stroke });
+}
+function getGradientParams(barItem, i) {
+    const { barValueAxisPos, barLabelAxisPos, data } = barItem;
+    const { linePosition, axis } = barItem.valueAxis;
+    const [start, end] = barValueAxisPos[i];
+    const labelAxisPos = barLabelAxisPos[i];
+    const value = data[i];
+    const [lineStart, lineEnd] = linePosition;
+    const valueAxisIndex = axis === 'x' ? 0 : 1;
+    let endPos = end;
+    if (!barItem.gradient.local) {
+        endPos = value < 0 ? lineStart[valueAxisIndex] : lineEnd[valueAxisIndex];
+    }
+    if (axis === 'y') {
+        return [labelAxisPos, endPos, labelAxisPos, start];
+    }
+    else {
+        return [endPos, labelAxisPos, start, labelAxisPos];
+    }
+}
+function getStartBarConfig(barItem) {
+    const configs = getBarConfig(barItem);
+    const { shapeType } = barItem;
+    configs.forEach(config => {
+        let { shape } = config;
+        if (shapeType === 'leftEchelon') {
+            shape = getStartLeftEchelonShape(shape, barItem);
+        }
+        else if (shapeType === 'rightEchelon') {
+            shape = getStartRightEchelonShape(shape, barItem);
+        }
+        else {
+            shape = getStartNormalBarShape(shape, barItem);
+        }
+        config.shape = shape;
+    });
+    return configs;
+}
+function getStartLeftEchelonShape(shape, barItem) {
+    const axis = barItem.valueAxis.axis;
+    shape = deepClone(shape);
+    const { points } = shape;
+    const index = axis === 'x' ? 0 : 1;
+    const start = points[2][index];
+    points.forEach(point => (point[index] = start));
+    return shape;
+}
+function getStartRightEchelonShape(shape, barItem) {
+    const axis = barItem.valueAxis.axis;
+    shape = deepClone(shape);
+    const { points } = shape;
+    const index = axis === 'x' ? 0 : 1;
+    const start = points[2][index];
+    points.forEach(point => (point[index] = start));
+    return shape;
+}
+function getStartNormalBarShape(shape, barItem) {
+    const axis = barItem.valueAxis.axis;
+    let { x, y, w, h } = shape;
+    if (axis === 'x') {
+        w = 0;
+    }
+    else {
+        y = y + h;
+        h = 0;
+    }
+    return { x, y, w, h };
+}
+function beforeUpdateBar(graphs, barItem, i, updater) {
+    const { render } = updater.chart;
+    const name = getBarName(barItem);
+    if (graphs[i] && graphs[i][0].name !== name) {
+        graphs[i].forEach(g => render.delGraph(g));
+        graphs[i] = null;
+    }
+}
+function getLabelConfig(barItem, updater) {
+    let { animationCurve, animationFrame, rLevel } = barItem;
+    const shapes = getLabelShapes(barItem, updater.chart.render.ctx);
+    // const style =
+    return shapes.map((shape, index) => ({
+        name: 'text',
+        index: rLevel,
+        visible: barItem.label.show,
+        animationCurve,
+        animationFrame,
+        shape,
+        style: getLabelStyle(barItem, index)
+    }));
+}
+function getLabelShapes(barItem, ctx) {
+    const contents = getFormatterLabels(barItem);
+    const position = getLabelsPosition(barItem, contents, ctx);
+    return position.map((pos, i) => ({
+        position: pos,
+        content: contents[i]
+    }));
+}
+function getFormatterLabels(barItem) {
+    let { data, label, labelAxis } = barItem;
+    const { dataZoom } = labelAxis;
+    if (dataZoom && dataZoom.show) {
+        data = data.slice(dataZoom.start, dataZoom.end + 1);
+    }
+    let { formatter } = label;
+    let labelData = data.map(d => (d instanceof Object ? d.value : d).toString());
+    if (!formatter)
+        return labelData;
+    const type = typeof formatter;
+    if (type === 'string')
+        return data.map((d, i) => getFormatterVal(callbackSendable, formatter, d instanceof Object ? { name: d.value, ...d } : { name: d }, i));
+    if (type === 'function')
+        return data.map((d, i) => String(formatter(d instanceof Object ? { name: d.value, ...d } : { name: d }, i)));
+    return labelData;
+}
+function getLabelsPosition(barItem, contents, ctx) {
+    const { label, barValueAxisPos, barLabelAxisPos } = barItem;
+    let { position, offset } = label;
+    const axis = barItem.valueAxis.axis;
+    if (offset.length === 1) {
+        offset.push(offset[0]);
+    }
+    if (axis === 'x' && JSON.stringify(offset) === JSON.stringify([0, -10])) {
+        offset = [5, 0];
+    }
+    return barValueAxisPos.map(([start, end], i) => {
+        const labelAxisPos = barLabelAxisPos[i];
+        let pos = [end, labelAxisPos];
+        if (axis === 'x' && position === 'top') {
+            pos[0] = end + (contents[i] ? ctx.measureText(contents[i]).width / 2 : 0); // è·å–æ–‡å­—çš„é•¿åº¦
+        }
+        if (position === 'bottom') {
+            pos = [start, labelAxisPos];
+        }
+        if (position === 'center') {
+            pos = [(start + end) / 2, labelAxisPos];
+        }
+        if (axis === 'y') {
+            pos.reverse();
+        }
+        return getOffsetedPoint(pos, offset);
+    });
+}
+function getOffsetedPoint(pos, offset) {
+    const [x, y] = pos;
+    const [ox, oy] = offset;
+    return [x + ox, y + oy];
+}
+function getLabelStyle(barItem, i) {
+    let { color: barColor, label: { color, fontSize }, gradient: { color: gc }, data, labelAxis } = barItem;
+    const { dataZoom: { show, start } } = labelAxis;
+    const dataItem = show ? data[i + start] : data[i];
+    const dataItemLabel = dataItem instanceof Object && dataItem.label ? dataItem.label : {};
+    barColor = color || barColor;
+    barColor = dataItemLabel.color || barColor;
+    fontSize = dataItemLabel.fontSize || fontSize;
+    // if (gc.length) barColor = gc[0]
+    const style = deepMerge({ fill: barColor }, {
+        fontSize
+    });
+    return style;
+}
+//# sourceMappingURL=bar.js.mapÂ•Ù…D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@mcui+mccharts@2.8.9\oh_modules\@mcui\mccharts\src\main\ets\mcCore\class\updater.class.tsÙ~D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@mcui+mccharts@2.8.9\oh_modules\@mcui\mccharts\src\main\ets\mcCore\config\index.tsÙ…D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@mcui+mccharts@2.8.9\oh_modules\@mcui\mccharts\src\main\ets\mcCore\cRender\plugin\util.tsÙ|D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@mcui+mccharts@2.8.9\oh_modules\@mcui\mccharts\src\main\ets\mcCore\util\index.tsÙ}D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@mcui+mccharts@2.8.9\oh_modules\@mcui\mccharts\src\main\ets\mcCore\util\common.tsÙzD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@mcui+mccharts@2.8.9\oh_modules\@mcui\mccharts\src\main\ets\mcCore\core\bar.tsÔrB˜±isLocalDependency¯isNodeEntryFile§pkgPath§pkgNameªpkgVersion±belongProjectPath±dependencyPkgInfo¬shouldEmitJsÂÂÙZD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@mcui+mccharts@2.8.9\oh_modules\@mcui\mccharts®@mcui/mccharts¥2.8.9ºD:\apps\deveco\tzb2025jbgsÔrC’§pkgNameªpkgVersion®@mcui/mccharts¥2.8.9ÃÃÚLÿimport { doUpdate } from '../class/updater.class'
+
+import { barConfig } from '../config'
+
+import { deepClone } from '../cRender/plugin/util'
+
+import { deepMerge, initNeedSeries, mergeSameStackData } from '../util'
+
+import { getFormatterVal } from '../util/common'
+
+let callbackSendable = null
+
+export function bar (chart, option?) {
+  const { xAxis, yAxis, series } = option
+
+  callbackSendable = chart.sendableTestClass || {}
+
+  let bars = []
+
+  if (xAxis && yAxis && series) {
+    bars = initNeedSeries(series, barConfig, 'bar')
+
+    bars = setBarAxis(bars, chart)
+
+    bars = setBarPositionData(bars, chart)
+  
+    bars = calcBarsPosition(bars, chart)
+  }
+
+  doUpdate({
+    chart,
+    series: bars.slice(-1),
+    key: 'backgroundBar',
+    getGraphConfig: getBackgroundBarConfig
+  })
+
+  bars.reverse()
+
+  doUpdate({
+    chart,
+    series: bars,
+    key: 'bar',
+    getGraphConfig: getBarConfig,
+    getStartGraphConfig: getStartBarConfig,
+    beforeUpdate: beforeUpdateBar
+  })
+
+  doUpdate({
+    chart,
+    series: bars,
+    key: 'barLabel',
+    getGraphConfig: getLabelConfig
+  })
+}
+
+function setBarAxis (bars, chart) {
+  const { axisData } = chart
+
+  bars.forEach(bar => {
+    let { xAxisIndex, yAxisIndex } = bar
+
+    if (typeof xAxisIndex !== 'number') xAxisIndex = 0
+    if (typeof yAxisIndex !== 'number') yAxisIndex = 0
+
+    const xAxis = axisData.find(({ axis, index }) => `${axis}${index}` === `x${xAxisIndex}`)
+    const yAxis = axisData.find(({ axis, index }) => `${axis}${index}` === `y${yAxisIndex}`)
+
+    const axis = [xAxis, yAxis]
+
+    const valueAxisIndex = axis.findIndex(({ type }) => type === 'value')
+
+    bar.valueAxis = axis[valueAxisIndex]
+    bar.labelAxis = axis[1 - valueAxisIndex]
+  })
+
+  return bars
+}
+
+function setBarPositionData (bars, chart) {
+  const labelBarGroup = groupBarByLabelAxis(bars)
+
+  labelBarGroup.forEach(group => {
+    setBarIndex(group)
+    setBarNum(group)
+    setBarCategoryWidth(group)
+    setBarWidthAndGap(group)
+    setBarAllWidthAndGap(group)
+  })
+
+  return bars
+}
+
+function setBarIndex (bars) {
+  let stacks = getBarStack(bars)
+  
+  stacks = stacks.map(stack => ({ stack, index: -1 }))
+
+  let currentIndex = 0
+
+  bars.forEach(bar => {
+    const { stack } = bar
+
+    if (!stack) {
+      bar.barIndex = currentIndex
+
+      currentIndex++
+    } else {
+      const stackData = stacks.find(({ stack:s }) => s === stack)
+
+      if (stackData.index === -1) {
+        stackData.index = currentIndex
+
+        currentIndex++
+      }
+
+      bar.barIndex = stackData.index
+    }
+  })
+}
+
+function groupBarByLabelAxis (bars) {
+  let labelAxis = bars.map(({ labelAxis: { axis, index } }) => (axis + index))
+
+  labelAxis = [...new Set(labelAxis)]
+
+  return labelAxis.map(axisIndex => {
+    return bars.filter(({ labelAxis: { axis, index } }) => (axis + index) === axisIndex)
+  })
+}
+
+function getBarStack (bars) {
+  const stacks = []
+
+  bars.forEach(({ stack }) => {
+    if (stack) stacks.push(stack)
+  })
+
+  return [...new Set(stacks)]
+}
+
+function setBarNum (bars) {
+  const barNum = [...new Set(bars.map(({ barIndex}) => barIndex))].length
+
+  bars.forEach(bar => (bar.barNum = barNum))
+}
+
+function setBarCategoryWidth (bars) {
+  const lastBar = bars.slice(-1)[0]
+
+  const { barStyle: { barCategoryGap }, labelAxis: { tickGap } } = lastBar
+
+  let barCategoryWidth = 0
+
+  if (typeof barCategoryGap === 'number') {
+    barCategoryWidth = barCategoryGap
+  } else {
+    barCategoryWidth = (1 - (parseInt(barCategoryGap) / 100)) * tickGap
+  }
+
+  bars.forEach(bar => (bar.barCategoryWidth = barCategoryWidth))
+}
+
+function setBarWidthAndGap (bars) {
+  const { barCategoryWidth, barStyle: { width: barWidth, barGap}, barNum } = bars.slice(-1)[0]
+
+  let widthAndGap = []
+
+  if (typeof barWidth === 'number' || barWidth !== 'auto') {
+    widthAndGap = getBarWidthAndGapWithPercentOrNumber(barCategoryWidth, barWidth, barGap)
+  } else if (barWidth === 'auto') {
+    widthAndGap = getBarWidthAndGapWidthAuto(barCategoryWidth, barWidth, barGap, barNum)
+  }
+
+  const [width, gap] = widthAndGap
+
+  bars.forEach(bar => {
+    bar.barWidth = width
+    bar.barGap = gap
+  })
+}
+
+function getBarWidthAndGapWithPercentOrNumber (barCategoryWidth, barWidth, barGap) {
+  let [width, gap] = [0, 0]
+
+  if (typeof barWidth === 'number') {
+    width = barWidth
+  } else {
+    width = parseInt(barWidth) / 100 * barCategoryWidth
+  }
+
+  if (typeof barGap === 'number') {
+    gap = barGap
+  } else {
+    gap = parseInt(barGap) / 100 * width
+  }
+
+  return [width, gap]
+}
+
+function getBarWidthAndGapWidthAuto (barCategoryWidth, barWidth, barGap, barNum) {
+  let [width, gap] = [0, 0]
+
+  const barItemWidth = barCategoryWidth / barNum
+
+  if (typeof barGap === 'number') {
+    gap = barGap
+    width = barItemWidth - gap
+  } else {
+    const percent = 10 + parseInt(barGap) / 10
+
+    if (percent === 0) {
+      width = barItemWidth * 2
+      gap = -width
+    } else {
+      width = barItemWidth / percent * 10
+      gap = barItemWidth - width
+    }
+  }
+
+  return [width, gap]
+}
+
+function setBarAllWidthAndGap (bars) {
+  const { barGap, barWidth, barNum } = bars.slice(-1)[0]
+
+  const barAllWidthAndGap = (barGap + barWidth) * barNum - barGap
+
+  bars.forEach(bar => (bar.barAllWidthAndGap = barAllWidthAndGap))
+}
+
+function calcBarsPosition (bars, chart) {
+  bars = calcBarValueAxisCoordinate(bars)
+  bars = calcBarLabelAxisCoordinate(bars)
+  bars = eliminateNullBarLabelAxis(bars)
+  bars = keepSameNumBetweenBarAndData(bars)
+
+  return bars
+}
+
+function calcBarLabelAxisCoordinate (bars) {
+  return bars.map(bar => {
+    const { labelAxis, barAllWidthAndGap, barGap, barWidth, barIndex } = bar
+
+    const { tickGap, tickPosition, axis } = labelAxis
+
+    const coordinateIndex = axis === 'x' ? 0 : 1
+
+    const barLabelAxisPos = tickPosition.map((tick, i) => {
+      const barCategoryStartPos = tickPosition[i][coordinateIndex] - tickGap / 2
+
+      const barItemsStartPos = barCategoryStartPos + (tickGap - barAllWidthAndGap) / 2
+
+      return barItemsStartPos + (barIndex + 0.5) * barWidth + barIndex * barGap
+    })
+
+    return {
+      ...bar,
+      barLabelAxisPos
+    }
+  })
+}
+
+function calcBarValueAxisCoordinate (bars) {
+  return bars.map(bar => {
+    let data = mergeSameStackData(bar, bars)
+
+    data = eliminateNonNumberData(bar, data)
+    const { labelAxis } = bar
+    const { dataZoom } = labelAxis
+    if (dataZoom && dataZoom.show) {
+      data = data.slice(dataZoom.start, dataZoom.end + 1)
+    }
+    const { axis, minValue, maxValue, linePosition } = bar.valueAxis
+
+    const startPos = getValuePos(
+      minValue,
+      maxValue,
+      minValue < 0 ? 0 : minValue,
+      linePosition,
+      axis
+    )
+
+    const { tickPosition } = labelAxis
+
+    const endPos = tickPosition.map((v, index) => getValuePos(
+      minValue,
+      maxValue,
+      data[index] || 0,
+      linePosition,
+      axis
+    ))
+
+    const barValueAxisPos = endPos.map(p => ([startPos, p]))
+
+    return {
+      ...bar,
+      barValueAxisPos: barValueAxisPos
+    }
+  })
+}
+
+function eliminateNonNumberData (barItem, barData) {
+  const { data } = barItem
+
+  return barData
+    .map((v, i) => Number(v instanceof Object ? v.value : v))
+    .filter(d => d !== null)
+}
+
+function eliminateNullBarLabelAxis (bars) {
+  return bars.map(bar => {
+    const { barLabelAxisPos, data } = bar
+
+    // data.forEach((d, i) => {
+    //   if (typeof d === 'number') return
+    //
+    //   barLabelAxisPos[i] = null
+    // })
+
+    return {
+      ...bar,
+      barLabelAxisPos: barLabelAxisPos.filter(p => p !== null)
+    }
+  })
+}
+
+function keepSameNumBetweenBarAndData (bars) {
+  bars.forEach(bar => {
+    const { data, barLabelAxisPos, barValueAxisPos } = bar
+
+    const dataNum = data.length
+    const axisPosNum = barLabelAxisPos.length
+
+    if (axisPosNum > dataNum) {
+      barLabelAxisPos.splice(dataNum)
+      barValueAxisPos.splice(dataNum)
+    }
+  })
+  
+  return bars
+}
+
+function getValuePos (min, max, value, linePosition, axis) {
+  // if (typeof value !== 'number') return null
+
+  const valueMinus = max - min
+
+  const coordinateIndex = axis === 'x' ? 0 : 1
+
+  const posMinus = linePosition[1][coordinateIndex] - linePosition[0][coordinateIndex]
+
+  value = value < min ? min : value > max ? max : value
+
+  let percent = (value - min) / valueMinus
+
+  if (valueMinus === 0) percent = 0
+
+  const pos = percent * posMinus
+
+  return pos + linePosition[0][coordinateIndex]
+}
+
+function getBackgroundBarConfig (barItem) {
+  const { animationCurve, animationFrame, rLevel } = barItem
+
+  const shapes = getBackgroundBarShapes(barItem)
+  const style = getBackgroundBarStyle(barItem)
+
+  return shapes.map(shape => ({
+    name: 'rect',
+    index: rLevel,
+    visible: barItem.backgroundStyle.show,
+    animationCurve,
+    animationFrame,
+    shape,
+    style
+  }))
+}
+
+function getBackgroundBarShapes (barItem) {
+  const { labelAxis, valueAxis } = barItem
+
+  const { tickPosition } = labelAxis
+
+  const { axis, linePosition } = valueAxis
+
+  const width = getBackgroundBarWidth(barItem)
+
+  const haltWidth = width / 2
+
+  const posIndex = axis === 'x' ? 0 : 1
+
+  const centerPos = tickPosition.map(p => p[1 - posIndex])
+
+  const [start, end] = [linePosition[0][posIndex], linePosition[1][posIndex]]
+
+  return centerPos.map(center => {
+    if (axis === 'x') {
+      return { x: start, y: center - haltWidth, w: end - start, h: width }
+    } else {
+      return { x: center - haltWidth, y: end, w: width, h: start - end }
+    }
+  })
+}
+
+function getBackgroundBarWidth (barItem) {
+  const { barAllWidthAndGap, barCategoryWidth, backgroundStyle } = barItem
+
+  const { width } = backgroundStyle
+
+  if (typeof width === 'number') return width
+
+  if (width === 'auto') return barAllWidthAndGap
+
+  return parseInt(width) / 100 * barCategoryWidth
+}
+
+function getBackgroundBarStyle (barItem) {
+  const {color} = barItem.backgroundStyle
+  return {
+    fill: color
+  }
+}
+
+function getBarConfig (barItem) {
+  const { barLabelAxisPos, animationCurve, animationFrame, rLevel } = barItem
+
+  const name = getBarName(barItem)
+
+  return barLabelAxisPos.map((foo, i) => ({
+    name,
+    index: rLevel,
+    animationCurve,
+    animationFrame,
+    shape: getBarShape(barItem, i),
+    style: getBarStyle(barItem, i)
+  }))
+}
+
+function getBarName (barItem) {
+  const { shapeType } = barItem
+
+  if (shapeType === 'leftEchelon' || shapeType === 'rightEchelon') return 'polyline'
+
+  return 'roundRect'
+}
+
+function getBarShape (barItem, i) {
+  const { shapeType } = barItem
+
+  if (shapeType === 'leftEchelon') {
+    return getLeftEchelonShape(barItem, i)
+  } else if (shapeType === 'rightEchelon') {
+    return getRightEchelonShape(barItem, i)
+  } else {
+    return getNormalBarShape(barItem, i)
+  }
+}
+
+function getLeftEchelonShape (barItem, i) {
+  const { barValueAxisPos, barLabelAxisPos, barWidth, echelonOffset } = barItem
+
+  const [start, end] = barValueAxisPos[i]
+  const labelAxisPos = barLabelAxisPos[i]
+  const halfWidth = barWidth / 2
+
+  const valueAxis = barItem.valueAxis.axis
+
+  const points = []
+
+  if (valueAxis === 'x') {
+    points[0] = [end, labelAxisPos - halfWidth]
+    points[1] = [end, labelAxisPos + halfWidth]
+    points[2] = [start, labelAxisPos + halfWidth]
+    points[3] = [start + echelonOffset, labelAxisPos - halfWidth]
+
+    if (end - start < echelonOffset) points.splice(3, 1)
+  } else {
+    points[0] = [labelAxisPos - halfWidth, end]
+    points[1] = [labelAxisPos + halfWidth, end]
+    points[2] = [labelAxisPos + halfWidth, start]
+    points[3] = [labelAxisPos - halfWidth, start - echelonOffset]
+
+    if (start - end < echelonOffset) points.splice(3, 1)
+  }
+
+  return { points, close: true }
+}
+
+function getRightEchelonShape (barItem, i) {
+  const { barValueAxisPos, barLabelAxisPos, barWidth, echelonOffset } = barItem
+
+  const [start, end] = barValueAxisPos[i]
+  const labelAxisPos = barLabelAxisPos[i]
+  const halfWidth = barWidth / 2
+
+  const valueAxis = barItem.valueAxis.axis
+
+  const points = []
+
+  if (valueAxis === 'x') {
+    points[0] = [end, labelAxisPos + halfWidth]
+    points[1] = [end, labelAxisPos - halfWidth]
+    points[2] = [start, labelAxisPos - halfWidth]
+    points[3] = [start + echelonOffset, labelAxisPos + halfWidth]
+
+    if (end - start < echelonOffset) points.splice(2, 1)
+  } else {
+    points[0] = [labelAxisPos + halfWidth, end]
+    points[1] = [labelAxisPos - halfWidth, end]
+    points[2] = [labelAxisPos - halfWidth, start]
+    points[3] = [labelAxisPos + halfWidth, start - echelonOffset]
+
+    if (start - end < echelonOffset) points.splice(2, 1)
+  }
+
+  return { points, close: true }
+}
+
+function getNormalBarShape (barItem, i) {
+  const { barValueAxisPos, barLabelAxisPos, barWidth, barStyle } = barItem
+
+  const { borderRadius } = barStyle
+
+  const [start, end] = barValueAxisPos[i]
+  const labelAxisPos = barLabelAxisPos[i]
+
+  const valueAxis = barItem.valueAxis.axis
+
+  const shape = {
+    x: 0,
+    y: 0,
+    w: 0,
+    h: 0,
+    r: null
+  }
+
+  if (valueAxis === 'x') {
+    shape.x = start
+    shape.y = labelAxisPos - barWidth / 2
+    shape.w = end - start
+    shape.h = barWidth
+  } else {
+    shape.x = labelAxisPos - barWidth / 2
+    shape.y = end
+    shape.w = barWidth
+    shape.h = start - end
+  }
+
+  if (borderRadius) {
+    if (typeof borderRadius === 'boolean') {
+      shape.r = Math.min(Math.abs(shape.w / 2), Math.abs(shape.h / 2))
+    } else if (Array.isArray(borderRadius)) {
+      shape.r = borderRadius.map((r) => {
+        return Math.min(r, Math.abs(shape.w / 2), Math.abs(shape.h / 2))
+      })
+    } else {
+      shape.r = Math.min(borderRadius, Math.abs(shape.w / 2), Math.abs(shape.h / 2))
+    }
+  } else {
+    shape.r = 0
+  }
+
+  return shape
+}
+
+function getBarStyle (barItem, i) {
+  const { barStyle, gradient, color, independentColor, independentColors, data, labelAxis } = barItem
+
+  const {dataZoom: {show, start}} = labelAxis
+
+  const dataItem = show ? data[i + start] : data[i]
+
+  const dataItemColor = dataItem instanceof Object && dataItem.color ? dataItem.color : ''
+
+  const fillColor =  dataItemColor || barStyle.color || color
+
+  let gradientColor = dataItemColor ? (Array.isArray(dataItemColor) ? dataItemColor : [dataItemColor]) : deepMerge(Array.isArray(fillColor) ? fillColor : [fillColor], gradient.color)
+
+  if (fillColor instanceof Array) {
+    // const idtColor = independentColors[i % independentColors.length]
+    gradientColor = fillColor
+  }
+
+  if (gradientColor.length === 1) gradientColor.push(gradientColor[0])
+
+  const gradientParams = getGradientParams(barItem, i)
+
+  return deepMerge({
+    gradientColor,
+    gradientParams,
+    gradientType: 'linear',
+    gradientWith: 'fill'
+  }, {stroke: barStyle.stroke})
+}
+
+function getGradientParams (barItem, i) {
+  const { barValueAxisPos, barLabelAxisPos, data } = barItem
+
+  const { linePosition, axis } = barItem.valueAxis
+
+  const [start, end] = barValueAxisPos[i]
+  const labelAxisPos = barLabelAxisPos[i]
+  const value = data[i]
+
+  const [lineStart, lineEnd] = linePosition
+
+  const valueAxisIndex = axis === 'x' ? 0 : 1
+
+  let endPos = end
+
+  if (!barItem.gradient.local) {
+    endPos = value < 0 ? lineStart[valueAxisIndex] : lineEnd[valueAxisIndex]
+  }
+
+  if (axis === 'y') {
+    return [labelAxisPos, endPos, labelAxisPos, start]
+  } else {
+    return [endPos, labelAxisPos, start, labelAxisPos]
+  }
+}
+
+function getStartBarConfig (barItem) {
+  const configs = getBarConfig(barItem)
+
+  const { shapeType } = barItem
+
+  configs.forEach(config => {
+    let { shape } = config
+
+    if (shapeType === 'leftEchelon') {
+      shape = getStartLeftEchelonShape(shape, barItem)
+    } else if (shapeType === 'rightEchelon') {
+      shape = getStartRightEchelonShape(shape, barItem)
+    } else {
+      shape = getStartNormalBarShape(shape, barItem)
+    }
+
+    config.shape = shape
+  })
+
+  return configs
+}
+
+function getStartLeftEchelonShape (shape, barItem) {
+  const axis = barItem.valueAxis.axis
+
+  shape = deepClone(shape)
+
+  const { points } = shape
+
+  const index = axis === 'x' ? 0 : 1
+
+  const start = points[2][index]
+
+  points.forEach(point => (point[index] = start))
+
+  return shape
+}
+
+function getStartRightEchelonShape (shape, barItem) {
+  const axis = barItem.valueAxis.axis
+
+  shape = deepClone(shape)
+
+  const { points } = shape
+
+  const index = axis === 'x' ? 0 : 1
+
+  const start = points[2][index]
+
+  points.forEach(point => (point[index] = start))
+
+  return shape
+}
+
+function getStartNormalBarShape(shape, barItem) {
+  const axis = barItem.valueAxis.axis
+
+  let { x, y, w, h } = shape
+
+  if (axis === 'x') {
+    w = 0
+  } else {
+    y = y + h
+    h = 0
+  }
+
+  return { x, y, w, h }
+}
+
+function beforeUpdateBar (graphs, barItem, i, updater) {
+  const { render } = updater.chart
+
+  const name = getBarName(barItem)
+
+  if (graphs[i] && graphs[i][0].name !== name) {
+    graphs[i].forEach(g => render.delGraph(g))
+
+    graphs[i] = null
+  }
+}
+
+function getLabelConfig (barItem, updater) {
+  let { animationCurve, animationFrame, rLevel } = barItem
+  const shapes = getLabelShapes(barItem, updater.chart.render.ctx)
+  // const style =
+
+  return shapes.map((shape, index) => ({
+    name: 'text',
+    index: rLevel,
+    visible: barItem.label.show,
+    animationCurve,
+    animationFrame,
+    shape,
+    style: getLabelStyle(barItem, index)
+  }))
+}
+
+function getLabelShapes (barItem, ctx) {
+  const contents = getFormatterLabels(barItem)
+  const position = getLabelsPosition(barItem, contents, ctx)
+
+  return position.map((pos, i) => ({
+    position: pos,
+    content: contents[i]
+  }))
+}
+
+function getFormatterLabels (barItem) {
+  let { data, label, labelAxis} = barItem
+  const { dataZoom } = labelAxis
+  if (dataZoom && dataZoom.show) {
+    data = data.slice(dataZoom.start, dataZoom.end + 1)
+  }
+  let { formatter } = label
+
+  let labelData = data.map(d => (d instanceof Object ? d.value : d).toString())
+
+  if (!formatter) return labelData
+
+  const type = typeof formatter
+
+  if (type === 'string') return data.map((d, i) => getFormatterVal(callbackSendable, formatter, d instanceof Object ? {name: d.value, ...d} : {name: d}, i))
+
+  if (type === 'function') return data.map((d, i) => String(formatter(d instanceof Object ? {name: d.value, ...d} : {name: d}, i)))
+
+  return labelData
+}
+
+function getLabelsPosition (barItem, contents, ctx) {
+  const { label, barValueAxisPos, barLabelAxisPos } = barItem
+
+  let { position, offset } = label
+
+  const axis = barItem.valueAxis.axis
+
+  if (offset.length === 1) {
+    offset.push(offset[0])
+  }
+
+  if (axis === 'x' && JSON.stringify(offset) === JSON.stringify([0, -10])) {
+    offset = [5, 0]
+  }
+  return barValueAxisPos.map(([start, end], i) => {
+    const labelAxisPos = barLabelAxisPos[i]
+    let pos = [end, labelAxisPos]
+
+    if (axis === 'x' && position === 'top') {
+      pos[0] = end + (contents[i] ? ctx.measureText(contents[i]).width / 2 : 0); // è·å–æ–‡å­—çš„é•¿åº¦
+    }
+
+    if (position === 'bottom') {
+      pos = [start, labelAxisPos]
+    }
+
+    if (position === 'center') {
+      pos = [(start + end) / 2, labelAxisPos]
+    }
+
+    if (axis === 'y') {
+      pos.reverse()
+    }
+
+    return getOffsetedPoint(pos, offset)
+  })
+}
+
+function getOffsetedPoint (pos, offset) {
+  const [x, y] = pos
+  const [ox, oy] = offset
+  return [x + ox, y + oy]
+}
+
+function getLabelStyle (barItem, i) {
+  let { color: barColor, label: { color, fontSize }, gradient: { color: gc }, data, labelAxis } = barItem
+
+  const {dataZoom: {show, start}} = labelAxis
+
+  const dataItem = show ? data[i + start] : data[i]
+
+  const dataItemLabel = dataItem instanceof Object && dataItem.label ? dataItem.label : {}
+
+  barColor = color || barColor
+
+  barColor = dataItemLabel.color || barColor
+
+  fontSize = dataItemLabel.fontSize || fontSize
+
+  // if (gc.length) barColor = gc[0]
+
+  const style = deepMerge({ fill: barColor }, {
+    fontSize
+  })
+
+  return style
+}
+ÀÔrD•¶../class/updater.class¶../cRender/plugin/util§../util®../util/common©../configÔrE—ªassertions¨external¢id¤meta±moduleSideEffectsªresolvedByµsyntheticNamedExportsAÂÙ…D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@mcui+mccharts@2.8.9\oh_modules\@mcui\mccharts\src\main\ets\mcCore\class\updater.class.tsAÃªoh-resolveÂEAÂÙ…D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@mcui+mccharts@2.8.9\oh_modules\@mcui\mccharts\src\main\ets\mcCore\cRender\plugin\util.tsAÃªoh-resolveÂEAÂÙ|D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@mcui+mccharts@2.8.9\oh_modules\@mcui\mccharts\src\main\ets\mcCore\util\index.tsAÃªoh-resolveÂEAÂÙ}D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@mcui+mccharts@2.8.9\oh_modules\@mcui\mccharts\src\main\ets\mcCore\util\common.tsAÃªoh-resolveÂEAÂÙ~D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@mcui+mccharts@2.8.9\oh_modules\@mcui\mccharts\src\main\ets\mcCore\config\index.tsAÃªoh-resolveÂ“ÔrF–§version¤fileªsourceRoot§sources¥names¨mappings¦bar.js ‘¦bar.tsÜd˜”    ”  ”	  	”  ”  ”  ”1  1”2  1˜”   ” ”	 	” ” ” ”% %”& %˜”   ” ”	 	” ” ” ”2 2”3 2œ”   ” ”	 	” ” ”" "”$ $”6 6”8 8”> >”ÌG ÌG”ÌH ÌG˜”   ” ”	 	” ” ”   ”0 0”1 0–”  
+ ” 
+” 
+” 
+” 
+” 
+˜”   ” ” ” ” ” ” ”! #œ” ”
+ ” 
+” ” ” ” ”  ”"  ”% #”+ )”, )™” ” ” ” ” ”. ,”2 0”4 2”5 2–” ” ” 
+” ” ” ˜” ” ” ” ” ” ”  ”"  œ” ” ” ” ” ”$  ”& "”/ +”1 -”6 2”7 3”8 3š” ” ” ” ” ” ”  ”% !”& "”' "š” ” ” ”! ”" ”& "”( $”- )”. *”/ *š” ” ” ” ”  ”$  ”& "”+ '”, (”- (‘” “” ” 
+” ’” ” 	š” ” 
+” ” ” ” ” ” ” ” ””  ”  ”  	”  ”” !” !” !”. !*“” "” "” "–” $” $”	 $” $” $” $“” &” &
+” &’” '” '	”” (” (
+” (” (”” )” )” )	” )”” *” *” *”$ * ”” +” +” +”. +*”” ,” ,” ,”% ,!“” -” -” -“” /” /
+” /’” 0” 0	”” 1” 1
+” 1” 1”” 2” 2” 2	” 2”” 3” 3” 3”& 3"“” 4” 4” 4’”  5 ” 5—”  7 ”	 7	” 7” 7” 7” 7” 7 ˜” 8”
+ 8” 8
+” 8” 8” 8” 8” 8˜” :” :”	 :” :” :” :” :” :š” ;” ;” ;
+” ;” ;”$ ; ”& ;"”) ;%”, ;(”- ;(–” =” =” =” =”" =”* =&•” =(” =2” =5” =6” =6–” >” >” >” >”" >”* >&•” >(” >2” >5” >6” >6Ü ” Ì@” Ì@
+” Ì@” Ì@” Ì@” Ì@”# Ì@”$ Ì@ ”% Ì@!”' Ì@#”+ Ì@'”- Ì@)”2 Ì@.”4 Ì@0”6 Ì@2”8 Ì@4”9 Ì@5”< Ì@8”Ì@ Ì@<”ÌC Ì@?”ÌH Ì@ÌD”ÌJ Ì@ÌF”ÌO Ì@ÌK”ÌS Ì@ÌO”Ì] Ì@ÌY”Ì_ Ì@Ì[”Ì` Ì@Ì\”Ìa Ì@Ì\Ü ” ÌA” ÌA
+” ÌA” ÌA” ÌA” ÌA”# ÌA”$ ÌA ”% ÌA!”' ÌA#”+ ÌA'”- ÌA)”2 ÌA.”4 ÌA0”6 ÌA2”8 ÌA4”9 ÌA5”< ÌA8”Ì@ ÌA<”ÌC ÌA?”ÌH ÌAÌD”ÌJ ÌAÌF”ÌO ÌAÌK”ÌS ÌAÌO”Ì] ÌAÌY”Ì_ ÌAÌ[”Ì` ÌAÌ\”Ìa ÌAÌ\š” ÌC” ÌC
+” ÌC” ÌC” ÌC” ÌC” ÌC”" ÌC”# ÌC”$ ÌCÜ ” ÌE” ÌE
+” ÌE” ÌE”# ÌE”$ ÌE ”- ÌE)”. ÌE*”/ ÌE+”1 ÌE-”5 ÌE1”7 ÌE3”9 ÌE5”; ÌE7”< ÌE8”Ì@ ÌE<”ÌE ÌEÌA”ÌL ÌEÌH”ÌM ÌEÌI”ÌN ÌEÌIš” ÌG” ÌG” ÌG” ÌG” ÌG” ÌG” ÌG”+ ÌG'”, ÌG(”- ÌG(œ” ÌH” ÌH” ÌH” ÌH” ÌH” ÌH” ÌH” ÌH”! ÌH”/ ÌH+”0 ÌH,”1 ÌH,”” ÌI” ÌI” ÌI” ÌI”” ÌK” ÌK	” ÌK” ÌK’”  ÌL ” ÌL—”  ÌN ”	 ÌN	” ÌN” ÌN”  ÌN!”" ÌN#”' ÌN(™” ÌO”
+ ÌO” ÌO” ÌO”- ÌO+”. ÌO,”2 ÌO0”3 ÌO1”4 ÌO1˜” ÌQ” ÌQ” ÌQ” ÌQ” ÌQ” ÌQ”  ÌQ”" ÌQ –” ÌR” ÌR” ÌR” ÌR” ÌR” ÌR–” ÌS” ÌS” ÌS” ÌS” ÌS” ÌS–” ÌT” ÌT” ÌT”! ÌT”" ÌT”# ÌT–” ÌU” ÌU” ÌU” ÌU”  ÌU”! ÌU–” ÌV” ÌV” ÌV”" ÌV”# ÌV”$ ÌV”” ÌW” ÌW” ÌW” ÌW”” ÌY” ÌY	” ÌY” ÌY’”  ÌZ ” ÌZ•”  Ì\ ”	 Ì\	” Ì\” Ì\” Ì\™” Ì]” Ì]” Ì]” Ì]” Ì]” Ì]”! Ì]”" Ì] ”# Ì] Ü ” Ì_”
+ Ì_” Ì_” Ì_” Ì_” Ì_” Ì_” Ì_” Ì_”  Ì_”! Ì_”" Ì_ ”$ Ì_"”) Ì_'”+ Ì_)”0 Ì_.”2 Ì_0”3 Ì_1”4 Ì_2”6 Ì_4”7 Ì_5”8 Ì_6”9 Ì_6–” Ìa” Ìa” Ìa” Ìa” Ìa” Ìa˜” Ìc” Ìc”	 Ìc” Ìc” Ìc” Ìc” Ìc” Ìc˜” Ìd” Ìd
+” Ìd” Ìd” Ìd” Ìd” Ìd” Ìd•” Ìf” Ìf” Ìf	” Ìf” Ìf—” Ìg” Ìg	” Ìg
+” Ìg” Ìg”' Ìg!”( Ìg!”” Ìi” Ìi” Ìi” Ìi‘”	 Ìj‘” ÌjÜ ” Ìk” Ìk” Ìk” Ìk”$ Ìk”% Ìk”) Ìk#”* Ìk$”+ Ìk%”- Ìk'”2 Ìk,”4 Ìk-”5 Ìk.”7 Ìk0”9 Ìk2”; Ìk4”< Ìk5”= Ìk6”ÌB Ìk;”ÌG ÌkÌ@”ÌH ÌkÌA”ÌI ÌkÌA™” Ìm” Ìm
+” Ìm” Ìm” Ìm”$ Ìm”% Ìm”& Ìm ”( Ìm"—” Ìn” Ìn” Ìn” Ìn”" Ìn”. Ìn&”/ Ìn&”” Ìp” Ìp” Ìp” Ìp‘” Ìq™” Ìs” Ìs	” Ìs
+” Ìs” Ìs”$ Ìs”% Ìs”* Ìs$”+ Ìs$‘”	 Ìt”” Ìu” Ìu” Ìu” Ìu’”  Ìv ” Ìv•”  Ìx ”	 Ìx	” Ìx” Ìx”! Ìx"Ü ” Ìy” Ìy” Ìy” Ìy” Ìy” Ìy” Ìy” Ìy” Ìy”  Ìy”) Ìy'”+ Ìy)”- Ìy+”1 Ìy/”3 Ìy1”8 Ìy6”: Ìy8”< Ìy:”> Ìy<”Ì@ Ìy>”ÌA Ìy?”ÌB ÌyÌ@”ÌF ÌyÌD”ÌI ÌyÌG”ÌN ÌyÌL”ÌO ÌyÌM”ÌP ÌyÌN”ÌQ ÌyÌNœ” Ì{” Ì{” Ì{” Ì{” Ì{” Ì{” Ì{” Ì{”% Ì{#”& Ì{$”' Ì{%”( Ì{%™” Ì}” Ì}	” Ì}” Ì}” Ì}” Ì}”" Ì} ”# Ì}!”% Ì}#Ü ” Ì~” Ì~” Ì~” Ì~” Ì~” Ì~” Ì~” Ì~”' Ì~#”) Ì~%”+ Ì~'”/ Ì~+”1 Ì~-”6 Ì~2”8 Ì~4”: Ì~6”< Ì~8”> Ì~:”? Ì~;”Ì@ Ì~<”ÌD Ì~Ì@”ÌG Ì~ÌC”ÌL Ì~ÌH”ÌM Ì~ÌI”ÌR Ì~ÌN”Ì[ Ì~ÌW”Ì\ Ì~ÌX”Ì] Ì~ÌX”” Ì” Ì” Ì” Ì’”  Ì€ ” Ì€•”  Ì‚ ”	 Ì‚	” Ì‚” Ì‚” Ì‚–” Ìƒ”
+ Ìƒ” Ìƒ” Ìƒ” Ìƒ” Ìƒ›” Ì…” Ì…”	 Ì…” Ì…” Ì…” Ì…” Ì…” Ì…” Ì…” Ì…” Ì…“” Ì†” Ì†” Ì†˜” Ì†” Ì†” Ì†” Ì†” Ì†” Ì† ” Ì†!” Ì†!”” Ì‡” Ì‡” Ì‡” Ì‡›” Ì‰” Ì‰	” Ì‰
+” Ì‰” Ì‰” Ì‰” Ì‰” Ì‰” Ì‰” Ì‰”  Ì‰’”  ÌŠ ” ÌŠ•”  ÌŒ ”	 ÌŒ	” ÌŒ” ÌŒ” ÌŒÜ ” Ì”
+ Ì” Ì” Ì” Ì” Ì” Ì” Ì” Ì”# Ì!”$ Ì"”' Ì%”( Ì&”) Ì'”+ Ì)”3 Ì1”5 Ì2”7 Ì4”9 Ì6”: Ì7”ÌB Ì?”ÌC ÌÌ@”ÌD ÌÌA”ÌE ÌÌB”ÌF ÌÌC”ÌL ÌÌI”ÌM ÌÌIÜ ” Ì” Ì”	 Ì” Ì” Ì” Ì” Ì” Ì” Ì” Ì” Ì” Ì”# Ì!”& Ì$”, Ì*”- Ì+”. Ì,”/ Ì,’”  Ì ” Ì•”  Ì’ ”	 Ì’	” Ì’” Ì’”! Ì’"Ÿ” Ì“”
+ Ì“” Ì“” Ì“” Ì“” Ì“” Ì“” Ì“”  Ì“”! Ì“”" Ì“ ”# Ì“!”$ Ì“"”% Ì“#”& Ì“#Ü ” Ì•”
+ Ì•” Ì•
+” Ì•” Ì•” Ì•”& Ì•$”( Ì•&”* Ì•(”3 Ì•1”5 Ì•3”7 Ì•5”> Ì•<”Ì@ Ì•>”ÌB Ì•Ì@”ÌE Ì•ÌC”ÌL Ì•ÌJ”ÌM Ì•ÌJ–” Ì—” Ì—” Ì—” Ì—” Ì—” Ì——” Ì™” Ì™” Ì™” Ì™”" Ì™ ”* Ì™(”, Ì™*•” Ìš” Ìš” Ìš”) Ìš%”* Ìš%‘” Ì›‘”	 Ì›	Ü ” Ìœ” Ìœ” Ìœ” Ìœ” Ìœ”  Ìœ”! Ìœ”) Ìœ%”* Ìœ&”8 Ìœ4”9 Ìœ5”< Ìœ8”? Ìœ;”Ì@ Ìœ<”ÌA Ìœ=”ÌD ÌœÌ@”ÌK ÌœÌG”ÌL ÌœÌG‘” ÌÜ ” ÌŸ” ÌŸ”	 ÌŸ” ÌŸ” ÌŸ” ÌŸ” ÌŸ” ÌŸ” ÌŸ” ÌŸ” ÌŸ” ÌŸ”- ÌŸ+”0 ÌŸ.”Ì@ ÌŸ>”ÌA ÌŸ?”ÌB ÌŸÌ@”ÌC ÌŸÌ@’”  Ì  ” Ì •”  Ì¢ ”	 Ì¢	” Ì¢” Ì¢” Ì¢ Ü ” Ì£”
+ Ì£” Ì£
+” Ì£” Ì£”& Ì£$”( Ì£&”* Ì£(”/ Ì£-”1 Ì£/”9 Ì£7”; Ì£9”ÌA Ì£?”ÌC Ì£Ì@”ÌE Ì£ÌB”ÌK Ì£ÌH”ÌM Ì£ÌJ”ÌP Ì£ÌM”ÌT Ì£ÌQ”ÌU Ì£ÌR”ÌZ Ì£ÌW”Ì[ Ì£ÌX”Ì\ Ì£ÌY”Ì] Ì£ÌZ”Ì^ Ì£Ì[”Ì_ Ì£Ì\”Ì` Ì£Ì]”Ìa Ì£Ì^”Ìb Ì£Ì^–” Ì¥” Ì¥” Ì¥” Ì¥” Ì¥” Ì¥›” Ì§” Ì§” Ì§” Ì§” Ì§”$ Ì§"”( Ì§&”0 Ì§.”5 Ì§3”; Ì§9”= Ì§;œ” Ì¨” Ì¨” Ì¨”: Ì¨6”; Ì¨7”ÌK Ì¨ÌG”ÌM Ì¨ÌI”ÌU Ì¨ÌQ”ÌW Ì¨ÌS”Ì] Ì¨ÌY”Ì^ Ì¨ÌZ”Ì_ Ì¨ÌZ‘” Ì©–”	 Ì©	” Ì©” Ì©” Ì©”  Ì© ”" Ì©"” Ìª” Ìª” Ìª”0 Ìª,”1 Ìª-”ÌA Ìª=”ÌC Ìª?”ÌK ÌªÌG”ÌM ÌªÌI”ÌS ÌªÌO”ÌU ÌªÌQ”Ì[ ÌªÌW”Ì\ ÌªÌX”Ì] ÌªÌX‘” Ì«š” Ì­”
+ Ì­” Ì­	” Ì­” Ì­” Ì­” Ì­” Ì­”$ Ì­"”% Ì­"˜” Ì¯” Ì¯”	 Ì¯” Ì¯” Ì¯” Ì¯” Ì¯” Ì¯—” Ì°” Ì°” Ì°” Ì°” Ì°” Ì°” Ì°—” Ì±” Ì±” Ì±” Ì±” Ì±” Ì±” Ì±”” Ì²” Ì²” Ì²” Ì²’”  Ì³ ” Ì³™”  Ìµ ”	 Ìµ	”- Ìµ-”. Ìµ/”> Ìµ?”Ì@ ÌµÌA”ÌH ÌµÌI”ÌJ ÌµÌK”ÌP ÌµÌQ” Ì¶” Ì¶”	 Ì¶” Ì¶” Ì¶” Ì¶” Ì¶” Ì¶” Ì¶” Ì¶” Ì¶” Ì¶” Ì¶” Ì¶—” Ì¸” Ì¸” Ì¸” Ì¸” Ì¸”$ Ì¸"”& Ì¸$•” Ì¹” Ì¹	” Ì¹” Ì¹” Ì¹‘” Ìº‘”	 Ìº	œ” Ì»” Ì»	” Ì»” Ì»” Ì»”! Ì»”" Ì»”% Ì»!”( Ì»$”+ Ì»'”; Ì»7”< Ì»7‘” Ì¼—” Ì¾” Ì¾” Ì¾” Ì¾” Ì¾”" Ì¾ ”$ Ì¾"•” Ì¿” Ì¿” Ì¿
+” Ì¿” Ì¿‘” ÌÀ‘”	 ÌÀ	œ” ÌÁ” ÌÁ” ÌÁ
+” ÌÁ” ÌÁ” ÌÁ” ÌÁ”! ÌÁ”$ ÌÁ ”' ÌÁ#”, ÌÁ(”- ÌÁ(‘” ÌÂ˜” ÌÄ” ÌÄ	” ÌÄ
+” ÌÄ” ÌÄ” ÌÄ” ÌÄ” ÌÄ’”  ÌÅ ” ÌÅ›”  ÌÇ ”	 ÌÇ	”# ÌÇ#”$ ÌÇ%”4 ÌÇ5”6 ÌÇ7”> ÌÇ?”Ì@ ÌÇÌA”ÌF ÌÇÌG”ÌH ÌÇÌI”ÌN ÌÇÌO” ÌÈ” ÌÈ”	 ÌÈ” ÌÈ” ÌÈ” ÌÈ” ÌÈ” ÌÈ” ÌÈ” ÌÈ” ÌÈ” ÌÈ” ÌÈ” ÌÈ˜” ÌÊ”
+ ÌÊ” ÌÊ” ÌÊ”) ÌÊ'”, ÌÊ*”2 ÌÊ0”3 ÌÊ0—” ÌÌ” ÌÌ” ÌÌ” ÌÌ” ÌÌ”" ÌÌ ”$ ÌÌ"•” ÌÍ” ÌÍ” ÌÍ
+” ÌÍ” ÌÍ—” ÌÎ” ÌÎ	” ÌÎ” ÌÎ” ÌÎ”" ÌÎ”# ÌÎ‘” ÌÏ‘”	 ÌÏ	” ÌĞ” ÌĞ
+” ÌĞ” ÌĞ” ÌĞ” ÌĞ”% ÌĞ!”& ÌĞ"”, ÌĞ(”- ÌĞ)”0 ÌĞ,”2 ÌĞ.”3 ÌĞ.–” ÌÒ” ÌÒ” ÌÒ” ÌÒ” ÌÒ” ÌÒ—” ÌÓ” ÌÓ” ÌÓ”  ÌÓ”# ÌÓ”$ ÌÓ”% ÌÓ–” ÌÔ” ÌÔ	” ÌÔ” ÌÔ” ÌÔ” ÌÔ‘”	 ÌÕ‘” ÌÕ™” ÌÖ” ÌÖ” ÌÖ”  ÌÖ”# ÌÖ”* ÌÖ$”- ÌÖ'”/ ÌÖ)”0 ÌÖ)—” Ì×” Ì×	” Ì×” Ì×”! Ì×”& Ì× ”' Ì× ‘”	 ÌØ‘” ÌÙ˜” ÌÛ” ÌÛ	” ÌÛ
+” ÌÛ” ÌÛ” ÌÛ” ÌÛ” ÌÛ’”  ÌÜ ” ÌÜ•”  ÌŞ ”	 ÌŞ	” ÌŞ” ÌŞ”" ÌŞ#Ü ” Ìß”
+ Ìß” Ìß
+” Ìß” Ìß” Ìß” Ìß”$ Ìß"”& Ìß$”) Ìß'”- Ìß+”. Ìß,”3 Ìß1”4 Ìß2”5 Ìß3”6 Ìß4”7 Ìß5”8 Ìß6”9 Ìß7”: Ìß8”; Ìß8” Ìá”
+ Ìá” Ìá” Ìá” Ìá”% Ìá#”( Ìá&”0 Ìá.”1 Ìá/”4 Ìá2”: Ìá8”= Ìá;”ÌC ÌáÌA”ÌD ÌáÌAÜ ” Ìã” Ìã”	 Ìã” Ìã” Ìã” Ìã” Ìã” Ìã” Ìã” Ìã” Ìã” Ìã”. Ìã,”1 Ìã/”ÌB ÌãÌ@”ÌC ÌãÌA”ÌD ÌãÌB”ÌE ÌãÌB’”  Ìä ” Ìä—”  Ìæ ”	 Ìæ	” Ìæ” Ìæ” Ìæ”  Ìæ!”% Ìæ&˜” Ìç” Ìç” Ìç	”% Ìç#”& Ìç$”* Ìç(”+ Ìç)”, Ìç)˜” Ìè” Ìè” Ìè	”% Ìè#”& Ìè$”* Ìè(”+ Ìè)”, Ìè)˜” Ìé” Ìé” Ìé	”$ Ìé"”% Ìé#”) Ìé'”* Ìé(”+ Ìé(˜” Ìê” Ìê” Ìê	”' Ìê%”( Ìê&”, Ìê*”- Ìê+”. Ìê+”” Ìì” Ìì	” Ìì” Ìì’”  Ìí ” Ìí•”  Ìï ”	 Ìï	”# Ìï#”$ Ìï%”( Ìï)™” Ìğ” Ìğ	” Ìğ” Ìğ” Ìğ” Ìğ” Ìğ” Ìğ” ÌğÜ ” Ìñ” Ìñ
+” Ìñ” Ìñ” Ìñ”, Ìñ(”. Ìñ*”4 Ìñ0”6 Ìñ2”> Ìñ:”Ì@ Ìñ<”ÌH ÌñÌD”ÌJ ÌñÌF”ÌM ÌñÌI”ÌP ÌñÌL”ÌQ ÌñÌLœ” Ìó” Ìó
+” Ìó” Ìó” Ìó”% Ìó!”' Ìó#”+ Ìó'”- Ìó)”0 Ìó,”9 Ìó5”: Ìó5Ü ” Ìõ” Ìõ
+” Ìõ”  Ìõ”$ Ìõ ”) Ìõ%”, Ìõ(”- Ìõ)”. Ìõ*”/ Ìõ+”0 Ìõ,”1 Ìõ-”2 Ìõ.”3 Ìõ/”4 Ìõ0”5 Ìõ0” Ì÷” Ì÷
+” Ì÷”  Ì÷”, Ì÷(”- Ì÷)”0 Ì÷,”1 Ì÷-”2 Ì÷.”6 Ì÷2”8 Ì÷4”9 Ì÷5”; Ì÷7”= Ì÷9Ü ” Ìø” Ìø”% Ìø”( Ìø"”4 Ìø.”5 Ìø/”6 Ìø0”7 Ìø1”8 Ìø2”ÌG ÌøÌA”ÌH ÌøÌB”ÌK ÌøÌE”ÌR ÌøÌL”ÌU ÌøÌO”ÌV ÌøÌP”ÌW ÌøÌP” Ìú” Ìú”" Ìú”% Ìú”8 Ìú2”; Ìú5”< Ìú6”ÌC Ìú=”ÌF ÌúÌ@”ÌW ÌúÌQ”ÌX ÌúÌR”Ì[ ÌúÌU”Ì\ ÌúÌV”Ì] ÌúÌVÜ ” Ìü” Ìü”# Ìü”& Ìü ”' Ìü!”/ Ìü)”2 Ìü,”5 Ìü/”6 Ìü0”9 Ìü3”ÌA Ìü;”ÌD Ìü>”ÌL ÌüÌF”ÌO ÌüÌI”ÌU ÌüÌO”ÌV ÌüÌO”” Ìı”	 Ìı”
+ Ìı” Ìı’” Ìÿ” Ìÿ“” Í ” Í 	” Í ’” Í” Í’”	 Í”
+ Í”” Í” Í” Í” Í’”  Í ” Í•”  Í ”	 Í	”# Í#”$ Í%”( Í)™” Í” Í	” Í” Í” Í” Í” Í” Í” Í›” Í” Í” Í” Í”% Í!”& Í"”) Í%”+ Í'”/ Í+”0 Í,”1 Í,š” Í
+” Í
+” Í
+”% Í
+!”& Í
+"”) Í
+%”+ Í
+'”/ Í
++”0 Í
+,”1 Í
+,˜” Í” Í
+” Í” Í” Í” Í”! Í”" Í˜” Í” Í
+” Í” Í” Í” Í”& Í"”' Í"˜” Í” Í” Í” Í”  Í”! Í”% Í!”' Í#Ü ” Í” Í
+” Í” Í” Í” Í” Í”& Í ”' Í!”, Í&”. Í(”6 Í0”7 Í1”: Í4”= Í7”> Í8”? Í9”Ì@ Í9‘”	 ÍÜ ” Í” Í
+” Í” Í” Í” Í”  Í”( Í$”* Í&”6 Í2”8 Í4”; Í7”> Í:”? Í;”ÌH ÍÌD”ÌI ÍÌDÜ ” Í” Í
+” Í” Í”$ Í ”% Í”- Í”/ Í”7 Í”9 Í”ÌA Í”ÌD Í”ÌE Í”ÌF Í”ÌG Í”ÌH Í”ÌI Í”ÌJ Í”ÌK Í”ÌL Í”ÌT Í!”ÌV Í”Ìb Í”Ìd Í”Ìh Í
+”Ìi Í”Ìj Í˜” Í” Í
+” Í” Í” Í”! Í”* Í&”+ Í&Ü "” Í” Í
+” Í” Í”# Í”$ Í ”' Í#”( Í$”) Í%”* Í&”, Í(”1 Í-”3 Í/”5 Í1”6 Í2”ÌA Í=”ÌB Í”ÌJ Í”ÌL Í”ÌT Í”ÌV Í”ÌZ Í
+”Ì[ Í”Ì` Í”Ìa Í”Ìe Í”Ìf Í”Ìh Í ”Ìt Í ”Ìv Í!”Ìz Í!
+”Ì{ Í"”Ì| Í"”Ì} Í"Ü ” Í$” Í$
+” Í$”  Í$”& Í$"”' Í$#”* Í$&”+ Í$'”, Í$(”- Í$)”/ Í$+”0 Í$,”1 Í$-”2 Í$.”: Í$6”< Í$8”= Í$9”> Í$:”? Í$;”Ì@ Í$<”ÌA Í$<’” Í&” Í&“” Í'” Í'	” Í'”” Í(” Í(” Í(”, Í(&’”	 Í)”
+ Í)”” Í*” Í*” Í*” Í*’”  Í+ ” Í+—”  Í- ”	 Í-	” Í-”  Í-!”' Í-(”) Í-*”0 Í-1˜” Í.”
+ Í.” Í.
+” Í.” Í.” Í.” Í.” Í.“” Í0” Í0	” Í0Ü ”	 Í1” Í1” Í1	” Í1
+” Í1” Í1” Í1” Í1” Í1” Í1” Í1” Í1” Í1”+ Í1'”1 Í1-”2 Í1.”3 Í1/”4 Í10”5 Í11”6 Í12”; Í17”< Í18”= Í19”> Í1:”? Í1;”Ì@ Í1<”ÌA Í1=œ”	 Í2” Í2” Í2” Í2” Í2” Í2” Í2” Í2” Í2” Í2”  Í2”! Í2’”  Í3 ” Í3•”  Í5 ”	 Í5	”" Í5"”# Í5$”' Í5(™” Í6” Í6	” Í6” Í6” Í6” Í6” Í6” Í6” Í6š” Í7” Í7
+” Í7” Í7”! Í7”% Í7!”' Í7#”* Í7&”- Í7)”. Í7)’” Í9”# Í9’” Í:”. Í:*’” Í;”
+ Í;’” Í<”& Í<"’” Í=” Í=	’” Í?” Í?“” Í@” Í@	” Í@Ÿ” ÍA” ÍA” ÍA”, ÍA&”- ÍA'”3 ÍA-”4 ÍA.”5 ÍA/”6 ÍA0”8 ÍA2”9 ÍA3”: ÍA4”? ÍA9”ÌC ÍA=”ÌD ÍA>’”	 ÍB”
+ ÍB”” ÍC” ÍC” ÍC” ÍC’”  ÍD ” ÍD•”  ÍF ”	 ÍF	”% ÍF%”& ÍF'”* ÍF+˜” ÍG” ÍG”	 ÍG” ÍG” ÍG” ÍG” ÍG” ÍGœ” ÍH” ÍH
+” ÍH” ÍH” ÍH”% ÍH!”' ÍH#”6 ÍH2”8 ÍH4”; ÍH7”> ÍH:”? ÍH:˜” ÍJ” ÍJ
+” ÍJ” ÍJ” ÍJ” ÍJ”# ÍJ”$ ÍJ˜” ÍK” ÍK
+” ÍK” ÍK”* ÍK&”+ ÍK'”1 ÍK-”2 ÍK-–” ÍM” ÍM” ÍM” ÍM”  ÍM”" ÍM˜” ÍN” ÍN” ÍN”" ÍN”# ÍN”* ÍN$”+ ÍN%”, ÍN%˜” ÍO” ÍO” ÍO”" ÍO”# ÍO”* ÍO$”+ ÍO%”, ÍO%‘”	 ÍP”” ÍQ” ÍQ” ÍQ” ÍQ”” ÍS” ÍS	” ÍS” ÍS’”  ÍT ” ÍT”  ÍV ”	 ÍV	” ÍV” ÍV” ÍV” ÍV” ÍV” ÍV ”$ ÍV%”& ÍV'”2 ÍV3”4 ÍV5”8 ÍV9’” ÍW”1 ÍW/˜” ÍY”
+ ÍY” ÍY” ÍY” ÍY” ÍY”  ÍY”! ÍYÜ ” Í[”
+ Í[” Í[” Í[”  Í[”% Í[#”( Í[&”) Í['”* Í[(”+ Í[)”, Í[*”- Í[+”. Í[,”/ Í[-”0 Í[.”1 Í[.Ü ” Í]”
+ Í]” Í]” Í]”! Í]”" Í] ”# Í]!”$ Í]"”% Í]#”4 Í]2”5 Í]3”8 Í]6”ÌD Í]ÌB”ÌE Í]ÌC”ÌF Í]ÌD”ÌG Í]ÌE”ÌH Í]ÌF”ÌW Í]ÌU”ÌX Í]ÌV”ÌY Í]ÌVÜ ” Í_”	 Í_” Í_
+” Í_” Í_” Í_” Í_” Í_” Í_” Í_” Í_” Í_”  Í_”% Í_#”( Í_&”+ Í_)”, Í_*”- Í_+”. Í_,”1 Í_/”2 Í_0”3 Í_1”4 Í_2”9 Í_7”: Í_7œ” Ía” Ía” Ía” Ía” Ía” Ía” Ía” Ía” Ía”" Ía ”, Ía*”- Ía*•” Íc” Íc” Íc” Íc” Íc•” Íc” Íc” Íc"” Íc#” Íc#˜” Íe”
+ Íe” Íe” Íe” Íe” Íe”" Íe ”# Íe œ” Íg” Íg	” Íg” Íg” Íg” Íg” Íg”  Íg”! Íg”0 Íg.”1 Íg/”2 Íg/’”  Íh ” Íh•”  Íj ”	 Íj	” Íj”  Íj!”' Íj(œ” Ík”
+ Ík” Ík
+” Ík” Ík”* Ík(”, Ík*”2 Ík0”4 Ík2”7 Ík5”> Ík<”? Ík<™” Ím”
+ Ím” Ím” Ím”) Ím'”* Ím(”1 Ím/”2 Ím0”3 Ím0™” Ín”
+ Ín” Ín” Ín”' Ín%”( Ín&”/ Ín-”0 Ín.”1 Ín.›” Íp” Íp	” Íp” Íp” Íp” Íp” Íp” Íp” Íp” Íp”  Íp”” Íq” Íq” Íq
+” Íq”” Ír” Ír	” Ír” Ír˜” Ís” Ís” Ís” Ís” Ís”( Ís$”) Ís%”- Ís)’” Ít” Ít’” Íu” Íu’” Ív” Ív	’” Íw” Íw	”” Íx” Íx” Íx” Íx’”  Íy ” Íy•”  Í{ ”	 Í{	” Í{”  Í{!”' Í{(š” Í|”
+ Í|” Í|
+” Í|” Í|”  Í|”" Í| ”% Í|#”, Í|*”- Í|*˜” Í~”
+ Í~” Í~
+” Í~” Í~” Í~”& Í~$”' Í~$š” Í€”
+ Í€” Í€
+” Í€” Í€” Í€”  Í€”# Í€!”, Í€*”- Í€*™” Í‚”
+ Í‚” Í‚” Í‚”' Í‚%”( Í‚&”/ Í‚-”0 Í‚.”1 Í‚.˜” Í„”
+ Í„” Í„” Í„” Í„” Í„” Í„”  Í„Ü ” Í†”
+ Í†” Í†” Í†” Í†” Í†”! Í†”" Í† ”# Í†!”$ Í†"”% Í†#”& Í†$”' Í†%”( Í†&”) Í†'”* Í†'Ü ” Íˆ”
+ Íˆ” Íˆ” Íˆ”" Íˆ ”# Íˆ!”& Íˆ$”' Íˆ%”( Íˆ&”) Íˆ'”+ Íˆ)”, Íˆ*”- Íˆ+”. Íˆ,”/ Íˆ-”2 Íˆ0”: Íˆ8”; Íˆ9”< Íˆ:”= Íˆ:Ü ” ÍŠ”
+ ÍŠ” ÍŠ	” ÍŠ” ÍŠ” ÍŠ” ÍŠ” ÍŠ” ÍŠ”& ÍŠ$”' ÍŠ%”( ÍŠ&”) ÍŠ'”* ÍŠ(”2 ÍŠ0”3 ÍŠ1”5 ÍŠ3”ÌA ÍŠ?”ÌB ÍŠÌ@”ÌC ÍŠÌA”ÌD ÍŠÌB”ÌE ÍŠÌC”ÌM ÍŠÌK”ÌN ÍŠÌL”ÌO ÍŠÌM”ÌP ÍŠÌM™” ÍŒ” ÍŒ	” ÍŒ” ÍŒ” ÍŒ” ÍŒ” ÍŒ”  ÍŒ”" ÍŒ –” Í” Í” Í” Í” Í” ÍÜ ” Í” Í” Í” Í” Í” Í” Í”  Í”" Í”( Í"”+ Í%”4 Í.”6 Í0”7 Í1”9 Í3”< Í6”? Í9”ÌD Í>”ÌF ÍÌ@”ÌG ÍÌA”ÌI ÍÌC”ÌN ÍÌH”ÌP ÍÌJ”ÌQ ÍÌJ‘”	 Í‘” ÍÜ ” Í” Í” Í” Í” Í” Í”! Í”* Í$”, Í&”- Í'”/ Í)”2 Í,”4 Í.”5 Í/”7 Í1”< Í6”> Í8”? Í9”ÌA Í;”ÌF ÍÌ@”ÌI ÍÌC”ÌL ÍÌF”ÌN ÍÌH”ÌO ÍÌH‘”	 Í‘”” Í’” Í’” Í’” Í’’”  Í“ ” Í“•”  Í• ”	 Í•	” Í•” Í• ”& Í•'œ” Í–”
+ Í–” Í–
+” Í–” Í–”/ Í–-”1 Í–/”Ì@ Í–>”ÌB Í–Ì@”ÌE Í–ÌC”ÌL Í–ÌJ”ÌM Í–ÌJ˜” Í˜”
+ Í˜” Í˜
+” Í˜” Í˜” Í˜”% Í˜#”& Í˜#–” Íš” Íš” Íš” Íš” Íš”! Íš”” Íš!” Íš(” Íš-” Íš-•” Íœ” Íœ” Íœ” Íœ” Íœ”” Íœ” Íœ”  Íœ0”! Íœ0›” Í” Í	” Í” Í” Í” Í” Í”  Í”# Í!”3 Í1”4 Í1’”  ÍŸ ” ÍŸ•”  Í¡ ”	 Í¡	” Í¡” Í¡ ”& Í¡'š” Í¢”
+ Í¢” Í¢	” Í¢” Í¢” Í¢” Í¢” Í¢”- Í¢)”. Í¢)’” Í£” Í£	”” Í¤” Í¤” Í¤
+” Í¤’” Í¥” Í¥’”  Í¦ ” Í¦•”  Í¨ ”	 Í¨	” Í¨” Í¨” Í¨” Í©”
+ Í©” Í©
+” Í©” Í©”+ Í©)”- Í©+”; Í©9”= Í©;”ÌC Í©ÌA”ÌE Í©ÌC”ÌH Í©ÌF”ÌO Í©ÌM”ÌP Í©ÌM™” Í«”
+ Í«” Í«” Í«” Í«” Í«”# Í«!”$ Í«"”% Í«"” Í­” Í­	” Í­” Í­” Í­” Í­”  Í­”# Í­!”% Í­#”& Í­$”( Í­&”* Í­(”+ Í­)”, Í­*’” Í®” Í®”” Í¯” Í¯	” Í¯” Í¯’” Í°” Í°’” Í±” Í±™” Í²” Í²	” Í²” Í²” Í²”" Í²”$ Í² ”% Í²!”& Í²"™” Í³” Í³	” Í³” Í³” Í³”" Í³”$ Í³ ”% Í³!”& Í³"”” Í´” Í´” Í´” Í´’”  Íµ ” Íµ•”  Í· ”	 Í·	” Í·” Í·” Í·˜” Í¸”
+ Í¸” Í¸
+” Í¸” Í¸” Í¸”! Í¸”" Í¸™” Íº” Íº” Íº” Íº”# Íº!”' Íº%”0 Íº.”5 Íº3”ÌC ÍºÌA”” ÍºÌC” ÍºÌJ” ÍºÌT” ÍºÌT”” Í¼” Í¼	” Í¼” Í¼’”  Í½ ” Í½—”  Í¿ ”	 Í¿	” Í¿” Í¿” Í¿” Í¿” Í¿ ˜” ÍÀ”
+ ÍÀ” ÍÀ
+” ÍÀ” ÍÀ” ÍÀ”! ÍÀ”" ÍÀ–” ÍÂ” ÍÂ” ÍÂ” ÍÂ”# ÍÂ!”% ÍÂ#™” ÍÃ” ÍÃ”" ÍÃ”# ÍÃ”* ÍÃ&”, ÍÃ(”- ÍÃ)”. ÍÃ*”/ ÍÃ*‘” ÍÄ–”	 ÍÄ	” ÍÄ” ÍÄ” ÍÄ”) ÍÄ)”+ ÍÄ+™” ÍÅ” ÍÅ”# ÍÅ”$ ÍÅ ”+ ÍÅ'”- ÍÅ)”. ÍÅ*”/ ÍÅ+”0 ÍÅ+‘” ÍÆ‘”	 ÍÆ	™” ÍÇ” ÍÇ”  ÍÇ”! ÍÇ”( ÍÇ$”* ÍÇ&”+ ÍÇ'”, ÍÇ(”- ÍÇ(‘” ÍÈ’”  ÍÉ ” ÍÉ—”  ÍË ”	 ÍË	” ÍË” ÍË”$ ÍË%”& ÍË'”' ÍË(” ÍÌ”
+ ÍÌ” ÍÌ
+” ÍÌ” ÍÌ”, ÍÌ*”. ÍÌ,”6 ÍÌ4”8 ÍÌ6”ÌE ÍÌÌC”ÌG ÍÌÌE”ÌJ ÍÌÌH”ÌQ ÍÌÌO”ÌR ÍÌÌO” ÍÎ”
+ ÍÎ” ÍÎ	” ÍÎ” ÍÎ” ÍÎ” ÍÎ” ÍÎ”( ÍÎ&”) ÍÎ'”* ÍÎ(”+ ÍÎ)”, ÍÎ)™” ÍÏ”
+ ÍÏ” ÍÏ” ÍÏ”( ÍÏ&”) ÍÏ'”* ÍÏ(”+ ÍÏ)”, ÍÏ)˜” ÍĞ”
+ ÍĞ” ÍĞ” ÍĞ” ÍĞ”! ÍĞ”" ÍĞ ”# ÍĞ š” ÍÒ”
+ ÍÒ” ÍÒ” ÍÒ” ÍÒ” ÍÒ”' ÍÒ%”( ÍÒ&”, ÍÒ*”- ÍÒ*–” ÍÔ”
+ ÍÔ” ÍÔ” ÍÔ” ÍÔ” ÍÔ–” ÍÖ” ÍÖ” ÍÖ” ÍÖ” ÍÖ” ÍÖ” Í×” Í×
+” Í×” Í×” Í×” Í×” Í×” Í×” Í×”& Í×"”) Í×%”2 Í×.”3 Í×/”4 Í×/” ÍØ” ÍØ
+” ÍØ” ÍØ” ÍØ” ÍØ” ÍØ” ÍØ” ÍØ”& ÍØ"”) ÍØ%”2 ÍØ.”3 ÍØ/”4 ÍØ/” ÍÙ” ÍÙ
+” ÍÙ” ÍÙ” ÍÙ” ÍÙ” ÍÙ” ÍÙ” ÍÙ”( ÍÙ$”+ ÍÙ'”4 ÍÙ0”5 ÍÙ1”6 ÍÙ1Ü ” ÍÚ” ÍÚ
+” ÍÚ” ÍÚ” ÍÚ” ÍÚ” ÍÚ” ÍÚ” ÍÚ”* ÍÚ&”, ÍÚ(”8 ÍÚ4”; ÍÚ7”ÌD ÍÚÌ@”ÌE ÍÚÌA”ÌF ÍÚÌA—” ÍÜ” ÍÜ” ÍÜ” ÍÜ” ÍÜ” ÍÜ”' ÍÜ#š” ÍÜ%” ÍÜ+” ÍÜ,” ÍÜ2” ÍÜ3” ÍÜ4” ÍÜ6” ÍÜ7” ÍÜ8”  ÍÜ8‘” Íİ‘”	 Íİ	” ÍŞ” ÍŞ
+” ÍŞ” ÍŞ” ÍŞ” ÍŞ” ÍŞ”! ÍŞ”$ ÍŞ ”- ÍŞ)”/ ÍŞ+”2 ÍŞ.”3 ÍŞ/”4 ÍŞ/” Íß” Íß
+” Íß” Íß” Íß” Íß” Íß”! Íß”$ Íß ”- Íß)”/ Íß+”2 Íß.”3 Íß/”4 Íß/” Íà” Íà
+” Íà” Íà” Íà” Íà” Íà”! Íà”$ Íà ”- Íà)”/ Íà+”4 Íà0”5 Íà1”6 Íà1Ü ” Íá” Íá
+” Íá” Íá” Íá” Íá” Íá”! Íá”$ Íá ”- Íá)”/ Íá+”4 Íá0”7 Íá3”ÌD ÍáÌ@”ÌE ÍáÌA”ÌF ÍáÌA—” Íã” Íã” Íã” Íã” Íã” Íã”' Íã#š” Íã%” Íã+” Íã,” Íã2” Íã3” Íã4” Íã6” Íã7” Íã8”  Íã8‘” Íäš” Íæ” Íæ	” Íæ” Íæ” Íæ” Íæ” Íæ”  Íæ”" Íæ ”# Íæ ’”  Íç ” Íç—”  Íé ”	 Íé	” Íé” Íé”% Íé&”' Íé(”( Íé)” Íê”
+ Íê” Íê
+” Íê” Íê”, Íê*”. Íê,”6 Íê4”8 Íê6”ÌE ÍêÌC”ÌG ÍêÌE”ÌJ ÍêÌH”ÌQ ÍêÌO”ÌR ÍêÌO” Íì”
+ Íì” Íì	” Íì” Íì” Íì” Íì” Íì”( Íì&”) Íì'”* Íì(”+ Íì)”, Íì)™” Íí”
+ Íí” Íí” Íí”( Íí&”) Íí'”* Íí(”+ Íí)”, Íí)˜” Íî”
+ Íî” Íî” Íî” Íî”! Íî”" Íî ”# Íî š” Íğ”
+ Íğ” Íğ” Íğ” Íğ” Íğ”' Íğ%”( Íğ&”, Íğ*”- Íğ*–” Íò”
+ Íò” Íò” Íò” Íò” Íò–” Íô” Íô” Íô” Íô” Íô” Íô” Íõ” Íõ
+” Íõ” Íõ” Íõ” Íõ” Íõ” Íõ” Íõ”& Íõ"”) Íõ%”2 Íõ.”3 Íõ/”4 Íõ/” Íö” Íö
+” Íö” Íö” Íö” Íö” Íö” Íö” Íö”& Íö"”) Íö%”2 Íö.”3 Íö/”4 Íö/” Í÷” Í÷
+” Í÷” Í÷” Í÷” Í÷” Í÷” Í÷” Í÷”( Í÷$”+ Í÷'”4 Í÷0”5 Í÷1”6 Í÷1Ü ” Íø” Íø
+” Íø” Íø” Íø” Íø” Íø” Íø” Íø”* Íø&”, Íø(”8 Íø4”; Íø7”ÌD ÍøÌ@”ÌE ÍøÌA”ÌF ÍøÌA—” Íú” Íú” Íú” Íú” Íú” Íú”' Íú#š” Íú%” Íú+” Íú,” Íú2” Íú3” Íú4” Íú6” Íú7” Íú8”  Íú8‘” Íû‘”	 Íû	” Íü” Íü
+” Íü” Íü” Íü” Íü” Íü”! Íü”$ Íü ”- Íü)”/ Íü+”2 Íü.”3 Íü/”4 Íü/” Íı” Íı
+” Íı” Íı” Íı” Íı” Íı”! Íı”$ Íı ”- Íı)”/ Íı+”2 Íı.”3 Íı/”4 Íı/” Íş” Íş
+” Íş” Íş” Íş” Íş” Íş”! Íş”$ Íş ”- Íş)”/ Íş+”4 Íş0”5 Íş1”6 Íş1Ü ” Íÿ” Íÿ
+” Íÿ” Íÿ” Íÿ” Íÿ” Íÿ”! Íÿ”$ Íÿ ”- Íÿ)”/ Íÿ+”4 Íÿ0”7 Íÿ3”ÌD ÍÿÌ@”ÌE ÍÿÌA”ÌF ÍÿÌA—” Í” Í” Í” Í” Í” Í”' Í#š” Í%” Í+” Í,” Í2” Í3” Í4” Í6” Í7” Í8”  Í8‘” Íš” Í” Í	” Í” Í” Í” Í” Í”  Í”" Í ”# Í ’”  Í ” Í—”  Í ”	 Í	” Í” Í”" Í#”$ Í%”% Í&” Í”
+ Í” Í
+” Í” Í”, Í*”. Í,”6 Í4”8 Í6”Ì@ Í>”ÌB ÍÌ@”ÌE ÍÌC”ÌL ÍÌJ”ÌM ÍÌJ˜” Í
+”
+ Í
+” Í
+
+” Í
+” Í
+” Í
+”% Í
+#”& Í
+#” Í”
+ Í” Í	” Í” Í” Í” Í” Í”( Í&”) Í'”* Í(”+ Í)”, Í)™” Í”
+ Í” Í” Í”( Í&”) Í'”* Í(”+ Í)”, Í)š” Í”
+ Í” Í” Í” Í” Í”' Í%”( Í&”, Í*”- Í*”” Í”
+ Í” Í” Í”” Í”	 Í” Í” Í”” Í”	 Í” Í” Í”” Í”	 Í” Í” Í”” Í”	 Í” Í” Í”” Í”	 Í” Í” Í’” Í” Í–” Í” Í” Í” Í” Í” Í—” Í” Í	” Í
+” Í” Í” Í” Í›” Í” Í	” Í
+” Í” Í” Í”! Í”) Í%”, Í(”- Í)”. Í)™” Í” Í	” Í
+” Í” Í” Í” Í” Í” Í—” Í” Í	” Í
+” Í” Í” Í” Í‘” Í‘”	 Í	›” Í” Í	” Í
+” Í” Í” Í”! Í”) Í%”, Í(”- Í)”. Í)—” Í ” Í 	” Í 
+” Í ” Í ” Í ” Í —” Í!” Í!	” Í!
+” Í!” Í!” Í!” Í!™” Í"” Í"	” Í"
+” Í"” Í"” Í"” Í"” Í"” Í"‘” Í#”” Í%” Í%” Í%” Í%—” Í&” Í&” Í&” Í&”$ Í& ”- Í&)”/ Í&+Ü  ” Í'” Í'” Í'” Í'” Í'” Í'” Í'” Í'” Í'”# Í'”$ Í'”' Í'!”( Í'"”- Í''”. Í'(”/ Í')”2 Í',”3 Í'-”4 Í'.”6 Í'0”: Í'4”; Í'5”> Í'8”? Í'9”ÌD Í'>”ÌE Í'?”ÌF Í'Ì@”ÌI Í'ÌC”ÌJ Í'ÌD”ÌK Í'ÌE”ÌL Í'ÌF”ÌM Í'ÌF‘”	 Í(™” Í(” Í(” Í(” Í(” Í(” Í(”+ Í()”, Í(*”. Í(,” Í)” Í)” Í)” Í)” Í)”" Í)”# Í)”& Í) ”' Í)!”( Í)"”) Í)#”+ Í)%”- Í)'Ü ” Í*” Í*” Í*” Í*” Í*”  Í*”! Í*”# Í*”' Í*”( Í* ”+ Í*#”, Í*$”1 Í*)”2 Í**”3 Í*+”6 Í*.”7 Í*/”8 Í*0”: Í*2”> Í*6”? Í*7”ÌB Í*:”ÌC Í*;”ÌH Í*Ì@”ÌI Í*ÌA”ÌJ Í*ÌB”ÌM Í*ÌE”ÌN Í*ÌF”ÌO Í*ÌG”ÌP Í*ÌH”ÌQ Í*ÌH”” Í+” Í+” Í+” Í+‘”	 Í,‘” Í,Ü "” Í-” Í-” Í-” Í-” Í-” Í-” Í-” Í-” Í-”+ Í-%”- Í-'”1 Í-+”2 Í-,”5 Í-/”6 Í-0”; Í-5”< Í-6”= Í-7”Ì@ Í-:”ÌA Í-;”ÌB Í-<”ÌD Í->”ÌH Í-ÌB”ÌI Í-ÌC”ÌL Í-ÌF”ÌM Í-ÌG”ÌR Í-ÌL”ÌS Í-ÌM”ÌT Í-ÌN”ÌW Í-ÌQ”ÌX Í-ÌR”ÌY Í-ÌS”ÌZ Í-ÌT”Ì[ Í-ÌT‘”	 Í.‘” Í/‘”	 Í/	—” Í0” Í0	” Í0
+” Í0” Í0” Í0” Í0‘” Í1”” Í3” Í3	” Í3” Í3’”  Í4 ” Í4—”  Í6 ”	 Í6	” Í6” Í6” Í6” Í6” Í6 Ü ” Í7”
+ Í7” Í7
+” Í7” Í7” Í7”  Í7”% Í7#”' Í7%”7 Í75”9 Í77”ÌJ Í7ÌH”ÌL Í7ÌJ”ÌP Í7ÌN”ÌR Í7ÌP”Ì[ Í7ÌY”Ì] Í7Ì[”Ì` Í7Ì^”Ìg Í7Ìe”Ìh Í7Ìe” Í9”
+ Í9” Í9	” Í9” Í9” Í9” Í9” Í9”# Í9”% Í9 ”' Í9!”* Í9$”3 Í9-”4 Í9-Ü ” Í;”
+ Í;” Í;” Í;” Í;” Í;” Í;” Í;”  Í;”! Í;”" Í; ”% Í;#”* Í;(”+ Í;)”, Í;*”- Í;+”. Í;,”2 Í;0”3 Í;1”4 Í;2”5 Í;3”6 Í;3Ü ” Í=”
+ Í=” Í=” Í=”" Í= ”. Í=,”4 Í=2”8 Í=6”Ì@ Í=>”ÌA Í=?”ÌF Í=ÌD”ÌG Í=ÌE”ÌH Í=ÌF”ÌI Í=ÌG”ÌQ Í=ÌO”ÌR Í=ÌP”ÌW Í=ÌU”ÌX Í=ÌV”ÌY Í=ÌW”ÌZ Í=ÌX”Ì\ Í=ÌZ”Ì] Í=ÌZœ” Í?”
+ Í?” Í?” Í?”# Í?"”' Í?&”/ Í?.”0 Í?/”5 Í?4”9 Í?8”> Í?=”? Í?=Ü 5” ÍA” ÍA” ÍA” ÍA”% ÍA#”& ÍA$”' ÍA%”( ÍA&”) ÍA'”. ÍA,”/ ÍA-”6 ÍA4”7 ÍA5”ÌD ÍAÌB”ÌE ÍAÌC”ÌF ÍAÌD”ÌG ÍAÌE”ÌH ÍAÌF”ÌU ÍAÌS”ÌV ÍAÌT”ÌW ÍAÌU”ÌX ÍAÌV”ÌY ÍAÌW”Ìf ÍAÌd”Ìg ÍAÌe”Ìh ÍAÌf”Ìi ÍAÌg”Ìj ÍAÌh”Ìk ÍAÌi”Ìt ÍAÌr”Ìu ÍAÌs”Ìz ÍAÌx”Ì{ ÍAÌy”Ì‚ ÍAÌ€”Ìƒ ÍAÌ”ÌŒ ÍAÌŠ”Ì ÍAÌ‹”Ì ÍAÌŒ”Ì ÍAÌ”Ì ÍAÌ”Ì™ ÍAÌ—”Ìš ÍAÌ˜”Ì› ÍAÌ™”Ìœ ÍAÌš”Ì ÍAÌ›”Ì¦ ÍAÌ¤”Ì§ ÍAÌ¥”Ì© ÍAÌ§”Ì± ÍAÌ¯”Ì² ÍAÌ°”Ì· ÍAÌµ”Ì¸ ÍAÌ¶”Ì¹ ÍAÌ¶–” ÍC” ÍC” ÍC” ÍC”" ÍC ”$ ÍC"’” ÍD”ÌK ÍDÌG•” ÍE” ÍE” ÍE”! ÍE”" ÍE‘” ÍF—” ÍH” ÍH” ÍH” ÍH” ÍH”! ÍH”" ÍH ›” ÍH"” ÍH/” ÍH0” ÍH4” ÍH5”( ÍHÌB”) ÍHÌC”* ÍHÌD”+ ÍHÌE”, ÍHÌF”- ÍHÌF›” ÍJ”
+ ÍJ” ÍJ” ÍJ”, ÍJ*”- ÍJ+”4 ÍJ2”6 ÍJ4”7 ÍJ5”8 ÍJ6”9 ÍJ6”” ÍL” ÍL	” ÍL” ÍL’” ÍM” ÍM’” ÍN” ÍN”” ÍO” ÍO” ÍO” ÍO”” ÍP” ÍP” ÍP” ÍP›” ÍQ” ÍQ”	 ÍQ” ÍQ” ÍQ” ÍQ” ÍQ”  ÍQ”" ÍQ”# ÍQ”$ ÍQ’”  ÍR ” ÍR—”  ÍT ”	 ÍT	” ÍT” ÍT”" ÍT#”$ ÍT%”% ÍT&œ” ÍU”
+ ÍU” ÍU
+” ÍU” ÍU”, ÍU*”. ÍU,”2 ÍU0”4 ÍU2”7 ÍU5”> ÍU<”? ÍU<œ” ÍW”
+ ÍW” ÍW
+” ÍW” ÍW” ÍW”  ÍW”# ÍW!”* ÍW(”+ ÍW)”4 ÍW2”5 ÍW2” ÍY”
+ ÍY” ÍY	” ÍY” ÍY” ÍY” ÍY” ÍY”( ÍY&”) ÍY'”* ÍY(”+ ÍY)”, ÍY)™” ÍZ”
+ ÍZ” ÍZ” ÍZ”( ÍZ&”) ÍZ'”* ÍZ(”+ ÍZ)”, ÍZ)™” Í[”
+ Í[” Í[” Í[” Í[” Í[” Í[” Í[” Í[š” Í]”
+ Í]” Í]	” Í]” Í]” Í]” Í]”! Í]”- Í]+”. Í]+Ü ” Í_”
+ Í_” Í_” Í_” Í_”$ Í_"”' Í_%”( Í_&”) Í_'”* Í_(”+ Í_)”, Í_*”- Í_+”. Í_,”/ Í_-”0 Í_-–” Ía” Ía” Ía” Ía” Ía” Ía™” Íc” Íc”	 Íc” Íc” Íc” Íc” Íc” Íc”! ÍcÜ ” Íd” Íd
+” Íd” Íd” Íd” Íd” Íd” Íd” Íd”& Íd"”' Íd#”5 Íd1”6 Íd2”7 Íd3”8 Íd4”9 Íd5”Ì@ Íd<”ÌA Íd=”ÌO ÍdÌK”ÌP ÍdÌL”ÌQ ÍdÌL‘” Íe–” Íg” Íg” Íg
+” Íg” Íg” Ígœ” Íh” Íh” Íh” Íh” Íh”$ Íh ”& Íh"”2 Íh.”4 Íh0”9 Íh5”: Íh6”; Íh6‘” Íi‘”	 Íi	œ” Íj” Íj” Íj” Íj” Íj”$ Íj ”& Íj"”+ Íj'”- Íj)”9 Íj5”: Íj6”; Íj6‘” Ík’”  Íl ” Íl•”  Ín ”	 Ín	” Ín” Ín”" Ín#™” Ío”
+ Ío” Ío” Ío”  Ío”! Ío”( Ío&”) Ío'”* Ío'˜” Íq”
+ Íq” Íq
+” Íq” Íq” Íq”! Íq”" Íq˜” Ís” Ís	” Ís
+” Ís” Ís” Ís” Ís” Ís˜” Ít” Ít” Ít
+” Ít” Ít” Ít” Ít” Ít–” Ív” Ív” Ív” Ív”' Ív#”) Ív%š” Íw” Íw” Íw”, Íw&”- Íw'”2 Íw,”4 Íw.”; Íw5”< Íw6”= Íw6‘”	 Íx–” Íx” Íx” Íx” Íx”- Íx+”/ Íx-š” Íy” Íy” Íy”- Íy'”. Íy(”3 Íy-”5 Íy/”< Íy6”= Íy7”> Íy7‘”	 Íz‘” Ízš” Í{” Í{” Í{”* Í{$”+ Í{%”0 Í{*”2 Í{,”9 Í{3”: Í{4”; Í{4‘”	 Í|—” Í~” Í~
+” Í~” Í~” Í~” Í~” Í~”” Í” Í” Í” Í”” Í” Í	” Í” Í’”  Í‚ ” Í‚—”  Í„ ”	 Í„	”! Í„!”" Í„#”' Í„(”) Í„*”0 Í„1š” Í…”
+ Í…” Í…” Í…” Í…” Í…”" Í… ”# Í…!”' Í…%”( Í…%˜” Í‡”	 Í‡” Í‡
+” Í‡” Í‡” Í‡” Í‡” Í‡˜” Í‰”
+ Í‰” Í‰
+” Í‰” Í‰” Í‰” Í‰” Í‰Ü ” Í‹”
+ Í‹” Í‹” Í‹” Í‹” Í‹” Í‹” Í‹”  Í‹”! Í‹”" Í‹ ”# Í‹!”$ Í‹"”% Í‹#”& Í‹$”' Í‹$œ” Í”
+ Í” Í” Í” Í” Í” Í” Í” Í”! Í”" Í ”# Í Ü ” Í”
+ Í” Í	” Í” Í” Í” Í” Í” Í” Í”" Í ”# Í!”( Í&”) Í'”, Í*”1 Í/”2 Í0”3 Í1”4 Í1”” Í‘” Í‘	” Í‘” Í‘’”  Í’ ” Í’—”  Í” ”	 Í”	”" Í”"”# Í”$”( Í”)”* Í”+”1 Í”2š” Í•”
+ Í•” Í•” Í•” Í•” Í•”" Í• ”# Í•!”' Í•%”( Í•%˜” Í—”	 Í—” Í—
+” Í—” Í—” Í—” Í—” Í—˜” Í™”
+ Í™” Í™
+” Í™” Í™” Í™” Í™” Í™Ü ” Í›”
+ Í›” Í›” Í›” Í›” Í›” Í›” Í›”  Í›”! Í›”" Í› ”# Í›!”$ Í›"”% Í›#”& Í›$”' Í›$œ” Í”
+ Í” Í” Í” Í” Í” Í” Í” Í”! Í”" Í ”# Í Ü ” ÍŸ”
+ ÍŸ” ÍŸ	” ÍŸ” ÍŸ” ÍŸ” ÍŸ” ÍŸ” ÍŸ” ÍŸ”" ÍŸ ”# ÍŸ!”( ÍŸ&”) ÍŸ'”, ÍŸ*”1 ÍŸ/”2 ÍŸ0”3 ÍŸ1”4 ÍŸ1”” Í¡” Í¡	” Í¡” Í¡’”  Í¢ ” Í¢—”  Í¤ ”	 Í¤	” Í¤”  Í¤ ”% Í¤%”' Í¤'”. Í¤.š” Í¥”
+ Í¥” Í¥” Í¥” Í¥” Í¥”" Í¥ ”# Í¥!”' Í¥%”( Í¥%” Í§” Í§”
+ Í§” Í§	” Í§” Í§” Í§” Í§” Í§” Í§” Í§” Í§” Í§” Í§–” Í©” Í©” Í©
+” Í©” Í©” Í©•” Íª”	 Íª” Íª” Íª	” Íª	‘” Í«‘”	 Í«	—” Í¬”	 Í¬” Í¬” Í¬	” Í¬” Í¬” Í¬•” Í­”	 Í­” Í­” Í­	” Í­	‘” Í®œ” Í°” Í°	” Í°” Í°” Í°” Í°” Í°” Í°” Í°” Í°” Í°” Í°’”  Í± ” Í±›”  Í³ ”	 Í³	” Í³” Í³” Í³ ”! Í³"”( Í³)”* Í³+”+ Í³,”- Í³.”4 Í³5š” Í´”
+ Í´” Í´
+” Í´” Í´” Í´” Í´” Í´”$ Í´"”% Í´"™” Í¶”
+ Í¶” Í¶” Í¶” Í¶” Í¶”# Í¶!”$ Í¶"”% Í¶"Ü ” Í¸” Í¸” Í¸” Í¸” Í¸” Í¸” Í¸” Í¸” Í¸” Í¸” Í¸” Í¸”  Í¸”! Í¸”" Í¸ ”& Í¸$”+ Í¸)”/ Í¸-”1 Í¸/Ü ” Í¹” Í¹
+” Í¹” Í¹” Í¹” Í¹” Í¹” Í¹” Í¹” Í¹” Í¹” Í¹”% Í¹!”& Í¹"”. Í¹*”/ Í¹+”0 Í¹,”1 Í¹-”2 Í¹.”3 Í¹.˜” Í»” Í»
+” Í»” Í»” Í»” Í»” Í»” Í»‘” Í¼’”  Í½ ” Í½—”  Í¿ ”	 Í¿	” Í¿” Í¿” Í¿ ”! Í¿"”( Í¿)œ” ÍÀ” ÍÀ”
+ ÍÀ” ÍÀ” ÍÀ”( ÍÀ&”* ÍÀ(”0 ÍÀ.”2 ÍÀ0”5 ÍÀ3”< ÍÀ:”= ÍÀ:Ü ” ÍÁ”
+ ÍÁ” ÍÁ” ÍÁ”! ÍÁ”" ÍÁ ”) ÍÁ'”+ ÍÁ)”2 ÍÁ0”3 ÍÁ1”8 ÍÁ6”9 ÍÁ7”? ÍÁ=”Ì@ ÍÁ>”ÌC ÍÁÌA”ÌD ÍÁÌB”ÌE ÍÁÌB’” ÍÂ” ÍÂ” ÍÄ” ÍÄ	” ÍÄ” ÍÄ” ÍÄ” ÍÄ” ÍÄ” ÍÄ” ÍÄ”# ÍÄ!”% ÍÄ#”' ÍÄ%”( ÍÄ&”) ÍÄ'”” ÍÅ” ÍÅ” ÍÅ
+” ÍÅ”” ÍÆ” ÍÆ	” ÍÆ” ÍÆ˜” ÍÇ” ÍÇ” ÍÇ” ÍÇ” ÍÇ” ÍÇ” ÍÇ”# ÍÇ’” ÍÈ” ÍÈ’” ÍÉ” ÍÉ’” ÍÊ” ÍÊ	™” ÍË” ÍË	” ÍË” ÍË” ÍË”$ ÍË ”& ÍË"”+ ÍË'”, ÍË(”” ÍÌ” ÍÌ” ÍÌ” ÍÌ’”  ÍÍ ” ÍÍ—”  ÍÏ ”	 ÍÏ	” ÍÏ” ÍÏ” ÍÏ ”! ÍÏ"”$ ÍÏ%™” ÍĞ”
+ ÍĞ” ÍĞ” ÍĞ”' ÍĞ%”( ÍĞ&”/ ÍĞ-”0 ÍĞ.”1 ÍĞ.” ÍÑ”
+ ÍÑ” ÍÑ” ÍÑ”& ÍÑ$”' ÍÑ%”. ÍÑ,”0 ÍÑ.”8 ÍÑ6”: ÍÑ8”= ÍÑ;”> ÍÑ<”? ÍÑ<” ÍÓ” ÍÓ	” ÍÓ” ÍÓ” ÍÓ” ÍÓ” ÍÓ” ÍÓ” ÍÓ” ÍÓ”! ÍÓ”# ÍÓ!”$ ÍÓ"”% ÍÓ#”” ÍÔ” ÍÔ” ÍÔ” ÍÔ—” ÍÕ” ÍÕ” ÍÕ” ÍÕ” ÍÕ” ÍÕ” ÍÕ”” ÍÖ” ÍÖ” ÍÖ” ÍÖ’”  Í× ” Í×•”  ÍÙ ”	 ÍÙ	” ÍÙ” ÍÙ”# ÍÙ$œ” ÍÚ” ÍÚ”
+ ÍÚ” ÍÚ” ÍÚ” ÍÚ” ÍÚ”  ÍÚ”" ÍÚ”% ÍÚ"”, ÍÚ)”- ÍÚ)˜” ÍÛ”
+ ÍÛ” ÍÛ
+” ÍÛ” ÍÛ” ÍÛ”" ÍÛ ”# ÍÛ ˜” ÍÜ” ÍÜ” ÍÜ” ÍÜ” ÍÜ” ÍÜ”! ÍÜ”# ÍÜ!Ü ” Íİ” Íİ” Íİ” Íİ” Íİ” Íİ” Íİ”" Íİ”# Íİ”( Íİ$”* Íİ&”2 Íİ.”3 Íİ/”6 Íİ2”9 Íİ5”: Íİ6”; Íİ7”< Íİ7‘” ÍŞ˜” Íß” Íß”
+ Íß” Íß” Íß” Íß” Íß” ÍßÜ  ” Íá” Íá” Íá” Íá” Íá” Íá” Íá” Íá” Íá” Íá”! Íá”" Íá ”# Íá!”$ Íá"”0 Íá.”6 Íá4”7 Íá5”8 Íá6”9 Íá7”: Íá8”; Íá9”Ì@ Íá>”ÌA Íá?”ÌB ÍáÌ@”ÌC ÍáÌA”ÌD ÍáÌB”ÌE ÍáÌC”ÌF ÍáÌD”ÌN ÍáÌL”ÌP ÍáÌN”ÌQ ÍáÌO”ÌR ÍáÌO”” Íã” Íã”	 Íã” Íã”” Íã” Íã” Íã"” Íã"—” Íå”
+ Íå” Íå” Íå” Íå”! Íå”" Íå•” Íç” Íç” Íç
+” Íç” ÍçÜ 0” Íç” Íç ” Íç$” Íç%” Íç(” Íç)” Íç*” Íç+” Íç-” Íç.” Íç0”! Íç2”" Íç3”1 ÍçÌB”2 ÍçÌC”ÌB ÍçÌS”ÌD ÍçÌU”ÌM ÍçÌ^”ÌO ÍçÌ`”ÌP ÍçÌa”Ì\ ÍçÌm”Ìb ÍçÌs”Ìc ÍçÌt”Ìd ÍçÌu”Ìe ÍçÌv”Ìg ÍçÌw”Ìk ÍçÌ{”Ìm ÍçÌ}”Ìn ÍçÌ~”Ìo ÍçÌ”Ìt ÍçÌ„”Ìv ÍçÌ†”Ìy ÍçÌ‰”Ìz ÍçÌŠ”Ì| ÍçÌ‹”Ì} ÍçÌŒ”Ì~ ÍçÌ”Ì ÍçÌ”Ì ÍçÌ”Ì… ÍçÌ“”Ì‡ ÍçÌ•”Ìˆ ÍçÌ–”ÌŠ ÍçÌ—”ÌŒ ÍçÌ™”Ì ÍçÌš”Ì ÍçÌ›”Ì ÍçÌœ”Ì ÍçÌœ•” Íé” Íé” Íé
+” Íé” ÍéÜ /” Íé” Íé"” Íé&” Íé'” Íé*” Íé+” Íé,” Íé-” Íé/” Íé0” Íé2”! Íé4”" Íé5”( Íé;”) Íé<”2 ÍéÌE”3 ÍéÌF”4 ÍéÌG”Ì@ ÍéÌS”ÌF ÍéÌY”ÌG ÍéÌZ”ÌH ÍéÌ[”ÌI ÍéÌ\”ÌK ÍéÌ]”ÌO ÍéÌa”ÌQ ÍéÌc”ÌR ÍéÌd”ÌS ÍéÌe”ÌX ÍéÌj”ÌZ ÍéÌl”Ì] ÍéÌo”Ì^ ÍéÌp”Ì` ÍéÌq”Ìa ÍéÌr”Ìb ÍéÌs”Ìc ÍéÌt”Ìe ÍéÌu”Ìi ÍéÌy”Ìk ÍéÌ{”Ìl ÍéÌ|”Ìn ÍéÌ}”Ìp ÍéÌ”Ìq ÍéÌ€”Ìr ÍéÌ”Ìs ÍéÌ‚”Ìt ÍéÌƒ”Ìu ÍéÌƒ”” Íë” Íë	” Íë” Íë’”  Íì ” Íì™”  Íî ”	 Íî	” Íî” Íî”" Íî#”$ Íî%”, Íî-”. Íî/”1 Íî2œ” Íï”
+ Íï” Íï
+” Íï” Íï”" Íï ”$ Íï"”3 Íï1”5 Íï3”8 Íï6”? Íï=”Ì@ Íï=š” Íñ” Íñ”
+ Íñ” Íñ” Íñ” Íñ” Íñ” Íñ”$ Íñ"”% Íñ"š” Íó”
+ Íó” Íó” Íó” Íó” Íó”" Íó ”# Íó!”' Íó%”( Íó%˜” Íõ” Íõ” Íõ” Íõ” Íõ” Íõ” Íõ” Íõ›” Íö” Íö
+” Íö” Íö” Íö” Íö” Íö” Íö” Íö” Íö” Íö‘” Í÷Ü ” Íù” Íù” Íù
+” Íù” Íù” Íù” Íù” Íù”& Íù$”' Íù%”- Íù+”. Íù,”3 Íù1”7 Íù5”8 Íù6”ÌA Íù?”ÌB ÍùÌ@”ÌC ÍùÌA”ÌD ÍùÌB”ÌF ÍùÌD”ÌG ÍùÌE”ÌI ÍùÌG”ÌJ ÍùÌH”ÌK ÍùÌI”ÌM ÍùÌK™” Íú” Íú
+” Íú” Íú” Íú” Íú” Íú” Íú” Íú‘” ÍûÜ ” Íü” Íü	” Íü” Íü” Íü” Íü”  Íü”! Íü”& Íü$”( Íü&”+ Íü)”, Íü*”. Íü,”/ Íü-”1 Íü/”3 Íü1™” Íı” Íı
+” Íı” Íı”, Íı(”- Íı)”. Íı*”/ Íı+”0 Íı+š” Íş” Íş” Íş” Íş” Íş” Íş” Íş”$ Íş ”% Íş!”& Íş!š” Í ” Í ” Í ” Í ” Í ” Í ”$ Í  ”) Í %”. Í *”0 Í ,Ü %” Í” Í	” Í
+” Í” Í” Í” Í” Í” Í”$ Í”% Í”& Í ”' Í!”( Í"”) Í#”* Í$”- Í'”. Í(”9 Í3”: Í4”ÌB Í<”ÌC Í=”ÌD Í>”ÌE Í?”ÌF ÍÌ@”ÌG ÍÌA”ÌL ÍÌF”ÌO ÍÌI”ÌP ÍÌJ”ÌQ ÍÌK”ÌR ÍÌL”ÌS ÍÌM”ÌT ÍÌN”ÌU ÍÌO”ÌV ÍÌP”ÌW ÍÌQ”Ìa ÍÌ[‘”	 Í–” Í” Í” Í” Í”! Í”# Í™” Í” Í	” Í” Í” Í” Í”& Í ”' Í!”( Í!‘”	 Í–” Í” Í” Í” Í”! Í”# ÍŸ” Í	” Í		” Í	” Í	” Í	” Í	” Í	” Í	”  Í	”# Í	”$ Í	”& Í	 ”2 Í	,”3 Í	-”4 Í	-‘”	 Í
+–” Í” Í” Í” Í” Í” Í–” Í” Í	” Í
+” Í” Í” Í‘”	 Í™” Í” Í” Í”  Í”# Í”% Í!”+ Í'”, Í(”- Í(”” Í” Í” Í” Í’”  Í ” Í—”  Í ”	 Í	” Í” Í” Í” Í ”% Í&š” Í”
+ Í” Í	” Í
+” Í” Í” Í” Í” Í” Íš” Í”
+ Í” Í	” Í” Í” Í” Í” Í” Í” Íœ” Í” Í	” Í
+” Í” Í” Í” Í” Í” Í” Í” Í” Í’”  Í ” Í—”  Í ”	 Í	” Í” Í” Í”  Í!”! Í"Ü ” Í” Í”
+ Í” Í” Í” Í” Í”  Í”" Í ”$ Í"”) Í'”+ Í)”3 Í1”5 Í3”7 Í5”? Í=”ÌA Í?”ÌC ÍÌA”ÌH ÍÌF”ÌJ ÍÌH”ÌL ÍÌJ”ÌN ÍÌL”ÌP ÍÌN”ÌT ÍÌR”ÌV ÍÌT”Ì_ ÍÌ]”Ìa ÍÌ_”Ìd ÍÌb”Ìk ÍÌi”Ìl ÍÌi” Í”
+ Í” Í	” Í” Í” Í” Í” Í”# Í”% Í ”' Í!”* Í$”3 Í-”4 Í-Ü ” Í”
+ Í” Í” Í” Í” Í” Í” Í”  Í”! Í”" Í ”% Í#”* Í(”+ Í)”, Í*”- Í+”. Í,”2 Í0”3 Í1”4 Í2”5 Í3”6 Í3Ü ” Í!”
+ Í!” Í!” Í!”" Í! ”. Í!,”4 Í!2”8 Í!6”Ì@ Í!>”ÌA Í!?”ÌF Í!ÌD”ÌG Í!ÌE”ÌH Í!ÌF”ÌI Í!ÌG”ÌQ Í!ÌO”ÌR Í!ÌP”ÌW Í!ÌU”ÌX Í!ÌV”ÌY Í!ÌW”ÌZ Í!ÌX”Ì\ Í!ÌZ”Ì] Í!ÌZ—” Í#” Í#
+” Í#” Í#” Í#”  Í#”! Í#™” Í%” Í%
+” Í%” Í%” Í%”" Í% ”& Í%$”. Í%,”/ Í%,™” Í'” Í'
+” Í'” Í'” Í'”% Í'#”) Í''”1 Í'/”2 Í'/’” Í)”& Í)$œ” Í+”
+ Í+” Í+” Í+” Í+” Í+” Í+”" Í+ ”$ Í+"”, Í+*”. Í+,”0 Í+.’” Í,” Í,“” Í-” Í-” Í-”” Í/” Í/	” Í/” Í/’”  Í0 ” Í0ÔrG–§version¤file§sources®sourcesContent¥names¨mappingsÀ‘À‘ÀÜe‘”    ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”  	 ‘”  
+ ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”    ‘”  ! ‘”  " ‘”  # ‘”  $ ‘”  % ‘”  & ‘”  ' ‘”  ( ‘”  ) ‘”  * ‘”  + ‘”  , ‘”  - ‘”  . ‘”  / ‘”  0 ‘”  1 ‘”  2 ‘”  3 ‘”  4 ‘”  5 ‘”  6 ‘”  7 ‘”  8 ‘”  9 ‘”  : ‘”  ; ‘”  < ‘”  = ‘”  > ‘”  ? ‘”  Ì@ ‘”  ÌA ‘”  ÌB ‘”  ÌC ‘”  ÌD ‘”  ÌE ‘”  ÌF ‘”  ÌG ‘”  ÌH ‘”  ÌI ‘”  ÌJ ‘”  ÌK ‘”  ÌL ‘”  ÌM ‘”  ÌN ‘”  ÌO ‘”  ÌP ‘”  ÌQ ‘”  ÌR ‘”  ÌS ‘”  ÌT ‘”  ÌU ‘”  ÌV ‘”  ÌW ‘”  ÌX ‘”  ÌY ‘”  ÌZ ‘”  Ì[ ‘”  Ì\ ‘”  Ì] ‘”  Ì^ ‘”  Ì_ ‘”  Ì` ‘”  Ìa ‘”  Ìb ‘”  Ìc ‘”  Ìd ‘”  Ìe ‘”  Ìf ‘”  Ìg ‘”  Ìh ‘”  Ìi ‘”  Ìj ‘”  Ìk ‘”  Ìl ‘”  Ìm ‘”  Ìn ‘”  Ìo ‘”  Ìp ‘”  Ìq ‘”  Ìr ‘”  Ìs ‘”  Ìt ‘”  Ìu ‘”  Ìv ‘”  Ìw ‘”  Ìx ‘”  Ìy ‘”  Ìz ‘”  Ì{ ‘”  Ì| ‘”  Ì} ‘”  Ì~ ‘”  Ì ‘”  Ì€ ‘”  Ì ‘”  Ì‚ ‘”  Ìƒ ‘”  Ì„ ‘”  Ì… ‘”  Ì† ‘”  Ì‡ ‘”  Ìˆ ‘”  Ì‰ ‘”  ÌŠ ‘”  Ì‹ ‘”  ÌŒ ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì‘ ‘”  Ì’ ‘”  Ì“ ‘”  Ì” ‘”  Ì• ‘”  Ì– ‘”  Ì— ‘”  Ì˜ ‘”  Ì™ ‘”  Ìš ‘”  Ì› ‘”  Ìœ ‘”  Ì ‘”  Ì ‘”  ÌŸ ‘”  Ì  ‘”  Ì¡ ‘”  Ì¢ ‘”  Ì£ ‘”  Ì¤ ‘”  Ì¥ ‘”  Ì¦ ‘”  Ì§ ‘”  Ì¨ ‘”  Ì© ‘”  Ìª ‘”  Ì« ‘”  Ì¬ ‘”  Ì­ ‘”  Ì® ‘”  Ì¯ ‘”  Ì° ‘”  Ì± ‘”  Ì² ‘”  Ì³ ‘”  Ì´ ‘”  Ìµ ‘”  Ì¶ ‘”  Ì· ‘”  Ì¸ ‘”  Ì¹ ‘”  Ìº ‘”  Ì» ‘”  Ì¼ ‘”  Ì½ ‘”  Ì¾ ‘”  Ì¿ ‘”  ÌÀ ‘”  ÌÁ ‘”  ÌÂ ‘”  ÌÃ ‘”  ÌÄ ‘”  ÌÅ ‘”  ÌÆ ‘”  ÌÇ ‘”  ÌÈ ‘”  ÌÉ ‘”  ÌÊ ‘”  ÌË ‘”  ÌÌ ‘”  ÌÍ ‘”  ÌÎ ‘”  ÌÏ ‘”  ÌĞ ‘”  ÌÑ ‘”  ÌÒ ‘”  ÌÓ ‘”  ÌÔ ‘”  ÌÕ ‘”  ÌÖ ‘”  Ì× ‘”  ÌØ ‘”  ÌÙ ‘”  ÌÚ ‘”  ÌÛ ‘”  ÌÜ ‘”  Ìİ ‘”  ÌŞ ‘”  Ìß ‘”  Ìà ‘”  Ìá ‘”  Ìâ ‘”  Ìã ‘”  Ìä ‘”  Ìå ‘”  Ìæ ‘”  Ìç ‘”  Ìè ‘”  Ìé ‘”  Ìê ‘”  Ìë ‘”  Ìì ‘”  Ìí ‘”  Ìî ‘”  Ìï ‘”  Ìğ ‘”  Ìñ ‘”  Ìò ‘”  Ìó ‘”  Ìô ‘”  Ìõ ‘”  Ìö ‘”  Ì÷ ‘”  Ìø ‘”  Ìù ‘”  Ìú ‘”  Ìû ‘”  Ìü ‘”  Ìı ‘”  Ìş ‘”  Ìÿ ‘”  Í  ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í	 ‘”  Í
+ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í  ‘”  Í! ‘”  Í" ‘”  Í# ‘”  Í$ ‘”  Í% ‘”  Í& ‘”  Í' ‘”  Í( ‘”  Í) ‘”  Í* ‘”  Í+ ‘”  Í, ‘”  Í- ‘”  Í. ‘”  Í/ ‘”  Í0 ‘”  Í1 ‘”  Í2 ‘”  Í3 ‘”  Í4 ‘”  Í5 ‘”  Í6 ‘”  Í7 ‘”  Í8 ‘”  Í9 ‘”  Í: ‘”  Í; ‘”  Í< ‘”  Í= ‘”  Í> ‘”  Í? ‘”  Í@ ‘”  ÍA ‘”  ÍB ‘”  ÍC ‘”  ÍD ‘”  ÍE ‘”  ÍF ‘”  ÍG ‘”  ÍH ‘”  ÍI ‘”  ÍJ ‘”  ÍK ‘”  ÍL ‘”  ÍM ‘”  ÍN ‘”  ÍO ‘”  ÍP ‘”  ÍQ ‘”  ÍR ‘”  ÍS ‘”  ÍT ‘”  ÍU ‘”  ÍV ‘”  ÍW ‘”  ÍX ‘”  ÍY ‘”  ÍZ ‘”  Í[ ‘”  Í\ ‘”  Í] ‘”  Í^ ‘”  Í_ ‘”  Í` ‘”  Ía ‘”  Íb ‘”  Íc ‘”  Íd ‘”  Íe ‘”  Íf ‘”  Íg ‘”  Íh ‘”  Íi ‘”  Íj ‘”  Ík ‘”  Íl ‘”  Ím ‘”  Ín ‘”  Ío ‘”  Íp ‘”  Íq ‘”  Ír ‘”  Ís ‘”  Ít ‘”  Íu ‘”  Ív ‘”  Íw ‘”  Íx ‘”  Íy ‘”  Íz ‘”  Í{ ‘”  Í| ‘”  Í} ‘”  Í~ ‘”  Í ‘”  Í€ ‘”  Í ‘”  Í‚ ‘”  Íƒ ‘”  Í„ ‘”  Í… ‘”  Í† ‘”  Í‡ ‘”  Íˆ ‘”  Í‰ ‘”  ÍŠ ‘”  Í‹ ‘”  ÍŒ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í‘ ‘”  Í’ ‘”  Í“ ‘”  Í” ‘”  Í• ‘”  Í– ‘”  Í— ‘”  Í˜ ‘”  Í™ ‘”  Íš ‘”  Í› ‘”  Íœ ‘”  Í ‘”  Í ‘”  ÍŸ ‘”  Í  ‘”  Í¡ ‘”  Í¢ ‘”  Í£ ‘”  Í¤ ‘”  Í¥ ‘”  Í¦ ‘”  Í§ ‘”  Í¨ ‘”  Í© ‘”  Íª ‘”  Í« ‘”  Í¬ ‘”  Í­ ‘”  Í® ‘”  Í¯ ‘”  Í° ‘”  Í± ‘”  Í² ‘”  Í³ ‘”  Í´ ‘”  Íµ ‘”  Í¶ ‘”  Í· ‘”  Í¸ ‘”  Í¹ ‘”  Íº ‘”  Í» ‘”  Í¼ ‘”  Í½ ‘”  Í¾ ‘”  Í¿ ‘”  ÍÀ ‘”  ÍÁ ‘”  ÍÂ ‘”  ÍÃ ‘”  ÍÄ ‘”  ÍÅ ‘”  ÍÆ ‘”  ÍÇ ‘”  ÍÈ ‘”  ÍÉ ‘”  ÍÊ ‘”  ÍË ‘”  ÍÌ ‘”  ÍÍ ‘”  ÍÎ ‘”  ÍÏ ‘”  ÍĞ ‘”  ÍÑ ‘”  ÍÒ ‘”  ÍÓ ‘”  ÍÔ ‘”  ÍÕ ‘”  ÍÖ ‘”  Í× ‘”  ÍØ ‘”  ÍÙ ‘”  ÍÚ ‘”  ÍÛ ‘”  ÍÜ ‘”  Íİ ‘”  ÍŞ ‘”  Íß ‘”  Íà ‘”  Íá ‘”  Íâ ‘”  Íã ‘”  Íä ‘”  Íå ‘”  Íæ ‘”  Íç ‘”  Íè ‘”  Íé ‘”  Íê ‘”  Íë ‘”  Íì ‘”  Íí ‘”  Íî ‘”  Íï ‘”  Íğ ‘”  Íñ ‘”  Íò ‘”  Íó ‘”  Íô ‘”  Íõ ‘”  Íö ‘”  Í÷ ‘”  Íø ‘”  Íù ‘”  Íú ‘”  Íû ‘”  Íü ‘”  Íı ‘”  Íş ‘”  Íÿ ‘”  Í  ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í	 ‘”  Í
+ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í  ‘”  Í! ‘”  Í" ‘”  Í# ‘”  Í$ ‘”  Í% ‘”  Í& ‘”  Í' ‘”  Í( ‘”  Í) ‘”  Í* ‘”  Í+ ‘”  Í, ‘”  Í- ‘”  Í. ‘”  Í/ ‘”  Í0 ‘”  Í1 ‘”  Í2 ‘”  Í3 ‘”  Í4 ‘”  Í5 ‘”  Í6 ‘”  Í7 ‘”  Í8 ‘”  Í9 ‘”  Í: ‘”  Í; ‘”  Í< ‘”  Í= ‘”  Í> ‘”  Í? ‘”  Í@ ‘”  ÍA ‘”  ÍB ‘”  ÍC ‘”  ÍD ‘”  ÍE ‘”  ÍF ‘”  ÍG ‘”  ÍH ‘”  ÍI ‘”  ÍJ ‘”  ÍK ‘”  ÍL ‘”  ÍM ‘”  ÍN ‘”  ÍO ‘”  ÍP ‘”  ÍQ ‘”  ÍR ‘”  ÍS ‘”  ÍT ‘”  ÍU ‘”  ÍV ‘”  ÍW ‘”  ÍX ‘”  ÍY ‘”  ÍZ ‘”  Í[ ‘”  Í\ ‘”  Í] ‘”  Í^ ‘”  Í_ ‘”  Í` ‘”  Ía ‘”  Íb ‘”  Íc ‘”  Íd ÔrH’§missing¦pluginÃ¦genAbcÂÔ  ÔrI”²dynamicImportCache¹exportAllDeclarationCache»exportNamedDeclarationCache«importCache‘ÔrJ–¤type¥start£end«declarationªspecifiers¦source¶ExportNamedDeclarationÍ,Í¿ÔrK™¤type¥start£end¢idªexpression©generator¥async¦params¤body³FunctionDeclarationÍ3Í¿ÔrL”¤type¥start£end¤nameªIdentifierÍ<Í?£barÂÂÂ’LªIdentifierÍ@ÍE¥chartLªIdentifierÍGÍM¦optionÔrM”¤type¥start£end¤body®BlockStatementÍOÍ¿˜ÔrN•¤type¥start£end¬declarations¤kind³VariableDeclarationÍVÍ~‘ÔrO•¤type¥start£end¢id¤init²VariableDeclaratorÍ\Í}ÔrP”¤type¥start£endªproperties­ObjectPatternÍ\Ít“ÔrQ™¤type¥start£end¦method©shorthand¨computed£key¤kind¥value¨PropertyÍ^ÍcÂÃÂLªIdentifierÍ^Íc¥xAxis¤initLªIdentifierÍ^Íc¥xAxisQ¨PropertyÍeÍjÂÃÂLªIdentifierÍeÍj¥yAxis¤initLªIdentifierÍeÍj¥yAxisQ¨PropertyÍlÍrÂÃÂLªIdentifierÍlÍr¦series¤initLªIdentifierÍlÍr¦seriesLªIdentifierÍwÍ}¦option¥constÔrR”¤type¥start£endªexpression³ExpressionStatementÍ„ÍµÔrS–¤type¥start£end¨operator¤left¥right´AssignmentExpressionÍ„Í´¡=LªIdentifierÍ„Í”°callbackSendableÔrT–¤type¥start£end¤left¨operator¥right±LogicalExpressionÍ—Í´ÔrU—¤type¥start£end¦object¨property¨computed¨optional°MemberExpressionÍ—Í®LªIdentifierÍ—Íœ¥chartLªIdentifierÍÍ®±sendableTestClassÂÂ¢||P°ObjectExpressionÍ²Í´N³VariableDeclarationÍ»ÍÉ‘O²VariableDeclaratorÍ¿ÍÈLªIdentifierÍ¿ÍÃ¤barsÔrV”¤type¥start£end¨elements¯ArrayExpressionÍÆÍÈ£letÔrW–¤type¥start£end¤testªconsequent©alternate«IfStatementÍÏÍ¸T±LogicalExpressionÍÓÍëT±LogicalExpressionÍÓÍáLªIdentifierÍÓÍØ¥xAxis¢&&LªIdentifierÍÜÍá¥yAxis¢&&LªIdentifierÍåÍë¦seriesM®BlockStatementÍíÍ¸”R³ExpressionStatementÍøÍ(S´AssignmentExpressionÍøÍ'¡=LªIdentifierÍøÍü¤barsÔrX–¤type¥start£end¦callee©arguments¨optional®CallExpressionÍÿÍ'LªIdentifierÍÿÍ®initNeedSeries“LªIdentifierÍÍ¦seriesLªIdentifierÍÍ©barConfigÔrY•¤type¥start£end¥value£raw§LiteralÍ!Í&£bar¥'bar'ÂR³ExpressionStatementÍ2ÍQS´AssignmentExpressionÍ2ÍP¡=LªIdentifierÍ2Í6¤barsX®CallExpressionÍ9ÍPLªIdentifierÍ9ÍCªsetBarAxis’LªIdentifierÍDÍH¤barsLªIdentifierÍJÍO¥chartÂR³ExpressionStatementÍ[Í‚S´AssignmentExpressionÍ[Í¡=LªIdentifierÍ[Í_¤barsX®CallExpressionÍbÍLªIdentifierÍbÍt²setBarPositionData’LªIdentifierÍuÍy¤barsLªIdentifierÍ{Í€¥chartÂR³ExpressionStatementÍŒÍ±S´AssignmentExpressionÍŒÍ°¡=LªIdentifierÍŒÍ¤barsX®CallExpressionÍ“Í°LªIdentifierÍ“Í£°calcBarsPosition’LªIdentifierÍ¤Í¨¤barsLªIdentifierÍªÍ¯¥chartÂÀR³ExpressionStatementÍ¾ÍQX®CallExpressionÍ¾ÍPLªIdentifierÍ¾ÍÆ¨doUpdate‘P°ObjectExpressionÍÇÍO”Q¨PropertyÍÒÍ×ÂÃÂLªIdentifierÍÒÍ×¥chart¤initLªIdentifierÍÒÍ×¥chartÔrZ™¤type¥start£end¦method©shorthand¨computed£key¥value¤kind¨PropertyÍâÍøÂÂÂLªIdentifierÍâÍè¦seriesX®CallExpressionÍêÍøU°MemberExpressionÍêÍôLªIdentifierÍêÍî¤barsLªIdentifierÍïÍô¥sliceÂÂ‘Ôr[–¤type¥start£end¨operator¦prefix¨argument¯UnaryExpressionÍõÍ÷¡-ÃY§LiteralÍöÍ÷¡1Â¤initZ¨PropertyÍÍÂÂÂLªIdentifierÍÍ£keyY§LiteralÍÍ­backgroundBar¯'backgroundBar'¤initZ¨PropertyÍ"ÍHÂÂÂLªIdentifierÍ"Í0®getGraphConfigLªIdentifierÍ2ÍH¶getBackgroundBarConfig¤initÂR³ExpressionStatementÍWÍfX®CallExpressionÍWÍeU°MemberExpressionÍWÍcLªIdentifierÍWÍ[¤barsLªIdentifierÍ\Íc§reverseÂÂÂR³ExpressionStatementÍlÍ:X®CallExpressionÍlÍ9LªIdentifierÍlÍt¨doUpdate‘P°ObjectExpressionÍuÍ8–Q¨PropertyÍ€Í…ÂÃÂLªIdentifierÍ€Í…¥chart¤initLªIdentifierÍ€Í…¥chartZ¨PropertyÍÍœÂÂÂLªIdentifierÍÍ–¦seriesLªIdentifierÍ˜Íœ¤bars¤initZ¨PropertyÍ§Í±ÂÂÂLªIdentifierÍ§Íª£keyY§LiteralÍ¬Í±£bar¥'bar'¤initZ¨PropertyÍ¼ÍØÂÂÂLªIdentifierÍ¼ÍÊ®getGraphConfigLªIdentifierÍÌÍØ¬getBarConfig¤initZ¨PropertyÍãÍ	ÂÂÂLªIdentifierÍãÍö³getStartGraphConfigLªIdentifierÍøÍ	±getStartBarConfig¤initZ¨PropertyÍÍ1ÂÂÂLªIdentifierÍÍ ¬beforeUpdateLªIdentifierÍ"Í1¯beforeUpdateBar¤initÂR³ExpressionStatementÍ@Í¼X®CallExpressionÍ@Í»LªIdentifierÍ@ÍH¨doUpdate‘P°ObjectExpressionÍIÍº”Q¨PropertyÍTÍYÂÃÂLªIdentifierÍTÍY¥chart¤initLªIdentifierÍTÍY¥chartZ¨PropertyÍdÍpÂÂÂLªIdentifierÍdÍj¦seriesLªIdentifierÍlÍp¤bars¤initZ¨PropertyÍ{ÍŠÂÂÂLªIdentifierÍ{Í~£keyY§LiteralÍ€ÍŠ¨barLabelª'barLabel'¤initZ¨PropertyÍ•Í³ÂÂÂLªIdentifierÍ•Í£®getGraphConfigLªIdentifierÍ¥Í³®getLabelConfig¤initÂÀ•Ôr\•¤type¥start£endªspecifiers¦source±ImportDeclaration 2‘Ôr]•¤type¥start£end¨imported¥local¯ImportSpecifier	LªIdentifier	¨doUpdateLªIdentifier	¨doUpdateY§Literal1¶../class/updater.class¸'../class/updater.class'\±ImportDeclaration4ÌZ‘]¯ImportSpecifier=ÌFLªIdentifier=ÌF©barConfigLªIdentifier=ÌF©barConfigY§LiteralÌNÌY©../config«'../config'\±ImportDeclarationÌ\Ì‘]¯ImportSpecifierÌeÌnLªIdentifierÌeÌn©deepCloneLªIdentifierÌeÌn©deepCloneY§LiteralÌvÌ¶../cRender/plugin/util¸'../cRender/plugin/util'\±ImportDeclarationÌ‘ÌÙ“]¯ImportSpecifierÌšÌ£LªIdentifierÌšÌ£©deepMergeLªIdentifierÌšÌ£©deepMerge]¯ImportSpecifierÌ¥Ì³LªIdentifierÌ¥Ì³®initNeedSeriesLªIdentifierÌ¥Ì³®initNeedSeries]¯ImportSpecifierÌµÌÇLªIdentifierÌµÌÇ²mergeSameStackDataLªIdentifierÌµÌÇ²mergeSameStackDataY§LiteralÌÏÌØ§../util©'../util'\±ImportDeclarationÌÛÍ‘]¯ImportSpecifierÌäÌóLªIdentifierÌäÌó¯getFormatterValLªIdentifierÌäÌó¯getFormatterValY§LiteralÌûÍ®../util/common°'../util/common'

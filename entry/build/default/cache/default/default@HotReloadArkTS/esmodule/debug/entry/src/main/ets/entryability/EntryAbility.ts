@@ -4,9 +4,11 @@ import ConfigurationConstant from "@ohos:app.ability.ConfigurationConstant";
 import UIAbility from "@ohos:app.ability.UIAbility";
 import type Want from "@ohos:app.ability.Want";
 import hilog from "@ohos:hilog";
+import promptAction from "@ohos:promptAction";
 import type window from "@ohos:window";
 import type { BusinessError as BusinessError } from "@ohos:base";
 import preferences from "@ohos:data.preferences";
+import { checkApiStatus } from "@normalized:N&&&entry/src/main/ets/service/Request&";
 //从Login.ets移动过来的常量
 const PREFERENCES_FILE_NAME = 'login_prefs';
 const DOMAIN = 0x0000;
@@ -38,25 +40,23 @@ export default class EntryAbility extends UIAbility {
         hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onDestroy');
     }
     async onWindowStageCreate(windowStage: window.WindowStage): Promise<void> {
-        /*let  initialPage=''
-        const isConnect:boolean=await checkApiStatus()
-    
+        let initialPage = '';
+        const isConnect: boolean = await checkApiStatus();
         if (!isConnect) {
-          initialPage='pages/NetError'
-        }else {
-          const isLoggedIn = await this.checkLoginSession()
-          initialPage = isLoggedIn ? 'pages/Index' : 'pages/Login'
+            initialPage = 'pages/NetError';
         }
-    
-        if (initialPage==='pages/Index') {
-          promptAction.showToast({ message: '欢迎回来，admin先生' ,bottom:'80%',duration:1000});
+        else {
+            const isLoggedIn = await this.checkLoginSession();
+            initialPage = isLoggedIn ? 'pages/Index' : 'pages/Login';
         }
-    
-        if (initialPage==='pages/NetError'){
-          promptAction.showToast({ message: '应用无法与服务器连接' ,bottom:'80%',duration:1000});
-        }*/
+        if (initialPage === 'pages/Index') {
+            promptAction.showToast({ message: '欢迎回来，admin先生', bottom: '80%', duration: 1000 });
+        }
+        if (initialPage === 'pages/NetError') {
+            promptAction.showToast({ message: '应用无法与服务器连接', bottom: '80%', duration: 1000 });
+        }
         // 设置应用要加载的初始页面
-        windowStage.loadContent('pages/Index', (err) => {
+        windowStage.loadContent(initialPage, (err) => {
             if (err.code) {
                 console.error('Failed to load the content. Cause:' + JSON.stringify(err));
                 return;

@@ -11,6 +11,8 @@ export struct Conveyor2 {
 
   @State private lastKnownSpeed: number = 0;
 
+  @Link avatar:Resource;
+
   private showSystemToast(message: string) {
     try {
       this.getUIContext().getPromptAction().showToast({
@@ -41,8 +43,6 @@ export struct Conveyor2 {
 
   //仪表盘的显示与隐藏控制器
   @State isChartVisible: boolean=false;
-
-  @Link avatar:Resource;
 
   @Prop @Watch('onActiveChange') isActive: boolean = false;
 
@@ -189,13 +189,17 @@ export struct Conveyor2 {
           // 设置仪表盘的起始和结束角度，形成一个非完整的环形
           startAngle: -(Math.PI / 4) * 5,
           endAngle: Math.PI / 4,
+
           // 设置仪表盘的数值范围
           min: 0,
           max: 100,
+
           // 设置主要的刻度分割数量
           splitNum: 11,
+
           // 设置进度条（彩色弧线）的宽度
           arcLineWidth: 15,
+
           // 初始化图表的数值数据
           data: [
             {
@@ -206,17 +210,20 @@ export struct Conveyor2 {
               gradient: ['#11998e' , '#38ef7d']
             }
           ],
+
           // 配置轴刻度线（白色的小短线）
           axisTick: {
             show: true,
             style: { lineWidth: 3, stroke: '#ffffffff' }
           },
+
           // 配置轴标签（例如 "0%", "10%" 等文字）
           axisLabel: {
             show: true,
             formatter: (label: string) => `${label}%`, // 为标签添加 '%' 后缀
             style: { fontSize: 16, fill: '#ffffffff' }
           },
+
           // 配置指针（中间的指示针）
           pointer: {
             show: true,
@@ -224,10 +231,12 @@ export struct Conveyor2 {
               color: '#1890ff' // 设置指针颜色
             }
           },
+
           // 隐藏仪表盘中心默认的文字详情
           details: {
             show: false
           },
+
           // 配置背景弧线（进度条底下的灰色弧线）
           backgroundArc: {
             show: true,
@@ -286,7 +295,6 @@ export struct Conveyor2 {
         .borderRadius(16)
         // HitTestMode.Block 会让图片组件“消费”掉点击事件，不会传递给背景
         .hitTestBehavior(HitTestMode.Block)
-
     }
     .width('100%')
     .height('100%')
@@ -320,7 +328,6 @@ export struct Conveyor2 {
           .justifyContent(FlexAlign.Center)
 
           Column({space:20}){
-
             //传送带名称
             Row(){
               Text('名称：')
@@ -444,7 +451,7 @@ export struct Conveyor2 {
 
                 //判断当前状态，准备不同的对话框信息
                 const isCurrentlyRunning = this.data.statusText === '运行中';
-                const message = isCurrentlyRunning ? '您确定要停止传送带002吗？' : '您确定要启动传送带002吗？';
+                const message = isCurrentlyRunning ? '您确定要停止二号传送带吗？' : '您确定要启动二号传送带吗？';
 
                 //显示确认对话框
                 AlertDialog.show({
@@ -467,12 +474,12 @@ export struct Conveyor2 {
                           this.data.statusText = '离线中';
                           this.data.speedValue = 0;
                           this.showSystemToast('关闭成功')
-                          this.addLog('warning', '关闭了传送带002，停止了对传送带002的操作。',true)
+                          this.addLog('warning', '关闭了二号传送带，停止了对二号传送带的操作。',true)
                         } else {
                           this.data.statusText = '运行中';
                           this.data.speedValue = 10;
                           this.showSystemToast('启动成功')
-                          this.addLog('info', '启动了传送带002，要对传送带002进行操作。',true)
+                          this.addLog('info', '启动了二号传送带，要对二号传送带进行操作。',true)
                         }
                       }
                     }
@@ -510,10 +517,10 @@ export struct Conveyor2 {
         })
 
         //速度调节卡片
-        Column({space:20}){
+        Column({space:10}){
           if (this.isChartVisible) {
             McGaugeChart({ options: this.chartOptions })
-              .height(320)
+              .height(300)
               .width(320)
               // 使用 .combine() 组合动画，这是正确的写法
               .transition(
@@ -529,6 +536,73 @@ export struct Conveyor2 {
               )
           }
 
+
+          Row(){
+            //选择传送带运动方向
+            Select([
+              { value: '正向运行' },
+              { value: '反向运行' }
+            ])
+              .optionWidth(90)
+              .menuBackgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+              .menuBackgroundColor(Color.Transparent)
+              .onSelect((event) => {
+                const newDirection = event.valueOf() === 0 ? '正向运行' : '反向运行';
+                if (this.data.direction !== newDirection) {
+                  this.data.direction = newDirection;
+                }
+              })
+              .selected(this.data.direction === '正向运行' ? 0 : 1)
+              .value(this.data.direction)
+              .width('40%')
+              .height(50)
+              .backgroundColor('rgba(255, 255, 255, 0.2)')
+              .borderRadius(25)
+              .fontColor(Color.White) // 设置选中项的字体颜色
+              .border({
+                width: 1.5,
+                color: 'rgba(255, 255, 255, 0.3)'
+              })
+              // 同样，只有在运行时才启用，并有透明度变化
+              .enabled(this.data.statusText === '运行中')
+              .opacity(this.data.statusText === '运行中' ? 1.0 : 0.4)
+              .animation({ duration: 250, curve: Curve.EaseInOut })
+
+            Select([
+              { value: '正常停止' },
+              { value: '急停' }
+            ])
+              .optionWidth(180)
+              .menuBackgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+              .menuBackgroundColor(Color.Transparent)
+              .onSelect((event) => {
+                const newStopMethod = event.valueOf() === 0 ? '正常停止' : '急停';
+                if (this.data.stopMethod !== newStopMethod) {
+                  this.data.stopMethod = newStopMethod
+                }
+              })
+              .selected(this.data.direction === '正常停止' ? 0 : 1)
+              .value(this.data.stopMethod)
+              .width('40%')
+              .height(50)
+              .backgroundColor('rgba(255, 255, 255, 0.2)')
+              .borderRadius(25)
+              .fontColor(Color.White) // 设置选中项的字体颜色
+              .border({
+                width: 1.5,
+                color: 'rgba(255, 255, 255, 0.3)'
+              })
+              // 同样，只有在运行时才启用，并有透明度变化
+              .enabled(this.data.statusText === '运行中')
+              .opacity(this.data.statusText === '运行中' ? 1.0 : 0.4)
+              .animation({ duration: 250, curve: Curve.EaseInOut })
+
+
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.SpaceAround)
+
+
           Row() {
             // 减速按钮
             Button({ type: ButtonType.Circle, stateEffect: true }) {
@@ -536,7 +610,7 @@ export struct Conveyor2 {
             }
             .width(50)
             .height(50)
-            .backgroundColor(Color.Transparent) // 【样式更新】背景改为透明
+            .backgroundColor(Color.Transparent) // 背景改为透明
             .onTouch((event: TouchEvent) => {
 
               event.stopPropagation()
@@ -560,7 +634,7 @@ export struct Conveyor2 {
                 .fontWeight(FontWeight.Bold)
                 .width(85)
                 .height(50)
-                .fontColor(Color.White) // 【样式更新】字体改为白色
+                .fontColor(Color.White) // 字体改为白色
                 .textAlign(TextAlign.Center)
                 .backgroundColor(Color.Transparent)
                 .onChange((value: string) => { this.speedInputText = value; })
@@ -582,9 +656,11 @@ export struct Conveyor2 {
             }
             .width(50)
             .height(50)
-            .backgroundColor(Color.Transparent) // 【样式更新】背景改为透明
+            .backgroundColor(Color.Transparent) //背景改为透明
             .onTouch((event: TouchEvent) => {
+
               event.stopPropagation()
+
               if (event.type === TouchType.Down) {
                 this.increaseSpeed();
                 this.holdTimer = setInterval(() => { this.increaseSpeed(); }, 120);
@@ -598,7 +674,6 @@ export struct Conveyor2 {
           .width('90%') // 控制条宽度
           .height(60)   // 控制条高度
           .justifyContent(FlexAlign.SpaceBetween) // 两端对齐，中间自适应
-          .margin({ top: 20 })
           //为整个控制条应用磨砂玻璃风格
           .backgroundColor('rgba(255, 255, 255, 0.2)')
           .borderRadius(30) // 使用大的圆角形成“胶囊”形状
@@ -639,7 +714,6 @@ export struct Conveyor2 {
       if (this.isPreviewVisible) {
         this.buildImagePreview()
       }
-
     }
     .width('100%')
     .height('100%')

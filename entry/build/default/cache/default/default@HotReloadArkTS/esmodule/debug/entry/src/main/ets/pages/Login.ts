@@ -271,7 +271,7 @@ class Login extends ViewPU {
             Gesture.pop();
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Image.create({ "id": 16777273, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+            Image.create({ "id": 16777274, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
             Image.width('100%');
             Image.height('100%');
             Image.objectFit(ImageFit.Cover);

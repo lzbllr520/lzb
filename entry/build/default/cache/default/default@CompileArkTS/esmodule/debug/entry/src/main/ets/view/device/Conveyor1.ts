@@ -783,7 +783,7 @@ export class Conveyor1 extends ViewPU {
         Column.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             //速度调节卡片
-            Column.create({ space: 20 });
+            Column.create({ space: 10 });
             //速度调节卡片
             Column.width('65%');
             //速度调节卡片
@@ -813,7 +813,7 @@ export class Conveyor1 extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         __Common__.create();
-                        __Common__.height(320);
+                        __Common__.height(300);
                         __Common__.width(320);
                         __Common__.transition(
                         // 创建一个从完全透明开始的动画效果
@@ -856,11 +856,63 @@ export class Conveyor1 extends ViewPU {
         If.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
+            Row.width('100%');
+            Row.justifyContent(FlexAlign.SpaceAround);
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            //选择传送带运动方向
+            Select.create([
+                { value: '正向' },
+                { value: '反向' }
+            ]);
+            Context.animation({ duration: 250, curve: Curve.EaseInOut });
+            //选择传送带运动方向
+            Select.optionWidth(90);
+            //选择传送带运动方向
+            Select.menuBackgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
+            //选择传送带运动方向
+            Select.menuBackgroundColor(Color.Transparent);
+            //选择传送带运动方向
+            Select.onSelect((event) => {
+                const newDirection = event.valueOf() === 0 ? '正向' : '反向';
+                if (this.data.direction !== newDirection) {
+                    this.data.direction = newDirection;
+                }
+            });
+            //选择传送带运动方向
+            Select.selected(this.data.direction === '正向' ? 0 : 1);
+            //选择传送带运动方向
+            Select.value(this.data.direction);
+            //选择传送带运动方向
+            Select.width('20%');
+            //选择传送带运动方向
+            Select.height(50);
+            //选择传送带运动方向
+            Select.backgroundColor('rgba(255, 255, 255, 0.2)');
+            //选择传送带运动方向
+            Select.borderRadius(25);
+            //选择传送带运动方向
+            Select.fontColor(Color.White);
+            //选择传送带运动方向
+            Select.border({
+                width: 1.5,
+                color: 'rgba(255, 255, 255, 0.3)'
+            });
+            //选择传送带运动方向
+            Select.enabled(this.data.statusText === '运行中');
+            //选择传送带运动方向
+            Select.opacity(this.data.statusText === '运行中' ? 1.0 : 0.4);
+            Context.animation(null);
+        }, Select);
+        //选择传送带运动方向
+        Select.pop();
+        Row.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Row.create();
             Context.animation({ duration: 250, curve: Curve.EaseInOut });
             Row.width('90%');
             Row.height(60);
             Row.justifyContent(FlexAlign.SpaceBetween);
-            Row.margin({ top: 20 });
             Row.backgroundColor('rgba(255, 255, 255, 0.2)');
             Row.borderRadius(30);
             Row.border({

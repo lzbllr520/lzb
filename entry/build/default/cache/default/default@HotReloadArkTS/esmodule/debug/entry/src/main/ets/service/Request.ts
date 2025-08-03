@@ -1,5 +1,6 @@
 import axios, { AxiosError } from "@normalized:N&&&@ohos/axios/index&2.2.6";
 import type { AxiosResponse, InternalAxiosRequestConfig } from "@normalized:N&&&@ohos/axios/index&2.2.6";
+import type { Server, Node } from '../model/ServerState';
 import { globalAbilityContext } from "@normalized:N&&&entry/src/main/ets/entryability/EntryAbility&";
 import preferences from "@ohos:data.preferences";
 // 定义所有不需要 Token 认证的公开API路径
@@ -104,11 +105,11 @@ export async function login(mobile: string, password: string): Promise<AxiosResp
     }
 }
 //获取所有服务接口
-export async function getAllServers(): Promise<AxiosResponse | null> {
+export async function getAllServers(): Promise<Server[] | null> {
     try {
         const responseData: AxiosResponse = await authAPI.get('/opcua/connected-servers');
         console.info('【获取所有服务接口】获取所有服务接口成功');
-        return responseData;
+        return responseData.data.data.servers;
     }
     catch (error) {
         if (error instanceof AxiosError) {
@@ -129,14 +130,14 @@ export async function getAllServers(): Promise<AxiosResponse | null> {
 export interface NodeRequestDataStart {
     id: string;
 }
-export async function getNodeStart(serverId: string): Promise<AxiosResponse | null> {
+export async function getNodeStart(serverId: string): Promise<Node[] | null> {
     let requestData: NodeRequestDataStart = {
         id: serverId
     };
     try {
         const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
         console.info(`【获取${serverId}服务的第一层结点接口】获取成功`);
-        return responseData;
+        return responseData.data.data.nodes;
     }
     catch (error) {
         if (error instanceof AxiosError) {
@@ -161,7 +162,7 @@ export interface NodeRequestDataOther {
     id: string;
     node_id: string;
 }
-export async function getNodeOther(serverId: string, node_id: string): Promise<AxiosResponse | null> {
+export async function getNodeOther(serverId: string, node_id: string): Promise<Node[] | null> {
     let requestData: NodeRequestDataOther = {
         id: serverId,
         node_id: node_id
@@ -169,7 +170,7 @@ export async function getNodeOther(serverId: string, node_id: string): Promise<A
     try {
         const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
         console.info(`【获取${serverId}服务的其他层结点接口】获取成功`);
-        return responseData;
+        return responseData.data.data.nodes;
     }
     catch (error) {
         if (error instanceof AxiosError) {
@@ -185,6 +186,342 @@ export async function getNodeOther(serverId: string, node_id: string): Promise<A
         }
         else {
             console.info(`【获取${serverId}服务的其他层结点接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+export async function getNodeEn(serverId: string, node_id: string): Promise<number[] | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【获取${serverId}服务的环境数据接口】获取成功`);
+        return responseData.data.data.output_args;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【获取${serverId}服务的环境数据接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【获取${serverId}服务的环境数据接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【获取${serverId}服务的环境数据接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【获取${serverId}服务的环境数据接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+export async function getNodeVoice(serverId: string, node_id: string): Promise<number | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【获取${serverId}服务的噪声数据接口】获取成功`);
+        return responseData.data.data.value;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【获取${serverId}服务的噪声数据接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【获取${serverId}服务的噪声数据接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【获取${serverId}服务的噪声数据接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【获取${serverId}服务的噪声数据接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+export async function getNodeRed1(serverId: string, node_id: string): Promise<boolean | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【获取${serverId}服务的红外检测状态接口】获取成功`);
+        return responseData.data.data.value;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【获取${serverId}服务的红外检测状态接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【获取${serverId}服务的红外检测状态接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【获取${serverId}服务的红外检测状态接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【获取${serverId}服务的红外检测状态接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+export async function getNodeRed2(serverId: string, node_id: string): Promise<number | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【获取${serverId}服务的红外检测次数接口】获取成功`);
+        return responseData.data.data.value;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【获取${serverId}服务的红外检测次数接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【获取${serverId}服务的红外检测次数接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【获取${serverId}服务的红外检测次数接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【获取${serverId}服务的红外检测次数接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+export async function getNodeShark1(serverId: string, node_id: string): Promise<boolean | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【获取${serverId}服务的震动状态接口】获取成功`);
+        return responseData.data.data.value;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【获取${serverId}服务的震动状态接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【获取${serverId}服务的震动状态接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【获取${serverId}服务的震动状态接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【获取${serverId}服务的震动状态接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+export async function getNodeShark2(serverId: string, node_id: string): Promise<number | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【获取${serverId}服务的震动次数接口】获取成功`);
+        return responseData.data.data.value;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【获取${serverId}服务的震动次数接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【获取${serverId}服务的震动次数接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【获取${serverId}服务的震动次数接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【获取${serverId}服务的震动次数接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+export async function getNodeShark3(serverId: string, node_id: string): Promise<number | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【获取${serverId}服务的脉冲次数接口】获取成功`);
+        return responseData.data.data.value;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【获取${serverId}服务的脉冲次数接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【获取${serverId}服务的脉冲次数接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【获取${serverId}服务的脉冲次数接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【获取${serverId}服务的脉冲次数接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+export async function getNodeRFID1(serverId: string, node_id: string): Promise<string | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【获取${serverId}服务的卡片UID接口】获取成功`);
+        return responseData.data.data.value;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【获取${serverId}服务的卡片UID接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【获取${serverId}服务的卡片UID接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【获取${serverId}服务的卡片UID接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【获取${serverId}服务的卡片UID接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+export async function getNodeRFID2(serverId: string, node_id: string): Promise<string | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【获取${serverId}服务的卡片存在接口】获取成功`);
+        return responseData.data.data.value;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【获取${serverId}服务的卡片存在接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【获取${serverId}服务的卡片存在接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【获取${serverId}服务的卡片存在接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【获取${serverId}服务的卡片存在接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+export async function getNodeRFID3(serverId: string, node_id: string): Promise<string | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【获取${serverId}服务的卡片数据块内容接口】获取成功`);
+        return responseData.data.data.value;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【获取${serverId}服务的卡片数据块内容接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【获取${serverId}服务的卡片数据块内容接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【获取${serverId}服务的卡片数据块内容接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【获取${serverId}服务的卡片数据块内容接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+export async function getNodeRFID4(serverId: string, node_id: string): Promise<string | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【获取${serverId}服务的卡片读取次数接口】获取成功`);
+        return responseData.data.data.value;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【获取${serverId}服务的卡片读取次数接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【获取${serverId}服务的卡片读取次数接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【获取${serverId}服务的卡片读取次数接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【获取${serverId}服务的卡片读取次数接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+export async function getNodeRFID5(serverId: string, node_id: string): Promise<string | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【获取${serverId}服务的卡片最后读取时间接口】获取成功`);
+        return responseData.data.data.value;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【获取${serverId}服务的卡片最后读取时间接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【获取${serverId}服务的卡片最后读取时间接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【获取${serverId}服务的卡片最后读取时间接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【获取${serverId}服务的卡片最后读取时间接口】捕获到未知错误:`, JSON.stringify(error));
         }
         return null;
     }
