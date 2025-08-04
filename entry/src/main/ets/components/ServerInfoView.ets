@@ -88,6 +88,7 @@ export struct ServerInfoView {
   @State private node_id_voice:string=''
   @State private node_id_red:string=''
   @State private node_id_shark:string=''
+  @State private node_id_read:string=''
 
   aboutToAppear() {
     this.onServersChange();
@@ -100,6 +101,7 @@ export struct ServerInfoView {
       if (nodes1&&nodes1.length>0) {
         const nodes2:Node[]|null=await getNodeOther(this.server.id,nodes1[3].node_id)
         if (nodes2&&nodes2.length>0) {
+          this.node_id_read=nodes2[4].node_id
           const nodes3:Node[]|null=await getNodeOther(this.server.id,nodes2[1].node_id)
           if (nodes3&&nodes3.length>0) {
             this.node_id_voc=nodes3[1].node_id
@@ -117,7 +119,7 @@ export struct ServerInfoView {
 
   build() {
     Column(){
-      Text((this.server ? this.server.name : 'null') + '——传感器动态数据集')
+      Text((this.server ? this.server.id : 'null') + '——传感器动态数据集')
         .fontSize(34)
         .fontWeight(FontWeight.Bold)
         .fontColor(Color.White)
@@ -154,6 +156,11 @@ export struct ServerInfoView {
                 router.pushUrl({
                   url: 'pages/SensorInfoShark',
                   params: { title: item.title, id:this.server?this.server.id:'', node_id:this.node_id_shark}
+                })
+              }else if (item.title==='RFID读卡器'){
+                router.pushUrl({
+                  url: 'pages/RFIDReadCard',
+                  params: { title: item.title, id:this.server?this.server.id:'', node_id:this.node_id_read}
                 })
               }
             })

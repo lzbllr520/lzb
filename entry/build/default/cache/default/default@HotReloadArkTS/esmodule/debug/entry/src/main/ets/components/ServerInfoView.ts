@@ -9,6 +9,7 @@ interface ServerInfoView_Params {
     node_id_voice?: string;
     node_id_red?: string;
     node_id_shark?: string;
+    node_id_read?: string;
 }
 interface InfoCard_Params {
     title?: string;
@@ -152,6 +153,7 @@ export class ServerInfoView extends ViewPU {
         this.__node_id_voice = new ObservedPropertySimplePU('', this, "node_id_voice");
         this.__node_id_red = new ObservedPropertySimplePU('', this, "node_id_red");
         this.__node_id_shark = new ObservedPropertySimplePU('', this, "node_id_shark");
+        this.__node_id_read = new ObservedPropertySimplePU('', this, "node_id_read");
         this.setInitiallyProvidedValue(params);
         this.declareWatch("server", this.onServersChange);
         this.finalizeConstruction();
@@ -175,6 +177,9 @@ export class ServerInfoView extends ViewPU {
         if (params.node_id_shark !== undefined) {
             this.node_id_shark = params.node_id_shark;
         }
+        if (params.node_id_read !== undefined) {
+            this.node_id_read = params.node_id_read;
+        }
     }
     updateStateVars(params: ServerInfoView_Params) {
         this.__server.reset(params.server);
@@ -186,6 +191,7 @@ export class ServerInfoView extends ViewPU {
         this.__node_id_voice.purgeDependencyOnElmtId(rmElmtId);
         this.__node_id_red.purgeDependencyOnElmtId(rmElmtId);
         this.__node_id_shark.purgeDependencyOnElmtId(rmElmtId);
+        this.__node_id_read.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
         this.__server.aboutToBeDeleted();
@@ -194,6 +200,7 @@ export class ServerInfoView extends ViewPU {
         this.__node_id_voice.aboutToBeDeleted();
         this.__node_id_red.aboutToBeDeleted();
         this.__node_id_shark.aboutToBeDeleted();
+        this.__node_id_read.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -244,6 +251,13 @@ export class ServerInfoView extends ViewPU {
     set node_id_shark(newValue: string) {
         this.__node_id_shark.set(newValue);
     }
+    private __node_id_read: ObservedPropertySimplePU<string>;
+    get node_id_read() {
+        return this.__node_id_read.get();
+    }
+    set node_id_read(newValue: string) {
+        this.__node_id_read.set(newValue);
+    }
     aboutToAppear() {
         this.onServersChange();
     }
@@ -254,6 +268,7 @@ export class ServerInfoView extends ViewPU {
             if (nodes1 && nodes1.length > 0) {
                 const nodes2: Node[] | null = await getNodeOther(this.server.id, nodes1[3].node_id);
                 if (nodes2 && nodes2.length > 0) {
+                    this.node_id_read = nodes2[4].node_id;
                     const nodes3: Node[] | null = await getNodeOther(this.server.id, nodes2[1].node_id);
                     if (nodes3 && nodes3.length > 0) {
                         this.node_id_voc = nodes3[1].node_id;
@@ -274,7 +289,7 @@ export class ServerInfoView extends ViewPU {
             Column.height('100%');
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create((this.server ? this.server.name : 'null') + '——传感器动态数据集');
+            Text.create((this.server ? this.server.id : 'null') + '——传感器动态数据集');
             Text.fontSize(34);
             Text.fontWeight(FontWeight.Bold);
             Text.fontColor(Color.White);
@@ -339,6 +354,12 @@ export class ServerInfoView extends ViewPU {
                                     params: { title: item.title, id: this.server ? this.server.id : '', node_id: this.node_id_shark }
                                 });
                             }
+                            else if (item.title === 'RFID读卡器') {
+                                router.pushUrl({
+                                    url: 'pages/RFIDReadCard',
+                                    params: { title: item.title, id: this.server ? this.server.id : '', node_id: this.node_id_read }
+                                });
+                            }
                         });
                     };
                     const deepRenderFunction = (elmtId, isInitialRender) => {
@@ -349,7 +370,7 @@ export class ServerInfoView extends ViewPU {
                                     let componentCall = new InfoCard(this, {
                                         title: item.title,
                                         description: item.description
-                                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 132, col: 15 });
+                                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 134, col: 15 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {

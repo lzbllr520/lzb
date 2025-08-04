@@ -306,8 +306,9 @@ export class MasterStation extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Tabs.create({
                             controller: this.controller,
-                            barPosition: BarPosition.End
+                            barPosition: BarPosition.Start
                         });
+                        Tabs.scrollable(false);
                         Tabs.vertical(true);
                         Tabs.barMode(BarMode.Fixed);
                         Tabs.barWidth(60);

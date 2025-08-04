@@ -7,6 +7,9 @@ import {Dolly} from '../view/device/Dolly'
 import {RobotArm1} from '../view/device/RobotArm1'
 import {RobotArm2} from '../view/device/RobotArm2'
 import {RobotArm3} from '../view/device/RobotArm3'
+import { Server,Node,Data } from '../model/ServerState'
+import { getNodeOther, getNodeStart } from '../service/Request'
+import { promptAction } from '@kit.ArkUI'
 
 @Component
 export struct DeviceManager {
@@ -31,58 +34,117 @@ export struct DeviceManager {
   private normalColor: string = '#E6FFFFFF'
   private selectedColor: string = '#FFFFFF'
 
-  //用于记录当前被按下的Tab索引，-1代表没有Tab被按下
   @State pressedTabIndex: number = -1
 
-  private swiperController: SwiperController = new SwiperController()
+  onIndexChange: (index: number) => void = () => {}
 
-  onIndexChange: (index: number) => void = () => {};
+  @Prop @Watch('onServersChange') servers:Server[]|null=[]
 
-  @Builder
-  deviceContent(index: number) {
-    Column() {
-      if (index === 0) {
-        Dolly({
-          data:this.dollyData,
-          addLog: this.addLog,
-          avatar:this.dollyAvatar
-        })
-      }else if (index===1){
-        Conveyor1({
-          data:this.conveyorData1,
-          addLog: this.addLog,
-          avatar:this.conveyorAvatar,
-          isActive: index === this.currentIndex
-        })
-      } else if (index === 2) {
-        Conveyor2({
-          data:this.conveyorData2,
-          addLog: this.addLog,
-          avatar:this.conveyorAvatar,
-          isActive: index === this.currentIndex
-        })
-      } else if (index === 3) {
-        RobotArm1({
-          data:this.robot1Data,
-          addLog: this.addLog,
-          avatar:this.robotArmAvatar
-        })
-      } else if (index === 4) {
-        RobotArm2({
-          data:this.robot2Data,
-          addLog: this.addLog,
-          avatar:this.robotArmAvatar
-        })
-      }else if(index===5){
-        RobotArm3({
-          data:this.robot3Data,
-          addLog: this.addLog,
-          avatar:this.robotArmAvatar
-        })
-      }
+  @State private hasLoaded: boolean = false
+
+  //传送带1
+  @State data1:Data={id:'', node_id:''}
+  //传送带2
+  @State data2:Data={id:'', node_id:''}
+  //机械臂1
+  @State data3:Data={id:'', node_id:''}
+  //机械臂2
+  @State data4:Data={id:'', node_id:''}
+  //机械臂3
+  @State data5:Data={id:'', node_id:''}
+
+  async onServersChange(): Promise<void>{
+    if (this.servers&&this.servers.length>0&& !this.hasLoaded) {
+      this.servers.forEach(async (item:Server)=>{
+        if (item.id==='server2') {
+          const nodes1:Node[]|null=await getNodeStart(item.id)
+          if (nodes1&&nodes1.length>0) {
+            const nodes2:Node[]|null=await getNodeOther(item.id,nodes1[3].node_id)
+            if (nodes2&&nodes2.length>0){
+              this.data1={
+                id:item.id,
+                node_id:nodes2[3].node_id
+              }
+            }
+          }
+        }else if (item.id==='server5'){
+          const nodes1:Node[]|null=await getNodeStart(item.id)
+          if (nodes1&&nodes1.length>0) {
+            const nodes2:Node[]|null=await getNodeOther(item.id,nodes1[3].node_id)
+            if (nodes2&&nodes2.length>0){
+              this.data2={
+                id:item.id,
+                node_id:nodes2[3].node_id
+              }
+            }
+          }
+        }
+      })
+    }
+    this.hasLoaded = true
+  }
+
+  aboutToAppear(): void {
+    this.onServersChange()
+  }
+
+  handleTabChange(targetIndex: number) {
+    let canSwitch = true;
+    let alertMessage = '';
+
+    switch (targetIndex) {
+      case 1:
+        if (!this.data1.id || !this.data1.node_id) {
+          canSwitch = false;
+          alertMessage = '没有一号传送带对应的服务可使用';
+        }
+        break;
+      case 2:
+        if (!this.data2.id || !this.data2.node_id) {
+          canSwitch = false;
+          alertMessage = '没有二号传送带对应的服务可使用';
+        }
+        break;
+      case 3:
+        if (!this.data3.id || !this.data3.node_id) {
+          canSwitch = false;
+          alertMessage = '没有一号机械臂对应的服务可使用';
+        }
+        break;
+      case 4:
+        if (!this.data4.id || !this.data4.node_id) {
+          canSwitch = false;
+          alertMessage = '没有二号机械臂对应的服务可使用';
+        }
+        break;
+      case 5:
+        if (!this.data5.id || !this.data5.node_id) {
+          canSwitch = false;
+          alertMessage = '没有三号机械臂对应的服务可使用';
+        }
+        break;
+    }
+
+    if (canSwitch) {
+      this.currentIndex = targetIndex;
+      this.onIndexChange(targetIndex);
+    } else {
+      AlertDialog.show({
+        title: '操作提示',
+        message: alertMessage,
+        alignment: DialogAlignment.Center,
+        autoCancel: true,
+        buttons: [
+          {
+            value: '确定',
+            action: () => {}
+          }
+        ]
+      })
     }
   }
 
+  // @Builder deviceContent 已被移除
 
   @Builder
   tabBuilder(title: string, targetIndex: number) {
@@ -100,15 +162,12 @@ export struct DeviceManager {
     .margin({ left: 15, right: 15 })
     .scale({ x: this.pressedTabIndex === targetIndex ? 0.95 : 1.0, y: this.pressedTabIndex === targetIndex ? 0.95 : 1.0 })
     .opacity(this.pressedTabIndex === targetIndex ? 0.6 : 1.0)
-    .animation({ duration: 100, curve: Curve.EaseOut }) // 点击反馈动画，要快
+    .animation({ duration: 100, curve: Curve.EaseOut })
     .onTouch((event: TouchEvent) => {
-      // 监听触摸事件
       if (event.type === TouchType.Down) {
-        // 手指按下时，记录当前项的索引
         this.pressedTabIndex = targetIndex;
       }
       if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        // 手指抬起或触摸取消时，重置状态
         this.pressedTabIndex = -1;
       }
     })
@@ -124,15 +183,7 @@ export struct DeviceManager {
         }
         .barMode(BarMode.Scrollable)
         .onChange((index: number) => {
-          if(index===this.currentIndex+1){
-            this.swiperController.showNext()
-          }else if(index===this.currentIndex-1){
-            this.swiperController.showPrevious()
-          }else {
-            this.swiperController.changeIndex(index,true)
-          }
-          this.currentIndex = index;
-          this.onIndexChange(index);
+          this.handleTabChange(index)
         })
         .barHeight(56)
         .width('100%')
@@ -149,25 +200,56 @@ export struct DeviceManager {
         color: 'rgba(255, 255, 255, 0.2)'
       })
 
-      Swiper(this.swiperController) {
-        ForEach(this.tabArray, (item:string,index:number) => {
-          Column() {
-            this.deviceContent(index)
-          }
-          .width('100%')
-          .height('100%')
-          .justifyContent(FlexAlign.Center)
-        }, (item:string) => item)
+      // 内容区域：直接使用 if/else if 结构，不再通过 @Builder 调用
+      Column() {
+        if (this.currentIndex === 0) {
+          Dolly({
+            data:this.dollyData,
+            addLog: this.addLog,
+            avatar:this.dollyAvatar
+          })
+        } else if (this.currentIndex === 1) {
+          Conveyor1({
+            data:this.conveyorData1,
+            addLog: this.addLog,
+            avatar:this.conveyorAvatar,
+            // 因为只有在 currentIndex === 1 时才会渲染，所以 isActive 恒为 true
+            isActive: true,
+            node:this.data1
+          })
+        } else if (this.currentIndex === 2) {
+          Conveyor2({
+            data:this.conveyorData2,
+            addLog: this.addLog,
+            avatar:this.conveyorAvatar,
+            // 因为只有在 currentIndex === 2 时才会渲染，所以 isActive 恒为 true
+            isActive: true,
+            node:this.data2
+          })
+        } else if (this.currentIndex === 3) {
+          RobotArm1({
+            data:this.robot1Data,
+            addLog: this.addLog,
+            avatar:this.robotArmAvatar
+          })
+        } else if (this.currentIndex === 4) {
+          RobotArm2({
+            data:this.robot2Data,
+            addLog: this.addLog,
+            avatar:this.robotArmAvatar
+          })
+        } else if (this.currentIndex === 5) {
+          RobotArm3({
+            data:this.robot3Data,
+            addLog: this.addLog,
+            avatar:this.robotArmAvatar
+          })
+        }
       }
-      .index(this.currentIndex)
-      .onChange((index: number) => {
-        this.currentIndex = index;
-        this.onIndexChange(index);
-      })
-      .loop(false)
-      .indicator(false)
-      .itemSpace(0)
+      // 合并了原有的两层Column的全部修饰符，以保证布局不变
       .width('100%')
+      .height('100%')
+      .justifyContent(FlexAlign.Center)
       .layoutWeight(1)
       .animation({ duration: 300, curve: Curve.Ease })
     }

@@ -215,14 +215,11 @@ class RFIDReadCard extends ViewPU {
         if (!this.sensorNodeId1 || !this.sensorNodeId2 || !this.sensorNodeId3) {
             const nodes1: Node[] | null = await getNodeOther(this.routeParams.id, this.routeParams.node_id);
             if (nodes1 && nodes1.length > 0) {
-                const nodes2: Node[] | null = await getNodeOther(this.routeParams.id, nodes1[1].node_id);
-                if (nodes2 && nodes2.length > 0) {
-                    this.sensorNodeId1 = nodes2[1].node_id;
-                    this.sensorNodeId2 = nodes2[2].node_id;
-                    this.sensorNodeId3 = nodes2[3].node_id;
-                    this.sensorNodeId4 = nodes2[4].node_id;
-                    this.sensorNodeId5 = nodes2[5].node_id;
-                }
+                this.sensorNodeId1 = nodes1[1].node_id;
+                this.sensorNodeId2 = nodes1[2].node_id;
+                this.sensorNodeId3 = nodes1[3].node_id;
+                this.sensorNodeId4 = nodes1[4].node_id;
+                this.sensorNodeId5 = nodes1[5].node_id;
             }
             else {
                 return;
@@ -361,39 +358,89 @@ class RFIDReadCard extends ViewPU {
             ForEach.create();
             const forEachItemGenFunction = _item => {
                 const item = _item;
-                {
-                    const itemCreation2 = (elmtId, isInitialRender) => {
-                        GridItem.create(() => { }, false);
-                    };
-                    const observedDeepRender = () => {
-                        this.observeComponentCreation2(itemCreation2, GridItem);
-                        {
-                            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, {
-                                        title: item.title,
-                                        value: item.value,
-                                        unit: item.unit
-                                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/RFIDReadCard.ets", line: 213, col: 17 });
-                                    ViewPU.create(componentCall);
-                                    let paramsLambda = () => {
-                                        return {
-                                            title: item.title,
-                                            value: item.value,
-                                            unit: item.unit
-                                        };
-                                    };
-                                    componentCall.paramsGenerator_ = paramsLambda;
-                                }
-                                else {
-                                    this.updateStateVarsOfChildByElmtId(elmtId, {});
-                                }
-                            }, { name: "ValueCard" });
-                        }
-                        GridItem.pop();
-                    };
-                    observedDeepRender();
-                }
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    If.create();
+                    if (item.title === '卡片UID' || item.title === '数据块内容') {
+                        this.ifElseBranchUpdateFunction(0, () => {
+                            {
+                                const itemCreation2 = (elmtId, isInitialRender) => {
+                                    GridItem.create(() => { }, false);
+                                    // 如果是，则设置起始和结束列，使其横跨4列 (0, 1, 2, 3)
+                                    GridItem.columnStart(0);
+                                    // 如果是，则设置起始和结束列，使其横跨4列 (0, 1, 2, 3)
+                                    GridItem.columnEnd(3);
+                                };
+                                const observedDeepRender = () => {
+                                    this.observeComponentCreation2(itemCreation2, GridItem);
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new ValueCard(this, {
+                                                    title: item.title,
+                                                    value: item.value,
+                                                    unit: item.unit
+                                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/RFIDReadCard.ets", line: 212, col: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        title: item.title,
+                                                        value: item.value,
+                                                        unit: item.unit
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "ValueCard" });
+                                    }
+                                    // 如果是，则设置起始和结束列，使其横跨4列 (0, 1, 2, 3)
+                                    GridItem.pop();
+                                };
+                                observedDeepRender();
+                            }
+                        });
+                    }
+                    else {
+                        this.ifElseBranchUpdateFunction(1, () => {
+                            {
+                                const itemCreation2 = (elmtId, isInitialRender) => {
+                                    GridItem.create(() => { }, false);
+                                };
+                                const observedDeepRender = () => {
+                                    this.observeComponentCreation2(itemCreation2, GridItem);
+                                    {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            if (isInitialRender) {
+                                                let componentCall = new ValueCard(this, {
+                                                    title: item.title,
+                                                    value: item.value,
+                                                    unit: item.unit
+                                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/RFIDReadCard.ets", line: 222, col: 19 });
+                                                ViewPU.create(componentCall);
+                                                let paramsLambda = () => {
+                                                    return {
+                                                        title: item.title,
+                                                        value: item.value,
+                                                        unit: item.unit
+                                                    };
+                                                };
+                                                componentCall.paramsGenerator_ = paramsLambda;
+                                            }
+                                            else {
+                                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                            }
+                                        }, { name: "ValueCard" });
+                                    }
+                                    GridItem.pop();
+                                };
+                                observedDeepRender();
+                            }
+                        });
+                    }
+                }, If);
+                If.pop();
             };
             this.forEachUpdateFunction(elmtId, this.sensorData, forEachItemGenFunction, (item: CardData) => JSON.stringify(item), false, false);
         }, ForEach);

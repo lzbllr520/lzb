@@ -526,3 +526,156 @@ export async function getNodeRFID5(serverId: string, node_id: string): Promise<s
         return null;
     }
 }
+//设置传送带速度
+export interface Conveyor1Data {
+    id: string;
+    node_id: string;
+    action: string;
+}
+export async function setConveyor1Speed(serverId: string, node_id: string, action: string): Promise<AxiosResponse | null> {
+    let requestData: Conveyor1Data = {
+        id: serverId,
+        node_id: node_id,
+        action: action
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【设置${serverId}服务的传送带速度接口】获取成功`);
+        return responseData;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【设置${serverId}服务的传送带速度接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【设置${serverId}服务的传送带速度接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【设置${serverId}服务的传送带速度接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【设置${serverId}服务的传送带速度接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+//启动传送带
+export async function openConveyor1(serverId: string, node_id: string): Promise<AxiosResponse | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【启动${serverId}服务的传送带接口】获取成功`);
+        return responseData;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【启动${serverId}服务的传送带接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【启动${serverId}服务的传送带接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【启动${serverId}服务的传送带接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【启动${serverId}服务的传送带接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+//关闭传送带
+export async function closeConveyor1(serverId: string, node_id: string): Promise<AxiosResponse | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【关闭${serverId}服务的传送带接口】获取成功`);
+        return responseData;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【关闭${serverId}服务的传送带接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【关闭${serverId}服务的传送带接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【关闭${serverId}服务的传送带接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【关闭${serverId}服务的传送带接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+//设置运行方向
+export async function setConveyor1Direction(serverId: string, node_id: string, action: string): Promise<AxiosResponse | null> {
+    let requestData: Conveyor1Data = {
+        id: serverId,
+        node_id: node_id,
+        action: action
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【设置${serverId}服务的传送带方向接口】获取成功`);
+        return responseData;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【设置${serverId}服务的传送带方向接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【设置${serverId}服务的传送带方向接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【设置${serverId}服务的传送带方向接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【设置${serverId}服务的传送带方向接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+//设置停止模式
+export async function setConveyor1Stop(serverId: string, node_id: string, action: string): Promise<AxiosResponse | null> {
+    let requestData: Conveyor1Data = {
+        id: serverId,
+        node_id: node_id,
+        action: action
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【设置${serverId}服务的传送带停止模式接口】获取成功`);
+        return responseData;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【设置${serverId}服务的传送带停止模式接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【设置${serverId}服务的传送带停止模式接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【设置${serverId}服务的传送带停止模式接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【设置${serverId}服务的传送带停止模式接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}

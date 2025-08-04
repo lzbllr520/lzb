@@ -216,6 +216,22 @@ class MainPage extends ViewPU {
                 ]
             });
         }
+        else if (index === 1 && this.servers?.length === 0) {
+            AlertDialog.show({
+                title: '操作提示',
+                message: '没有可用服务对象，无法对设备进行操作管理',
+                alignment: DialogAlignment.Center,
+                autoCancel: true,
+                buttons: [
+                    {
+                        value: '确定',
+                        action: () => {
+                            //无需做任何操作
+                        }
+                    }
+                ]
+            });
+        }
         else {
             this.currentPage = index;
         }
@@ -600,7 +616,7 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 288, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 303, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -642,7 +658,7 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 300, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 315, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -684,7 +700,7 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 312, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 327, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -726,7 +742,7 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 324, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 339, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -768,7 +784,7 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 336, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 351, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -828,7 +844,7 @@ class MainPage extends ViewPU {
                                     robot3Data: this.__robot3Data,
                                     addLog: this.addLog.bind(this),
                                     isLineRunning: this.__isLineRunning
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 368, col: 13 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 383, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -873,8 +889,9 @@ class MainPage extends ViewPU {
                                     robotArmAvatar: this.__robotArmAvatar,
                                     onIndexChange: (index: number) => {
                                         this.deviceManagerIndex = index;
-                                    }
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 380, col: 13 });
+                                    },
+                                    servers: this.servers
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 395, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -891,13 +908,16 @@ class MainPage extends ViewPU {
                                         robotArmAvatar: this.robotArmAvatar,
                                         onIndexChange: (index: number) => {
                                             this.deviceManagerIndex = index;
-                                        }
+                                        },
+                                        servers: this.servers
                                     };
                                 };
                                 componentCall.paramsGenerator_ = paramsLambda;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                    servers: this.servers
+                                });
                             }
                         }, { name: "DeviceManager" });
                     }
@@ -911,7 +931,7 @@ class MainPage extends ViewPU {
                                 let componentCall = new TaskLog(this, {
                                     allLogItems: this.allLogItems,
                                     clearAllLogs: this.clearAllLogs.bind(this)
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 397, col: 13 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 413, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -935,7 +955,7 @@ class MainPage extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new DataStatics(this, {}, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 402, col: 13 });
+                                let componentCall = new DataStatics(this, {}, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 418, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {};
@@ -957,7 +977,7 @@ class MainPage extends ViewPU {
                                 let componentCall = new SystemSetting(this, {
                                     addLog: this.addLog.bind(this),
                                     avatar: this.__userAvatar
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 404, col: 13 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 420, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {

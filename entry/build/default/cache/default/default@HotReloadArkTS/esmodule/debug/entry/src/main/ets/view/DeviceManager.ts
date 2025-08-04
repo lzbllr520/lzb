@@ -19,8 +19,14 @@ interface DeviceManager_Params {
     normalColor?: string;
     selectedColor?: string;
     pressedTabIndex?: number;
-    swiperController?: SwiperController;
     onIndexChange?: (index: number) => void;
+    servers?: Server[] | null;
+    hasLoaded?: boolean;
+    data1?: Data;
+    data2?: Data;
+    data3?: Data;
+    data4?: Data;
+    data5?: Data;
 }
 import type { ConveyorState } from '../model/ConveyorState';
 import type { DollyState } from '../model/DollyState';
@@ -31,6 +37,8 @@ import { Dolly } from "@normalized:N&&&entry/src/main/ets/view/device/Dolly&";
 import { RobotArm1 } from "@normalized:N&&&entry/src/main/ets/view/device/RobotArm1&";
 import { RobotArm2 } from "@normalized:N&&&entry/src/main/ets/view/device/RobotArm2&";
 import { RobotArm3 } from "@normalized:N&&&entry/src/main/ets/view/device/RobotArm3&";
+import type { Server, Node, Data } from '../model/ServerState';
+import { getNodeOther, getNodeStart } from "@normalized:N&&&entry/src/main/ets/service/Request&";
 export class DeviceManager extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -54,9 +62,26 @@ export class DeviceManager extends ViewPU {
         this.normalColor = '#E6FFFFFF';
         this.selectedColor = '#FFFFFF';
         this.__pressedTabIndex = new ObservedPropertySimplePU(-1, this, "pressedTabIndex");
-        this.swiperController = new SwiperController();
         this.onIndexChange = () => { };
+        this.__servers = new SynchedPropertyObjectOneWayPU(params.servers, this, "servers");
+        this.__hasLoaded = new ObservedPropertySimplePU(false
+        //传送带1
+        , this, "hasLoaded");
+        this.__data1 = new ObservedPropertyObjectPU({ id: '', node_id: '' }
+        //传送带2
+        , this, "data1");
+        this.__data2 = new ObservedPropertyObjectPU({ id: '', node_id: '' }
+        //机械臂1
+        , this, "data2");
+        this.__data3 = new ObservedPropertyObjectPU({ id: '', node_id: '' }
+        //机械臂2
+        , this, "data3");
+        this.__data4 = new ObservedPropertyObjectPU({ id: '', node_id: '' }
+        //机械臂3
+        , this, "data4");
+        this.__data5 = new ObservedPropertyObjectPU({ id: '', node_id: '' }, this, "data5");
         this.setInitiallyProvidedValue(params);
+        this.declareWatch("servers", this.onServersChange);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params: DeviceManager_Params) {
@@ -81,14 +106,33 @@ export class DeviceManager extends ViewPU {
         if (params.pressedTabIndex !== undefined) {
             this.pressedTabIndex = params.pressedTabIndex;
         }
-        if (params.swiperController !== undefined) {
-            this.swiperController = params.swiperController;
-        }
         if (params.onIndexChange !== undefined) {
             this.onIndexChange = params.onIndexChange;
         }
+        if (params.servers === undefined) {
+            this.__servers.set([]);
+        }
+        if (params.hasLoaded !== undefined) {
+            this.hasLoaded = params.hasLoaded;
+        }
+        if (params.data1 !== undefined) {
+            this.data1 = params.data1;
+        }
+        if (params.data2 !== undefined) {
+            this.data2 = params.data2;
+        }
+        if (params.data3 !== undefined) {
+            this.data3 = params.data3;
+        }
+        if (params.data4 !== undefined) {
+            this.data4 = params.data4;
+        }
+        if (params.data5 !== undefined) {
+            this.data5 = params.data5;
+        }
     }
     updateStateVars(params: DeviceManager_Params) {
+        this.__servers.reset(params.servers);
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
         this.__currentIndex.purgeDependencyOnElmtId(rmElmtId);
@@ -102,6 +146,13 @@ export class DeviceManager extends ViewPU {
         this.__dollyAvatar.purgeDependencyOnElmtId(rmElmtId);
         this.__robotArmAvatar.purgeDependencyOnElmtId(rmElmtId);
         this.__pressedTabIndex.purgeDependencyOnElmtId(rmElmtId);
+        this.__servers.purgeDependencyOnElmtId(rmElmtId);
+        this.__hasLoaded.purgeDependencyOnElmtId(rmElmtId);
+        this.__data1.purgeDependencyOnElmtId(rmElmtId);
+        this.__data2.purgeDependencyOnElmtId(rmElmtId);
+        this.__data3.purgeDependencyOnElmtId(rmElmtId);
+        this.__data4.purgeDependencyOnElmtId(rmElmtId);
+        this.__data5.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
         this.__currentIndex.aboutToBeDeleted();
@@ -115,6 +166,13 @@ export class DeviceManager extends ViewPU {
         this.__dollyAvatar.aboutToBeDeleted();
         this.__robotArmAvatar.aboutToBeDeleted();
         this.__pressedTabIndex.aboutToBeDeleted();
+        this.__servers.aboutToBeDeleted();
+        this.__hasLoaded.aboutToBeDeleted();
+        this.__data1.aboutToBeDeleted();
+        this.__data2.aboutToBeDeleted();
+        this.__data3.aboutToBeDeleted();
+        this.__data4.aboutToBeDeleted();
+        this.__data5.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -194,7 +252,6 @@ export class DeviceManager extends ViewPU {
     private selectedFontSize: number;
     private normalColor: string;
     private selectedColor: string;
-    //用于记录当前被按下的Tab索引，-1代表没有Tab被按下
     private __pressedTabIndex: ObservedPropertySimplePU<number>;
     get pressedTabIndex() {
         return this.__pressedTabIndex.get();
@@ -202,192 +259,150 @@ export class DeviceManager extends ViewPU {
     set pressedTabIndex(newValue: number) {
         this.__pressedTabIndex.set(newValue);
     }
-    private swiperController: SwiperController;
     private onIndexChange: (index: number) => void;
-    deviceContent(index: number, parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Column.create();
-        }, Column);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            If.create();
-            if (index === 0) {
-                this.ifElseBranchUpdateFunction(0, () => {
-                    {
-                        this.observeComponentCreation2((elmtId, isInitialRender) => {
-                            if (isInitialRender) {
-                                let componentCall = new Dolly(this, {
-                                    data: this.__dollyData,
-                                    addLog: this.addLog,
-                                    avatar: this.__dollyAvatar
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 45, col: 9 });
-                                ViewPU.create(componentCall);
-                                let paramsLambda = () => {
-                                    return {
-                                        data: this.dollyData,
-                                        addLog: this.addLog,
-                                        avatar: this.dollyAvatar
-                                    };
-                                };
-                                componentCall.paramsGenerator_ = paramsLambda;
-                            }
-                            else {
-                                this.updateStateVarsOfChildByElmtId(elmtId, {});
-                            }
-                        }, { name: "Dolly" });
-                    }
-                });
-            }
-            else if (index === 1) {
-                this.ifElseBranchUpdateFunction(1, () => {
-                    {
-                        this.observeComponentCreation2((elmtId, isInitialRender) => {
-                            if (isInitialRender) {
-                                let componentCall = new Conveyor1(this, {
-                                    data: this.__conveyorData1,
-                                    addLog: this.addLog,
-                                    avatar: this.__conveyorAvatar,
-                                    isActive: index === this.currentIndex
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 51, col: 9 });
-                                ViewPU.create(componentCall);
-                                let paramsLambda = () => {
-                                    return {
-                                        data: this.conveyorData1,
-                                        addLog: this.addLog,
-                                        avatar: this.conveyorAvatar,
-                                        isActive: index === this.currentIndex
-                                    };
-                                };
-                                componentCall.paramsGenerator_ = paramsLambda;
-                            }
-                            else {
-                                this.updateStateVarsOfChildByElmtId(elmtId, {
-                                    isActive: index === this.currentIndex
-                                });
-                            }
-                        }, { name: "Conveyor1" });
-                    }
-                });
-            }
-            else if (index === 2) {
-                this.ifElseBranchUpdateFunction(2, () => {
-                    {
-                        this.observeComponentCreation2((elmtId, isInitialRender) => {
-                            if (isInitialRender) {
-                                let componentCall = new Conveyor2(this, {
-                                    data: this.__conveyorData2,
-                                    addLog: this.addLog,
-                                    avatar: this.__conveyorAvatar,
-                                    isActive: index === this.currentIndex
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 58, col: 9 });
-                                ViewPU.create(componentCall);
-                                let paramsLambda = () => {
-                                    return {
-                                        data: this.conveyorData2,
-                                        addLog: this.addLog,
-                                        avatar: this.conveyorAvatar,
-                                        isActive: index === this.currentIndex
-                                    };
-                                };
-                                componentCall.paramsGenerator_ = paramsLambda;
-                            }
-                            else {
-                                this.updateStateVarsOfChildByElmtId(elmtId, {
-                                    isActive: index === this.currentIndex
-                                });
-                            }
-                        }, { name: "Conveyor2" });
-                    }
-                });
-            }
-            else if (index === 3) {
-                this.ifElseBranchUpdateFunction(3, () => {
-                    {
-                        this.observeComponentCreation2((elmtId, isInitialRender) => {
-                            if (isInitialRender) {
-                                let componentCall = new RobotArm1(this, {
-                                    data: this.__robot1Data,
-                                    addLog: this.addLog,
-                                    avatar: this.__robotArmAvatar
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 65, col: 9 });
-                                ViewPU.create(componentCall);
-                                let paramsLambda = () => {
-                                    return {
-                                        data: this.robot1Data,
-                                        addLog: this.addLog,
-                                        avatar: this.robotArmAvatar
-                                    };
-                                };
-                                componentCall.paramsGenerator_ = paramsLambda;
-                            }
-                            else {
-                                this.updateStateVarsOfChildByElmtId(elmtId, {});
-                            }
-                        }, { name: "RobotArm1" });
-                    }
-                });
-            }
-            else if (index === 4) {
-                this.ifElseBranchUpdateFunction(4, () => {
-                    {
-                        this.observeComponentCreation2((elmtId, isInitialRender) => {
-                            if (isInitialRender) {
-                                let componentCall = new RobotArm2(this, {
-                                    data: this.__robot2Data,
-                                    addLog: this.addLog,
-                                    avatar: this.__robotArmAvatar
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 71, col: 9 });
-                                ViewPU.create(componentCall);
-                                let paramsLambda = () => {
-                                    return {
-                                        data: this.robot2Data,
-                                        addLog: this.addLog,
-                                        avatar: this.robotArmAvatar
-                                    };
-                                };
-                                componentCall.paramsGenerator_ = paramsLambda;
-                            }
-                            else {
-                                this.updateStateVarsOfChildByElmtId(elmtId, {});
-                            }
-                        }, { name: "RobotArm2" });
-                    }
-                });
-            }
-            else if (index === 5) {
-                this.ifElseBranchUpdateFunction(5, () => {
-                    {
-                        this.observeComponentCreation2((elmtId, isInitialRender) => {
-                            if (isInitialRender) {
-                                let componentCall = new RobotArm3(this, {
-                                    data: this.__robot3Data,
-                                    addLog: this.addLog,
-                                    avatar: this.__robotArmAvatar
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 77, col: 9 });
-                                ViewPU.create(componentCall);
-                                let paramsLambda = () => {
-                                    return {
-                                        data: this.robot3Data,
-                                        addLog: this.addLog,
-                                        avatar: this.robotArmAvatar
-                                    };
-                                };
-                                componentCall.paramsGenerator_ = paramsLambda;
-                            }
-                            else {
-                                this.updateStateVarsOfChildByElmtId(elmtId, {});
-                            }
-                        }, { name: "RobotArm3" });
-                    }
-                });
-            }
-            else {
-                this.ifElseBranchUpdateFunction(6, () => {
-                });
-            }
-        }, If);
-        If.pop();
-        Column.pop();
+    private __servers: SynchedPropertySimpleOneWayPU<Server[] | null>;
+    get servers() {
+        return this.__servers.get();
     }
+    set servers(newValue: Server[] | null) {
+        this.__servers.set(newValue);
+    }
+    private __hasLoaded: ObservedPropertySimplePU<boolean>;
+    get hasLoaded() {
+        return this.__hasLoaded.get();
+    }
+    set hasLoaded(newValue: boolean) {
+        this.__hasLoaded.set(newValue);
+    }
+    //传送带1
+    private __data1: ObservedPropertyObjectPU<Data>;
+    get data1() {
+        return this.__data1.get();
+    }
+    set data1(newValue: Data) {
+        this.__data1.set(newValue);
+    }
+    //传送带2
+    private __data2: ObservedPropertyObjectPU<Data>;
+    get data2() {
+        return this.__data2.get();
+    }
+    set data2(newValue: Data) {
+        this.__data2.set(newValue);
+    }
+    //机械臂1
+    private __data3: ObservedPropertyObjectPU<Data>;
+    get data3() {
+        return this.__data3.get();
+    }
+    set data3(newValue: Data) {
+        this.__data3.set(newValue);
+    }
+    //机械臂2
+    private __data4: ObservedPropertyObjectPU<Data>;
+    get data4() {
+        return this.__data4.get();
+    }
+    set data4(newValue: Data) {
+        this.__data4.set(newValue);
+    }
+    //机械臂3
+    private __data5: ObservedPropertyObjectPU<Data>;
+    get data5() {
+        return this.__data5.get();
+    }
+    set data5(newValue: Data) {
+        this.__data5.set(newValue);
+    }
+    async onServersChange(): Promise<void> {
+        if (this.servers && this.servers.length > 0 && !this.hasLoaded) {
+            this.servers.forEach(async (item: Server) => {
+                if (item.id === 'server2') {
+                    const nodes1: Node[] | null = await getNodeStart(item.id);
+                    if (nodes1 && nodes1.length > 0) {
+                        const nodes2: Node[] | null = await getNodeOther(item.id, nodes1[3].node_id);
+                        if (nodes2 && nodes2.length > 0) {
+                            this.data1 = {
+                                id: item.id,
+                                node_id: nodes2[3].node_id
+                            };
+                        }
+                    }
+                }
+                else if (item.id === 'server5') {
+                    const nodes1: Node[] | null = await getNodeStart(item.id);
+                    if (nodes1 && nodes1.length > 0) {
+                        const nodes2: Node[] | null = await getNodeOther(item.id, nodes1[3].node_id);
+                        if (nodes2 && nodes2.length > 0) {
+                            this.data2 = {
+                                id: item.id,
+                                node_id: nodes2[3].node_id
+                            };
+                        }
+                    }
+                }
+            });
+        }
+        this.hasLoaded = true;
+    }
+    aboutToAppear(): void {
+        this.onServersChange();
+    }
+    handleTabChange(targetIndex: number) {
+        let canSwitch = true;
+        let alertMessage = '';
+        switch (targetIndex) {
+            case 1:
+                if (!this.data1.id || !this.data1.node_id) {
+                    canSwitch = false;
+                    alertMessage = '没有一号传送带对应的服务可使用';
+                }
+                break;
+            case 2:
+                if (!this.data2.id || !this.data2.node_id) {
+                    canSwitch = false;
+                    alertMessage = '没有二号传送带对应的服务可使用';
+                }
+                break;
+            case 3:
+                if (!this.data3.id || !this.data3.node_id) {
+                    canSwitch = false;
+                    alertMessage = '没有一号机械臂对应的服务可使用';
+                }
+                break;
+            case 4:
+                if (!this.data4.id || !this.data4.node_id) {
+                    canSwitch = false;
+                    alertMessage = '没有二号机械臂对应的服务可使用';
+                }
+                break;
+            case 5:
+                if (!this.data5.id || !this.data5.node_id) {
+                    canSwitch = false;
+                    alertMessage = '没有三号机械臂对应的服务可使用';
+                }
+                break;
+        }
+        if (canSwitch) {
+            this.currentIndex = targetIndex;
+            this.onIndexChange(targetIndex);
+        }
+        else {
+            AlertDialog.show({
+                title: '操作提示',
+                message: alertMessage,
+                alignment: DialogAlignment.Center,
+                autoCancel: true,
+                buttons: [
+                    {
+                        value: '确定',
+                        action: () => { }
+                    }
+                ]
+            });
+        }
+    }
+    // @Builder deviceContent 已被移除
     tabBuilder(title: string, targetIndex: number, parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
@@ -401,13 +416,10 @@ export class DeviceManager extends ViewPU {
             Column.opacity(this.pressedTabIndex === targetIndex ? 0.6 : 1.0);
             Context.animation(null);
             Column.onTouch((event: TouchEvent) => {
-                // 监听触摸事件
                 if (event.type === TouchType.Down) {
-                    // 手指按下时，记录当前项的索引
                     this.pressedTabIndex = targetIndex;
                 }
                 if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-                    // 手指抬起或触摸取消时，重置状态
                     this.pressedTabIndex = -1;
                 }
             });
@@ -447,17 +459,7 @@ export class DeviceManager extends ViewPU {
             Tabs.create({ index: this.currentIndex });
             Tabs.barMode(BarMode.Scrollable);
             Tabs.onChange((index: number) => {
-                if (index === this.currentIndex + 1) {
-                    this.swiperController.showNext();
-                }
-                else if (index === this.currentIndex - 1) {
-                    this.swiperController.showPrevious();
-                }
-                else {
-                    this.swiperController.changeIndex(index, true);
-                }
-                this.currentIndex = index;
-                this.onIndexChange(index);
+                this.handleTabChange(index);
             });
             Tabs.barHeight(56);
             Tabs.width('100%');
@@ -480,37 +482,212 @@ export class DeviceManager extends ViewPU {
         Tabs.pop();
         Row.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Swiper.create(this.swiperController);
+            // 内容区域：直接使用 if/else if 结构，不再通过 @Builder 调用
+            Column.create();
             Context.animation({ duration: 300, curve: Curve.Ease });
-            Swiper.index(this.currentIndex);
-            Swiper.onChange((index: number) => {
-                this.currentIndex = index;
-                this.onIndexChange(index);
-            });
-            Swiper.loop(false);
-            Swiper.indicator(false);
-            Swiper.itemSpace(0);
-            Swiper.width('100%');
-            Swiper.layoutWeight(1);
+            // 内容区域：直接使用 if/else if 结构，不再通过 @Builder 调用
+            Column.width('100%');
+            // 内容区域：直接使用 if/else if 结构，不再通过 @Builder 调用
+            Column.height('100%');
+            // 内容区域：直接使用 if/else if 结构，不再通过 @Builder 调用
+            Column.justifyContent(FlexAlign.Center);
+            // 内容区域：直接使用 if/else if 结构，不再通过 @Builder 调用
+            Column.layoutWeight(1);
             Context.animation(null);
-        }, Swiper);
+        }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            ForEach.create();
-            const forEachItemGenFunction = (_item, index: number) => {
-                const item = _item;
-                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                    Column.create();
-                    Column.width('100%');
-                    Column.height('100%');
-                    Column.justifyContent(FlexAlign.Center);
-                }, Column);
-                this.deviceContent.bind(this)(index);
-                Column.pop();
-            };
-            this.forEachUpdateFunction(elmtId, this.tabArray, forEachItemGenFunction, (item: string) => item, true, false);
-        }, ForEach);
-        ForEach.pop();
-        Swiper.pop();
+            If.create();
+            if (this.currentIndex === 0) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new Dolly(this, {
+                                    data: this.__dollyData,
+                                    addLog: this.addLog,
+                                    avatar: this.__dollyAvatar
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 206, col: 11 });
+                                ViewPU.create(componentCall);
+                                let paramsLambda = () => {
+                                    return {
+                                        data: this.dollyData,
+                                        addLog: this.addLog,
+                                        avatar: this.dollyAvatar
+                                    };
+                                };
+                                componentCall.paramsGenerator_ = paramsLambda;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                            }
+                        }, { name: "Dolly" });
+                    }
+                });
+            }
+            else if (this.currentIndex === 1) {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new Conveyor1(this, {
+                                    data: this.__conveyorData1,
+                                    addLog: this.addLog,
+                                    avatar: this.__conveyorAvatar,
+                                    // 因为只有在 currentIndex === 1 时才会渲染，所以 isActive 恒为 true
+                                    isActive: true,
+                                    node: this.data1
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 212, col: 11 });
+                                ViewPU.create(componentCall);
+                                let paramsLambda = () => {
+                                    return {
+                                        data: this.conveyorData1,
+                                        addLog: this.addLog,
+                                        avatar: this.conveyorAvatar,
+                                        // 因为只有在 currentIndex === 1 时才会渲染，所以 isActive 恒为 true
+                                        isActive: true,
+                                        node: this.data1
+                                    };
+                                };
+                                componentCall.paramsGenerator_ = paramsLambda;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                    // 因为只有在 currentIndex === 1 时才会渲染，所以 isActive 恒为 true
+                                    isActive: true,
+                                    node: this.data1
+                                });
+                            }
+                        }, { name: "Conveyor1" });
+                    }
+                });
+            }
+            else if (this.currentIndex === 2) {
+                this.ifElseBranchUpdateFunction(2, () => {
+                    {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new Conveyor2(this, {
+                                    data: this.__conveyorData2,
+                                    addLog: this.addLog,
+                                    avatar: this.__conveyorAvatar,
+                                    // 因为只有在 currentIndex === 2 时才会渲染，所以 isActive 恒为 true
+                                    isActive: true,
+                                    node: this.data2
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 221, col: 11 });
+                                ViewPU.create(componentCall);
+                                let paramsLambda = () => {
+                                    return {
+                                        data: this.conveyorData2,
+                                        addLog: this.addLog,
+                                        avatar: this.conveyorAvatar,
+                                        // 因为只有在 currentIndex === 2 时才会渲染，所以 isActive 恒为 true
+                                        isActive: true,
+                                        node: this.data2
+                                    };
+                                };
+                                componentCall.paramsGenerator_ = paramsLambda;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                    // 因为只有在 currentIndex === 2 时才会渲染，所以 isActive 恒为 true
+                                    isActive: true,
+                                    node: this.data2
+                                });
+                            }
+                        }, { name: "Conveyor2" });
+                    }
+                });
+            }
+            else if (this.currentIndex === 3) {
+                this.ifElseBranchUpdateFunction(3, () => {
+                    {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new RobotArm1(this, {
+                                    data: this.__robot1Data,
+                                    addLog: this.addLog,
+                                    avatar: this.__robotArmAvatar
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 230, col: 11 });
+                                ViewPU.create(componentCall);
+                                let paramsLambda = () => {
+                                    return {
+                                        data: this.robot1Data,
+                                        addLog: this.addLog,
+                                        avatar: this.robotArmAvatar
+                                    };
+                                };
+                                componentCall.paramsGenerator_ = paramsLambda;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                            }
+                        }, { name: "RobotArm1" });
+                    }
+                });
+            }
+            else if (this.currentIndex === 4) {
+                this.ifElseBranchUpdateFunction(4, () => {
+                    {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new RobotArm2(this, {
+                                    data: this.__robot2Data,
+                                    addLog: this.addLog,
+                                    avatar: this.__robotArmAvatar
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 236, col: 11 });
+                                ViewPU.create(componentCall);
+                                let paramsLambda = () => {
+                                    return {
+                                        data: this.robot2Data,
+                                        addLog: this.addLog,
+                                        avatar: this.robotArmAvatar
+                                    };
+                                };
+                                componentCall.paramsGenerator_ = paramsLambda;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                            }
+                        }, { name: "RobotArm2" });
+                    }
+                });
+            }
+            else if (this.currentIndex === 5) {
+                this.ifElseBranchUpdateFunction(5, () => {
+                    {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new RobotArm3(this, {
+                                    data: this.__robot3Data,
+                                    addLog: this.addLog,
+                                    avatar: this.__robotArmAvatar
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 242, col: 11 });
+                                ViewPU.create(componentCall);
+                                let paramsLambda = () => {
+                                    return {
+                                        data: this.robot3Data,
+                                        addLog: this.addLog,
+                                        avatar: this.robotArmAvatar
+                                    };
+                                };
+                                componentCall.paramsGenerator_ = paramsLambda;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                            }
+                        }, { name: "RobotArm3" });
+                    }
+                });
+            }
+            else // 合并了原有的两层Column的全部修饰符，以保证布局不变
+             {
+                this.ifElseBranchUpdateFunction(6, () => {
+                });
+            }
+        }, If);
+        If.pop();
+        // 内容区域：直接使用 if/else if 结构，不再通过 @Builder 调用
+        Column.pop();
         Column.pop();
     }
     rerender() {

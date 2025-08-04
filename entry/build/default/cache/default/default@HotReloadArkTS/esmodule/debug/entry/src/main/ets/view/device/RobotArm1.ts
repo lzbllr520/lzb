@@ -1346,7 +1346,7 @@ export class RobotArm1 extends ViewPU {
                                 let componentCall = new RoboticArmWorkRangeView(this, {
                                     data: this.__data,
                                     onActivate: this.activateArm.bind(this)
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 765, col: 17 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 766, col: 17 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -2086,7 +2086,7 @@ export class RobotArm1 extends ViewPU {
                                 this.data.isInfoCardVisible = !this.data.isInfoCardVisible;
                             });
                         }
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 1263, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 1264, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {

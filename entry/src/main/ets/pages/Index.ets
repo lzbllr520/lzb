@@ -51,7 +51,22 @@ struct MainPage {
           }
         ]
       });
-    } else {
+    } else if (index===1&&this.servers?.length===0) {
+      AlertDialog.show({
+        title: '操作提示',
+        message: '没有可用服务对象，无法对设备进行操作管理',
+        alignment: DialogAlignment.Center,
+        autoCancel: true,
+        buttons: [
+          {
+            value: '确定',
+            action: () => {
+              //无需做任何操作
+            }
+          }
+        ]
+      });
+    }else {
       this.currentPage = index;
     }
   }
@@ -391,7 +406,8 @@ struct MainPage {
               robotArmAvatar:this.robotArmAvatar,
               onIndexChange: (index: number) => {
                 this.deviceManagerIndex = index;
-              }
+              },
+              servers:this.servers
             })
           } else if (this.currentPage === 2) {
             TaskLog({

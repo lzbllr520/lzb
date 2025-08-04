@@ -76,7 +76,7 @@ struct RFIDReadCard {
     { title: '数据块内容', value: 'null', unit: '' },
     { title: '读取次数', value: 'null', unit: '次' },
     { title: '最后读取时间', value: 'null', unit: '' }
-  ];
+  ]
 
   @State bgOpacity: number = 0;
 
@@ -96,14 +96,11 @@ struct RFIDReadCard {
     if (!this.sensorNodeId1||!this.sensorNodeId2||!this.sensorNodeId3) {
       const nodes1: Node[] | null = await getNodeOther(this.routeParams.id, this.routeParams.node_id);
       if (nodes1 && nodes1.length > 0) {
-        const nodes2: Node[] | null = await getNodeOther(this.routeParams.id, nodes1[1].node_id);
-        if (nodes2&&nodes2.length>0) {
-          this.sensorNodeId1=nodes2[1].node_id
-          this.sensorNodeId2=nodes2[2].node_id
-          this.sensorNodeId3=nodes2[3].node_id
-          this.sensorNodeId4=nodes2[4].node_id
-          this.sensorNodeId5=nodes2[5].node_id
-        }
+          this.sensorNodeId1=nodes1[1].node_id
+          this.sensorNodeId2=nodes1[2].node_id
+          this.sensorNodeId3=nodes1[3].node_id
+          this.sensorNodeId4=nodes1[4].node_id
+          this.sensorNodeId5=nodes1[5].node_id
       } else {
         return;
       }
@@ -209,12 +206,25 @@ struct RFIDReadCard {
           Grid() {
             // 3. 遍历数据数组，为每个数据对象创建一个卡片
             ForEach(this.sensorData, (item: CardData) => {
-              GridItem() { // 每个卡片都是一个GridItem
-                ValueCard({
-                  title: item.title,
-                  value: item.value,
-                  unit: item.unit
-                })
+              if (item.title === '卡片UID' || item.title === '数据块内容') {
+                // 如果是，则设置起始和结束列，使其横跨4列 (0, 1, 2, 3)
+                GridItem() {
+                  ValueCard({
+                    title: item.title,
+                    value: item.value,
+                    unit: item.unit
+                  })
+                }
+                .columnStart(0)
+                .columnEnd(3)
+              } else {
+                GridItem() {
+                  ValueCard({
+                    title: item.title,
+                    value: item.value,
+                    unit: item.unit
+                  })
+                }
               }
             }, (item: CardData) => JSON.stringify(item)) // 使用唯一key提高性能
           }

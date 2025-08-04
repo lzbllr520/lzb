@@ -1,6 +1,11 @@
 
 import { McGaugeChart, Options } from '@mcui/mccharts'
 import { ConveyorState } from '../../model/ConveyorState'
+import { Server, Node,Data } from '../../model/ServerState';
+import { promptAction } from '@kit.ArkUI';
+import { getNodeOther,setConveyorSpeed,openConveyor,closeConveyor,setConveyorDirection,setConveyorStop,
+  getConveyorSpeed } from '../../service/Request';
+import { AxiosResponse } from '@ohos/axios';
 
 @Component
 export struct Conveyor2 {
@@ -11,7 +16,130 @@ export struct Conveyor2 {
 
   @State private lastKnownSpeed: number = 0;
 
-  @Link avatar:Resource;
+  @Link avatar:Resource
+
+  private readonly MAX_SPEED: number = 3000;
+  private readonly START_SPEED: number = 800;
+  private readonly MIN_ADJUSTABLE_SPEED: number = 800;
+
+  private rawSpeedToPercentage(rawSpeed: number): number {
+    if (rawSpeed <= 0) return 0;
+    return Math.round((rawSpeed / this.MAX_SPEED) * 100);
+  }
+
+  private percentageToRawSpeed(percentage: number): number {
+    const rawSpeed = (percentage / 100) * this.MAX_SPEED;
+    return Math.round(rawSpeed);
+  }
+
+
+  @Prop @Watch('onNodeChange') node:Data={id:'',node_id:''}
+
+  @State private hasLoaded: boolean = false
+
+  @State private getSpeedNode:string=''
+
+  @State private setSpeedNode:string=''
+
+  @State private openNode:string=''
+
+  @State private  setCloseModelNode:string=''
+
+  @State private  closeNode:string=''
+
+  @State private setDirectionNode:string=''
+
+  //获取传送带速度
+  async getSpeed(): Promise<void>{
+    if (this.node.id&&this.node.node_id&&this.getSpeedNode){
+      const res:AxiosResponse|null=await getConveyorSpeed(this.node.id,this.getSpeedNode)
+      if (!res) {
+        promptAction.showToast({message:'首次获取传送带速度失败'})
+      }else if (res.data.code!==0){
+        promptAction.showToast({message:'首次获取传送带速度失败'})
+      }else {
+        if (res.data.data.value>0) {
+          this.data.statusText='运行中'
+          this.data.speedValue=this.rawSpeedToPercentage(res.data.data.value)
+        }
+      }
+    }else {
+      promptAction.showToast({message:'首次获取传送带速度失败'})
+    }
+  }
+
+  //设置传送带速度
+  async setSpeed(action:number): Promise<boolean>{
+    if (this.node.id&&this.node.node_id&&this.setSpeedNode){
+      const res:AxiosResponse|null=await setConveyorSpeed(this.node.id,this.setSpeedNode,action+'')
+      return res?.data.code===0//为0的话就是设置成功
+    }else {
+      return false
+    }
+  }
+
+  //启动传送带
+  async open(): Promise<boolean>{
+    if (this.node.id&&this.node.node_id&&this.openNode){
+      const res:AxiosResponse|null=await openConveyor(this.node.id,this.openNode)
+      return res?.data.code===0
+    }else {
+      return false
+    }
+  }
+
+  //设置关闭模式
+  async setCloseModel(action:number): Promise<boolean>{
+    if (this.node.id&&this.node.node_id&&this.setCloseModelNode){
+      const res:AxiosResponse|null=await setConveyorStop(this.node.id,this.setCloseModelNode,action+'')
+      return res?.data.code===0
+    }else {
+      return false
+    }
+  }
+
+  //关闭传送带
+  async close(): Promise<boolean>{
+    if (this.node.id&&this.node.node_id&&this.closeNode){
+      const res:AxiosResponse|null=await closeConveyor(this.node.id,this.closeNode)
+      return res?.data.code===0
+    }else {
+      return false
+    }
+  }
+
+  //设置运动方向
+  async setDirection(action:number): Promise<boolean>{
+    if (this.node.id&&this.node.node_id&&this.setDirectionNode){
+      const res:AxiosResponse|null=await setConveyorDirection(this.node.id,this.setDirectionNode,action+'')
+      return res?.data.code===0
+    }else {
+      return false
+    }
+  }
+
+  async onNodeChange(): Promise<void>{
+    if (this.node.id&&this.node.node_id&& !this.hasLoaded) {
+      const nodes1:Node[]|null=await getNodeOther(this.node.id,this.node.node_id)
+      if (nodes1&&nodes1.length>0) {
+        //先获取传送带控制结点的node_id
+        const nodes3:Node[]|null=await getNodeOther(this.node.id,nodes1[2].node_id)
+        if (nodes3&&nodes3.length>0) {
+          this.openNode=nodes3[1].node_id
+          this.closeNode=nodes3[2].node_id
+          this.setSpeedNode=nodes3[3].node_id
+          this.setDirectionNode=nodes3[4].node_id
+          this.setCloseModelNode=nodes3[5].node_id
+        }
+        //再获取传送带的速度结点的node_id
+        const nodes4:Node[]|null=await getNodeOther(this.node.id,nodes1[1].node_id)
+        if (nodes4&&nodes4.length>0) {
+          this.getSpeedNode=nodes4[1].node_id
+        }
+      }
+    }
+    this.hasLoaded=true
+  }
 
   private showSystemToast(message: string) {
     try {
@@ -114,14 +242,14 @@ export struct Conveyor2 {
 
   private commitSpeedInput() {
     let num = parseInt(this.speedInputText, 10);
+    // 计算800对应的百分比下限
+    const minPercentage = this.rawSpeedToPercentage(this.MIN_ADJUSTABLE_SPEED);
 
     if (isNaN(num)) {
-      // 如果输入的内容不是有效数字（比如被清空了），则恢复显示为上一次的有效值
       this.syncInputText();
     } else {
-      // 如果是有效数字，则更新主速度值（并限制在0-100）
-      // @Watch 会自动处理后续的图表和文本框同步
-      this.data.speedValue = Math.min(100, Math.max(0, num));
+      // 修改：限制速度范围在 minPercentage 到 100 之间
+      this.data.speedValue = Math.min(100, Math.max(minPercentage, num));
     }
   }
 
@@ -140,7 +268,10 @@ export struct Conveyor2 {
 
   // 减少速度的辅助方法
   private decreaseSpeed() {
-    if (this.data.speedValue > 0) {
+    // 计算800对应的百分比下限
+    const minPercentage = this.rawSpeedToPercentage(this.MIN_ADJUSTABLE_SPEED);
+    // 只有当速度高于下限时，才允许减少
+    if (this.data.speedValue > minPercentage) {
       this.data.speedValue--;
     } else {
       // 如果已达最小值，清除定时器
@@ -171,8 +302,10 @@ export struct Conveyor2 {
     })
   }
 
-  // aboutToAppear是页面即将显示时的生命周期回调
-  aboutToAppear() {
+  async aboutToAppear() {
+    //加上await的原因是等onNodeChange中的请求执行完毕再执行getSpeed中的请求
+    await this.onNodeChange()
+    await this.getSpeed()
     this.lastKnownSpeed = this.data.speedValue;
     this.speedInputText = this.data.speedValue.toFixed(0);
     this.initChartOptions();
@@ -250,13 +383,17 @@ export struct Conveyor2 {
     })
   }
 
-  onDataChange() {
+  async onDataChange() {
     if (this.data.speedValue !== this.lastKnownSpeed) {
-      console.info(`Speed changed from ${this.lastKnownSpeed} to ${this.data.speedValue}`);
 
       // 只有速度真的变了，才执行核心逻辑
       this.updateChart();
       this.syncInputText();
+
+      if (this.data.statusText === '运行中' && this.data.speedValue > 0) {
+        const rawSpeed = this.percentageToRawSpeed(this.data.speedValue);
+        await this.setSpeed(rawSpeed)
+      }
 
       //执行完逻辑后，千万不要忘记更新 "lastKnownSpeed" 的值！
       this.lastKnownSpeed = this.data.speedValue;
@@ -448,7 +585,6 @@ export struct Conveyor2 {
               }
               if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                 this.isPressed = false;
-
                 //判断当前状态，准备不同的对话框信息
                 const isCurrentlyRunning = this.data.statusText === '运行中';
                 const message = isCurrentlyRunning ? '您确定要停止二号传送带吗？' : '您确定要启动二号传送带吗？';
@@ -469,17 +605,28 @@ export struct Conveyor2 {
                     {
                       value: '确认',
                       fontColor: Color.Red, // 将确认按钮设为红色以示警示
-                      action: () => {
+                      action: async () => {
                         if (isCurrentlyRunning) {
-                          this.data.statusText = '离线中';
-                          this.data.speedValue = 0;
-                          this.showSystemToast('关闭成功')
-                          this.addLog('warning', '关闭了二号传送带，停止了对二号传送带的操作。',true)
+                          const isClose:boolean=await this.close()
+                          if (isClose) {
+                            this.data.speedValue=0
+                            this.data.statusText='离线中'
+                            this.showSystemToast('关闭成功')
+                            this.addLog('warning', '关闭了二号传送带，停止了对二号传送带的操作。',true)
+                          }else {
+                            this.showSystemToast('关闭失败')
+                          }
                         } else {
-                          this.data.statusText = '运行中';
-                          this.data.speedValue = 10;
-                          this.showSystemToast('启动成功')
-                          this.addLog('info', '启动了二号传送带，要对二号传送带进行操作。',true)
+                          const isRun1:boolean=await this.setSpeed(this.START_SPEED)
+                          const isRun2:boolean=await this.open()
+                          if (isRun1&&isRun2) {
+                            this.data.speedValue = this.rawSpeedToPercentage(this.START_SPEED)
+                            this.data.statusText='运行中'
+                            this.showSystemToast('启动成功')
+                            this.addLog('info', '启动了二号传送带，要对二号传送带进行操作。',true)
+                          }else {
+                            this.showSystemToast('启动失败')
+                          }
                         }
                       }
                     }
@@ -546,8 +693,14 @@ export struct Conveyor2 {
               .optionWidth(90)
               .menuBackgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
               .menuBackgroundColor(Color.Transparent)
-              .onSelect((event) => {
+              .onSelect(async (event) => {
                 const newDirection = event.valueOf() === 0 ? '正向运行' : '反向运行';
+                const isSet:boolean= await this.setDirection(event.valueOf())
+                if (isSet){
+                  this.showSystemToast('设置运行方向成功')
+                }else {
+                  this.showSystemToast('设置运行方向失败')
+                }
                 if (this.data.direction !== newDirection) {
                   this.data.direction = newDirection;
                 }
@@ -558,14 +711,14 @@ export struct Conveyor2 {
               .height(50)
               .backgroundColor('rgba(255, 255, 255, 0.2)')
               .borderRadius(25)
-              .fontColor(Color.White) // 设置选中项的字体颜色
+              .fontColor(Color.White)
               .border({
                 width: 1.5,
                 color: 'rgba(255, 255, 255, 0.3)'
               })
               // 同样，只有在运行时才启用，并有透明度变化
-              .enabled(this.data.statusText === '运行中')
-              .opacity(this.data.statusText === '运行中' ? 1.0 : 0.4)
+              .enabled(this.data.statusText === '离线中')
+              .opacity(this.data.statusText === '离线中' ? 1.0 : 0.4)
               .animation({ duration: 250, curve: Curve.EaseInOut })
 
             Select([
@@ -575,8 +728,14 @@ export struct Conveyor2 {
               .optionWidth(180)
               .menuBackgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
               .menuBackgroundColor(Color.Transparent)
-              .onSelect((event) => {
+              .onSelect(async (event) => {
                 const newStopMethod = event.valueOf() === 0 ? '正常停止' : '急停';
+                const isSet:boolean= await this.setCloseModel(event.valueOf())
+                if (isSet){
+                  this.showSystemToast('设置停止模式成功')
+                }else {
+                  this.showSystemToast('设置停止模式失败')
+                }
                 if (this.data.stopMethod !== newStopMethod) {
                   this.data.stopMethod = newStopMethod
                 }
@@ -596,8 +755,6 @@ export struct Conveyor2 {
               .enabled(this.data.statusText === '运行中')
               .opacity(this.data.statusText === '运行中' ? 1.0 : 0.4)
               .animation({ duration: 250, curve: Curve.EaseInOut })
-
-
           }
           .width('100%')
           .justifyContent(FlexAlign.SpaceAround)

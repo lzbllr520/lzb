@@ -3,8 +3,6 @@
 export struct IconTab {
   // 接收父组件传入的图标资源
   @Prop private icon: Resource;
-  // 接收父组件传入的是否为“当前选中”的状态
-  @Prop private isSelected: boolean;
 
   // 组件内部状态，用于追踪是否被按下
   @State private isPressed: boolean = false;
@@ -15,13 +13,17 @@ export struct IconTab {
       Image(this.icon)
         .width(28)
         .height(28)
-        .fillColor(this.isSelected ? Color.White : 'rgba(255, 255, 255, 0.6)')
+        .fillColor('rgba(255, 255, 255, 0.6)')
     }
     .width('100%')
     .height('100%')
+    .stateStyles({
+      // 当被父组件标记为 selected 时，应用高亮背景
+      selected: {
+        .backgroundColor('rgba(255, 255, 255, 0.3)')
+      }
+    })
     .justifyContent(FlexAlign.Center)
-    // 背景色：选中时有高亮效果
-    .backgroundColor(this.isSelected ? 'rgba(255, 255, 255, 0.15)' : Color.Transparent)
     .borderRadius(12)
     // 动画效果：当背景色、缩放、颜色等属性变化时，平滑过渡
     .animation({ duration: 200, curve: Curve.EaseInOut })

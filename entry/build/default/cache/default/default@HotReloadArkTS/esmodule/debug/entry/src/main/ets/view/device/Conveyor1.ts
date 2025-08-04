@@ -6,6 +6,13 @@ interface Conveyor1_Params {
     data?: ConveyorState;
     lastKnownSpeed?: number;
     avatar?: Resource;
+    node?: Data;
+    hasLoaded?: boolean;
+    setSpeedNode?: string;
+    openNode?: string;
+    setCloseModelNode?: string;
+    closeNode?: string;
+    setDirectionNode?: string;
     isPressed?: boolean;
     isHover?: boolean;
     isChartVisible?: boolean;
@@ -17,6 +24,9 @@ interface Conveyor1_Params {
 }
 import { McGaugeChart, Options } from "@normalized:N&&&@mcui/mccharts/index&2.8.9";
 import type { ConveyorState } from '../../model/ConveyorState';
+import type { Node, Data } from '../../model/ServerState';
+import { getNodeOther, setConveyor1Speed, openConveyor1, closeConveyor1 } from "@normalized:N&&&entry/src/main/ets/service/Request&";
+import type { AxiosResponse } from '@ohos/axios';
 export class Conveyor1 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -27,6 +37,15 @@ export class Conveyor1 extends ViewPU {
         this.__data = new SynchedPropertyObjectTwoWayPU(params.data, this, "data");
         this.__lastKnownSpeed = new ObservedPropertySimplePU(0, this, "lastKnownSpeed");
         this.__avatar = new SynchedPropertyObjectTwoWayPU(params.avatar, this, "avatar");
+        this.__node = new SynchedPropertyObjectOneWayPU(params.node, this, "node");
+        this.__hasLoaded = new ObservedPropertySimplePU(false, this, "hasLoaded");
+        this.__setSpeedNode = new ObservedPropertySimplePU('', this, "setSpeedNode");
+        this.__openNode = new ObservedPropertySimplePU('', this, "openNode");
+        this.__setCloseModelNode = new ObservedPropertySimplePU('', this, "setCloseModelNode");
+        this.__closeNode = new ObservedPropertySimplePU('', this, "closeNode");
+        this.__setDirectionNode = new ObservedPropertySimplePU(''
+        //设置传送带速度
+        , this, "setDirectionNode");
         this.__isPressed = new ObservedPropertySimplePU(false, this, "isPressed");
         this.__isHover = new ObservedPropertySimplePU(false, this, "isHover");
         this.__isChartVisible = new ObservedPropertySimplePU(false, this, "isChartVisible");
@@ -39,6 +58,7 @@ export class Conveyor1 extends ViewPU {
         this.__isPreviewVisible = new ObservedPropertySimplePU(false, this, "isPreviewVisible");
         this.setInitiallyProvidedValue(params);
         this.declareWatch("data", this.onDataChange);
+        this.declareWatch("node", this.onNodeChange);
         this.declareWatch("isActive", this.onActiveChange);
         this.finalizeConstruction();
     }
@@ -48,6 +68,27 @@ export class Conveyor1 extends ViewPU {
         }
         if (params.lastKnownSpeed !== undefined) {
             this.lastKnownSpeed = params.lastKnownSpeed;
+        }
+        if (params.node === undefined) {
+            this.__node.set({ id: '', node_id: '' });
+        }
+        if (params.hasLoaded !== undefined) {
+            this.hasLoaded = params.hasLoaded;
+        }
+        if (params.setSpeedNode !== undefined) {
+            this.setSpeedNode = params.setSpeedNode;
+        }
+        if (params.openNode !== undefined) {
+            this.openNode = params.openNode;
+        }
+        if (params.setCloseModelNode !== undefined) {
+            this.setCloseModelNode = params.setCloseModelNode;
+        }
+        if (params.closeNode !== undefined) {
+            this.closeNode = params.closeNode;
+        }
+        if (params.setDirectionNode !== undefined) {
+            this.setDirectionNode = params.setDirectionNode;
         }
         if (params.isPressed !== undefined) {
             this.isPressed = params.isPressed;
@@ -75,12 +116,20 @@ export class Conveyor1 extends ViewPU {
         }
     }
     updateStateVars(params: Conveyor1_Params) {
+        this.__node.reset(params.node);
         this.__isActive.reset(params.isActive);
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
         this.__data.purgeDependencyOnElmtId(rmElmtId);
         this.__lastKnownSpeed.purgeDependencyOnElmtId(rmElmtId);
         this.__avatar.purgeDependencyOnElmtId(rmElmtId);
+        this.__node.purgeDependencyOnElmtId(rmElmtId);
+        this.__hasLoaded.purgeDependencyOnElmtId(rmElmtId);
+        this.__setSpeedNode.purgeDependencyOnElmtId(rmElmtId);
+        this.__openNode.purgeDependencyOnElmtId(rmElmtId);
+        this.__setCloseModelNode.purgeDependencyOnElmtId(rmElmtId);
+        this.__closeNode.purgeDependencyOnElmtId(rmElmtId);
+        this.__setDirectionNode.purgeDependencyOnElmtId(rmElmtId);
         this.__isPressed.purgeDependencyOnElmtId(rmElmtId);
         this.__isHover.purgeDependencyOnElmtId(rmElmtId);
         this.__isChartVisible.purgeDependencyOnElmtId(rmElmtId);
@@ -94,6 +143,13 @@ export class Conveyor1 extends ViewPU {
         this.__data.aboutToBeDeleted();
         this.__lastKnownSpeed.aboutToBeDeleted();
         this.__avatar.aboutToBeDeleted();
+        this.__node.aboutToBeDeleted();
+        this.__hasLoaded.aboutToBeDeleted();
+        this.__setSpeedNode.aboutToBeDeleted();
+        this.__openNode.aboutToBeDeleted();
+        this.__setCloseModelNode.aboutToBeDeleted();
+        this.__closeNode.aboutToBeDeleted();
+        this.__setDirectionNode.aboutToBeDeleted();
         this.__isPressed.aboutToBeDeleted();
         this.__isHover.aboutToBeDeleted();
         this.__isChartVisible.aboutToBeDeleted();
@@ -126,6 +182,108 @@ export class Conveyor1 extends ViewPU {
     }
     set avatar(newValue: Resource) {
         this.__avatar.set(newValue);
+    }
+    private __node: SynchedPropertySimpleOneWayPU<Data>;
+    get node() {
+        return this.__node.get();
+    }
+    set node(newValue: Data) {
+        this.__node.set(newValue);
+    }
+    private __hasLoaded: ObservedPropertySimplePU<boolean>;
+    get hasLoaded() {
+        return this.__hasLoaded.get();
+    }
+    set hasLoaded(newValue: boolean) {
+        this.__hasLoaded.set(newValue);
+    }
+    private __setSpeedNode: ObservedPropertySimplePU<string>;
+    get setSpeedNode() {
+        return this.__setSpeedNode.get();
+    }
+    set setSpeedNode(newValue: string) {
+        this.__setSpeedNode.set(newValue);
+    }
+    private __openNode: ObservedPropertySimplePU<string>;
+    get openNode() {
+        return this.__openNode.get();
+    }
+    set openNode(newValue: string) {
+        this.__openNode.set(newValue);
+    }
+    private __setCloseModelNode: ObservedPropertySimplePU<string>;
+    get setCloseModelNode() {
+        return this.__setCloseModelNode.get();
+    }
+    set setCloseModelNode(newValue: string) {
+        this.__setCloseModelNode.set(newValue);
+    }
+    private __closeNode: ObservedPropertySimplePU<string>;
+    get closeNode() {
+        return this.__closeNode.get();
+    }
+    set closeNode(newValue: string) {
+        this.__closeNode.set(newValue);
+    }
+    private __setDirectionNode: ObservedPropertySimplePU<string>;
+    get setDirectionNode() {
+        return this.__setDirectionNode.get();
+    }
+    set setDirectionNode(newValue: string) {
+        this.__setDirectionNode.set(newValue);
+    }
+    //设置传送带速度
+    async setSpeed(action: number): Promise<boolean> {
+        if (this.node.id && this.node.node_id && this.setSpeedNode) {
+            const res: AxiosResponse | null = await setConveyor1Speed(this.node.id, this.setSpeedNode, action + '');
+            return res?.data.code === 0; //为0的话就是设置成功
+        }
+        else {
+            return false;
+        }
+    }
+    //启动传送带
+    async open(): Promise<boolean> {
+        if (this.node.id && this.node.node_id && this.openNode) {
+            const res: AxiosResponse | null = await openConveyor1(this.node.id, this.openNode);
+            return res?.data.code === 0;
+        }
+        else {
+            return false;
+        }
+    }
+    //设置关闭模式
+    async setCloseModel(): Promise<void> {
+    }
+    //关闭传送带
+    async close(): Promise<boolean> {
+        if (this.node.id && this.node.node_id && this.closeNode) {
+            const res: AxiosResponse | null = await closeConveyor1(this.node.id, this.closeNode);
+            return res?.data.code === 0;
+        }
+        else {
+            return false;
+        }
+    }
+    //设置运动方向
+    async setDirection(): Promise<void> {
+    }
+    async onNodeChange(): Promise<void> {
+        if (this.node.id && this.node.node_id && !this.hasLoaded) {
+            const nodes1: Node[] | null = await getNodeOther(this.node.id, this.node.node_id);
+            if (nodes1 && nodes1.length > 0) {
+                //获取传送带控制结点的node_id
+                const nodes3: Node[] | null = await getNodeOther(this.node.id, nodes1[2].node_id);
+                if (nodes3 && nodes3.length > 0) {
+                    this.openNode = nodes3[1].node_id;
+                    this.closeNode = nodes3[2].node_id;
+                    this.setSpeedNode = nodes3[3].node_id;
+                    this.setDirectionNode = nodes3[4].node_id;
+                    this.setCloseModelNode = nodes3[5].node_id;
+                }
+            }
+        }
+        this.hasLoaded = true;
     }
     private showSystemToast(message: string) {
         try {
@@ -314,8 +472,8 @@ export class Conveyor1 extends ViewPU {
             ]
         });
     }
-    // aboutToAppear是页面即将显示时的生命周期回调
     aboutToAppear() {
+        this.onNodeChange();
         this.lastKnownSpeed = this.data.speedValue;
         this.speedInputText = this.data.speedValue.toFixed(0);
         this.initChartOptions();
@@ -715,18 +873,31 @@ export class Conveyor1 extends ViewPU {
                             {
                                 value: '确认',
                                 fontColor: Color.Red,
-                                action: () => {
+                                action: async () => {
                                     if (isCurrentlyRunning) {
-                                        this.data.statusText = '离线中';
-                                        this.data.speedValue = 0;
-                                        this.showSystemToast('关闭成功');
-                                        this.addLog('warning', '关闭了一号传送带，停止了对一号传送带的操作。', true);
+                                        //this.data.statusText = '离线中';
+                                        //this.data.speedValue = 0;
+                                        const isClose: boolean = await this.close();
+                                        if (isClose) {
+                                            this.showSystemToast('关闭成功');
+                                            this.addLog('warning', '关闭了一号传送带，停止了对一号传送带的操作。', true);
+                                        }
+                                        else {
+                                            this.showSystemToast('关闭失败');
+                                        }
                                     }
                                     else {
-                                        this.data.statusText = '运行中';
-                                        this.data.speedValue = 10;
-                                        this.showSystemToast('启动成功');
-                                        this.addLog('info', '启动了一号传送带，要对一号传送带进行操作。', true);
+                                        const isRun1: boolean = await this.setSpeed(3000);
+                                        const isRun2: boolean = await this.open();
+                                        //this.data.statusText = '运行中';
+                                        //this.data.speedValue = 10;
+                                        if (isRun1 && isRun2) {
+                                            this.showSystemToast('启动成功');
+                                            this.addLog('info', '启动了一号传送带，要对一号传送带进行操作。', true);
+                                        }
+                                        else {
+                                            this.showSystemToast('启动失败');
+                                        }
                                     }
                                 }
                             }
@@ -829,7 +1000,7 @@ export class Conveyor1 extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new McGaugeChart(this, { options: this.chartOptions }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Conveyor1.ets", line: 523, col: 13 });
+                                let componentCall = new McGaugeChart(this, { options: this.chartOptions }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Conveyor1.ets", line: 609, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {

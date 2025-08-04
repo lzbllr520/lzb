@@ -18,10 +18,9 @@ export struct MasterStation {
   addLog: (level: 'info' | 'warning' | 'error', message: string,shouldSave:boolean) => void = () => {};
 
   @Builder
-  private CustomIconTabBar(icon: Resource, isSelected: boolean) {
+  private CustomIconTabBar(icon: Resource) {
     IconTab({
-      icon: icon,
-      isSelected: isSelected
+      icon: icon
     })
   }
 
@@ -145,7 +144,7 @@ export struct MasterStation {
       } else {
         Tabs({
           controller: this.controller,
-          barPosition: BarPosition.End
+          barPosition: BarPosition.Start
         }) {
           ForEach(
             this.servers,
@@ -153,11 +152,12 @@ export struct MasterStation {
               TabContent() {
                 ServerInfoView({ server: server })
               }
-              .tabBar(this.CustomIconTabBar($r('app.media.server'), this.currentIndex === index))
+              .tabBar(this.CustomIconTabBar($r('app.media.server')))
             },
             (server: Server) => server.id
           )
         }
+        .scrollable(false)
         .vertical(true)
         .barMode(BarMode.Fixed)
         .barWidth(60)

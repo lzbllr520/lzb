@@ -1,6 +1,7 @@
 import { RobotArmState } from '../../model/RobotArmState'
-import { RoboticArmWorkRangeView } from '../../components/RoboticArmWorkRangeView';
-import { promptAction, PromptAction } from '@kit.ArkUI';
+import { RoboticArmWorkRangeView } from '../../components/RoboticArmWorkRangeView'
+import { Server,Node } from '../../model/ServerState';
+
 @Component
 export struct RobotArm1 {
 

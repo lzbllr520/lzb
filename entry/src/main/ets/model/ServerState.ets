@@ -14,3 +14,8 @@ export interface Node{
   has_children:boolean,
   browsable:boolean
 }
+
+export interface Data{
+  id:string,
+  node_id:string
+}
