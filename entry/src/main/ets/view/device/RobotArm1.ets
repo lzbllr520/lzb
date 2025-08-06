@@ -1,6 +1,18 @@
 import { RobotArmState } from '../../model/RobotArmState'
 import { RoboticArmWorkRangeView } from '../../components/RoboticArmWorkRangeView'
-import { Server,Node } from '../../model/ServerState';
+import { Server, Node,Data } from '../../model/ServerState'
+import {
+  clearEndAble,
+  clearRobotArmAlarms,
+  endControl,
+  getEndStatus,
+  getNodeOther, getRobotArmAlarms,
+  getRobotArmNowPosition,
+  getRobotArmTime, getRobotArmUid,
+  setEndAble,
+  setRobotArmMove,
+  setStop,
+  setToStart} from '../../service/Request';
 
 @Component
 export struct RobotArm1 {
@@ -27,9 +39,271 @@ export struct RobotArm1 {
   @State con_width2:string='95%'
   @State con_height2:number=40
 
+  //序列号
+  @State sn:string='DT1420071876'
+  //固定版本
+  @State version:string='3.7.0'
+  //系统时钟
+  @State time:number=0
+  //设备uid
+  @State uid:string=''
+  //设备警报
+  @State alarms:number=0
+  @State node_id_alarms:string=''
+  private alarmTimer: number = -1
+  //使能
+  @State endAbled:boolean=false
+  @State node_id_endAbled:string=''
+  //清除警报
+  @State node_id_clearAlarms:string=''
+  //末端执行
+  @State node_id_end:string=''
+  //设置回零
+  @State node_id_toStart:string=''
+  //设置急停
+  @State node_id_stop:string=''
+  //获取当前位姿
+  @State node_id_nowPosition:string=''
+  //机械臂移动
+  @State node_id_move:string=''
+  //是否抓取
+  @State isCatch:boolean=false
+
+  @Prop @Watch('onNodeChange') node:Data={id:'',node_id:''}
+
+  async onNodeChange(): Promise<void>{
+    if (this.node.id&&this.node.node_id){
+      //先找到机械臂下的所有结点
+      const nodes:Node[]|null=await getNodeOther(this.node.id,this.node.node_id)
+      if (nodes&&nodes.length>0) {
+        //获取设备信息
+        const infoNodes:Node[]|null=await getNodeOther(this.node.id,nodes[1].node_id)
+        if (infoNodes&&infoNodes.length>0) {
+          //获取系统时钟
+          const time:number|null=await getRobotArmTime(this.node.id,infoNodes[4].node_id)
+          if (time) {
+            this.time=time
+          }else {
+            this.showSystemToast('获取系统时间失败')
+          }
+          //获取uid
+          const uid:string|null=await getRobotArmUid(this.node.id,infoNodes[5].node_id)
+          if (uid) {
+            this.uid=uid
+          }else {
+            this.showSystemToast('获取uid失败')
+          }
+        }
+        //获取警报node_id
+        const alarmsNodes:Node[]|null=await getNodeOther(this.node.id,nodes[2].node_id)
+        if (alarmsNodes&&alarmsNodes.length>0) {
+          //获取是否存在警报和警报信息
+          this.node_id_alarms=alarmsNodes[1].node_id
+          //获取清除警报node_id
+          this.node_id_clearAlarms=alarmsNodes[4].node_id
+        }
+        //获取末端执行node_id
+        const endNodes1:Node[]|null=await getNodeOther(this.node.id,nodes[5].node_id)
+        if (endNodes1&&endNodes1.length>0) {
+          const endNodes2:Node[]|null=await getNodeOther(this.node.id,endNodes1[3].node_id)
+          if (endNodes2&&endNodes2.length>0) {
+            this.node_id_end=endNodes2[3].node_id
+            this.node_id_endAbled=endNodes2[4].node_id
+          }
+        }
+        //获取执行回零node_id
+        const toStartNode:Node[]|null=await getNodeOther(this.node.id,nodes[4].node_id)
+        if (toStartNode&&toStartNode.length>0) {
+          this.node_id_toStart=toStartNode[2].node_id
+        }
+        //获取当前位姿和急停node_id
+        const control:Node[]|null=await getNodeOther(this.node.id,nodes[6].node_id)
+        if (control&&control.length>0) {
+          //获取机械臂急停node_id
+          this.node_id_stop=control[2].node_id
+          //机械臂移动控制node_id
+          this.node_id_move=control[3].node_id
+          //获取当前位姿
+          this.node_id_nowPosition=control[1].node_id
+          const nowPositions:number[]|null=await getRobotArmNowPosition(this.node.id,control[1].node_id)
+          if (nowPositions&&nowPositions.length>0) {
+            //获取当前位姿成功，然后进行回显
+            this.data.xValue = parseFloat(nowPositions[0].toFixed(2));
+            this.data.yValue = parseFloat(nowPositions[1].toFixed(2));
+            this.data.zValue = parseFloat(nowPositions[2].toFixed(2));
+            this.data.rValue = parseFloat(nowPositions[3].toFixed(2));
+          }
+        }
+      }
+    }
+  }
+
+  //获取警报
+  async getAlarms(): Promise<void>{
+    if (this.node.id&&this.node.node_id&&this.node_id_alarms) {
+      const num:number|null=await getRobotArmAlarms(this.node.id,this.node_id_alarms)
+      if (num!==null) {
+        this.alarms=num
+      }
+    }
+  }
+
+  //清除警报
+  async clearAlarms():Promise<void>{
+    if (this.node.id&&this.node.node_id&&this.node_id_clearAlarms) {
+      const isClear:boolean|null=await clearRobotArmAlarms(this.node.id,this.node_id_clearAlarms)
+      if (isClear) {
+        this.showSystemToast('清除警报成功')
+      }else {
+        this.showSystemToast('清除警报失败')
+      }
+    }
+  }
+
+  //获取机械臂使能状态
+  async getEndStatus():Promise<void>{
+    if (this.node.id&&this.node.node_id&&this.node_id_endAbled){
+      const endStatus:boolean[]|null=await getEndStatus(this.node.id,this.node_id_endAbled)
+      if (endStatus&&endStatus.length>0) {
+        if (endStatus[0]===true&&endStatus[1]===false) {
+          //有使能(还未抓取)
+          this.endAbled=true
+          this.isCatch=false
+        }else if (endStatus[0]===false&&endStatus[1]===false) {
+          //无使能（无法抓取）
+          this.endAbled=false
+          this.isCatch=false
+        }else if (endStatus[0]===true&&endStatus[1]===true){
+          //有使能（已抓取）
+          this.endAbled=true
+          this.isCatch=true
+        }
+      }
+    }
+  }
+
+  //赋予末端使能
+  async setEndAble():Promise<void>{
+    if (this.node.id&&this.node.node_id&&this.node_id_end){
+      const isSet:boolean|null=await setEndAble(this.node.id,this.node_id_end,"true false")
+      if (isSet) {
+        this.showSystemToast('赋予末端使能成功')
+      }else {
+        this.showSystemToast('赋予末端使能失败')
+      }
+    }
+  }
+
+  //清除末端使能
+  async clearEndAble():Promise<void>{
+    if (this.node.id&&this.node.node_id&&this.node_id_end){
+      const isSet:boolean|null=await clearEndAble(this.node.id,this.node_id_end,"false false")
+      if (isSet) {
+        this.showSystemToast('清除末端使能成功')
+      }else {
+        this.showSystemToast('清除末端使能失败')
+      }
+    }
+  }
+
+  //控制机械臂末端
+  async setEndControl(action:string):Promise<boolean>{
+    if (this.node.id&&this.node.node_id&&this.node_id_end){
+      const isSet:boolean|null=await endControl(this.node.id,this.node_id_end,action)
+      if (isSet) {
+        return isSet
+      }else {
+        return false
+      }
+    }else {
+      return false
+    }
+  }
+
+  //设置回零
+  async setToStart():Promise<void>{
+    if (this.node.id&&this.node.node_id&&this.node_id_toStart) {
+      const isSet:boolean|null=await setToStart(this.node.id,this.node_id_toStart)
+      if (isSet) {
+        this.showSystemToast('设置回零成功')
+      }else {
+        this.showSystemToast('设置回零失败')
+      }
+    }
+  }
+
+  //设置急停
+  async setStop():Promise<void>{
+    if (this.node.id&&this.node.node_id&&this.node_id_stop) {
+      const isSet:boolean|null=await setStop(this.node.id,this.node_id_stop)
+      if (isSet) {
+        this.showSystemToast('急停成功')
+      }else {
+        this.showSystemToast('急停失败')
+      }
+    }
+  }
+
+  //获取当前位姿
+  async getNowPosition():Promise<void>{
+    if (this.node.id&&this.node.node_id&&this.node_id_nowPosition){
+      const nowPositions:number[]|null=await getRobotArmNowPosition(this.node.id,this.node_id_nowPosition)
+      if (nowPositions&&nowPositions.length>0) {
+        //获取当前位姿成功，然后进行回显
+        this.data.xValue = parseFloat(nowPositions[0].toFixed(2));
+        this.data.yValue = parseFloat(nowPositions[1].toFixed(2));
+        this.data.zValue = parseFloat(nowPositions[2].toFixed(2));
+        this.data.rValue = parseFloat(nowPositions[3].toFixed(2));
+      }
+    }
+  }
+
+  //机械臂移动
+  async setMove(x:string,y:string,z:string,r:string):Promise<boolean>{
+    if (this.node.id&&this.node.node_id&&this.node_id_move){
+      const isSet:boolean|null=await setRobotArmMove(this.node.id,this.node_id_move,`${x} ${y} ${z} ${r}`)
+      if (isSet) {
+        return isSet
+      }else {
+        return false
+      }
+    }else {
+      return false
+    }
+  }
+
+  async aboutToAppear(): Promise<void> {
+    await this.onNodeChange()
+    if (this.alarmTimer === -1) {
+      await this.getAlarms()
+      await this.getEndStatus()
+      this.alarmTimer = setInterval(async () => {
+        await this.getAlarms()
+        await this.getEndStatus()
+      }, 1000)
+    }
+  }
+
+  aboutToDisappear() {
+    // 清理 setTimeout 创建的定时器
+    if (this.idleTimer !== -1) clearTimeout(this.idleTimer)
+    if (this.alarmTimer !== -1) {
+      clearInterval(this.alarmTimer)
+      this.alarmTimer = -1
+    }
+  }
+
+  private getStatusColor(status:boolean): Color {
+    if (status) {
+      return Color.Red
+    }else {
+      return Color.Green
+    }
+  }
 
   private increaseSpeedX() {
     this.data.xValue+=this.data.step_xyz
+    this.setMove(this.data.xValue+'',this.data.yValue+'',this.data.zValue+'',this.data.rValue+'')
   }
   private decreaseSpeedX() {
     this.data.xValue-=this.data.step_xyz
@@ -84,18 +358,11 @@ export struct RobotArm1 {
   //用于追踪鼠标悬浮状态
   @State isHover: boolean = false;
 
-  private getStatusColor(): Color {
-    switch (this.data.statusText) {
-      case '运行中':
-        return Color.Orange;
-      case '离线中':
-        return Color.Gray;
-      case '空闲中':
-        return Color.Green;
-      default:
-        return Color.Gray;
-    }
-  }
+  // 用于控制按钮按压动画的状态
+  @State isPressed1: boolean = false;
+
+  //用于追踪鼠标悬浮状态
+  @State isHover1: boolean = false;
 
   private getShadowOptions(): ShadowOptions {
     if (this.isHover && !this.isPressed) {
@@ -138,31 +405,20 @@ export struct RobotArm1 {
 
   @State private idleTimer: number = -1;
 
-  onDisappear() {
-    // 清理 setTimeout 创建的定时器
-    if (this.idleTimer !== -1) clearTimeout(this.idleTimer);
-  }
-
-  private activateArm() {
-    if (this.data.statusText === '空闲中') {
-      this.data.statusText = '运行中';
-    }
-  }
-
-  private resetIdleTimer() {
-    if (this.idleTimer !== -1) {
-      clearTimeout(this.idleTimer);
-    }
-    if (this.data.statusText === '运行中') {
-      this.idleTimer = setTimeout(() => {
-        if (this.data.statusText === '运行中') {
-          this.data.statusText = '空闲中';
-        }
-      }, 10000);
-    }
-  }
 
   @State isPreviewVisible: boolean = false;
+
+  private formattedTime(time:number): string {
+    if (!time || time <= 0) {
+      return 'N/A';
+    }
+    const date = new Date(time * 1000);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    // 拼接成 "HH:mm:ss" 格式
+    return `${hours}:${minutes}:${seconds}`;
+  }
 
   @Builder
   private buildImagePreview() {
@@ -215,12 +471,39 @@ export struct RobotArm1 {
               .justifyContent(FlexAlign.Center)
 
               //信息展示
-              Column({space:20}){
+              Column({space:12}){
+                //机械臂uid
+                Row(){
+                  Text('UID：')
+                    .fontWeight(FontWeight.Bold)
+                    .fontSize(17)
+                    .fontColor(Color.White)
+                  Text(this.uid)
+                    .fontColor(Color.White)
+                    .fontSize(12)
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.Center)
+                .alignItems(VerticalAlign.Center)
+
+                //机械臂序列号
+                Row(){
+                  Text('序列号：')
+                    .fontWeight(FontWeight.Bold)
+                    .fontSize(17)
+                    .fontColor(Color.White)
+                  Text(this.sn)
+                    .fontColor(Color.White)
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.Center)
+                .alignItems(VerticalAlign.Center)
+
                 //机械臂名称
                 Row(){
                   Text('名称：')
                     .fontWeight(FontWeight.Bold)
-                    .fontSize(20)
+                    .fontSize(17)
                     .fontColor(Color.White)
                   Text('机械臂001')
                     .fontColor(Color.White)
@@ -229,166 +512,148 @@ export struct RobotArm1 {
                 .justifyContent(FlexAlign.Center)
                 .alignItems(VerticalAlign.Center)
 
-                //机械臂状态
+                //机械臂固定版本
                 Row(){
-                  Text('运作状态：')
+                  Text('固定版本：')
+                    .fontWeight(FontWeight.Bold)
+                    .fontSize(17)
+                    .fontColor(Color.White)
+                  Text(this.version)
+                    .fontColor(Color.White)
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.Center)
+                .alignItems(VerticalAlign.Center)
+
+                //机械臂系统时间
+                Row(){
+                  Text('系统时间：')
+                    .fontWeight(FontWeight.Bold)
+                    .fontSize(17)
+                    .fontColor(Color.White)
+                  Text(this.formattedTime(this.time))
+                    .fontColor(Color.White)
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.Center)
+                .alignItems(VerticalAlign.Center)
+
+                //机械臂使能
+                Row(){
+                  Text('使能状态：')
                     .fontWeight(FontWeight.Bold)
                     .fontSize(20)
                     .fontColor(Color.White)
-                  Text(this.data.statusText)
+                  Text(this.endAbled?'有使能':'无使能')
                     .fontColor(Color.White)
                   Circle()
                     .margin({left:10})
                     .width(16)
                     .height(16)
-                    .fill(this.getStatusColor())
+                    .fill(this.getStatusColor(!this.endAbled))
                 }
                 .width('100%')
                 .justifyContent(FlexAlign.Center)
                 .alignItems(VerticalAlign.Center)
 
-                //末端状态
+                //机械臂警报
                 Row(){
-                  Text('末端状态：')
+                  Text('警报原因：')
                     .fontWeight(FontWeight.Bold)
                     .fontSize(20)
                     .fontColor(Color.White)
-                  Text(this.data.endStatusText)
+                  Text(this.alarms===0?'无报警':this.alarms+'')
                     .fontColor(Color.White)
+                  Circle()
+                    .margin({left:10})
+                    .width(16)
+                    .height(16)
+                    .fill(this.getStatusColor(this.alarms!==0))
                 }
                 .width('100%')
                 .justifyContent(FlexAlign.Center)
                 .alignItems(VerticalAlign.Center)
 
-                //负载状态
                 Row(){
-                  Text('负载：')
-                    .fontWeight(FontWeight.Bold)
-                    .fontSize(20)
-                    .fontColor(Color.White)
-                  Text(this.data.loadText)
-                    .fontColor(Color.White)
-                  if (this.data.loadText==='有物品'){
-                    Image($r('app.media.close_box'))
-                      .width(20)
-                      .height(20)
-                      .margin({left:10})
-                  }else {
-                    Image($r('app.media.open_box'))
-                      .width(20)
-                      .height(20)
-                      .margin({left:10})
+                  //赋予和清除使能按钮
+                  Row() {
+                    Text(this.endAbled?'清除使能':'赋予使能').fontSize(15).fontWeight(FontWeight.Bold).fontColor(Color.White).margin({ left: 8 })
                   }
+                  .height(40)
+                  .padding(8)
+                  .justifyContent(FlexAlign.Center)
+                  .alignItems(VerticalAlign.Center)
+                  .backgroundColor(this.endAbled? 'rgba(255, 0, 0, 0.75)' :'rgba(0, 200, 83, 0.5)')
+                  .borderRadius(20)
+                  .border({
+                    width: 1,
+                    color: 'rgba(255, 255, 255, 0.3)'
+                  })
+                  .margin({ top: 20 })
+                  //使用辅助方法来动态设置阴影
+                  .shadow(this.getShadowOptions())
+                  //使用辅助方法来动态设置缩放
+                  .scale({
+                    x: this.getScaleValue(),
+                    y: this.getScaleValue()
+                  })
+                  //透明度只响应点击，不响应悬浮
+                  .opacity(this.isPressed1 ? 0.8 : 1.0)
+                  //添加 onHover 事件来更新 isHover 状态
+                  .onHover((isHover: boolean) => {
+                    this.isHover1 = isHover;
+                  })
+                  //onTouch 事件保持不变
+                  .onTouch((event: TouchEvent) => {
+                    event.stopPropagation()
+                    if (event.type === TouchType.Down) {
+                      this.isPressed1 = true
+                    }
+                    if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+                      this.isPressed1 = false
+                      if (this.endAbled) {
+                        //清除使能
+                        this.clearEndAble()
+                      }else {
+                        //赋予使能
+                        this.setEndAble()
+                      }
+                    }
+                  })
+                  //动画曲线作用于所有变化的属性（scale, shadow, opacity）
+                  .animation({ duration: 150, curve: Curve.EaseOut })
+
+                  //清除警报按钮
+                  Button('清除警报')
+                  .fontSize(15)
+                  .fontWeight(FontWeight.Bold)
+                  .fontColor(Color.White)
+                  .enabled(this.alarms!==0)
+                  .height(40)
+                  .padding(8)
+                  .backgroundColor(this.alarms===0?'rgba(173, 170, 170, 0.40)' :'rgba(0, 200, 83, 0.5)')
+                  .borderRadius(20)
+                  .border({
+                    width: 1,
+                    color: 'rgba(255, 255, 255, 0.3)'
+                  })
+                  .margin({ top: 20 })
+                  //使用辅助方法来动态设置阴影
+                  .shadow(this.getShadowOptions())
+                  //使用辅助方法来动态设置缩放
+                  .scale({
+                    x: this.getScaleValue(),
+                    y: this.getScaleValue()
+                  })
+                    .onClick(()=>{
+                      this.clearAlarms()
+                    })
+                  //动画曲线作用于所有变化的属性（scale, shadow, opacity）
+                  .animation({ duration: 150, curve: Curve.EaseOut })
                 }
                 .width('100%')
-                .justifyContent(FlexAlign.Center)
+                .justifyContent(FlexAlign.SpaceAround)
                 .alignItems(VerticalAlign.Center)
-
-                //控制按钮
-                Row() {
-                  if (this.data.statusText === '运行中'||this.data.statusText==='空闲中') {
-                    Image($r('app.media.stop'))
-                      .width(22).height(22).fillColor(Color.White)
-                    Text('停止').fontSize(18).fontWeight(FontWeight.Bold).fontColor(Color.White).margin({ left: 8 })
-                  } else {
-                    Image($r('app.media.start'))
-                      .width(24).height(24).fillColor(Color.White)
-                    Text('启动').fontSize(18).fontWeight(FontWeight.Bold).fontColor(Color.White).margin({ left: 8 })
-                  }
-                }
-                .width('80%')
-                .height(50)
-                .padding(10)
-                .justifyContent(FlexAlign.Center)
-                .alignItems(VerticalAlign.Center)
-                .backgroundColor(this.data.statusText === '运行中'||this.data.statusText==='空闲中' ? 'rgba(255, 80, 80, 0.4)' : 'rgba(0, 200, 83, 0.5)')
-                .borderRadius(25)
-                .border({
-                  width: 1,
-                  color: 'rgba(255, 255, 255, 0.3)'
-                })
-                .margin({ top: 20 })
-
-                //使用辅助方法来动态设置阴影
-                .shadow(this.getShadowOptions())
-
-                //使用辅助方法来动态设置缩放
-                .scale({
-                  x: this.getScaleValue(),
-                  y: this.getScaleValue()
-                })
-
-                //透明度只响应点击，不响应悬浮
-                .opacity(this.isPressed ? 0.8 : 1.0)
-
-                //添加 onHover 事件来更新 isHover 状态
-                .onHover((isHover: boolean) => {
-                  this.isHover = isHover;
-                })
-
-                //onTouch 事件保持不变
-                .onTouch((event: TouchEvent) => {
-
-                  event.stopPropagation()
-
-                  if (event.type === TouchType.Down) {
-                    this.isPressed = true;
-                  }
-                  if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-                    this.isPressed = false;
-
-                    //判断当前状态，准备不同的对话框信息
-                    const isCurrentlyRunning = this.data.statusText === '运行中'||this.data.statusText==='空闲中';
-                    const message = isCurrentlyRunning ? '您确定要关闭一号机械臂吗？' : '您确定要启动一号机械臂吗？';
-
-                    AlertDialog.show({
-                      title: '操作确认',
-                      message: message,
-                      autoCancel: true, // 点击对话框外部可取消
-                      alignment: DialogAlignment.Center,
-                      buttons: [
-                        {
-                          value: '取消',
-                          action: () => {
-                            // 用户点击取消，不做任何事
-                            console.info('操作已取消');
-                          }
-                        },
-                        {
-                          value: '确认',
-                          fontColor: Color.Red, // 将确认按钮设为红色以示警示
-                          action: () => {
-                            if (isCurrentlyRunning) {
-                              //创建一个新的、干净的 RobotArmState 实例
-                              const newData = new RobotArmState();
-                              //将这个全新的、准备好的对象赋值给 this.data
-                              //因为原来的RobotArmState对象初始值就是关闭的状态
-                              this.data = newData;
-                              this.showSystemToast('关闭成功')
-
-                              //关闭时清除定时器
-                              if (this.idleTimer !== -1) {
-                                clearTimeout(this.idleTimer);
-                                this.idleTimer = -1;
-                              }
-
-                              this.addLog('warning', '关闭了一号传送带，停止了对一号传送带的操作。',true)
-
-                            } else {
-                              this.data.statusText = '空闲中';
-                              this.showSystemToast('启动成功')
-                              this.addLog('info', '启动了一号传送带，要对一号传送带进行操作。',true)
-                            }
-                          }
-                        }
-                      ]
-                    });
-                  }
-                })
-
-                //动画曲线作用于所有变化的属性（scale, shadow, opacity）
-                .animation({ duration: 150, curve: Curve.EaseOut })
-
               }
               .width('100%')
               .height('70%')
@@ -437,9 +702,7 @@ export struct RobotArm1 {
                   .height(this.button_size2)
                   .backgroundColor(Color.Transparent) // 背景改为透明
                   .onClick(()=>{
-                    this.activateArm()
                     this.decreaseSpeedJump();
-                    this.resetIdleTimer()
                   })
 
                   Text('H-')
@@ -474,9 +737,7 @@ export struct RobotArm1 {
                   .height(this.button_size2)
                   .backgroundColor(Color.Transparent)
                   .onClick(()=>{
-                    this.activateArm()
                     this.increaseSpeedJump();
-                    this.resetIdleTimer()
                   })
                 }
               }
@@ -491,8 +752,6 @@ export struct RobotArm1 {
                 color: 'rgba(255, 255, 255, 0.3)' // 添加微妙的白色边框
               })
               .backdropBlur(8) // 添加磨砂效果
-              .opacity(this.data.statusText === '运行中'||this.data.statusText==='空闲中' ? 1.0 : 0.4) // 运行时不透明，离线时半透明
-              .enabled(this.data.statusText === '运行中'||this.data.statusText==='空闲中') // 运行时启用，离线时禁用交互
               .animation({ duration: 250, curve: Curve.EaseInOut }) // 为状态切换增加平滑动画
               .shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' }) // 添加细微的阴影
 
@@ -512,9 +771,7 @@ export struct RobotArm1 {
                   .height(this.button_size2)
                   .backgroundColor(Color.Transparent) // 背景改为透明
                   .onClick(()=>{
-                    this.activateArm()
                     this.decreaseSpeedZZ();
-                    this.resetIdleTimer()
                   })
 
                   Text('Z-')
@@ -550,9 +807,7 @@ export struct RobotArm1 {
                   .height(this.button_size2)
                   .backgroundColor(Color.Transparent)
                   .onClick(()=>{
-                    this.activateArm()
                     this.increaseSpeedZZ();
-                    this.resetIdleTimer()
                   })
                 }
               }
@@ -567,8 +822,6 @@ export struct RobotArm1 {
                 color: 'rgba(255, 255, 255, 0.3)' // 添加微妙的白色边框
               })
               .backdropBlur(8) // 添加磨砂效果
-              .opacity(this.data.statusText === '运行中'||this.data.statusText==='空闲中' ? 1.0 : 0.4) // 运行时不透明，离线时半透明
-              .enabled(this.data.statusText === '运行中'||this.data.statusText==='空闲中') // 运行时启用，离线时禁用交互
               .animation({ duration: 250, curve: Curve.EaseInOut }) // 为状态切换增加平滑动画
               .shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' }) // 添加细微的阴影
 
@@ -588,9 +841,7 @@ export struct RobotArm1 {
                   .height(this.button_size2)
                   .backgroundColor(Color.Transparent) // 背景改为透明
                   .onClick(()=>{
-                    this.activateArm()
                     this.decreaseSpeedRR();
-                    this.resetIdleTimer()
                   })
 
                   Text('R-')
@@ -626,9 +877,7 @@ export struct RobotArm1 {
                   .height(this.button_size2)
                   .backgroundColor(Color.Transparent)
                   .onClick(()=>{
-                    this.activateArm()
                     this.increaseSpeedRR();
-                    this.resetIdleTimer()
                   })
 
                 }
@@ -644,91 +893,92 @@ export struct RobotArm1 {
                 color: 'rgba(255, 255, 255, 0.3)' // 添加微妙的白色边框
               })
               .backdropBlur(8) // 添加磨砂效果
-              .opacity(this.data.statusText === '运行中'||this.data.statusText==='空闲中' ? 1.0 : 0.4) // 运行时不透明，离线时半透明
-              .enabled(this.data.statusText === '运行中'||this.data.statusText==='空闲中') // 运行时启用，离线时禁用交互
               .animation({ duration: 250, curve: Curve.EaseInOut }) // 为状态切换增加平滑动画
               .shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' }) // 添加细微的阴影
 
-                //抓取释放按钮
-                Button() {
-                  Row({ space: 10 }) {
-                    // 根据状态显示不同文本
-                    Text(this.data.endStatusText === '释放' ? '点击抓取' : '点击释放')
-                      .fontSize(this.catch_font_size2)
-                      .fontColor(Color.White)
-                  }
-                  .justifyContent(FlexAlign.Center)
-                  .alignItems(VerticalAlign.Center)
-                }
+              //设置回零按钮
+              Button('回零')
+                .fontSize(this.catch_font_size2)
+                .fontWeight(FontWeight.Bold)
+                .fontColor(Color.White)
                 .width(this.catch_size_width2) // 按钮宽度
                 .height(this.catch_size_height2)   // 按钮高度
-                .onClick(() => {
-                  this.activateArm()
-                  // 切换末端状态
-                  if (this.data.endStatusText === '释放') {
-                    this.data.endStatusText = '抓取';
-                    this.showSystemToast('末端已抓取');
-                  } else {
-                    this.data.endStatusText = '释放';
-                    this.showSystemToast('末端已释放');
-                  }
-                  this.resetIdleTimer()
-                })
-                // 沿用统一的磨砂玻璃风格
-                .backgroundColor('rgba(255, 255, 255, 0.2)')
+                .backgroundColor('rgba(0, 200, 83, 0.5)')
                 .borderRadius(30)
                 .border({
                   width: 1.5,
                   color: 'rgba(255, 255, 255, 0.3)'
                 })
                 .backdropBlur(12)
-                .opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.8) // 根据机械臂状态决定是否可用
-                .enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中') // 根据机械臂状态决定是否可交互
+                .shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' })
+                .onClick(()=>{
+                  this.setToStart()
+                })
+                .animation({ duration: 150, curve: Curve.EaseOut })
+
+              //抓取释放按钮
+              Button() {
+                Row({ space: 10 }) {
+                  // 根据状态显示不同文本
+                  Text(!this.isCatch ? '点击抓取' : '点击释放')
+                    .fontSize(this.catch_font_size2)
+                    .fontColor(Color.White)
+                }
+                .justifyContent(FlexAlign.Center)
+                .alignItems(VerticalAlign.Center)
+              }
+              .width(this.catch_size_width2) // 按钮宽度
+              .height(this.catch_size_height2)   // 按钮高度
+              .enabled(this.endAbled)
+              .backgroundColor(!this.endAbled?'rgba(173, 170, 170, 0.40)':'rgba(0, 200, 83, 0.5)')
+              .onClick(async () => {
+                // 切换末端状态
+                if (this.isCatch) {
+                  //释放逻辑
+                  const isSet:boolean=await this.setEndControl("true false")
+                  if (isSet) {
+                    this.showSystemToast('释放成功')
+                  }else {
+                    this.showSystemToast('释放失败')
+                  }
+                } else {
+                  //抓取逻辑
+                  const isSet:boolean=await this.setEndControl("true true")
+                  if (isSet) {
+                    this.showSystemToast('抓取成功')
+                  }else {
+                    this.showSystemToast('抓取失败')
+                  }
+                }
+              })
+              .borderRadius(30)
+              .border({
+                width: 1.5,
+                color: 'rgba(255, 255, 255, 0.3)'
+              })
+              .backdropBlur(12)
+              .animation({ duration: 250, curve: Curve.EaseInOut })
+              .shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' })
+
+              //急停按钮
+              Button('急停')
+                .width(this.catch_size_width2) // 按钮宽度
+                .height(this.catch_size_height2)   // 按钮高度
+                .fontSize(this.catch_font_size2)
+                .fontColor(Color.White)
+                .onClick(() => {
+                  this.setStop()
+                })
+                // 沿用统一的磨砂玻璃风格
+                .backgroundColor('rgba(0, 200, 83, 0.5)')
+                .borderRadius(30)
+                .border({
+                  width: 1.5,
+                  color: 'rgba(255, 255, 255, 0.3)'
+                })
+                .backdropBlur(12)
                 .animation({ duration: 250, curve: Curve.EaseInOut })
                 .shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' })
-
-                //停止按钮
-                Button('停止')
-                  .width(this.catch_size_width2) // 按钮宽度
-                  .height(this.catch_size_height2)   // 按钮高度
-                  .fontSize(this.catch_font_size2)
-                  .fontColor(Color.White)
-                  .onClick(() => {
-                  })
-                  // 沿用统一的磨砂玻璃风格
-                  .backgroundColor('rgba(255, 255, 255, 0.2)')
-                  .borderRadius(30)
-                  .border({
-                    width: 1.5,
-                    color: 'rgba(255, 255, 255, 0.3)'
-                  })
-                  .backdropBlur(12)
-                  .opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.8) // 根据机械臂状态决定是否可用
-                  .enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中') // 根据机械臂状态决定是否可交互
-                  .animation({ duration: 250, curve: Curve.EaseInOut })
-                  .shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' })
-
-                //急停按钮
-                Button('急停')
-                  .width(this.catch_size_width2) // 按钮宽度
-                  .height(this.catch_size_height2)   // 按钮高度
-                  .fontSize(this.catch_font_size2)
-                  .fontColor(Color.White)
-                  .onClick(() => {
-
-                  })
-                  // 沿用统一的磨砂玻璃风格
-                  .backgroundColor('rgba(255, 255, 255, 0.2)')
-                  .borderRadius(30)
-                  .border({
-                    width: 1.5,
-                    color: 'rgba(255, 255, 255, 0.3)'
-                  })
-                  .backdropBlur(12)
-                  .opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.8) // 根据机械臂状态决定是否可用
-                  .enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中') // 根据机械臂状态决定是否可交互
-                  .animation({ duration: 250, curve: Curve.EaseInOut })
-                  .shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' })
 
             }
             .width('100%')
@@ -764,8 +1014,7 @@ export struct RobotArm1 {
             Stack() {
               Column() {
                 RoboticArmWorkRangeView({
-                  data:this.data,
-                  onActivate: this.activateArm.bind(this)
+                  data:this.data
                 })
               }
               .width('100%')
@@ -824,8 +1073,6 @@ export struct RobotArm1 {
 
               }
               .width('100%')
-              .opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.4) // 根据机械臂状态决定是否可用
-              .enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中') // 根据机械臂状态决定是否可交互
 
               //控制x轴（左右）
               Row() {
@@ -839,9 +1086,7 @@ export struct RobotArm1 {
                   .height(this.button_size)
                   .backgroundColor(Color.Transparent) //背景改为透明
                   .onClick(()=>{
-                    this.activateArm(); //激活机械臂
                     this.decreaseSpeedX();
-                    this.resetIdleTimer()
                   })
                   Text('X-')
                     .fontColor(Color.White)
@@ -875,9 +1120,7 @@ export struct RobotArm1 {
                   .height(this.button_size)
                   .backgroundColor(Color.Transparent)
                   .onClick(()=>{
-                    this.activateArm()
                     this.increaseSpeedX()
-                    this.resetIdleTimer()
                   })
                 }
               }
@@ -892,8 +1135,6 @@ export struct RobotArm1 {
                 color: 'rgba(255, 255, 255, 0.3)' // 添加微妙的白色边框
               })
               .backdropBlur(8) // 添加磨砂效果
-              .opacity(this.data.statusText === '运行中'||this.data.statusText==='空闲中' ? 1.0 : 0.4) // 运行时不透明，离线时半透明
-              .enabled(this.data.statusText === '运行中'||this.data.statusText==='空闲中') // 运行时启用，离线时禁用交互
               .animation({ duration: 250, curve: Curve.EaseInOut }) // 为状态切换增加平滑动画
               .shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' }) // 添加细微的阴影
 
@@ -909,9 +1150,7 @@ export struct RobotArm1 {
                   .height(this.button_size)
                   .backgroundColor(Color.Transparent) //背景改为透明
                   .onClick(()=>{
-                    this.activateArm()
                     this.decreaseSpeedY();
-                    this.resetIdleTimer()
                   })
 
                   Text('Y-')
@@ -947,9 +1186,7 @@ export struct RobotArm1 {
                   .height(this.button_size)
                   .backgroundColor(Color.Transparent)
                   .onClick(()=>{
-                    this.activateArm()
                     this.increaseSpeedY();
-                    this.resetIdleTimer()
                   })
                 }
               }
@@ -964,8 +1201,6 @@ export struct RobotArm1 {
                 color: 'rgba(255, 255, 255, 0.3)' // 添加微妙的白色边框
               })
               .backdropBlur(8) // 添加磨砂效果
-              .opacity(this.data.statusText === '运行中'||this.data.statusText==='空闲中' ? 1.0 : 0.4) // 运行时不透明，离线时半透明
-              .enabled(this.data.statusText === '运行中'||this.data.statusText==='空闲中') // 运行时启用，离线时禁用交互
               .animation({ duration: 250, curve: Curve.EaseInOut }) // 为状态切换增加平滑动画
               .shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' }) // 添加细微的阴影
 
@@ -981,9 +1216,7 @@ export struct RobotArm1 {
                   .height(this.button_size)
                   .backgroundColor(Color.Transparent) // 背景改为透明
                   .onClick(()=>{
-                    this.activateArm()
                     this.decreaseSpeedZ();
-                    this.resetIdleTimer()
                   })
                   Text('Z-')
                     .fontColor(Color.White)
@@ -1018,9 +1251,7 @@ export struct RobotArm1 {
                   .height(this.button_size)
                   .backgroundColor(Color.Transparent)
                   .onClick(()=>{
-                    this.activateArm()
                     this.increaseSpeedZ();
-                    this.resetIdleTimer()
                   })
                 }
               }
@@ -1035,8 +1266,6 @@ export struct RobotArm1 {
                 color: 'rgba(255, 255, 255, 0.3)' // 添加微妙的白色边框
               })
               .backdropBlur(8) // 添加磨砂效果
-              .opacity(this.data.statusText === '运行中'||this.data.statusText==='空闲中' ? 1.0 : 0.4) // 运行时不透明，离线时半透明
-              .enabled(this.data.statusText === '运行中'||this.data.statusText==='空闲中') // 运行时启用，离线时禁用交互
               .animation({ duration: 250, curve: Curve.EaseInOut }) // 为状态切换增加平滑动画
               .shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' }) // 添加细微的阴影
 
@@ -1072,8 +1301,6 @@ export struct RobotArm1 {
 
               }
               .width('100%')
-              .opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.4) // 根据机械臂状态决定是否可用
-              .enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中') // 根据机械臂状态决定是否可交互
 
               //r轴控制（角度）
               Row() {
@@ -1087,9 +1314,7 @@ export struct RobotArm1 {
                   .height(this.button_size)
                   .backgroundColor(Color.Transparent) // 背景改为透明
                   .onClick(()=>{
-                    this.activateArm()
                     this.decreaseSpeedR();
-                    this.resetIdleTimer()
                   })
                   Text('R-')
                     .fontColor(Color.White)
@@ -1123,9 +1348,7 @@ export struct RobotArm1 {
                   .height(this.button_size)
                   .backgroundColor(Color.Transparent)
                   .onClick(()=>{
-                    this.activateArm()
                     this.increaseSpeedR();
-                    this.resetIdleTimer()
                   })
                 }
               }
@@ -1140,8 +1363,6 @@ export struct RobotArm1 {
                 color: 'rgba(255, 255, 255, 0.3)' // 添加微妙的白色边框
               })
               .backdropBlur(8) // 添加磨砂效果
-              .opacity(this.data.statusText === '运行中'||this.data.statusText==='空闲中' ? 1.0 : 0.4) // 运行时不透明，离线时半透明
-              .enabled(this.data.statusText === '运行中'||this.data.statusText==='空闲中') // 运行时启用，离线时禁用交互
               .animation({ duration: 250, curve: Curve.EaseInOut }) // 为状态切换增加平滑动画
               .shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' }) // 添加细微的阴影
 
@@ -1149,16 +1370,36 @@ export struct RobotArm1 {
                 Text('状态控制：')
                   .fontColor(Color.White)
               }
-              .opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.4) // 根据机械臂状态决定是否可用
-              .enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中') // 根据机械臂状态决定是否可交互
               .width('100%')
 
               Row({space:10}){
+                //设置回零按钮
+                Button('回零')
+                  .fontSize(this.catch_font_size)
+                  .fontWeight(FontWeight.Bold)
+                  .fontColor(Color.White)
+                  .width(this.catch_size_width) // 按钮宽度
+                  .height(this.catch_size_height)   // 按钮高度
+                  .borderRadius(20)
+                  .border({
+                    width: 1,
+                    color: 'rgba(255, 255, 255, 0.3)'
+                  })
+                  .backgroundColor('rgba(0, 200, 83, 0.5)')
+                  .borderRadius(30)
+                  .border({
+                    width: 1.5,
+                    color: 'rgba(255, 255, 255, 0.3)'
+                  })
+                  .backdropBlur(12)
+                  .animation({ duration: 250, curve: Curve.EaseInOut })
+                  .shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' })
+
                 //抓取释放按钮
                 Button() {
                   Row({ space: 10 }) {
                     // 根据状态显示不同文本
-                    Text(this.data.endStatusText === '释放' ? '点击抓取' : '点击释放')
+                    Text(!this.isCatch ? '点击抓取' : '点击释放')
                       .fontSize(this.catch_font_size)
                       .fontColor(Color.White)
                   }
@@ -1167,52 +1408,36 @@ export struct RobotArm1 {
                 }
                 .width(this.catch_size_width) // 按钮宽度
                 .height(this.catch_size_height)   // 按钮高度
-                .onClick(() => {
-                  this.activateArm()
+                .enabled(this.endAbled)
+                .backgroundColor(!this.endAbled?'rgba(173, 170, 170, 0.40)':'rgba(0, 200, 83, 0.5)')
+                .onClick(async () => {
                   // 切换末端状态
-                  if (this.data.endStatusText === '释放') {
-                    this.data.endStatusText = '抓取';
-                    this.showSystemToast('末端已抓取');
+                  if (this.isCatch) {
+                    //释放逻辑
+                    const isSet:boolean=await this.setEndControl("true false")
+                    if (isSet) {
+                      this.showSystemToast('释放成功')
+                    }else {
+                      this.showSystemToast('释放失败')
+                    }
                   } else {
-                    this.data.endStatusText = '释放';
-                    this.showSystemToast('末端已释放');
+                    //抓取逻辑
+                    const isSet:boolean=await this.setEndControl("true true")
+                    if (isSet) {
+                      this.showSystemToast('抓取成功')
+                    }else {
+                      this.showSystemToast('抓取失败')
+                    }
                   }
-                  this.resetIdleTimer()
                 })
-                // 沿用统一的磨砂玻璃风格
-                .backgroundColor('rgba(255, 255, 255, 0.2)')
                 .borderRadius(30)
                 .border({
                   width: 1.5,
                   color: 'rgba(255, 255, 255, 0.3)'
                 })
                 .backdropBlur(12)
-                .opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.8) // 根据机械臂状态决定是否可用
-                .enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中') // 根据机械臂状态决定是否可交互
                 .animation({ duration: 250, curve: Curve.EaseInOut })
                 .shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' })
-
-                //停止按钮
-                Button('停止')
-                  .width(this.catch_size_width) // 按钮宽度
-                  .height(this.catch_size_height)   // 按钮高度
-                  .fontSize(this.catch_font_size)
-                  .fontColor(Color.White)
-                  .onClick(() => {
-
-                  })
-                  // 沿用统一的磨砂玻璃风格
-                  .backgroundColor('rgba(255, 255, 255, 0.2)')
-                  .borderRadius(30)
-                  .border({
-                    width: 1.5,
-                    color: 'rgba(255, 255, 255, 0.3)'
-                  })
-                  .backdropBlur(12)
-                  .opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.8) // 根据机械臂状态决定是否可用
-                  .enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中') // 根据机械臂状态决定是否可交互
-                  .animation({ duration: 250, curve: Curve.EaseInOut })
-                  .shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' })
 
                 //急停按钮
                 Button('急停')
@@ -1221,18 +1446,16 @@ export struct RobotArm1 {
                   .fontSize(this.catch_font_size)
                   .fontColor(Color.White)
                   .onClick(() => {
-
+                    this.setStop()
                   })
                   // 沿用统一的磨砂玻璃风格
-                  .backgroundColor('rgba(255, 255, 255, 0.2)')
+                  .backgroundColor('rgba(0, 200, 83, 0.5)')
                   .borderRadius(30)
                   .border({
                     width: 1.5,
                     color: 'rgba(255, 255, 255, 0.3)'
                   })
                   .backdropBlur(12)
-                  .opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.8) // 根据机械臂状态决定是否可用
-                  .enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中') // 根据机械臂状态决定是否可交互
                   .animation({ duration: 250, curve: Curve.EaseInOut })
                   .shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' })
               }
@@ -1265,6 +1488,7 @@ export struct RobotArm1 {
             // 请替换为您的图标资源
             icon: $r('app.media.change'),
             click: () => {
+              this.getNowPosition()
               animateTo({ duration: 800, curve: Curve.EaseInOut }, () => {
                 this.data.isRegionAVisible=!this.data.isRegionAVisible
                 this.data.isInfoCardVisible=!this.data.isInfoCardVisible
@@ -1272,8 +1496,6 @@ export struct RobotArm1 {
             }
           })
             .position({top:10,right:10})
-            .enabled(this.data.statusText === '运行中'||this.data.statusText === '空闲中')
-            .opacity(this.data.statusText === '运行中'||this.data.statusText === '空闲中' ? 1.0 : 0.4)
         }
         .width(this.data.controlCardWidth)
         .height('100%')

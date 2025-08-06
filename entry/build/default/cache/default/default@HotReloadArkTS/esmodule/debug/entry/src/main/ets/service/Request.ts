@@ -526,14 +526,43 @@ export async function getNodeRFID5(serverId: string, node_id: string): Promise<s
         return null;
     }
 }
-//设置传送带速度
-export interface Conveyor1Data {
+//获取传送带速度
+export async function getConveyorSpeed(serverId: string, node_id: string): Promise<AxiosResponse | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【获取${serverId}服务的传送带速度接口】获取成功`);
+        return responseData;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【获取${serverId}服务的传送带速度接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【获取${serverId}服务的传送带速度接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【获取${serverId}服务的传送带速度接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【获取${serverId}服务的传送带速度接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+export interface ConveyorData {
     id: string;
     node_id: string;
     action: string;
 }
-export async function setConveyor1Speed(serverId: string, node_id: string, action: string): Promise<AxiosResponse | null> {
-    let requestData: Conveyor1Data = {
+//设置传送带速度
+export async function setConveyorSpeed(serverId: string, node_id: string, action: string): Promise<AxiosResponse | null> {
+    let requestData: ConveyorData = {
         id: serverId,
         node_id: node_id,
         action: action
@@ -562,7 +591,7 @@ export async function setConveyor1Speed(serverId: string, node_id: string, actio
     }
 }
 //启动传送带
-export async function openConveyor1(serverId: string, node_id: string): Promise<AxiosResponse | null> {
+export async function openConveyor(serverId: string, node_id: string): Promise<AxiosResponse | null> {
     let requestData: NodeRequestDataOther = {
         id: serverId,
         node_id: node_id
@@ -591,7 +620,7 @@ export async function openConveyor1(serverId: string, node_id: string): Promise<
     }
 }
 //关闭传送带
-export async function closeConveyor1(serverId: string, node_id: string): Promise<AxiosResponse | null> {
+export async function closeConveyor(serverId: string, node_id: string): Promise<AxiosResponse | null> {
     let requestData: NodeRequestDataOther = {
         id: serverId,
         node_id: node_id
@@ -620,8 +649,8 @@ export async function closeConveyor1(serverId: string, node_id: string): Promise
     }
 }
 //设置运行方向
-export async function setConveyor1Direction(serverId: string, node_id: string, action: string): Promise<AxiosResponse | null> {
-    let requestData: Conveyor1Data = {
+export async function setConveyorDirection(serverId: string, node_id: string, action: string): Promise<AxiosResponse | null> {
+    let requestData: ConveyorData = {
         id: serverId,
         node_id: node_id,
         action: action
@@ -650,15 +679,15 @@ export async function setConveyor1Direction(serverId: string, node_id: string, a
     }
 }
 //设置停止模式
-export async function setConveyor1Stop(serverId: string, node_id: string, action: string): Promise<AxiosResponse | null> {
-    let requestData: Conveyor1Data = {
+export async function setConveyorStop(serverId: string, node_id: string, action: string): Promise<AxiosResponse | null> {
+    let requestData: ConveyorData = {
         id: serverId,
         node_id: node_id,
         action: action
     };
     try {
         const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
-        console.info(`【设置${serverId}服务的传送带停止模式接口】获取成功`);
+        console.info(`ppp${action}【设置${serverId}服务的传送带停止模式接口】获取成功`);
         return responseData;
     }
     catch (error) {
@@ -675,6 +704,333 @@ export async function setConveyor1Stop(serverId: string, node_id: string, action
         }
         else {
             console.info(`【设置${serverId}服务的传送带停止模式接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+export interface RobotArmData {
+    id: string;
+    node_id: string;
+    action: string;
+}
+//获取机械臂系统时间
+export async function getRobotArmTime(serverId: string, node_id: string): Promise<number | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【获取${serverId}服务的机械臂系统时间接口】获取成功`);
+        return responseData.data.data.value;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【获取${serverId}服务的机械臂系统时间接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【获取${serverId}服务的机械臂系统时间接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【获取${serverId}服务的机械臂系统时间接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【获取${serverId}服务的机械臂系统时间接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+//获取机械臂uid
+export async function getRobotArmUid(serverId: string, node_id: string): Promise<string | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【获取${serverId}服务的机械臂uid接口】获取成功`);
+        return responseData.data.data.value;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【获取${serverId}服务的机械臂uid接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【获取${serverId}服务的机械臂uid接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【获取${serverId}服务的机械臂uid接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【获取${serverId}服务的机械臂uid接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+//获取机械臂警报信息
+export async function getRobotArmAlarms(serverId: string, node_id: string): Promise<number | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【获取${serverId}服务的机械臂警报接口】获取成功`);
+        return responseData.data.data.value;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【获取${serverId}服务的机械臂警报接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【获取${serverId}服务的机械臂警报接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【获取${serverId}服务的机械臂警报接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【获取${serverId}服务的机械臂警报接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+//清除机械臂警报
+export async function clearRobotArmAlarms(serverId: string, node_id: string): Promise<boolean | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【清除${serverId}服务的机械臂警报接口】获取成功`);
+        return responseData.data.code === 0;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【清除${serverId}服务的机械臂警报接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【清除${serverId}服务的机械臂警报接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【清除${serverId}服务的机械臂警报接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【清除${serverId}服务的机械臂警报接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+//控制末端执行器
+export async function endControl(serverId: string, node_id: string, action: string): Promise<boolean | null> {
+    let requestData: RobotArmData = {
+        id: serverId,
+        node_id: node_id,
+        action: action
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`获取【${serverId}服务的机械臂末端执行接口】获取成功`);
+        return responseData.data.code === 0;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`获取【${serverId}服务的机械臂末端执行接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`获取【${serverId}服务的机械臂末端执行接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`获取【${serverId}服务的机械臂末端执行接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`获取【${serverId}服务的机械臂末端执行接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+//获取机械臂警报信息
+export async function getEndStatus(serverId: string, node_id: string): Promise<boolean[] | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【获取${serverId}服务的机械臂使能接口】获取成功`);
+        return responseData.data.data.output_args;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【获取${serverId}服务的机械臂使能接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【获取${serverId}服务的机械臂使能接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【获取${serverId}服务的机械臂使能接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【获取${serverId}服务的机械臂使能接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+//赋予机械臂末端控制器使能
+export async function setEndAble(serverId: string, node_id: string, action: string): Promise<boolean | null> {
+    let requestData: RobotArmData = {
+        id: serverId,
+        node_id: node_id,
+        action: action
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`赋予【${serverId}服务的机械臂末端使能接口】获取成功`);
+        return responseData.data.code === 0;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`赋予【${serverId}服务的机械臂末端使能接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`赋予【${serverId}服务的机械臂末端使能接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`赋予【${serverId}服务的机械臂末端使能接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`赋予【${serverId}服务的机械臂末端使能接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+//赋予机械臂末端控制器使能
+export async function clearEndAble(serverId: string, node_id: string, action: string): Promise<boolean | null> {
+    let requestData: RobotArmData = {
+        id: serverId,
+        node_id: node_id,
+        action: action
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`清除【${serverId}服务的机械臂末端使能接口】获取成功`);
+        return responseData.data.code === 0;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`清除【${serverId}服务的机械臂末端使能接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`清除【${serverId}服务的机械臂末端使能接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`清除【${serverId}服务的机械臂末端使能接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`清除【${serverId}服务的机械臂末端使能接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+//获取当前机械臂位姿
+export async function getRobotArmNowPosition(serverId: string, node_id: string): Promise<number[] | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`【获取${serverId}服务的机械臂位姿接口】获取成功`);
+        return responseData.data.data.value;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【获取${serverId}服务的机械臂位姿接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【获取${serverId}服务的机械臂位姿接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【获取${serverId}服务的机械臂位姿接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【获取${serverId}服务的机械臂位姿接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+//机械臂设置回零
+export async function setToStart(serverId: string, node_id: string): Promise<boolean | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`设置【${serverId}服务的机械臂回零接口】获取成功`);
+        return responseData.data.code === 0;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`设置【${serverId}服务的机械臂回零接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`设置【${serverId}服务的机械臂回零接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`设置【${serverId}服务的机械臂回零接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`设置【${serverId}服务的机械臂回零接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+//机械臂设置急停
+export async function setStop(serverId: string, node_id: string): Promise<boolean | null> {
+    let requestData: NodeRequestDataOther = {
+        id: serverId,
+        node_id: node_id
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`设置【${serverId}服务的机械臂急停接口】获取成功`);
+        return responseData.data.code === 0;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`设置【${serverId}服务的机械臂急停接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`设置【${serverId}服务的机械臂急停接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`设置【${serverId}服务的机械臂急停接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`设置【${serverId}服务的机械臂急停接口】捕获到未知错误:`, JSON.stringify(error));
         }
         return null;
     }

@@ -7,8 +7,6 @@ interface RoboticArmWorkRangeView_Params {
     centerY?: number;
     radius?: number;
     data?: RobotArmState;
-    //控制空闲中和运行中状态
-    onActivate?: () => void;
     displayCurrentPos?: Point;
     displayTargetPos?: Point;
 }
@@ -24,7 +22,6 @@ export class RoboticArmWorkRangeView extends ViewPU {
         this.centerY = 210;
         this.radius = 180;
         this.__data = new SynchedPropertyObjectTwoWayPU(params.data, this, "data");
-        this.onActivate = () => { };
         this.__displayCurrentPos = new ObservedPropertyObjectPU({ x: 0, y: 0 }, this, "displayCurrentPos");
         this.__displayTargetPos = new ObservedPropertyObjectPU({ x: 0, y: 0 }, this, "displayTargetPos");
         this.setInitiallyProvidedValue(params);
@@ -44,9 +41,6 @@ export class RoboticArmWorkRangeView extends ViewPU {
         }
         if (params.radius !== undefined) {
             this.radius = params.radius;
-        }
-        if (params.onActivate !== undefined) {
-            this.onActivate = params.onActivate;
         }
         if (params.displayCurrentPos !== undefined) {
             this.displayCurrentPos = params.displayCurrentPos;
@@ -84,8 +78,6 @@ export class RoboticArmWorkRangeView extends ViewPU {
     set data(newValue: RobotArmState) {
         this.__data.set(newValue);
     }
-    //控制空闲中和运行中状态
-    private onActivate: () => void;
     //动画显示位置状态：这些变量用于在动画过程中实时更新并绘制在画布上。
     // @Watch 会监控它们的变化，并在每一帧触发 redraw。
     private __displayCurrentPos: ObservedPropertyObjectPU<Point>;
@@ -370,7 +362,6 @@ export class RoboticArmWorkRangeView extends ViewPU {
                 const lowerBound = 345; // 相当于 -15°
                 const upperBound = 195;
                 if (distance <= this.radius && (angleDeg >= lowerBound || angleDeg <= upperBound)) {
-                    this.onActivate();
                     //如果在范围内，执行原有逻辑
                     //计算正确的【数据坐标】用于存储
                     const maxDataValue = 250;

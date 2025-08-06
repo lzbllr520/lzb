@@ -70,7 +70,7 @@ export class IconTab extends ViewPU {
             Column.width('100%');
             Column.height('100%');
             Column.justifyContent(FlexAlign.Center);
-            Column.backgroundColor(this.isSelected ? 'rgba(255, 255, 255, 0.3)' : Color.Transparent);
+            Column.backgroundColor(this.isSelected ? 'rgba(255, 255, 255, 0.15)' : Color.Transparent);
             Column.borderRadius(12);
             Context.animation(null);
             Column.scale({ x: this.isPressed ? 0.9 : 1.0, y: this.isPressed ? 0.9 : 1.0 });

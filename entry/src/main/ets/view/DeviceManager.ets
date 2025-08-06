@@ -9,7 +9,6 @@ import {RobotArm2} from '../view/device/RobotArm2'
 import {RobotArm3} from '../view/device/RobotArm3'
 import { Server,Node,Data } from '../model/ServerState'
 import { getNodeOther, getNodeStart } from '../service/Request'
-import { promptAction } from '@kit.ArkUI'
 
 @Component
 export struct DeviceManager {
@@ -40,8 +39,6 @@ export struct DeviceManager {
 
   @Prop @Watch('onServersChange') servers:Server[]|null=[]
 
-  @State private hasLoaded: boolean = false
-
   //传送带1
   @State data1:Data={id:'', node_id:''}
   //传送带2
@@ -54,7 +51,7 @@ export struct DeviceManager {
   @State data5:Data={id:'', node_id:''}
 
   async onServersChange(): Promise<void>{
-    if (this.servers&&this.servers.length>0&& !this.hasLoaded) {
+    if (this.servers&&this.servers.length>0) {
       this.servers.forEach(async (item:Server)=>{
         if (item.id==='server2') {
           const nodes1:Node[]|null=await getNodeStart(item.id)
@@ -78,10 +75,42 @@ export struct DeviceManager {
               }
             }
           }
+        }else if (item.id==='server1'){
+          const nodes1:Node[]|null=await getNodeStart(item.id)
+          if (nodes1&&nodes1.length>0) {
+            const nodes2:Node[]|null=await getNodeOther(item.id,nodes1[3].node_id)
+            if (nodes2&&nodes2.length>0){
+              this.data3={
+                id:item.id,
+                node_id:nodes2[2].node_id
+              }
+            }
+          }
+        }else if (item.id==='server3'){
+          const nodes1:Node[]|null=await getNodeStart(item.id)
+          if (nodes1&&nodes1.length>0) {
+            const nodes2:Node[]|null=await getNodeOther(item.id,nodes1[3].node_id)
+            if (nodes2&&nodes2.length>0){
+              this.data4={
+                id:item.id,
+                node_id:nodes2[2].node_id
+              }
+            }
+          }
+        }else if (item.id==='server4'){
+          const nodes1:Node[]|null=await getNodeStart(item.id)
+          if (nodes1&&nodes1.length>0) {
+            const nodes2:Node[]|null=await getNodeOther(item.id,nodes1[3].node_id)
+            if (nodes2&&nodes2.length>0){
+              this.data5={
+                id:item.id,
+                node_id:nodes2[2].node_id
+              }
+            }
+          }
         }
       })
     }
-    this.hasLoaded = true
   }
 
   aboutToAppear(): void {
@@ -230,19 +259,22 @@ export struct DeviceManager {
           RobotArm1({
             data:this.robot1Data,
             addLog: this.addLog,
-            avatar:this.robotArmAvatar
+            avatar:this.robotArmAvatar,
+            node:this.data3
           })
         } else if (this.currentIndex === 4) {
           RobotArm2({
             data:this.robot2Data,
             addLog: this.addLog,
-            avatar:this.robotArmAvatar
+            avatar:this.robotArmAvatar,
+            node:this.data4
           })
         } else if (this.currentIndex === 5) {
           RobotArm3({
             data:this.robot3Data,
             addLog: this.addLog,
-            avatar:this.robotArmAvatar
+            avatar:this.robotArmAvatar,
+            node:this.data5
           })
         }
       }

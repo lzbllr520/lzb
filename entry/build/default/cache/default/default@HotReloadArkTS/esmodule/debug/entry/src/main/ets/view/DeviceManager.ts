@@ -21,7 +21,6 @@ interface DeviceManager_Params {
     pressedTabIndex?: number;
     onIndexChange?: (index: number) => void;
     servers?: Server[] | null;
-    hasLoaded?: boolean;
     data1?: Data;
     data2?: Data;
     data3?: Data;
@@ -64,9 +63,6 @@ export class DeviceManager extends ViewPU {
         this.__pressedTabIndex = new ObservedPropertySimplePU(-1, this, "pressedTabIndex");
         this.onIndexChange = () => { };
         this.__servers = new SynchedPropertyObjectOneWayPU(params.servers, this, "servers");
-        this.__hasLoaded = new ObservedPropertySimplePU(false
-        //传送带1
-        , this, "hasLoaded");
         this.__data1 = new ObservedPropertyObjectPU({ id: '', node_id: '' }
         //传送带2
         , this, "data1");
@@ -110,10 +106,9 @@ export class DeviceManager extends ViewPU {
             this.onIndexChange = params.onIndexChange;
         }
         if (params.servers === undefined) {
-            this.__servers.set([]);
-        }
-        if (params.hasLoaded !== undefined) {
-            this.hasLoaded = params.hasLoaded;
+            this.__servers.set([]
+            //传送带1
+            );
         }
         if (params.data1 !== undefined) {
             this.data1 = params.data1;
@@ -147,7 +142,6 @@ export class DeviceManager extends ViewPU {
         this.__robotArmAvatar.purgeDependencyOnElmtId(rmElmtId);
         this.__pressedTabIndex.purgeDependencyOnElmtId(rmElmtId);
         this.__servers.purgeDependencyOnElmtId(rmElmtId);
-        this.__hasLoaded.purgeDependencyOnElmtId(rmElmtId);
         this.__data1.purgeDependencyOnElmtId(rmElmtId);
         this.__data2.purgeDependencyOnElmtId(rmElmtId);
         this.__data3.purgeDependencyOnElmtId(rmElmtId);
@@ -167,7 +161,6 @@ export class DeviceManager extends ViewPU {
         this.__robotArmAvatar.aboutToBeDeleted();
         this.__pressedTabIndex.aboutToBeDeleted();
         this.__servers.aboutToBeDeleted();
-        this.__hasLoaded.aboutToBeDeleted();
         this.__data1.aboutToBeDeleted();
         this.__data2.aboutToBeDeleted();
         this.__data3.aboutToBeDeleted();
@@ -267,13 +260,6 @@ export class DeviceManager extends ViewPU {
     set servers(newValue: Server[] | null) {
         this.__servers.set(newValue);
     }
-    private __hasLoaded: ObservedPropertySimplePU<boolean>;
-    get hasLoaded() {
-        return this.__hasLoaded.get();
-    }
-    set hasLoaded(newValue: boolean) {
-        this.__hasLoaded.set(newValue);
-    }
     //传送带1
     private __data1: ObservedPropertyObjectPU<Data>;
     get data1() {
@@ -315,7 +301,7 @@ export class DeviceManager extends ViewPU {
         this.__data5.set(newValue);
     }
     async onServersChange(): Promise<void> {
-        if (this.servers && this.servers.length > 0 && !this.hasLoaded) {
+        if (this.servers && this.servers.length > 0) {
             this.servers.forEach(async (item: Server) => {
                 if (item.id === 'server2') {
                     const nodes1: Node[] | null = await getNodeStart(item.id);
@@ -341,9 +327,44 @@ export class DeviceManager extends ViewPU {
                         }
                     }
                 }
+                else if (item.id === 'server1') {
+                    const nodes1: Node[] | null = await getNodeStart(item.id);
+                    if (nodes1 && nodes1.length > 0) {
+                        const nodes2: Node[] | null = await getNodeOther(item.id, nodes1[3].node_id);
+                        if (nodes2 && nodes2.length > 0) {
+                            this.data3 = {
+                                id: item.id,
+                                node_id: nodes2[2].node_id
+                            };
+                        }
+                    }
+                }
+                else if (item.id === 'server3') {
+                    const nodes1: Node[] | null = await getNodeStart(item.id);
+                    if (nodes1 && nodes1.length > 0) {
+                        const nodes2: Node[] | null = await getNodeOther(item.id, nodes1[3].node_id);
+                        if (nodes2 && nodes2.length > 0) {
+                            this.data4 = {
+                                id: item.id,
+                                node_id: nodes2[2].node_id
+                            };
+                        }
+                    }
+                }
+                else if (item.id === 'server4') {
+                    const nodes1: Node[] | null = await getNodeStart(item.id);
+                    if (nodes1 && nodes1.length > 0) {
+                        const nodes2: Node[] | null = await getNodeOther(item.id, nodes1[3].node_id);
+                        if (nodes2 && nodes2.length > 0) {
+                            this.data5 = {
+                                id: item.id,
+                                node_id: nodes2[2].node_id
+                            };
+                        }
+                    }
+                }
             });
         }
-        this.hasLoaded = true;
     }
     aboutToAppear(): void {
         this.onServersChange();
@@ -506,7 +527,7 @@ export class DeviceManager extends ViewPU {
                                     data: this.__dollyData,
                                     addLog: this.addLog,
                                     avatar: this.__dollyAvatar
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 206, col: 11 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 235, col: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -536,7 +557,7 @@ export class DeviceManager extends ViewPU {
                                     // 因为只有在 currentIndex === 1 时才会渲染，所以 isActive 恒为 true
                                     isActive: true,
                                     node: this.data1
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 212, col: 11 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 241, col: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -573,7 +594,7 @@ export class DeviceManager extends ViewPU {
                                     // 因为只有在 currentIndex === 2 时才会渲染，所以 isActive 恒为 true
                                     isActive: true,
                                     node: this.data2
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 221, col: 11 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 250, col: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -606,20 +627,24 @@ export class DeviceManager extends ViewPU {
                                 let componentCall = new RobotArm1(this, {
                                     data: this.__robot1Data,
                                     addLog: this.addLog,
-                                    avatar: this.__robotArmAvatar
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 230, col: 11 });
+                                    avatar: this.__robotArmAvatar,
+                                    node: this.data3
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 259, col: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
                                         data: this.robot1Data,
                                         addLog: this.addLog,
-                                        avatar: this.robotArmAvatar
+                                        avatar: this.robotArmAvatar,
+                                        node: this.data3
                                     };
                                 };
                                 componentCall.paramsGenerator_ = paramsLambda;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                    node: this.data3
+                                });
                             }
                         }, { name: "RobotArm1" });
                     }
@@ -633,20 +658,24 @@ export class DeviceManager extends ViewPU {
                                 let componentCall = new RobotArm2(this, {
                                     data: this.__robot2Data,
                                     addLog: this.addLog,
-                                    avatar: this.__robotArmAvatar
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 236, col: 11 });
+                                    avatar: this.__robotArmAvatar,
+                                    node: this.data4
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 266, col: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
                                         data: this.robot2Data,
                                         addLog: this.addLog,
-                                        avatar: this.robotArmAvatar
+                                        avatar: this.robotArmAvatar,
+                                        node: this.data4
                                     };
                                 };
                                 componentCall.paramsGenerator_ = paramsLambda;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                    node: this.data4
+                                });
                             }
                         }, { name: "RobotArm2" });
                     }
@@ -660,20 +689,24 @@ export class DeviceManager extends ViewPU {
                                 let componentCall = new RobotArm3(this, {
                                     data: this.__robot3Data,
                                     addLog: this.addLog,
-                                    avatar: this.__robotArmAvatar
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 242, col: 11 });
+                                    avatar: this.__robotArmAvatar,
+                                    node: this.data5
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 273, col: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
                                         data: this.robot3Data,
                                         addLog: this.addLog,
-                                        avatar: this.robotArmAvatar
+                                        avatar: this.robotArmAvatar,
+                                        node: this.data5
                                     };
                                 };
                                 componentCall.paramsGenerator_ = paramsLambda;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                    node: this.data5
+                                });
                             }
                         }, { name: "RobotArm3" });
                     }

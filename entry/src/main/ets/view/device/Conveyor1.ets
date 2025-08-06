@@ -1,8 +1,8 @@
 
 import { McGaugeChart, Options } from '@mcui/mccharts'
 import { ConveyorState } from '../../model/ConveyorState'
-import { Server, Node,Data } from '../../model/ServerState';
-import { promptAction } from '@kit.ArkUI';
+import { Server, Node,Data } from '../../model/ServerState'
+import { promptAction } from '@kit.ArkUI'
 import { getNodeOther,setConveyorSpeed,openConveyor,closeConveyor,setConveyorDirection,setConveyorStop,
   getConveyorSpeed } from '../../service/Request';
 import { AxiosResponse } from '@ohos/axios';
@@ -35,7 +35,6 @@ export struct Conveyor1 {
 
   @Prop @Watch('onNodeChange') node:Data={id:'',node_id:''}
 
-  @State private hasLoaded: boolean = false
 
   @State private getSpeedNode:string=''
 
@@ -63,8 +62,6 @@ export struct Conveyor1 {
           this.data.speedValue=this.rawSpeedToPercentage(res.data.data.value)
         }
       }
-    }else {
-      promptAction.showToast({message:'首次获取传送带速度失败'})
     }
   }
 
@@ -119,7 +116,7 @@ export struct Conveyor1 {
   }
 
   async onNodeChange(): Promise<void>{
-    if (this.node.id&&this.node.node_id&& !this.hasLoaded) {
+    if (this.node.id&&this.node.node_id) {
       const nodes1:Node[]|null=await getNodeOther(this.node.id,this.node.node_id)
       if (nodes1&&nodes1.length>0) {
         //先获取传送带控制结点的node_id
@@ -138,7 +135,7 @@ export struct Conveyor1 {
         }
       }
     }
-    this.hasLoaded=true
+    await this.getSpeed();
   }
 
   private showSystemToast(message: string) {
@@ -303,9 +300,7 @@ export struct Conveyor1 {
   }
 
   async aboutToAppear() {
-    //加上await的原因是等onNodeChange中的请求执行完毕再执行getSpeed中的请求
     await this.onNodeChange()
-    await this.getSpeed()
     this.lastKnownSpeed = this.data.speedValue;
     this.speedInputText = this.data.speedValue.toFixed(0);
     this.initChartOptions();
@@ -696,13 +691,11 @@ export struct Conveyor1 {
               .onSelect(async (event) => {
                 const newDirection = event.valueOf() === 0 ? '正向运行' : '反向运行';
                 const isSet:boolean= await this.setDirection(event.valueOf())
+                this.data.direction = newDirection;
                 if (isSet){
                   this.showSystemToast('设置运行方向成功')
                 }else {
                   this.showSystemToast('设置运行方向失败')
-                }
-                if (this.data.direction !== newDirection) {
-                  this.data.direction = newDirection;
                 }
               })
               .selected(this.data.direction === '正向运行' ? 0 : 1)
@@ -719,7 +712,6 @@ export struct Conveyor1 {
               // 同样，只有在运行时才启用，并有透明度变化
               .enabled(this.data.statusText === '离线中')
               .opacity(this.data.statusText === '离线中' ? 1.0 : 0.4)
-              .animation({ duration: 250, curve: Curve.EaseInOut })
 
             Select([
               { value: '正常停止' },
@@ -731,16 +723,14 @@ export struct Conveyor1 {
               .onSelect(async (event) => {
                 const newStopMethod = event.valueOf() === 0 ? '正常停止' : '急停';
                 const isSet:boolean= await this.setCloseModel(event.valueOf())
+                this.data.stopMethod = newStopMethod
                 if (isSet){
                   this.showSystemToast('设置停止模式成功')
                 }else {
                   this.showSystemToast('设置停止模式失败')
                 }
-                if (this.data.stopMethod !== newStopMethod) {
-                  this.data.stopMethod = newStopMethod
-                }
               })
-              .selected(this.data.direction === '正常停止' ? 0 : 1)
+              .selected(this.data.stopMethod === '正常停止' ? 0 : 1)
               .value(this.data.stopMethod)
               .width('40%')
               .height(50)
@@ -754,7 +744,6 @@ export struct Conveyor1 {
               // 同样，只有在运行时才启用，并有透明度变化
               .enabled(this.data.statusText === '运行中')
               .opacity(this.data.statusText === '运行中' ? 1.0 : 0.4)
-              .animation({ duration: 250, curve: Curve.EaseInOut })
           }
           .width('100%')
           .justifyContent(FlexAlign.SpaceAround)

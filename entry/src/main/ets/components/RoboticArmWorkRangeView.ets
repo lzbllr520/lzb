@@ -15,9 +15,6 @@ export  struct RoboticArmWorkRangeView {
   //提升状态信息
   @Link data: RobotArmState;
 
-  //控制空闲中和运行中状态
-  onActivate: () => void = () => {};
-
   //动画显示位置状态：这些变量用于在动画过程中实时更新并绘制在画布上。
   // @Watch 会监控它们的变化，并在每一帧触发 redraw。
   @State @Watch('redraw') private displayCurrentPos: Point = { x: 0, y: 0 };
@@ -284,8 +281,6 @@ export  struct RoboticArmWorkRangeView {
           const upperBound = 195;
 
           if (distance <= this.radius && (angleDeg >= lowerBound || angleDeg <= upperBound)) {
-
-            this.onActivate();
 
             //如果在范围内，执行原有逻辑
             //计算正确的【数据坐标】用于存储

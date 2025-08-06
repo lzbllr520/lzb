@@ -24,13 +24,30 @@ interface RobotArm3_Params {
     catch_font_size2?: number;
     con_width2?: string;
     con_height2?: number;
+    sn?: string;
+    version?: string;
+    time?: number;
+    uid?: string;
+    alarms?: number;
+    node_id_alarms?: string;
+    alarmTimer?: number;
+    endAbled?: boolean;
+    node_id_endAbled?: string;
+    node_id_clearAlarms?: string;
+    node_id_end?: string;
+    isCatch?: boolean;
+    node?: Data;
     isPressed?: boolean;
     isHover?: boolean;
+    isPressed1?: boolean;
+    isHover1?: boolean;
     idleTimer?: number;
     isPreviewVisible?: boolean;
 }
-import { RobotArmState } from "@normalized:N&&&entry/src/main/ets/model/RobotArmState&";
+import type { RobotArmState } from '../../model/RobotArmState';
 import { RoboticArmWorkRangeView } from "@normalized:N&&&entry/src/main/ets/components/RoboticArmWorkRangeView&";
+import type { Node, Data } from '../../model/ServerState';
+import { clearEndAble, clearRobotArmAlarms, endControl, getEndStatus, getNodeOther, getRobotArmAlarms, getRobotArmTime, getRobotArmUid, setEndAble } from "@normalized:N&&&entry/src/main/ets/service/Request&";
 export class RobotArm3 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -53,12 +70,44 @@ export class RobotArm3 extends ViewPU {
         this.__catch_size_width2 = new ObservedPropertySimplePU('70%', this, "catch_size_width2");
         this.__catch_font_size2 = new ObservedPropertySimplePU(20, this, "catch_font_size2");
         this.__con_width2 = new ObservedPropertySimplePU('95%', this, "con_width2");
-        this.__con_height2 = new ObservedPropertySimplePU(40, this, "con_height2");
+        this.__con_height2 = new ObservedPropertySimplePU(40
+        //序列号
+        , this, "con_height2");
+        this.__sn = new ObservedPropertySimplePU('DT1420071864'
+        //固定版本
+        , this, "sn");
+        this.__version = new ObservedPropertySimplePU('3.7.0'
+        //系统时钟
+        , this, "version");
+        this.__time = new ObservedPropertySimplePU(0
+        //设备uid
+        , this, "time");
+        this.__uid = new ObservedPropertySimplePU(''
+        //设备警报
+        , this, "uid");
+        this.__alarms = new ObservedPropertySimplePU(0, this, "alarms");
+        this.__node_id_alarms = new ObservedPropertySimplePU('', this, "node_id_alarms");
+        this.alarmTimer = -1;
+        this.__endAbled = new ObservedPropertySimplePU(false, this, "endAbled");
+        this.__node_id_endAbled = new ObservedPropertySimplePU(''
+        //清除警报
+        , this, "node_id_endAbled");
+        this.__node_id_clearAlarms = new ObservedPropertySimplePU(''
+        //末端执行
+        , this, "node_id_clearAlarms");
+        this.__node_id_end = new ObservedPropertySimplePU(''
+        //是否抓取
+        , this, "node_id_end");
+        this.__isCatch = new ObservedPropertySimplePU(false, this, "isCatch");
+        this.__node = new SynchedPropertyObjectOneWayPU(params.node, this, "node");
         this.__isPressed = new ObservedPropertySimplePU(false, this, "isPressed");
         this.__isHover = new ObservedPropertySimplePU(false, this, "isHover");
+        this.__isPressed1 = new ObservedPropertySimplePU(false, this, "isPressed1");
+        this.__isHover1 = new ObservedPropertySimplePU(false, this, "isHover1");
         this.__idleTimer = new ObservedPropertySimplePU(-1, this, "idleTimer");
         this.__isPreviewVisible = new ObservedPropertySimplePU(false, this, "isPreviewVisible");
         this.setInitiallyProvidedValue(params);
+        this.declareWatch("node", this.onNodeChange);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params: RobotArm3_Params) {
@@ -107,11 +156,56 @@ export class RobotArm3 extends ViewPU {
         if (params.con_height2 !== undefined) {
             this.con_height2 = params.con_height2;
         }
+        if (params.sn !== undefined) {
+            this.sn = params.sn;
+        }
+        if (params.version !== undefined) {
+            this.version = params.version;
+        }
+        if (params.time !== undefined) {
+            this.time = params.time;
+        }
+        if (params.uid !== undefined) {
+            this.uid = params.uid;
+        }
+        if (params.alarms !== undefined) {
+            this.alarms = params.alarms;
+        }
+        if (params.node_id_alarms !== undefined) {
+            this.node_id_alarms = params.node_id_alarms;
+        }
+        if (params.alarmTimer !== undefined) {
+            this.alarmTimer = params.alarmTimer;
+        }
+        if (params.endAbled !== undefined) {
+            this.endAbled = params.endAbled;
+        }
+        if (params.node_id_endAbled !== undefined) {
+            this.node_id_endAbled = params.node_id_endAbled;
+        }
+        if (params.node_id_clearAlarms !== undefined) {
+            this.node_id_clearAlarms = params.node_id_clearAlarms;
+        }
+        if (params.node_id_end !== undefined) {
+            this.node_id_end = params.node_id_end;
+        }
+        if (params.isCatch !== undefined) {
+            this.isCatch = params.isCatch;
+        }
+        if (params.node === undefined) {
+            this.__node.set({ id: '', node_id: '' });
+        }
         if (params.isPressed !== undefined) {
             this.isPressed = params.isPressed;
         }
         if (params.isHover !== undefined) {
             this.isHover = params.isHover;
+        }
+        if (params.isPressed1 !== undefined) {
+            this.isPressed1 = params.isPressed1;
+        }
+        if (params.isHover1 !== undefined) {
+            this.isHover1 = params.isHover1;
         }
         if (params.idleTimer !== undefined) {
             this.idleTimer = params.idleTimer;
@@ -121,6 +215,7 @@ export class RobotArm3 extends ViewPU {
         }
     }
     updateStateVars(params: RobotArm3_Params) {
+        this.__node.reset(params.node);
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
         this.__data.purgeDependencyOnElmtId(rmElmtId);
@@ -139,8 +234,22 @@ export class RobotArm3 extends ViewPU {
         this.__catch_font_size2.purgeDependencyOnElmtId(rmElmtId);
         this.__con_width2.purgeDependencyOnElmtId(rmElmtId);
         this.__con_height2.purgeDependencyOnElmtId(rmElmtId);
+        this.__sn.purgeDependencyOnElmtId(rmElmtId);
+        this.__version.purgeDependencyOnElmtId(rmElmtId);
+        this.__time.purgeDependencyOnElmtId(rmElmtId);
+        this.__uid.purgeDependencyOnElmtId(rmElmtId);
+        this.__alarms.purgeDependencyOnElmtId(rmElmtId);
+        this.__node_id_alarms.purgeDependencyOnElmtId(rmElmtId);
+        this.__endAbled.purgeDependencyOnElmtId(rmElmtId);
+        this.__node_id_endAbled.purgeDependencyOnElmtId(rmElmtId);
+        this.__node_id_clearAlarms.purgeDependencyOnElmtId(rmElmtId);
+        this.__node_id_end.purgeDependencyOnElmtId(rmElmtId);
+        this.__isCatch.purgeDependencyOnElmtId(rmElmtId);
+        this.__node.purgeDependencyOnElmtId(rmElmtId);
         this.__isPressed.purgeDependencyOnElmtId(rmElmtId);
         this.__isHover.purgeDependencyOnElmtId(rmElmtId);
+        this.__isPressed1.purgeDependencyOnElmtId(rmElmtId);
+        this.__isHover1.purgeDependencyOnElmtId(rmElmtId);
         this.__idleTimer.purgeDependencyOnElmtId(rmElmtId);
         this.__isPreviewVisible.purgeDependencyOnElmtId(rmElmtId);
     }
@@ -161,8 +270,22 @@ export class RobotArm3 extends ViewPU {
         this.__catch_font_size2.aboutToBeDeleted();
         this.__con_width2.aboutToBeDeleted();
         this.__con_height2.aboutToBeDeleted();
+        this.__sn.aboutToBeDeleted();
+        this.__version.aboutToBeDeleted();
+        this.__time.aboutToBeDeleted();
+        this.__uid.aboutToBeDeleted();
+        this.__alarms.aboutToBeDeleted();
+        this.__node_id_alarms.aboutToBeDeleted();
+        this.__endAbled.aboutToBeDeleted();
+        this.__node_id_endAbled.aboutToBeDeleted();
+        this.__node_id_clearAlarms.aboutToBeDeleted();
+        this.__node_id_end.aboutToBeDeleted();
+        this.__isCatch.aboutToBeDeleted();
+        this.__node.aboutToBeDeleted();
         this.__isPressed.aboutToBeDeleted();
         this.__isHover.aboutToBeDeleted();
+        this.__isPressed1.aboutToBeDeleted();
+        this.__isHover1.aboutToBeDeleted();
         this.__idleTimer.aboutToBeDeleted();
         this.__isPreviewVisible.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
@@ -282,6 +405,256 @@ export class RobotArm3 extends ViewPU {
     set con_height2(newValue: number) {
         this.__con_height2.set(newValue);
     }
+    //序列号
+    private __sn: ObservedPropertySimplePU<string>;
+    get sn() {
+        return this.__sn.get();
+    }
+    set sn(newValue: string) {
+        this.__sn.set(newValue);
+    }
+    //固定版本
+    private __version: ObservedPropertySimplePU<string>;
+    get version() {
+        return this.__version.get();
+    }
+    set version(newValue: string) {
+        this.__version.set(newValue);
+    }
+    //系统时钟
+    private __time: ObservedPropertySimplePU<number>;
+    get time() {
+        return this.__time.get();
+    }
+    set time(newValue: number) {
+        this.__time.set(newValue);
+    }
+    //设备uid
+    private __uid: ObservedPropertySimplePU<string>;
+    get uid() {
+        return this.__uid.get();
+    }
+    set uid(newValue: string) {
+        this.__uid.set(newValue);
+    }
+    //设备警报
+    private __alarms: ObservedPropertySimplePU<number>;
+    get alarms() {
+        return this.__alarms.get();
+    }
+    set alarms(newValue: number) {
+        this.__alarms.set(newValue);
+    }
+    private __node_id_alarms: ObservedPropertySimplePU<string>;
+    get node_id_alarms() {
+        return this.__node_id_alarms.get();
+    }
+    set node_id_alarms(newValue: string) {
+        this.__node_id_alarms.set(newValue);
+    }
+    private alarmTimer: number;
+    //使能
+    private __endAbled: ObservedPropertySimplePU<boolean>;
+    get endAbled() {
+        return this.__endAbled.get();
+    }
+    set endAbled(newValue: boolean) {
+        this.__endAbled.set(newValue);
+    }
+    private __node_id_endAbled: ObservedPropertySimplePU<string>;
+    get node_id_endAbled() {
+        return this.__node_id_endAbled.get();
+    }
+    set node_id_endAbled(newValue: string) {
+        this.__node_id_endAbled.set(newValue);
+    }
+    //清除警报
+    private __node_id_clearAlarms: ObservedPropertySimplePU<string>;
+    get node_id_clearAlarms() {
+        return this.__node_id_clearAlarms.get();
+    }
+    set node_id_clearAlarms(newValue: string) {
+        this.__node_id_clearAlarms.set(newValue);
+    }
+    //末端执行
+    private __node_id_end: ObservedPropertySimplePU<string>;
+    get node_id_end() {
+        return this.__node_id_end.get();
+    }
+    set node_id_end(newValue: string) {
+        this.__node_id_end.set(newValue);
+    }
+    //是否抓取
+    private __isCatch: ObservedPropertySimplePU<boolean>;
+    get isCatch() {
+        return this.__isCatch.get();
+    }
+    set isCatch(newValue: boolean) {
+        this.__isCatch.set(newValue);
+    }
+    private __node: SynchedPropertySimpleOneWayPU<Data>;
+    get node() {
+        return this.__node.get();
+    }
+    set node(newValue: Data) {
+        this.__node.set(newValue);
+    }
+    async onNodeChange(): Promise<void> {
+        if (this.node.id && this.node.node_id) {
+            //先找到机械臂下的所有结点
+            const nodes: Node[] | null = await getNodeOther(this.node.id, this.node.node_id);
+            if (nodes && nodes.length > 0) {
+                //获取设备信息
+                const infoNodes: Node[] | null = await getNodeOther(this.node.id, nodes[1].node_id);
+                if (infoNodes && infoNodes.length > 0) {
+                    //获取系统时钟
+                    const time: number | null = await getRobotArmTime(this.node.id, infoNodes[4].node_id);
+                    if (time) {
+                        this.time = time;
+                    }
+                    else {
+                        this.showSystemToast('获取系统时间失败');
+                    }
+                    //获取uid
+                    const uid: string | null = await getRobotArmUid(this.node.id, infoNodes[5].node_id);
+                    if (uid) {
+                        this.uid = uid;
+                    }
+                    else {
+                        this.showSystemToast('获取uid失败');
+                    }
+                }
+                //获取警报node_id
+                const alarmsNodes: Node[] | null = await getNodeOther(this.node.id, nodes[2].node_id);
+                if (alarmsNodes && alarmsNodes.length > 0) {
+                    //获取是否存在警报和警报信息
+                    this.node_id_alarms = alarmsNodes[1].node_id;
+                    //获取清除警报node_id
+                    this.node_id_clearAlarms = alarmsNodes[4].node_id;
+                }
+                //获取末端执行node_id
+                const endNodes1: Node[] | null = await getNodeOther(this.node.id, nodes[5].node_id);
+                if (endNodes1 && endNodes1.length > 0) {
+                    const endNodes2: Node[] | null = await getNodeOther(this.node.id, endNodes1[3].node_id);
+                    if (endNodes2 && endNodes2.length > 0) {
+                        this.node_id_end = endNodes2[3].node_id;
+                        this.node_id_endAbled = endNodes2[4].node_id;
+                    }
+                }
+            }
+        }
+    }
+    //获取警报
+    async getAlarms(): Promise<void> {
+        if (this.node.id && this.node.node_id && this.node_id_alarms) {
+            const num: number | null = await getRobotArmAlarms(this.node.id, this.node_id_alarms);
+            if (num !== null) {
+                this.alarms = num;
+            }
+        }
+    }
+    //清除警报
+    async clearAlarms(): Promise<void> {
+        if (this.node.id && this.node.node_id && this.node_id_clearAlarms) {
+            const isClear: boolean | null = await clearRobotArmAlarms(this.node.id, this.node_id_clearAlarms);
+            if (isClear) {
+                this.showSystemToast('清除警报成功');
+            }
+            else {
+                this.showSystemToast('清除警报失败');
+            }
+        }
+    }
+    //获取机械臂使能状态
+    async getEndStatus(): Promise<void> {
+        if (this.node.id && this.node.node_id && this.node_id_endAbled) {
+            const endStatus: boolean[] | null = await getEndStatus(this.node.id, this.node_id_endAbled);
+            if (endStatus && endStatus.length > 0) {
+                if (endStatus[0] === true && endStatus[1] === false) {
+                    //有使能(还未抓取)
+                    this.endAbled = true;
+                    this.isCatch = false;
+                }
+                else if (endStatus[0] === false && endStatus[1] === false) {
+                    //无使能（无法抓取）
+                    this.endAbled = false;
+                    this.isCatch = false;
+                }
+                else if (endStatus[0] === true && endStatus[1] === true) {
+                    //有使能（已抓取）
+                    this.endAbled = true;
+                    this.isCatch = true;
+                }
+            }
+        }
+    }
+    //赋予末端使能
+    async setEndAble(): Promise<void> {
+        if (this.node.id && this.node.node_id && this.node_id_end) {
+            const isSet: boolean | null = await setEndAble(this.node.id, this.node_id_end, "true false");
+            if (isSet) {
+                this.showSystemToast('赋予末端使能成功');
+            }
+            else {
+                this.showSystemToast('赋予末端使能失败');
+            }
+        }
+    }
+    //清除末端使能
+    async clearEndAble(): Promise<void> {
+        if (this.node.id && this.node.node_id && this.node_id_end) {
+            const isSet: boolean | null = await clearEndAble(this.node.id, this.node_id_end, "false false");
+            if (isSet) {
+                this.showSystemToast('清除末端使能成功');
+            }
+            else {
+                this.showSystemToast('清除末端使能失败');
+            }
+        }
+    }
+    //控制机械臂末端
+    async setEndControl(action: string): Promise<boolean> {
+        if (this.node.id && this.node.node_id && this.node_id_end) {
+            const isSet: boolean | null = await endControl(this.node.id, this.node_id_end, action);
+            if (isSet) {
+                return isSet;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+    }
+    async aboutToAppear(): Promise<void> {
+        await this.onNodeChange();
+        if (this.alarmTimer === -1) {
+            await this.getAlarms();
+            await this.getEndStatus();
+            this.alarmTimer = setInterval(async () => {
+                await this.getAlarms();
+                await this.getEndStatus();
+            }, 1000);
+        }
+    }
+    aboutToDisappear() {
+        // 清理 setTimeout 创建的定时器
+        if (this.idleTimer !== -1)
+            clearTimeout(this.idleTimer);
+        if (this.alarmTimer !== -1) {
+            clearInterval(this.alarmTimer);
+            this.alarmTimer = -1;
+        }
+    }
+    private getStatusColor(status: boolean): Color {
+        if (status) {
+            return Color.Red;
+        }
+        else {
+            return Color.Green;
+        }
+    }
     private increaseSpeedX() {
         this.data.xValue += this.data.step_xyz;
     }
@@ -340,17 +713,21 @@ export class RobotArm3 extends ViewPU {
     set isHover(newValue: boolean) {
         this.__isHover.set(newValue);
     }
-    private getStatusColor(): Color {
-        switch (this.data.statusText) {
-            case '运行中':
-                return Color.Orange;
-            case '离线中':
-                return Color.Gray;
-            case '空闲中':
-                return Color.Green;
-            default:
-                return Color.Gray;
-        }
+    // 用于控制按钮按压动画的状态
+    private __isPressed1: ObservedPropertySimplePU<boolean>;
+    get isPressed1() {
+        return this.__isPressed1.get();
+    }
+    set isPressed1(newValue: boolean) {
+        this.__isPressed1.set(newValue);
+    }
+    //用于追踪鼠标悬浮状态
+    private __isHover1: ObservedPropertySimplePU<boolean>;
+    get isHover1() {
+        return this.__isHover1.get();
+    }
+    set isHover1(newValue: boolean) {
+        this.__isHover1.set(newValue);
     }
     private getShadowOptions(): ShadowOptions {
         if (this.isHover && !this.isPressed) {
@@ -396,34 +773,23 @@ export class RobotArm3 extends ViewPU {
     set idleTimer(newValue: number) {
         this.__idleTimer.set(newValue);
     }
-    onDisappear() {
-        // 清理 setTimeout 创建的定时器
-        if (this.idleTimer !== -1)
-            clearTimeout(this.idleTimer);
-    }
-    private activateArm() {
-        if (this.data.statusText === '空闲中') {
-            this.data.statusText = '运行中';
-        }
-    }
-    private resetIdleTimer() {
-        if (this.idleTimer !== -1) {
-            clearTimeout(this.idleTimer);
-        }
-        if (this.data.statusText === '运行中') {
-            this.idleTimer = setTimeout(() => {
-                if (this.data.statusText === '运行中') {
-                    this.data.statusText = '空闲中';
-                }
-            }, 10000);
-        }
-    }
     private __isPreviewVisible: ObservedPropertySimplePU<boolean>;
     get isPreviewVisible() {
         return this.__isPreviewVisible.get();
     }
     set isPreviewVisible(newValue: boolean) {
         this.__isPreviewVisible.set(newValue);
+    }
+    private formattedTime(time: number): string {
+        if (!time || time <= 0) {
+            return 'N/A';
+        }
+        const date = new Date(time * 1000);
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const seconds = date.getSeconds().toString().padStart(2, '0');
+        // 拼接成 "HH:mm:ss" 格式
+        return `${hours}:${minutes}:${seconds}`;
     }
     private buildImagePreview(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -533,7 +899,7 @@ export class RobotArm3 extends ViewPU {
                     Column.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //信息展示
-                        Column.create({ space: 20 });
+                        Column.create({ space: 12 });
                         //信息展示
                         Column.width('100%');
                         //信息展示
@@ -545,6 +911,55 @@ export class RobotArm3 extends ViewPU {
                         //信息展示
                         Column.padding({ left: 10 });
                     }, Column);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        //机械臂uid
+                        Row.create();
+                        //机械臂uid
+                        Row.width('100%');
+                        //机械臂uid
+                        Row.justifyContent(FlexAlign.Center);
+                        //机械臂uid
+                        Row.alignItems(VerticalAlign.Center);
+                    }, Row);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create('UID：');
+                        Text.fontWeight(FontWeight.Bold);
+                        Text.fontSize(17);
+                        Text.fontColor(Color.White);
+                    }, Text);
+                    Text.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create(this.uid);
+                        Text.fontColor(Color.White);
+                        Text.fontSize(12);
+                    }, Text);
+                    Text.pop();
+                    //机械臂uid
+                    Row.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        //机械臂序列号
+                        Row.create();
+                        //机械臂序列号
+                        Row.width('100%');
+                        //机械臂序列号
+                        Row.justifyContent(FlexAlign.Center);
+                        //机械臂序列号
+                        Row.alignItems(VerticalAlign.Center);
+                    }, Row);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create('序列号：');
+                        Text.fontWeight(FontWeight.Bold);
+                        Text.fontSize(17);
+                        Text.fontColor(Color.White);
+                    }, Text);
+                    Text.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create(this.sn);
+                        Text.fontColor(Color.White);
+                    }, Text);
+                    Text.pop();
+                    //机械臂序列号
+                    Row.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //机械臂名称
                         Row.create();
@@ -558,7 +973,7 @@ export class RobotArm3 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('名称：');
                         Text.fontWeight(FontWeight.Bold);
-                        Text.fontSize(20);
+                        Text.fontSize(17);
                         Text.fontColor(Color.White);
                     }, Text);
                     Text.pop();
@@ -570,24 +985,72 @@ export class RobotArm3 extends ViewPU {
                     //机械臂名称
                     Row.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        //机械臂状态
+                        //机械臂固定版本
                         Row.create();
-                        //机械臂状态
+                        //机械臂固定版本
                         Row.width('100%');
-                        //机械臂状态
+                        //机械臂固定版本
                         Row.justifyContent(FlexAlign.Center);
-                        //机械臂状态
+                        //机械臂固定版本
                         Row.alignItems(VerticalAlign.Center);
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create('运作状态：');
+                        Text.create('固定版本：');
+                        Text.fontWeight(FontWeight.Bold);
+                        Text.fontSize(17);
+                        Text.fontColor(Color.White);
+                    }, Text);
+                    Text.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create(this.version);
+                        Text.fontColor(Color.White);
+                    }, Text);
+                    Text.pop();
+                    //机械臂固定版本
+                    Row.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        //机械臂系统时间
+                        Row.create();
+                        //机械臂系统时间
+                        Row.width('100%');
+                        //机械臂系统时间
+                        Row.justifyContent(FlexAlign.Center);
+                        //机械臂系统时间
+                        Row.alignItems(VerticalAlign.Center);
+                    }, Row);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create('系统时间：');
+                        Text.fontWeight(FontWeight.Bold);
+                        Text.fontSize(17);
+                        Text.fontColor(Color.White);
+                    }, Text);
+                    Text.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create(this.formattedTime(this.time));
+                        Text.fontColor(Color.White);
+                    }, Text);
+                    Text.pop();
+                    //机械臂系统时间
+                    Row.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        //机械臂使能
+                        Row.create();
+                        //机械臂使能
+                        Row.width('100%');
+                        //机械臂使能
+                        Row.justifyContent(FlexAlign.Center);
+                        //机械臂使能
+                        Row.alignItems(VerticalAlign.Center);
+                    }, Row);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create('使能状态：');
                         Text.fontWeight(FontWeight.Bold);
                         Text.fontSize(20);
                         Text.fontColor(Color.White);
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create(this.data.statusText);
+                        Text.create(this.endAbled ? '有使能' : '无使能');
                         Text.fontColor(Color.White);
                     }, Text);
                     Text.pop();
@@ -596,216 +1059,159 @@ export class RobotArm3 extends ViewPU {
                         Circle.margin({ left: 10 });
                         Circle.width(16);
                         Circle.height(16);
-                        Circle.fill(this.getStatusColor());
+                        Circle.fill(this.getStatusColor(!this.endAbled));
                     }, Circle);
-                    //机械臂状态
+                    //机械臂使能
                     Row.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        //末端状态
+                        //机械臂警报
                         Row.create();
-                        //末端状态
+                        //机械臂警报
                         Row.width('100%');
-                        //末端状态
+                        //机械臂警报
                         Row.justifyContent(FlexAlign.Center);
-                        //末端状态
+                        //机械臂警报
                         Row.alignItems(VerticalAlign.Center);
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create('末端状态：');
+                        Text.create('警报原因：');
                         Text.fontWeight(FontWeight.Bold);
                         Text.fontSize(20);
                         Text.fontColor(Color.White);
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create(this.data.endStatusText);
+                        Text.create(this.alarms === 0 ? '无报警' : this.alarms + '');
                         Text.fontColor(Color.White);
                     }, Text);
                     Text.pop();
-                    //末端状态
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Circle.create();
+                        Circle.margin({ left: 10 });
+                        Circle.width(16);
+                        Circle.height(16);
+                        Circle.fill(this.getStatusColor(this.alarms !== 0));
+                    }, Circle);
+                    //机械臂警报
                     Row.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        //负载状态
                         Row.create();
-                        //负载状态
                         Row.width('100%');
-                        //负载状态
-                        Row.justifyContent(FlexAlign.Center);
-                        //负载状态
+                        Row.justifyContent(FlexAlign.SpaceAround);
                         Row.alignItems(VerticalAlign.Center);
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create('负载：');
-                        Text.fontWeight(FontWeight.Bold);
-                        Text.fontSize(20);
-                        Text.fontColor(Color.White);
-                    }, Text);
-                    Text.pop();
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create(this.data.loadText);
-                        Text.fontColor(Color.White);
-                    }, Text);
-                    Text.pop();
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        If.create();
-                        if (this.data.loadText === '有物品') {
-                            this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create({ "id": 16777232, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                                    Image.width(20);
-                                    Image.height(20);
-                                    Image.margin({ left: 10 });
-                                }, Image);
-                            });
-                        }
-                        else {
-                            this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create({ "id": 16777257, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                                    Image.width(20);
-                                    Image.height(20);
-                                    Image.margin({ left: 10 });
-                                }, Image);
-                            });
-                        }
-                    }, If);
-                    If.pop();
-                    //负载状态
-                    Row.pop();
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        //控制按钮
+                        //赋予和清除使能按钮
                         Row.create();
                         Context.animation({ duration: 150, curve: Curve.EaseOut });
-                        //控制按钮
-                        Row.width('80%');
-                        //控制按钮
-                        Row.height(50);
-                        //控制按钮
-                        Row.padding(10);
-                        //控制按钮
+                        //赋予和清除使能按钮
+                        Row.width('45%');
+                        //赋予和清除使能按钮
+                        Row.height(40);
+                        //赋予和清除使能按钮
+                        Row.padding(8);
+                        //赋予和清除使能按钮
                         Row.justifyContent(FlexAlign.Center);
-                        //控制按钮
+                        //赋予和清除使能按钮
                         Row.alignItems(VerticalAlign.Center);
-                        //控制按钮
-                        Row.backgroundColor(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 'rgba(255, 80, 80, 0.4)' : 'rgba(0, 200, 83, 0.5)');
-                        //控制按钮
-                        Row.borderRadius(25);
-                        //控制按钮
+                        //赋予和清除使能按钮
+                        Row.backgroundColor(this.endAbled ? 'rgba(255, 0, 0, 0.75)' : 'rgba(0, 200, 83, 0.5)');
+                        //赋予和清除使能按钮
+                        Row.borderRadius(20);
+                        //赋予和清除使能按钮
                         Row.border({
                             width: 1,
                             color: 'rgba(255, 255, 255, 0.3)'
                         });
-                        //控制按钮
+                        //赋予和清除使能按钮
                         Row.margin({ top: 20 });
-                        //控制按钮
+                        //赋予和清除使能按钮
                         Row.shadow(this.getShadowOptions());
-                        //控制按钮
+                        //赋予和清除使能按钮
                         Row.scale({
                             x: this.getScaleValue(),
                             y: this.getScaleValue()
                         });
-                        //控制按钮
-                        Row.opacity(this.isPressed ? 0.8 : 1.0);
-                        //控制按钮
+                        //赋予和清除使能按钮
+                        Row.opacity(this.isPressed1 ? 0.8 : 1.0);
+                        //赋予和清除使能按钮
                         Row.onHover((isHover: boolean) => {
-                            this.isHover = isHover;
+                            this.isHover1 = isHover;
                         });
-                        //控制按钮
+                        //赋予和清除使能按钮
                         Row.onTouch((event: TouchEvent) => {
                             event.stopPropagation();
                             if (event.type === TouchType.Down) {
-                                this.isPressed = true;
+                                this.isPressed1 = true;
                             }
                             if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-                                this.isPressed = false;
-                                //判断当前状态，准备不同的对话框信息
-                                const isCurrentlyRunning = this.data.statusText === '运行中' || this.data.statusText === '空闲中';
-                                const message = isCurrentlyRunning ? '您确定要关闭二号机械臂吗？' : '您确定要启动二号机械臂吗？';
-                                AlertDialog.show({
-                                    title: '操作确认',
-                                    message: message,
-                                    autoCancel: true,
-                                    alignment: DialogAlignment.Center,
-                                    buttons: [
-                                        {
-                                            value: '取消',
-                                            action: () => {
-                                                // 用户点击取消，不做任何事
-                                                console.info('操作已取消');
-                                            }
-                                        },
-                                        {
-                                            value: '确认',
-                                            fontColor: Color.Red,
-                                            action: () => {
-                                                if (isCurrentlyRunning) {
-                                                    //创建一个新的、干净的 RobotArmState 实例
-                                                    const newData = new RobotArmState();
-                                                    //将这个全新的、准备好的对象赋值给 this.data
-                                                    //因为原来的RobotArmState对象初始值就是关闭的状态
-                                                    this.data = newData;
-                                                    this.showSystemToast('关闭成功');
-                                                    //关闭时清除定时器
-                                                    if (this.idleTimer !== -1) {
-                                                        clearTimeout(this.idleTimer);
-                                                        this.idleTimer = -1;
-                                                    }
-                                                    this.addLog('warning', '关闭了二号传送带，停止了对二号传送带的操作。', true);
-                                                }
-                                                else {
-                                                    this.data.statusText = '空闲中';
-                                                    this.showSystemToast('启动成功');
-                                                    this.addLog('info', '启动了二号传送带，要对二号传送带进行操作。', true);
-                                                }
-                                            }
-                                        }
-                                    ]
-                                });
+                                this.isPressed1 = false;
+                                if (this.endAbled) {
+                                    //清除使能
+                                    this.clearEndAble();
+                                }
+                                else {
+                                    //赋予使能
+                                    this.setEndAble();
+                                }
                             }
                         });
                         Context.animation(null);
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        If.create();
-                        if (this.data.statusText === '运行中' || this.data.statusText === '空闲中') {
-                            this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create({ "id": 16777268, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                                    Image.width(22);
-                                    Image.height(22);
-                                    Image.fillColor(Color.White);
-                                }, Image);
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Text.create('停止');
-                                    Text.fontSize(18);
-                                    Text.fontWeight(FontWeight.Bold);
-                                    Text.fontColor(Color.White);
-                                    Text.margin({ left: 8 });
-                                }, Text);
-                                Text.pop();
-                            });
-                        }
-                        else {
-                            this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create({ "id": 16777267, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                                    Image.width(24);
-                                    Image.height(24);
-                                    Image.fillColor(Color.White);
-                                }, Image);
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Text.create('启动');
-                                    Text.fontSize(18);
-                                    Text.fontWeight(FontWeight.Bold);
-                                    Text.fontColor(Color.White);
-                                    Text.margin({ left: 8 });
-                                }, Text);
-                                Text.pop();
-                            });
-                        }
-                    }, If);
-                    If.pop();
-                    //控制按钮
+                        Text.create(this.endAbled ? '清除使能' : '赋予使能');
+                        Text.fontSize(15);
+                        Text.fontWeight(FontWeight.Bold);
+                        Text.fontColor(Color.White);
+                        Text.margin({ left: 8 });
+                    }, Text);
+                    Text.pop();
+                    //赋予和清除使能按钮
+                    Row.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        //清除警报按钮
+                        Button.createWithLabel('清除警报');
+                        Context.animation({ duration: 150, curve: Curve.EaseOut });
+                        //清除警报按钮
+                        Button.fontSize(15);
+                        //清除警报按钮
+                        Button.fontWeight(FontWeight.Bold);
+                        //清除警报按钮
+                        Button.fontColor(Color.White);
+                        //清除警报按钮
+                        Button.enabled(this.alarms !== 0);
+                        //清除警报按钮
+                        Button.width('45%');
+                        //清除警报按钮
+                        Button.height(40);
+                        //清除警报按钮
+                        Button.padding(8);
+                        //清除警报按钮
+                        Button.backgroundColor(this.alarms === 0 ? 'rgba(173, 170, 170, 0.40)' : 'rgba(0, 200, 83, 0.5)');
+                        //清除警报按钮
+                        Button.borderRadius(20);
+                        //清除警报按钮
+                        Button.border({
+                            width: 1,
+                            color: 'rgba(255, 255, 255, 0.3)'
+                        });
+                        //清除警报按钮
+                        Button.margin({ top: 20 });
+                        //清除警报按钮
+                        Button.shadow(this.getShadowOptions());
+                        //清除警报按钮
+                        Button.scale({
+                            x: this.getScaleValue(),
+                            y: this.getScaleValue()
+                        });
+                        //清除警报按钮
+                        Button.onClick(() => {
+                            this.clearAlarms();
+                        });
+                        Context.animation(null);
+                    }, Button);
+                    //清除警报按钮
+                    Button.pop();
                     Row.pop();
                     //信息展示
                     Column.pop();
@@ -875,10 +1281,6 @@ export class RobotArm3 extends ViewPU {
                         });
                         //jump高度控制
                         Row.backdropBlur(8);
-                        //jump高度控制
-                        Row.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.4);
-                        //jump高度控制
-                        Row.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
                         Context.animation(null);
                         //jump高度控制
                         Row.shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' });
@@ -892,9 +1294,7 @@ export class RobotArm3 extends ViewPU {
                         Button.height(this.button_size2);
                         Button.backgroundColor(Color.Transparent);
                         Button.onClick(() => {
-                            this.activateArm();
                             this.decreaseSpeedJump();
-                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -942,9 +1342,7 @@ export class RobotArm3 extends ViewPU {
                         Button.height(this.button_size2);
                         Button.backgroundColor(Color.Transparent);
                         Button.onClick(() => {
-                            this.activateArm();
                             this.increaseSpeedJump();
-                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -979,8 +1377,6 @@ export class RobotArm3 extends ViewPU {
                             color: 'rgba(255, 255, 255, 0.3)' // 添加微妙的白色边框
                         });
                         Row.backdropBlur(8);
-                        Row.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.4);
-                        Row.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
                         Context.animation(null);
                         Row.shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' });
                     }, Row);
@@ -993,9 +1389,7 @@ export class RobotArm3 extends ViewPU {
                         Button.height(this.button_size2);
                         Button.backgroundColor(Color.Transparent);
                         Button.onClick(() => {
-                            this.activateArm();
                             this.decreaseSpeedZZ();
-                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1047,9 +1441,7 @@ export class RobotArm3 extends ViewPU {
                         Button.height(this.button_size2);
                         Button.backgroundColor(Color.Transparent);
                         Button.onClick(() => {
-                            this.activateArm();
                             this.increaseSpeedZZ();
-                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1083,8 +1475,6 @@ export class RobotArm3 extends ViewPU {
                             color: 'rgba(255, 255, 255, 0.3)' // 添加微妙的白色边框
                         });
                         Row.backdropBlur(8);
-                        Row.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.4);
-                        Row.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
                         Context.animation(null);
                         Row.shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' });
                     }, Row);
@@ -1097,9 +1487,7 @@ export class RobotArm3 extends ViewPU {
                         Button.height(this.button_size2);
                         Button.backgroundColor(Color.Transparent);
                         Button.onClick(() => {
-                            this.activateArm();
                             this.decreaseSpeedRR();
-                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1151,9 +1539,7 @@ export class RobotArm3 extends ViewPU {
                         Button.height(this.button_size2);
                         Button.backgroundColor(Color.Transparent);
                         Button.onClick(() => {
-                            this.activateArm();
                             this.increaseSpeedRR();
-                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1173,21 +1559,33 @@ export class RobotArm3 extends ViewPU {
                         //抓取释放按钮
                         Button.height(this.catch_size_height2);
                         //抓取释放按钮
-                        Button.onClick(() => {
-                            this.activateArm();
+                        Button.enabled(this.endAbled);
+                        //抓取释放按钮
+                        Button.backgroundColor(!this.endAbled ? 'rgba(173, 170, 170, 0.40)' : 'rgba(0, 200, 83, 0.5)');
+                        //抓取释放按钮
+                        Button.onClick(async () => {
                             // 切换末端状态
-                            if (this.data.endStatusText === '释放') {
-                                this.data.endStatusText = '抓取';
-                                this.showSystemToast('末端已抓取');
+                            if (this.isCatch) {
+                                //释放逻辑
+                                const isSet: boolean = await this.setEndControl("true false");
+                                if (isSet) {
+                                    this.showSystemToast('释放成功');
+                                }
+                                else {
+                                    this.showSystemToast('释放失败');
+                                }
                             }
                             else {
-                                this.data.endStatusText = '释放';
-                                this.showSystemToast('末端已释放');
+                                //抓取逻辑
+                                const isSet: boolean = await this.setEndControl("true true");
+                                if (isSet) {
+                                    this.showSystemToast('抓取成功');
+                                }
+                                else {
+                                    this.showSystemToast('抓取失败');
+                                }
                             }
-                            this.resetIdleTimer();
                         });
-                        //抓取释放按钮
-                        Button.backgroundColor('rgba(255, 255, 255, 0.2)');
                         //抓取释放按钮
                         Button.borderRadius(30);
                         //抓取释放按钮
@@ -1197,10 +1595,6 @@ export class RobotArm3 extends ViewPU {
                         });
                         //抓取释放按钮
                         Button.backdropBlur(12);
-                        //抓取释放按钮
-                        Button.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.8);
-                        //抓取释放按钮
-                        Button.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
                         Context.animation(null);
                         //抓取释放按钮
                         Button.shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' });
@@ -1212,7 +1606,7 @@ export class RobotArm3 extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         // 根据状态显示不同文本
-                        Text.create(this.data.endStatusText === '释放' ? '点击抓取' : '点击释放');
+                        Text.create(!this.isCatch ? '点击抓取' : '点击释放');
                         // 根据状态显示不同文本
                         Text.fontSize(this.catch_font_size2);
                         // 根据状态显示不同文本
@@ -1249,10 +1643,6 @@ export class RobotArm3 extends ViewPU {
                         });
                         //停止按钮
                         Button.backdropBlur(12);
-                        //停止按钮
-                        Button.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.8);
-                        //停止按钮
-                        Button.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
                         Context.animation(null);
                         //停止按钮
                         Button.shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' });
@@ -1285,10 +1675,6 @@ export class RobotArm3 extends ViewPU {
                         });
                         //急停按钮
                         Button.backdropBlur(12);
-                        //急停按钮
-                        Button.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.8);
-                        //急停按钮
-                        Button.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
                         Context.animation(null);
                         //急停按钮
                         Button.shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' });
@@ -1344,14 +1730,12 @@ export class RobotArm3 extends ViewPU {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
                                 let componentCall = new RoboticArmWorkRangeView(this, {
-                                    data: this.__data,
-                                    onActivate: this.activateArm.bind(this)
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm3.ets", line: 766, col: 17 });
+                                    data: this.__data
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm3.ets", line: 930, col: 17 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
-                                        data: this.data,
-                                        onActivate: this.activateArm.bind(this)
+                                        data: this.data
                                     };
                                 };
                                 componentCall.paramsGenerator_ = paramsLambda;
@@ -1398,8 +1782,6 @@ export class RobotArm3 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create({ space: 40 });
                         Row.width('100%');
-                        Row.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.4);
-                        Row.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('方位控制：');
@@ -1462,10 +1844,6 @@ export class RobotArm3 extends ViewPU {
                         });
                         //控制x轴（左右）
                         Row.backdropBlur(8);
-                        //控制x轴（左右）
-                        Row.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.4);
-                        //控制x轴（左右）
-                        Row.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
                         Context.animation(null);
                         //控制x轴（左右）
                         Row.shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' });
@@ -1479,9 +1857,7 @@ export class RobotArm3 extends ViewPU {
                         Button.height(this.button_size);
                         Button.backgroundColor(Color.Transparent);
                         Button.onClick(() => {
-                            this.activateArm(); //激活机械臂
                             this.decreaseSpeedX();
-                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1533,9 +1909,7 @@ export class RobotArm3 extends ViewPU {
                         Button.height(this.button_size);
                         Button.backgroundColor(Color.Transparent);
                         Button.onClick(() => {
-                            this.activateArm();
                             this.increaseSpeedX();
-                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1568,10 +1942,6 @@ export class RobotArm3 extends ViewPU {
                         });
                         //y控制（前后）
                         Row.backdropBlur(8);
-                        //y控制（前后）
-                        Row.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.4);
-                        //y控制（前后）
-                        Row.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
                         Context.animation(null);
                         //y控制（前后）
                         Row.shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' });
@@ -1585,9 +1955,7 @@ export class RobotArm3 extends ViewPU {
                         Button.height(this.button_size);
                         Button.backgroundColor(Color.Transparent);
                         Button.onClick(() => {
-                            this.activateArm();
                             this.decreaseSpeedY();
-                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1639,9 +2007,7 @@ export class RobotArm3 extends ViewPU {
                         Button.height(this.button_size);
                         Button.backgroundColor(Color.Transparent);
                         Button.onClick(() => {
-                            this.activateArm();
                             this.increaseSpeedY();
-                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1674,10 +2040,6 @@ export class RobotArm3 extends ViewPU {
                         });
                         //z轴控制（上下）
                         Row.backdropBlur(8);
-                        //z轴控制（上下）
-                        Row.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.4);
-                        //z轴控制（上下）
-                        Row.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
                         Context.animation(null);
                         //z轴控制（上下）
                         Row.shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' });
@@ -1691,9 +2053,7 @@ export class RobotArm3 extends ViewPU {
                         Button.height(this.button_size);
                         Button.backgroundColor(Color.Transparent);
                         Button.onClick(() => {
-                            this.activateArm();
                             this.decreaseSpeedZ();
-                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1745,9 +2105,7 @@ export class RobotArm3 extends ViewPU {
                         Button.height(this.button_size);
                         Button.backgroundColor(Color.Transparent);
                         Button.onClick(() => {
-                            this.activateArm();
                             this.increaseSpeedZ();
-                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1762,8 +2120,6 @@ export class RobotArm3 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create({ space: 40 });
                         Row.width('100%');
-                        Row.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.4);
-                        Row.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create('角度控制：');
@@ -1826,10 +2182,6 @@ export class RobotArm3 extends ViewPU {
                         });
                         //r轴控制（角度）
                         Row.backdropBlur(8);
-                        //r轴控制（角度）
-                        Row.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.4);
-                        //r轴控制（角度）
-                        Row.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
                         Context.animation(null);
                         //r轴控制（角度）
                         Row.shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' });
@@ -1843,9 +2195,7 @@ export class RobotArm3 extends ViewPU {
                         Button.height(this.button_size);
                         Button.backgroundColor(Color.Transparent);
                         Button.onClick(() => {
-                            this.activateArm();
                             this.decreaseSpeedR();
-                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1897,9 +2247,7 @@ export class RobotArm3 extends ViewPU {
                         Button.height(this.button_size);
                         Button.backgroundColor(Color.Transparent);
                         Button.onClick(() => {
-                            this.activateArm();
                             this.increaseSpeedR();
-                            this.resetIdleTimer();
                         });
                     }, Button);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1913,8 +2261,6 @@ export class RobotArm3 extends ViewPU {
                     Row.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
-                        Row.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.4);
-                        Row.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
                         Row.width('100%');
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1937,21 +2283,33 @@ export class RobotArm3 extends ViewPU {
                         //抓取释放按钮
                         Button.height(this.catch_size_height);
                         //抓取释放按钮
-                        Button.onClick(() => {
-                            this.activateArm();
+                        Button.enabled(this.endAbled);
+                        //抓取释放按钮
+                        Button.backgroundColor(!this.endAbled ? 'rgba(173, 170, 170, 0.40)' : 'rgba(0, 200, 83, 0.5)');
+                        //抓取释放按钮
+                        Button.onClick(async () => {
                             // 切换末端状态
-                            if (this.data.endStatusText === '释放') {
-                                this.data.endStatusText = '抓取';
-                                this.showSystemToast('末端已抓取');
+                            if (this.isCatch) {
+                                //释放逻辑
+                                const isSet: boolean = await this.setEndControl("true false");
+                                if (isSet) {
+                                    this.showSystemToast('释放成功');
+                                }
+                                else {
+                                    this.showSystemToast('释放失败');
+                                }
                             }
                             else {
-                                this.data.endStatusText = '释放';
-                                this.showSystemToast('末端已释放');
+                                //抓取逻辑
+                                const isSet: boolean = await this.setEndControl("true true");
+                                if (isSet) {
+                                    this.showSystemToast('抓取成功');
+                                }
+                                else {
+                                    this.showSystemToast('抓取失败');
+                                }
                             }
-                            this.resetIdleTimer();
                         });
-                        //抓取释放按钮
-                        Button.backgroundColor('rgba(255, 255, 255, 0.2)');
                         //抓取释放按钮
                         Button.borderRadius(30);
                         //抓取释放按钮
@@ -1961,10 +2319,6 @@ export class RobotArm3 extends ViewPU {
                         });
                         //抓取释放按钮
                         Button.backdropBlur(12);
-                        //抓取释放按钮
-                        Button.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.8);
-                        //抓取释放按钮
-                        Button.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
                         Context.animation(null);
                         //抓取释放按钮
                         Button.shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' });
@@ -1976,7 +2330,7 @@ export class RobotArm3 extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         // 根据状态显示不同文本
-                        Text.create(this.data.endStatusText === '释放' ? '点击抓取' : '点击释放');
+                        Text.create(!this.isCatch ? '点击抓取' : '点击释放');
                         // 根据状态显示不同文本
                         Text.fontSize(this.catch_font_size);
                         // 根据状态显示不同文本
@@ -2013,10 +2367,6 @@ export class RobotArm3 extends ViewPU {
                         });
                         //停止按钮
                         Button.backdropBlur(12);
-                        //停止按钮
-                        Button.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.8);
-                        //停止按钮
-                        Button.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
                         Context.animation(null);
                         //停止按钮
                         Button.shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' });
@@ -2049,10 +2399,6 @@ export class RobotArm3 extends ViewPU {
                         });
                         //急停按钮
                         Button.backdropBlur(12);
-                        //急停按钮
-                        Button.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.8);
-                        //急停按钮
-                        Button.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
                         Context.animation(null);
                         //急停按钮
                         Button.shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' });
@@ -2069,8 +2415,6 @@ export class RobotArm3 extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             __Common__.create();
             __Common__.position({ top: 10, right: 10 });
-            __Common__.enabled(this.data.statusText === '运行中' || this.data.statusText === '空闲中');
-            __Common__.opacity(this.data.statusText === '运行中' || this.data.statusText === '空闲中' ? 1.0 : 0.4);
         }, __Common__);
         {
             this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -2086,7 +2430,7 @@ export class RobotArm3 extends ViewPU {
                                 this.data.isInfoCardVisible = !this.data.isInfoCardVisible;
                             });
                         }
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm3.ets", line: 1264, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm3.ets", line: 1399, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {

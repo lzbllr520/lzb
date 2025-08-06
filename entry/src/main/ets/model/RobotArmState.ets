@@ -12,9 +12,6 @@ export class RobotArmState {
   rValue:number=0
   rrValue:number=0
   jumpValue:number=0
-  statusText: string = '离线中'
-  endStatusText: string = '释放'
-  loadText: string = '无物品'
 
   //持久化界面动画执行信息
   isInfoCardVisible: boolean = false

@@ -16,10 +16,10 @@ interface MasterStation_Params {
 }
 import { ServerInfoView } from "@normalized:N&&&entry/src/main/ets/components/ServerInfoView&";
 import type { Server } from '../model/ServerState';
-import { IconTab } from "@normalized:N&&&entry/src/main/ets/components/IconTab&";
 import type { ConveyorState } from '../model/ConveyorState';
 import type { DollyState } from '../model/DollyState';
 import type { RobotArmState } from '../model/RobotArmState';
+import promptAction from "@ohos:promptAction";
 export class MasterStation extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -104,32 +104,6 @@ export class MasterStation extends ViewPU {
         this.__isLineRunning.set(newValue);
     }
     private addLog: (level: 'info' | 'warning' | 'error', message: string, shouldSave: boolean) => void;
-    private CustomIconTabBar(icon: Resource, isSelected: boolean, parent = null) {
-        {
-            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                if (isInitialRender) {
-                    let componentCall = new IconTab(this, {
-                        icon: icon,
-                        isSelected: isSelected
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/MasterStation.ets", line: 22, col: 5 });
-                    ViewPU.create(componentCall);
-                    let paramsLambda = () => {
-                        return {
-                            icon: icon,
-                            isSelected: isSelected
-                        };
-                    };
-                    componentCall.paramsGenerator_ = paramsLambda;
-                }
-                else {
-                    this.updateStateVarsOfChildByElmtId(elmtId, {
-                        icon: icon,
-                        isSelected: isSelected
-                    });
-                }
-            }, { name: "IconTab" });
-        }
-    }
     private __conveyorData1: SynchedPropertySimpleOneWayPU<ConveyorState>;
     get conveyorData1() {
         return this.__conveyorData1.get();
@@ -190,6 +164,7 @@ export class MasterStation extends ViewPU {
                     value: '确认',
                     fontColor: Color.Red,
                     action: () => {
+                        promptAction.showToast({ message: '关闭成功', bottom: '50%' });
                         this.isLineRunning = false;
                         this.addLog('warning', '停止产线运行', true);
                     }
@@ -215,39 +190,9 @@ export class MasterStation extends ViewPU {
                     value: '确认',
                     fontColor: Color.Red,
                     action: () => {
-                        //将所有独立的 @Link 状态文本放入一个数组中
-                        const allDeviceStatuses = [
-                            this.conveyorData1.statusText,
-                            this.conveyorData2.statusText,
-                            this.dollyData.statusText,
-                            this.robot1Data.statusText,
-                            this.robot2Data.statusText,
-                            this.robot3Data.statusText
-                        ];
-                        //检查这个数组中是否有任何一个状态不是“离线中”
-                        const isAnyDeviceNotOffline = allDeviceStatuses.some(status => status !== '离线中');
-                        if (isAnyDeviceNotOffline) {
-                            //有设备未进入离线状态，无法进入产线运作
-                            //进行弹窗提示
-                            AlertDialog.show({
-                                title: '操作提示',
-                                message: '有设备未进入离线状态，请前往设备管理界面中停止设备运作。',
-                                alignment: DialogAlignment.Center,
-                                autoCancel: true,
-                                buttons: [
-                                    {
-                                        value: '确定',
-                                        action: () => {
-                                            //无需做任何操作
-                                        }
-                                    }
-                                ]
-                            });
-                        }
-                        else {
-                            this.isLineRunning = true;
-                            this.addLog('info', '启动产线运行', true);
-                        }
+                        promptAction.showToast({ message: '启动成功!', bottom: '50%' });
+                        this.isLineRunning = true;
+                        this.addLog('info', '启动产线运行', true);
                     }
                 }
             ]
@@ -282,8 +227,103 @@ export class MasterStation extends ViewPU {
         Row.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (!this.servers || this.servers.length === 0) {
+            if (this.isLineRunning) {
                 this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        If.create();
+                        if (!this.servers || this.servers.length === 0) {
+                            this.ifElseBranchUpdateFunction(0, () => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    Column.create();
+                                    Column.width('100%');
+                                    Column.height('100%');
+                                    Column.justifyContent(FlexAlign.Center);
+                                }, Column);
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    Text.create('暂无服务器');
+                                    Text.fontColor(Color.White);
+                                    Text.fontWeight(FontWeight.Bolder);
+                                    Text.fontSize(30);
+                                    Text.opacity(0.8);
+                                }, Text);
+                                Text.pop();
+                                Column.pop();
+                            });
+                        }
+                        else {
+                            this.ifElseBranchUpdateFunction(1, () => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    Row.create();
+                                    Row.width('100%');
+                                    Row.layoutWeight(1);
+                                }, Row);
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    Tabs.create({
+                                        controller: this.controller,
+                                        barPosition: BarPosition.Start,
+                                        index: this.currentIndex
+                                    });
+                                    Tabs.margin({ left: 10 });
+                                    Tabs.vertical(true);
+                                    Tabs.barMode(BarMode.Fixed);
+                                    Tabs.barWidth(60);
+                                    Tabs.animationDuration(300);
+                                    Tabs.onChange((index: number) => {
+                                        this.currentIndex = index;
+                                    });
+                                    Tabs.layoutWeight(1);
+                                }, Tabs);
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    ForEach.create();
+                                    const forEachItemGenFunction = (_item, index: number) => {
+                                        const server = _item;
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            TabContent.create(() => {
+                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                    Column.create();
+                                                    Column.width('100%');
+                                                    Column.height('100%');
+                                                }, Column);
+                                                {
+                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                        if (isInitialRender) {
+                                                            let componentCall = new ServerInfoView(this, { server: server }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/MasterStation.ets", line: 121, col: 23 });
+                                                            ViewPU.create(componentCall);
+                                                            let paramsLambda = () => {
+                                                                return {
+                                                                    server: server
+                                                                };
+                                                            };
+                                                            componentCall.paramsGenerator_ = paramsLambda;
+                                                        }
+                                                        else {
+                                                            this.updateStateVarsOfChildByElmtId(elmtId, {
+                                                                server: server
+                                                            });
+                                                        }
+                                                    }, { name: "ServerInfoView" });
+                                                }
+                                                Column.pop();
+                                            });
+                                            TabContent.tabBar({ builder: () => {
+                                                    this.buildTabBar.call(this, { "id": 16777280, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, index);
+                                                } });
+                                        }, TabContent);
+                                        TabContent.pop();
+                                    };
+                                    this.forEachUpdateFunction(elmtId, this.servers, forEachItemGenFunction, (server: Server) => server.id, true, false);
+                                }, ForEach);
+                                ForEach.pop();
+                                Tabs.pop();
+                                Row.pop();
+                            });
+                        }
+                    }, If);
+                    If.pop();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
                         Column.width('100%');
@@ -291,7 +331,7 @@ export class MasterStation extends ViewPU {
                         Column.justifyContent(FlexAlign.Center);
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create('暂无服务器');
+                        Text.create('未启动产线，无法获取数据信息');
                         Text.fontColor(Color.White);
                         Text.fontWeight(FontWeight.Bolder);
                         Text.fontSize(30);
@@ -301,83 +341,29 @@ export class MasterStation extends ViewPU {
                     Column.pop();
                 });
             }
-            else {
-                this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Tabs.create({
-                            controller: this.controller,
-                            barPosition: BarPosition.Start
-                        });
-                        Tabs.scrollable(false);
-                        Tabs.vertical(true);
-                        Tabs.barMode(BarMode.Fixed);
-                        Tabs.barWidth(60);
-                        Tabs.animationDuration(300);
-                        Tabs.onChange((index: number) => {
-                            this.currentIndex = index;
-                        });
-                        Tabs.layoutWeight(1);
-                    }, Tabs);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        ForEach.create();
-                        const forEachItemGenFunction = (_item, index: number) => {
-                            const server = _item;
-                            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                TabContent.create(() => {
-                                    {
-                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                            if (isInitialRender) {
-                                                let componentCall = new ServerInfoView(this, { server: server }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/MasterStation.ets", line: 154, col: 17 });
-                                                ViewPU.create(componentCall);
-                                                let paramsLambda = () => {
-                                                    return {
-                                                        server: server
-                                                    };
-                                                };
-                                                componentCall.paramsGenerator_ = paramsLambda;
-                                            }
-                                            else {
-                                                this.updateStateVarsOfChildByElmtId(elmtId, {
-                                                    server: server
-                                                });
-                                            }
-                                        }, { name: "ServerInfoView" });
-                                    }
-                                });
-                                TabContent.tabBar({ builder: () => {
-                                        this.CustomIconTabBar.call(this, { "id": 16777280, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, this.currentIndex === index);
-                                    } });
-                            }, TabContent);
-                            TabContent.pop();
-                        };
-                        this.forEachUpdateFunction(elmtId, this.servers, forEachItemGenFunction, (server: Server) => server.id, true, false);
-                    }, ForEach);
-                    ForEach.pop();
-                    Tabs.pop();
-                });
-            }
         }, If);
         If.pop();
         Column.pop();
     }
-    buildTabBar(name: string, parent = null) {
+    private buildTabBar(icon: Resource, index: number, parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.padding({ left: 10, right: 10, top: 15, bottom: 15 });
-            Column.width('100%');
-            Column.height('100%');
+            Context.animation({ duration: 200, curve: Curve.EaseInOut });
+            Column.width('90%');
+            Column.aspectRatio(1);
             Column.justifyContent(FlexAlign.Center);
+            Column.backgroundColor(this.currentIndex === index ? 'rgba(255, 255, 255, 0.25)' : Color.Transparent);
+            Column.scale(this.currentIndex === index ? { x: 1.1, y: 1.1 } : { x: 1.0, y: 1.0 });
+            Column.borderRadius(12);
+            Context.animation(null);
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create(name);
-            Text.fontSize(18);
-            Text.fontWeight(FontWeight.Medium);
-            Text.fontColor(Color.White);
-            Text.maxLines(2);
-            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-            Text.textAlign(TextAlign.Center);
-        }, Text);
-        Text.pop();
+            Image.create(icon);
+            Image.width(18);
+            Image.height(18);
+            Image.fillColor(Color.White);
+            Image.objectFit(ImageFit.Contain);
+        }, Image);
         Column.pop();
     }
     rerender() {
