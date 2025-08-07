@@ -22,6 +22,9 @@ export struct RobotArm1 {
   @Link data:RobotArmState;
   @Link avatar:Resource;
 
+  @State stepInputText_xyz: string = '5'
+  @State stepInputText_r: string = '5'
+
   // 基础信息卡片和控制卡片联动动画控制器
   @State button_icon_size:number=25
   @State button_size:number=40
@@ -68,6 +71,8 @@ export struct RobotArm1 {
   @State node_id_move:string=''
   //是否抓取
   @State isCatch:boolean=false
+  //是否点击移动
+  @State isMove:boolean=false
 
   @Prop @Watch('onNodeChange') node:Data={id:'',node_id:''}
 
@@ -139,12 +144,17 @@ export struct RobotArm1 {
   }
 
   //获取警报
-  async getAlarms(): Promise<void>{
+  async getAlarms(): Promise<boolean>{
     if (this.node.id&&this.node.node_id&&this.node_id_alarms) {
       const num:number|null=await getRobotArmAlarms(this.node.id,this.node_id_alarms)
       if (num!==null) {
         this.alarms=num
+        return true
+      }else {
+        return false
       }
+    }else {
+      return false
     }
   }
 
@@ -161,10 +171,11 @@ export struct RobotArm1 {
   }
 
   //获取机械臂使能状态
-  async getEndStatus():Promise<void>{
+  async getEndStatus():Promise<boolean>{
     if (this.node.id&&this.node.node_id&&this.node_id_endAbled){
       const endStatus:boolean[]|null=await getEndStatus(this.node.id,this.node_id_endAbled)
       if (endStatus&&endStatus.length>0) {
+        this.showSystemToast('获取使能状态成功')
         if (endStatus[0]===true&&endStatus[1]===false) {
           //有使能(还未抓取)
           this.endAbled=true
@@ -178,7 +189,12 @@ export struct RobotArm1 {
           this.endAbled=true
           this.isCatch=true
         }
+        return true
+      }else {
+        return false
       }
+    }else {
+      return false
     }
   }
 
@@ -245,7 +261,7 @@ export struct RobotArm1 {
   }
 
   //获取当前位姿
-  async getNowPosition():Promise<void>{
+  async getNowPosition():Promise<boolean>{
     if (this.node.id&&this.node.node_id&&this.node_id_nowPosition){
       const nowPositions:number[]|null=await getRobotArmNowPosition(this.node.id,this.node_id_nowPosition)
       if (nowPositions&&nowPositions.length>0) {
@@ -254,16 +270,7 @@ export struct RobotArm1 {
         this.data.yValue = parseFloat(nowPositions[1].toFixed(2));
         this.data.zValue = parseFloat(nowPositions[2].toFixed(2));
         this.data.rValue = parseFloat(nowPositions[3].toFixed(2));
-      }
-    }
-  }
-
-  //机械臂移动
-  async setMove(x:string,y:string,z:string,r:string):Promise<boolean>{
-    if (this.node.id&&this.node.node_id&&this.node_id_move){
-      const isSet:boolean|null=await setRobotArmMove(this.node.id,this.node_id_move,`${x} ${y} ${z} ${r}`)
-      if (isSet) {
-        return isSet
+        return true
       }else {
         return false
       }
@@ -272,25 +279,33 @@ export struct RobotArm1 {
     }
   }
 
+  //机械臂移动
+  async setMove(x:string,y:string,z:string,r:string):Promise<void>{
+    if (this.node.id&&this.node.node_id&&this.node_id_move){
+      const isSet:boolean|null=await setRobotArmMove(this.node.id,this.node_id_move,`${x} ${y} ${z} ${r}`)
+      if (isSet) {
+        this.isMove=false
+      }else {
+        this.setMove(x,y,z,r)
+      }
+    }
+  }
+
   async aboutToAppear(): Promise<void> {
     await this.onNodeChange()
-    if (this.alarmTimer === -1) {
-      await this.getAlarms()
-      await this.getEndStatus()
-      this.alarmTimer = setInterval(async () => {
-        await this.getAlarms()
-        await this.getEndStatus()
-      }, 1000)
+    const is1= await this.getNowPosition()
+    const is2= await this.getAlarms()
+    const is3 =await this.getEndStatus()
+    if (is1&&is2&&is3) {
+      this.showSystemToast('初始化成功')
+    }else {
+      this.showSystemToast('初始化失败')
     }
   }
 
   aboutToDisappear() {
     // 清理 setTimeout 创建的定时器
     if (this.idleTimer !== -1) clearTimeout(this.idleTimer)
-    if (this.alarmTimer !== -1) {
-      clearInterval(this.alarmTimer)
-      this.alarmTimer = -1
-    }
   }
 
   private getStatusColor(status:boolean): Color {
@@ -302,32 +317,55 @@ export struct RobotArm1 {
   }
 
   private increaseSpeedX() {
-    this.data.xValue+=this.data.step_xyz
+    this.isMove=true
+    let result = this.data.xValue + this.data.step_xyz;
+    this.data.xValue = parseFloat(result.toFixed(2));
     this.setMove(this.data.xValue+'',this.data.yValue+'',this.data.zValue+'',this.data.rValue+'')
   }
   private decreaseSpeedX() {
-    this.data.xValue-=this.data.step_xyz
+    this.isMove=true
+    let result = this.data.xValue - this.data.step_xyz;
+    this.data.xValue = parseFloat(result.toFixed(2));
+    this.setMove(this.data.xValue+'',this.data.yValue+'',this.data.zValue+'',this.data.rValue+'')
   }
 
   private increaseSpeedY() {
-    this.data.yValue+=this.data.step_xyz
+    this.isMove=true
+    let result = this.data.yValue + this.data.step_xyz;
+    this.data.yValue = parseFloat(result.toFixed(2));
+    this.setMove(this.data.xValue+'',this.data.yValue+'',this.data.zValue+'',this.data.rValue+'')
   }
   private decreaseSpeedY() {
-    this.data.yValue-=this.data.step_xyz
+    this.isMove=true
+    let result = this.data.yValue - this.data.step_xyz;
+    this.data.yValue = parseFloat(result.toFixed(2));
+    this.setMove(this.data.xValue+'',this.data.yValue+'',this.data.zValue+'',this.data.rValue+'')
   }
 
   private increaseSpeedZ() {
-    this.data.zValue+=this.data.step_xyz
+    this.isMove=true
+    let result = this.data.zValue + this.data.step_xyz;
+    this.data.zValue = parseFloat(result.toFixed(2));
+    this.setMove(this.data.xValue+'',this.data.yValue+'',this.data.zValue+'',this.data.rValue+'')
   }
   private decreaseSpeedZ() {
-    this.data.zValue-=this.data.step_xyz
+    this.isMove=true
+    let result = this.data.zValue - this.data.step_xyz;
+    this.data.zValue = parseFloat(result.toFixed(2));
+    this.setMove(this.data.xValue+'',this.data.yValue+'',this.data.zValue+'',this.data.rValue+'')
   }
 
   private increaseSpeedR() {
-    this.data.rValue+=this.data.step_r
+    this.isMove=true
+    let result = this.data.rValue + this.data.step_r;
+    this.data.rValue = parseFloat(result.toFixed(2));
+    this.setMove(this.data.xValue+'',this.data.yValue+'',this.data.zValue+'',this.data.rValue+'')
   }
   private decreaseSpeedR() {
-    this.data.rValue-=this.data.step_r
+    this.isMove=true
+    let result = this.data.rValue - this.data.step_r;
+    this.data.rValue = parseFloat(result.toFixed(2));
+    this.setMove(this.data.xValue+'',this.data.yValue+'',this.data.zValue+'',this.data.rValue+'')
   }
 
   private increaseSpeedJump() {
@@ -350,7 +388,6 @@ export struct RobotArm1 {
   private decreaseSpeedRR() {
     this.data.rrValue--
   }
-
 
   // 用于控制按钮按压动画的状态
   @State isPressed: boolean = false;
@@ -1041,7 +1078,7 @@ export struct RobotArm1 {
           } else {
             // 原有的控制面板UI
             Column({space:15}){
-              Row({space:40}){
+              Row({space:20}){
                 Text('方位控制：')
                   .fontColor(Color.White)
 
@@ -1051,7 +1088,7 @@ export struct RobotArm1 {
                     .fontColor(Color.White)
                   TextInput({ text: this.data.step_xyz + ' mm' })
                     .type(InputType.Number)
-                    .width(120)
+                    .width(100)
                     .height(30)
                     .fontSize(12)
                     .fontWeight(FontWeight.Bold)
@@ -1060,13 +1097,19 @@ export struct RobotArm1 {
                     .backgroundColor('rgba(255, 255, 255, 0.2)')
                     .borderRadius(20)
                     .onChange((value: string) => {
-                      const num = parseInt(value, 10);
-                      // 步长必须是大于等于1的有效数字
-                      if (!isNaN(num) && num >= 1) {
+                      this.stepInputText_xyz = value;
+                    })
+                    .onSubmit((enterKey: EnterKeyType) => {
+                      const cleanValue = this.stepInputText_xyz.replace(/ mm$/, '').trim();
+                      const num = parseFloat(cleanValue);
+                      const decimalPart = cleanValue.split('.')[1] || '';
+                      if (!isNaN(num) && num > 0 && decimalPart.length <= 2) {
                         this.data.step_xyz = num;
+                        this.stepInputText_xyz = num.toString();
                       } else {
-                        // 如果输入不合法（如0、负数、文本），则恢复为1
                         this.data.step_xyz = 5;
+                        this.stepInputText_xyz = '5';
+                        this.showSystemToast('输入无效！已恢复为 5 mm');
                       }
                     })
                 }
@@ -1094,7 +1137,7 @@ export struct RobotArm1 {
                 }
                 //数值显示
                 Row() {
-                  Text(this.data.xValue+' mm')
+                  Text((this.data.xValue).toFixed(2)+' mm')
                     .fontSize(this.button_icon_size)
                     .fontWeight(FontWeight.Bold)
                     .width(150)
@@ -1124,6 +1167,8 @@ export struct RobotArm1 {
                   })
                 }
               }
+              .enabled(!this.isMove)
+              .opacity(this.isMove? 0.5 : 1.0)
               .width(this.con_width) // 控制条宽度
               .height(this.con_height)   // 控制条高度
               .justifyContent(FlexAlign.SpaceBetween) // 两端对齐，中间自适应
@@ -1160,7 +1205,7 @@ export struct RobotArm1 {
 
                 //数值显示
                 Row() {
-                  Text(this.data.yValue+' mm')
+                  Text((this.data.yValue).toFixed(2)+' mm')
                     .fontSize(this.button_icon_size)
                     .fontWeight(FontWeight.Bold)
                     .width(150)
@@ -1190,6 +1235,8 @@ export struct RobotArm1 {
                   })
                 }
               }
+              .enabled(!this.isMove)
+              .opacity(this.isMove? 0.5 : 1.0)
               .width(this.con_width) // 控制条宽度
               .height(this.con_height)   // 控制条高度
               .justifyContent(FlexAlign.SpaceBetween) // 两端对齐，中间自适应
@@ -1225,7 +1272,7 @@ export struct RobotArm1 {
 
                 //数值显示
                 Row() {
-                  Text(this.data.zValue+' mm')
+                  Text((this.data.zValue).toFixed(2)+' mm')
                     .fontSize(this.button_icon_size)
                     .fontWeight(FontWeight.Bold)
                     .width(150)
@@ -1255,6 +1302,8 @@ export struct RobotArm1 {
                   })
                 }
               }
+              .enabled(!this.isMove)
+              .opacity(this.isMove ? 0.5 : 1.0)
               .width(this.con_width) // 控制条宽度
               .height(this.con_height)   // 控制条高度
               .justifyContent(FlexAlign.SpaceBetween) // 两端对齐，中间自适应
@@ -1269,7 +1318,7 @@ export struct RobotArm1 {
               .animation({ duration: 250, curve: Curve.EaseInOut }) // 为状态切换增加平滑动画
               .shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' }) // 添加细微的阴影
 
-              Row({space:40}){
+              Row({space:20}){
                 Text('角度控制：')
                   .fontColor(Color.White)
 
@@ -1279,7 +1328,7 @@ export struct RobotArm1 {
                     .fontColor(Color.White)
                   TextInput({ text: this.data.step_r + '' })
                     .type(InputType.Number)
-                    .width(120)
+                    .width(100)
                     .height(30)
                     .fontSize(12)
                     .fontWeight(FontWeight.Bold)
@@ -1288,13 +1337,20 @@ export struct RobotArm1 {
                     .backgroundColor('rgba(255, 255, 255, 0.2)')
                     .borderRadius(20)
                     .onChange((value: string) => {
-                      const num = parseInt(value, 10);
-                      // 步长必须是大于等于1的有效数字
-                      if (!isNaN(num) && num >= 1) {
-                        this.data.step_xyz = num;
+                      this.stepInputText_r = value;
+                    })
+                    .onSubmit((enterKey: EnterKeyType) => {
+                      const cleanValue = this.stepInputText_r.replace(/ mm$/, '').trim();
+                      const num = parseFloat(cleanValue);
+                      const decimalPart = cleanValue.split('.')[1] || '';
+                      // 开始校验
+                      if (!isNaN(num) && num > 0 && decimalPart.length <= 2) {
+                        this.data.step_r = num;
+                        this.stepInputText_r = num.toString();
                       } else {
-                        // 如果输入不合法（如0、负数、文本），则恢复为1
-                        this.data.step_xyz = 5;
+                        this.data.step_r = 5;
+                        this.stepInputText_r = '5';
+                        this.showSystemToast('输入无效！已恢复为 5 mm');
                       }
                     })
                 }
@@ -1322,7 +1378,7 @@ export struct RobotArm1 {
                 }
                 //数值显示
                 Row() {
-                  Text(this.data.rValue+' °')
+                  Text((this.data.rValue).toFixed(2)+' °')
                     .fontSize(this.button_icon_size)
                     .fontWeight(FontWeight.Bold)
                     .width(150)
@@ -1352,6 +1408,8 @@ export struct RobotArm1 {
                   })
                 }
               }
+              .enabled(!this.isMove)
+              .opacity(this.isMove? 0.5 : 1.0)
               .width(this.con_width) // 控制条宽度
               .height(this.con_height)   // 控制条高度
               .justifyContent(FlexAlign.SpaceBetween) // 两端对齐，中间自适应
@@ -1483,20 +1541,43 @@ export struct RobotArm1 {
             })
           }
 
+          //刷新按钮
+          ActionButton({
+            // 请替换为您的图标资源
+            icon: $r('app.media.refresh'),
+            click: async() => {
+              const is1= await this.getNowPosition()
+              const is2= await this.getAlarms()
+              const is3= await this.getEndStatus()
+              if (is1&&is2&&is3) {
+                this.showSystemToast('刷新成功')
+              }else {
+                this.showSystemToast('刷新失败')
+              }
+            }
+          })
+            .position({top:10,right:50})
+
           //切换按钮
           ActionButton({
             // 请替换为您的图标资源
             icon: $r('app.media.change'),
             click: () => {
-              this.getNowPosition()
-              animateTo({ duration: 800, curve: Curve.EaseInOut }, () => {
+              animateTo({ duration: 800, curve: Curve.EaseInOut }, async () => {
                 this.data.isRegionAVisible=!this.data.isRegionAVisible
                 this.data.isInfoCardVisible=!this.data.isInfoCardVisible
+                if (!this.data.isInfoCardVisible) {
+                  await this.getNowPosition()
+                  await this.getAlarms()
+                  await this.getEndStatus()
+                }
               });
             }
           })
             .position({top:10,right:10})
         }
+        .enabled(this.alarms===0)
+        .opacity(this.alarms===0 ? 1:0.5)
         .width(this.data.controlCardWidth)
         .height('100%')
       }

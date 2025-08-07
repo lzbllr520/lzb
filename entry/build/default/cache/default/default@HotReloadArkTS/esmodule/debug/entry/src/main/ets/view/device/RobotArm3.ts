@@ -10,6 +10,8 @@ interface RobotArm3_Params {
     addLog?: (level: 'info' | 'warning' | 'error', message: string, shouldSave: boolean) => void;
     data?: RobotArmState;
     avatar?: Resource;
+    stepInputText_xyz?: string;
+    stepInputText_r?: string;
     button_icon_size?: number;
     button_size?: number;
     catch_size_height?: number;
@@ -35,7 +37,12 @@ interface RobotArm3_Params {
     node_id_endAbled?: string;
     node_id_clearAlarms?: string;
     node_id_end?: string;
+    node_id_toStart?: string;
+    node_id_stop?: string;
+    node_id_nowPosition?: string;
+    node_id_move?: string;
     isCatch?: boolean;
+    isMove?: boolean;
     node?: Data;
     isPressed?: boolean;
     isHover?: boolean;
@@ -47,7 +54,7 @@ interface RobotArm3_Params {
 import type { RobotArmState } from '../../model/RobotArmState';
 import { RoboticArmWorkRangeView } from "@normalized:N&&&entry/src/main/ets/components/RoboticArmWorkRangeView&";
 import type { Node, Data } from '../../model/ServerState';
-import { clearEndAble, clearRobotArmAlarms, endControl, getEndStatus, getNodeOther, getRobotArmAlarms, getRobotArmTime, getRobotArmUid, setEndAble } from "@normalized:N&&&entry/src/main/ets/service/Request&";
+import { clearEndAble, clearRobotArmAlarms, endControl, getEndStatus, getNodeOther, getRobotArmAlarms, getRobotArmNowPosition, getRobotArmTime, getRobotArmUid, setEndAble, setRobotArmMove, setStop, setToStart } from "@normalized:N&&&entry/src/main/ets/service/Request&";
 export class RobotArm3 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -57,6 +64,10 @@ export class RobotArm3 extends ViewPU {
         this.addLog = () => { };
         this.__data = new SynchedPropertyObjectTwoWayPU(params.data, this, "data");
         this.__avatar = new SynchedPropertyObjectTwoWayPU(params.avatar, this, "avatar");
+        this.__stepInputText_xyz = new ObservedPropertySimplePU('5', this, "stepInputText_xyz");
+        this.__stepInputText_r = new ObservedPropertySimplePU('5'
+        // 基础信息卡片和控制卡片联动动画控制器
+        , this, "stepInputText_r");
         this.__button_icon_size = new ObservedPropertySimplePU(25, this, "button_icon_size");
         this.__button_size = new ObservedPropertySimplePU(40, this, "button_size");
         this.__catch_size_height = new ObservedPropertySimplePU(40, this, "catch_size_height");
@@ -73,7 +84,7 @@ export class RobotArm3 extends ViewPU {
         this.__con_height2 = new ObservedPropertySimplePU(40
         //序列号
         , this, "con_height2");
-        this.__sn = new ObservedPropertySimplePU('DT1420071864'
+        this.__sn = new ObservedPropertySimplePU('DT1420071876'
         //固定版本
         , this, "sn");
         this.__version = new ObservedPropertySimplePU('3.7.0'
@@ -96,9 +107,24 @@ export class RobotArm3 extends ViewPU {
         //末端执行
         , this, "node_id_clearAlarms");
         this.__node_id_end = new ObservedPropertySimplePU(''
-        //是否抓取
+        //设置回零
         , this, "node_id_end");
-        this.__isCatch = new ObservedPropertySimplePU(false, this, "isCatch");
+        this.__node_id_toStart = new ObservedPropertySimplePU(''
+        //设置急停
+        , this, "node_id_toStart");
+        this.__node_id_stop = new ObservedPropertySimplePU(''
+        //获取当前位姿
+        , this, "node_id_stop");
+        this.__node_id_nowPosition = new ObservedPropertySimplePU(''
+        //机械臂移动
+        , this, "node_id_nowPosition");
+        this.__node_id_move = new ObservedPropertySimplePU(''
+        //是否抓取
+        , this, "node_id_move");
+        this.__isCatch = new ObservedPropertySimplePU(false
+        //是否点击移动
+        , this, "isCatch");
+        this.__isMove = new ObservedPropertySimplePU(false, this, "isMove");
         this.__node = new SynchedPropertyObjectOneWayPU(params.node, this, "node");
         this.__isPressed = new ObservedPropertySimplePU(false, this, "isPressed");
         this.__isHover = new ObservedPropertySimplePU(false, this, "isHover");
@@ -113,6 +139,12 @@ export class RobotArm3 extends ViewPU {
     setInitiallyProvidedValue(params: RobotArm3_Params) {
         if (params.addLog !== undefined) {
             this.addLog = params.addLog;
+        }
+        if (params.stepInputText_xyz !== undefined) {
+            this.stepInputText_xyz = params.stepInputText_xyz;
+        }
+        if (params.stepInputText_r !== undefined) {
+            this.stepInputText_r = params.stepInputText_r;
         }
         if (params.button_icon_size !== undefined) {
             this.button_icon_size = params.button_icon_size;
@@ -189,8 +221,23 @@ export class RobotArm3 extends ViewPU {
         if (params.node_id_end !== undefined) {
             this.node_id_end = params.node_id_end;
         }
+        if (params.node_id_toStart !== undefined) {
+            this.node_id_toStart = params.node_id_toStart;
+        }
+        if (params.node_id_stop !== undefined) {
+            this.node_id_stop = params.node_id_stop;
+        }
+        if (params.node_id_nowPosition !== undefined) {
+            this.node_id_nowPosition = params.node_id_nowPosition;
+        }
+        if (params.node_id_move !== undefined) {
+            this.node_id_move = params.node_id_move;
+        }
         if (params.isCatch !== undefined) {
             this.isCatch = params.isCatch;
+        }
+        if (params.isMove !== undefined) {
+            this.isMove = params.isMove;
         }
         if (params.node === undefined) {
             this.__node.set({ id: '', node_id: '' });
@@ -220,6 +267,8 @@ export class RobotArm3 extends ViewPU {
     purgeVariableDependenciesOnElmtId(rmElmtId) {
         this.__data.purgeDependencyOnElmtId(rmElmtId);
         this.__avatar.purgeDependencyOnElmtId(rmElmtId);
+        this.__stepInputText_xyz.purgeDependencyOnElmtId(rmElmtId);
+        this.__stepInputText_r.purgeDependencyOnElmtId(rmElmtId);
         this.__button_icon_size.purgeDependencyOnElmtId(rmElmtId);
         this.__button_size.purgeDependencyOnElmtId(rmElmtId);
         this.__catch_size_height.purgeDependencyOnElmtId(rmElmtId);
@@ -244,7 +293,12 @@ export class RobotArm3 extends ViewPU {
         this.__node_id_endAbled.purgeDependencyOnElmtId(rmElmtId);
         this.__node_id_clearAlarms.purgeDependencyOnElmtId(rmElmtId);
         this.__node_id_end.purgeDependencyOnElmtId(rmElmtId);
+        this.__node_id_toStart.purgeDependencyOnElmtId(rmElmtId);
+        this.__node_id_stop.purgeDependencyOnElmtId(rmElmtId);
+        this.__node_id_nowPosition.purgeDependencyOnElmtId(rmElmtId);
+        this.__node_id_move.purgeDependencyOnElmtId(rmElmtId);
         this.__isCatch.purgeDependencyOnElmtId(rmElmtId);
+        this.__isMove.purgeDependencyOnElmtId(rmElmtId);
         this.__node.purgeDependencyOnElmtId(rmElmtId);
         this.__isPressed.purgeDependencyOnElmtId(rmElmtId);
         this.__isHover.purgeDependencyOnElmtId(rmElmtId);
@@ -256,6 +310,8 @@ export class RobotArm3 extends ViewPU {
     aboutToBeDeleted() {
         this.__data.aboutToBeDeleted();
         this.__avatar.aboutToBeDeleted();
+        this.__stepInputText_xyz.aboutToBeDeleted();
+        this.__stepInputText_r.aboutToBeDeleted();
         this.__button_icon_size.aboutToBeDeleted();
         this.__button_size.aboutToBeDeleted();
         this.__catch_size_height.aboutToBeDeleted();
@@ -280,7 +336,12 @@ export class RobotArm3 extends ViewPU {
         this.__node_id_endAbled.aboutToBeDeleted();
         this.__node_id_clearAlarms.aboutToBeDeleted();
         this.__node_id_end.aboutToBeDeleted();
+        this.__node_id_toStart.aboutToBeDeleted();
+        this.__node_id_stop.aboutToBeDeleted();
+        this.__node_id_nowPosition.aboutToBeDeleted();
+        this.__node_id_move.aboutToBeDeleted();
         this.__isCatch.aboutToBeDeleted();
+        this.__isMove.aboutToBeDeleted();
         this.__node.aboutToBeDeleted();
         this.__isPressed.aboutToBeDeleted();
         this.__isHover.aboutToBeDeleted();
@@ -305,6 +366,20 @@ export class RobotArm3 extends ViewPU {
     }
     set avatar(newValue: Resource) {
         this.__avatar.set(newValue);
+    }
+    private __stepInputText_xyz: ObservedPropertySimplePU<string>;
+    get stepInputText_xyz() {
+        return this.__stepInputText_xyz.get();
+    }
+    set stepInputText_xyz(newValue: string) {
+        this.__stepInputText_xyz.set(newValue);
+    }
+    private __stepInputText_r: ObservedPropertySimplePU<string>;
+    get stepInputText_r() {
+        return this.__stepInputText_r.get();
+    }
+    set stepInputText_r(newValue: string) {
+        this.__stepInputText_r.set(newValue);
     }
     // 基础信息卡片和控制卡片联动动画控制器
     private __button_icon_size: ObservedPropertySimplePU<number>;
@@ -484,6 +559,38 @@ export class RobotArm3 extends ViewPU {
     set node_id_end(newValue: string) {
         this.__node_id_end.set(newValue);
     }
+    //设置回零
+    private __node_id_toStart: ObservedPropertySimplePU<string>;
+    get node_id_toStart() {
+        return this.__node_id_toStart.get();
+    }
+    set node_id_toStart(newValue: string) {
+        this.__node_id_toStart.set(newValue);
+    }
+    //设置急停
+    private __node_id_stop: ObservedPropertySimplePU<string>;
+    get node_id_stop() {
+        return this.__node_id_stop.get();
+    }
+    set node_id_stop(newValue: string) {
+        this.__node_id_stop.set(newValue);
+    }
+    //获取当前位姿
+    private __node_id_nowPosition: ObservedPropertySimplePU<string>;
+    get node_id_nowPosition() {
+        return this.__node_id_nowPosition.get();
+    }
+    set node_id_nowPosition(newValue: string) {
+        this.__node_id_nowPosition.set(newValue);
+    }
+    //机械臂移动
+    private __node_id_move: ObservedPropertySimplePU<string>;
+    get node_id_move() {
+        return this.__node_id_move.get();
+    }
+    set node_id_move(newValue: string) {
+        this.__node_id_move.set(newValue);
+    }
     //是否抓取
     private __isCatch: ObservedPropertySimplePU<boolean>;
     get isCatch() {
@@ -491,6 +598,14 @@ export class RobotArm3 extends ViewPU {
     }
     set isCatch(newValue: boolean) {
         this.__isCatch.set(newValue);
+    }
+    //是否点击移动
+    private __isMove: ObservedPropertySimplePU<boolean>;
+    get isMove() {
+        return this.__isMove.get();
+    }
+    set isMove(newValue: boolean) {
+        this.__isMove.set(newValue);
     }
     private __node: SynchedPropertySimpleOneWayPU<Data>;
     get node() {
@@ -541,16 +656,46 @@ export class RobotArm3 extends ViewPU {
                         this.node_id_endAbled = endNodes2[4].node_id;
                     }
                 }
+                //获取执行回零node_id
+                const toStartNode: Node[] | null = await getNodeOther(this.node.id, nodes[4].node_id);
+                if (toStartNode && toStartNode.length > 0) {
+                    this.node_id_toStart = toStartNode[2].node_id;
+                }
+                //获取当前位姿和急停node_id
+                const control: Node[] | null = await getNodeOther(this.node.id, nodes[6].node_id);
+                if (control && control.length > 0) {
+                    //获取机械臂急停node_id
+                    this.node_id_stop = control[2].node_id;
+                    //机械臂移动控制node_id
+                    this.node_id_move = control[3].node_id;
+                    //获取当前位姿
+                    this.node_id_nowPosition = control[1].node_id;
+                    const nowPositions: number[] | null = await getRobotArmNowPosition(this.node.id, control[1].node_id);
+                    if (nowPositions && nowPositions.length > 0) {
+                        //获取当前位姿成功，然后进行回显
+                        this.data.xValue = parseFloat(nowPositions[0].toFixed(2));
+                        this.data.yValue = parseFloat(nowPositions[1].toFixed(2));
+                        this.data.zValue = parseFloat(nowPositions[2].toFixed(2));
+                        this.data.rValue = parseFloat(nowPositions[3].toFixed(2));
+                    }
+                }
             }
         }
     }
     //获取警报
-    async getAlarms(): Promise<void> {
+    async getAlarms(): Promise<boolean> {
         if (this.node.id && this.node.node_id && this.node_id_alarms) {
             const num: number | null = await getRobotArmAlarms(this.node.id, this.node_id_alarms);
             if (num !== null) {
                 this.alarms = num;
+                return true;
             }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
         }
     }
     //清除警报
@@ -566,10 +711,11 @@ export class RobotArm3 extends ViewPU {
         }
     }
     //获取机械臂使能状态
-    async getEndStatus(): Promise<void> {
+    async getEndStatus(): Promise<boolean> {
         if (this.node.id && this.node.node_id && this.node_id_endAbled) {
             const endStatus: boolean[] | null = await getEndStatus(this.node.id, this.node_id_endAbled);
             if (endStatus && endStatus.length > 0) {
+                this.showSystemToast('获取使能状态成功');
                 if (endStatus[0] === true && endStatus[1] === false) {
                     //有使能(还未抓取)
                     this.endAbled = true;
@@ -585,7 +731,14 @@ export class RobotArm3 extends ViewPU {
                     this.endAbled = true;
                     this.isCatch = true;
                 }
+                return true;
             }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
         }
     }
     //赋予末端使能
@@ -627,25 +780,78 @@ export class RobotArm3 extends ViewPU {
             return false;
         }
     }
+    //设置回零
+    async setToStart(): Promise<void> {
+        if (this.node.id && this.node.node_id && this.node_id_toStart) {
+            const isSet: boolean | null = await setToStart(this.node.id, this.node_id_toStart);
+            if (isSet) {
+                this.showSystemToast('设置回零成功');
+            }
+            else {
+                this.showSystemToast('设置回零失败');
+            }
+        }
+    }
+    //设置急停
+    async setStop(): Promise<void> {
+        if (this.node.id && this.node.node_id && this.node_id_stop) {
+            const isSet: boolean | null = await setStop(this.node.id, this.node_id_stop);
+            if (isSet) {
+                this.showSystemToast('急停成功');
+            }
+            else {
+                this.showSystemToast('急停失败');
+            }
+        }
+    }
+    //获取当前位姿
+    async getNowPosition(): Promise<boolean> {
+        if (this.node.id && this.node.node_id && this.node_id_nowPosition) {
+            const nowPositions: number[] | null = await getRobotArmNowPosition(this.node.id, this.node_id_nowPosition);
+            if (nowPositions && nowPositions.length > 0) {
+                //获取当前位姿成功，然后进行回显
+                this.data.xValue = parseFloat(nowPositions[0].toFixed(2));
+                this.data.yValue = parseFloat(nowPositions[1].toFixed(2));
+                this.data.zValue = parseFloat(nowPositions[2].toFixed(2));
+                this.data.rValue = parseFloat(nowPositions[3].toFixed(2));
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+    }
+    //机械臂移动
+    async setMove(x: string, y: string, z: string, r: string): Promise<void> {
+        if (this.node.id && this.node.node_id && this.node_id_move) {
+            const isSet: boolean | null = await setRobotArmMove(this.node.id, this.node_id_move, `${x} ${y} ${z} ${r}`);
+            if (isSet) {
+                this.isMove = false;
+            }
+            else {
+                this.setMove(x, y, z, r);
+            }
+        }
+    }
     async aboutToAppear(): Promise<void> {
         await this.onNodeChange();
-        if (this.alarmTimer === -1) {
-            await this.getAlarms();
-            await this.getEndStatus();
-            this.alarmTimer = setInterval(async () => {
-                await this.getAlarms();
-                await this.getEndStatus();
-            }, 1000);
+        const is1 = await this.getNowPosition();
+        const is2 = await this.getAlarms();
+        const is3 = await this.getEndStatus();
+        if (is1 && is2 && is3) {
+            this.showSystemToast('初始化成功');
+        }
+        else {
+            this.showSystemToast('初始化失败');
         }
     }
     aboutToDisappear() {
         // 清理 setTimeout 创建的定时器
         if (this.idleTimer !== -1)
             clearTimeout(this.idleTimer);
-        if (this.alarmTimer !== -1) {
-            clearInterval(this.alarmTimer);
-            this.alarmTimer = -1;
-        }
     }
     private getStatusColor(status: boolean): Color {
         if (status) {
@@ -656,28 +862,52 @@ export class RobotArm3 extends ViewPU {
         }
     }
     private increaseSpeedX() {
-        this.data.xValue += this.data.step_xyz;
+        this.isMove = true;
+        let result = this.data.xValue + this.data.step_xyz;
+        this.data.xValue = parseFloat(result.toFixed(2));
+        this.setMove(this.data.xValue + '', this.data.yValue + '', this.data.zValue + '', this.data.rValue + '');
     }
     private decreaseSpeedX() {
-        this.data.xValue -= this.data.step_xyz;
+        this.isMove = true;
+        let result = this.data.xValue - this.data.step_xyz;
+        this.data.xValue = parseFloat(result.toFixed(2));
+        this.setMove(this.data.xValue + '', this.data.yValue + '', this.data.zValue + '', this.data.rValue + '');
     }
     private increaseSpeedY() {
-        this.data.yValue += this.data.step_xyz;
+        this.isMove = true;
+        let result = this.data.yValue + this.data.step_xyz;
+        this.data.yValue = parseFloat(result.toFixed(2));
+        this.setMove(this.data.xValue + '', this.data.yValue + '', this.data.zValue + '', this.data.rValue + '');
     }
     private decreaseSpeedY() {
-        this.data.yValue -= this.data.step_xyz;
+        this.isMove = true;
+        let result = this.data.yValue - this.data.step_xyz;
+        this.data.yValue = parseFloat(result.toFixed(2));
+        this.setMove(this.data.xValue + '', this.data.yValue + '', this.data.zValue + '', this.data.rValue + '');
     }
     private increaseSpeedZ() {
-        this.data.zValue += this.data.step_xyz;
+        this.isMove = true;
+        let result = this.data.zValue + this.data.step_xyz;
+        this.data.zValue = parseFloat(result.toFixed(2));
+        this.setMove(this.data.xValue + '', this.data.yValue + '', this.data.zValue + '', this.data.rValue + '');
     }
     private decreaseSpeedZ() {
-        this.data.zValue -= this.data.step_xyz;
+        this.isMove = true;
+        let result = this.data.zValue - this.data.step_xyz;
+        this.data.zValue = parseFloat(result.toFixed(2));
+        this.setMove(this.data.xValue + '', this.data.yValue + '', this.data.zValue + '', this.data.rValue + '');
     }
     private increaseSpeedR() {
-        this.data.rValue += this.data.step_r;
+        this.isMove = true;
+        let result = this.data.rValue + this.data.step_r;
+        this.data.rValue = parseFloat(result.toFixed(2));
+        this.setMove(this.data.xValue + '', this.data.yValue + '', this.data.zValue + '', this.data.rValue + '');
     }
     private decreaseSpeedR() {
-        this.data.rValue -= this.data.step_r;
+        this.isMove = true;
+        let result = this.data.rValue - this.data.step_r;
+        this.data.rValue = parseFloat(result.toFixed(2));
+        this.setMove(this.data.xValue + '', this.data.yValue + '', this.data.zValue + '', this.data.rValue + '');
     }
     private increaseSpeedJump() {
         this.data.jumpValue++;
@@ -1105,8 +1335,6 @@ export class RobotArm3 extends ViewPU {
                         Row.create();
                         Context.animation({ duration: 150, curve: Curve.EaseOut });
                         //赋予和清除使能按钮
-                        Row.width('45%');
-                        //赋予和清除使能按钮
                         Row.height(40);
                         //赋予和清除使能按钮
                         Row.padding(8);
@@ -1180,8 +1408,6 @@ export class RobotArm3 extends ViewPU {
                         Button.fontColor(Color.White);
                         //清除警报按钮
                         Button.enabled(this.alarms !== 0);
-                        //清除警报按钮
-                        Button.width('45%');
                         //清除警报按钮
                         Button.height(40);
                         //清除警报按钮
@@ -1551,6 +1777,41 @@ export class RobotArm3 extends ViewPU {
                     Row.pop();
                     Row.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        //设置回零按钮
+                        Button.createWithLabel('回零');
+                        Context.animation({ duration: 150, curve: Curve.EaseOut });
+                        //设置回零按钮
+                        Button.fontSize(this.catch_font_size2);
+                        //设置回零按钮
+                        Button.fontWeight(FontWeight.Bold);
+                        //设置回零按钮
+                        Button.fontColor(Color.White);
+                        //设置回零按钮
+                        Button.width(this.catch_size_width2);
+                        //设置回零按钮
+                        Button.height(this.catch_size_height2);
+                        //设置回零按钮
+                        Button.backgroundColor('rgba(0, 200, 83, 0.5)');
+                        //设置回零按钮
+                        Button.borderRadius(30);
+                        //设置回零按钮
+                        Button.border({
+                            width: 1.5,
+                            color: 'rgba(255, 255, 255, 0.3)'
+                        });
+                        //设置回零按钮
+                        Button.backdropBlur(12);
+                        //设置回零按钮
+                        Button.shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' });
+                        //设置回零按钮
+                        Button.onClick(() => {
+                            this.setToStart();
+                        });
+                        Context.animation(null);
+                    }, Button);
+                    //设置回零按钮
+                    Button.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //抓取释放按钮
                         Button.createWithChild();
                         Context.animation({ duration: 250, curve: Curve.EaseInOut });
@@ -1618,38 +1879,6 @@ export class RobotArm3 extends ViewPU {
                     //抓取释放按钮
                     Button.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        //停止按钮
-                        Button.createWithLabel('停止');
-                        Context.animation({ duration: 250, curve: Curve.EaseInOut });
-                        //停止按钮
-                        Button.width(this.catch_size_width2);
-                        //停止按钮
-                        Button.height(this.catch_size_height2);
-                        //停止按钮
-                        Button.fontSize(this.catch_font_size2);
-                        //停止按钮
-                        Button.fontColor(Color.White);
-                        //停止按钮
-                        Button.onClick(() => {
-                        });
-                        //停止按钮
-                        Button.backgroundColor('rgba(255, 255, 255, 0.2)');
-                        //停止按钮
-                        Button.borderRadius(30);
-                        //停止按钮
-                        Button.border({
-                            width: 1.5,
-                            color: 'rgba(255, 255, 255, 0.3)'
-                        });
-                        //停止按钮
-                        Button.backdropBlur(12);
-                        Context.animation(null);
-                        //停止按钮
-                        Button.shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' });
-                    }, Button);
-                    //停止按钮
-                    Button.pop();
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //急停按钮
                         Button.createWithLabel('急停');
                         Context.animation({ duration: 250, curve: Curve.EaseInOut });
@@ -1663,9 +1892,10 @@ export class RobotArm3 extends ViewPU {
                         Button.fontColor(Color.White);
                         //急停按钮
                         Button.onClick(() => {
+                            this.setStop();
                         });
                         //急停按钮
-                        Button.backgroundColor('rgba(255, 255, 255, 0.2)');
+                        Button.backgroundColor('rgba(0, 200, 83, 0.5)');
                         //急停按钮
                         Button.borderRadius(30);
                         //急停按钮
@@ -1690,6 +1920,10 @@ export class RobotArm3 extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             //控制区域
             Stack.create({ alignContent: Alignment.TopEnd });
+            //控制区域
+            Stack.enabled(this.alarms === 0);
+            //控制区域
+            Stack.opacity(this.alarms === 0 ? 1 : 0.5);
             //控制区域
             Stack.width(this.data.controlCardWidth);
             //控制区域
@@ -1731,7 +1965,7 @@ export class RobotArm3 extends ViewPU {
                             if (isInitialRender) {
                                 let componentCall = new RoboticArmWorkRangeView(this, {
                                     data: this.__data
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm3.ets", line: 930, col: 17 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm3.ets", line: 1053, col: 17 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -1780,7 +2014,7 @@ export class RobotArm3 extends ViewPU {
                         });
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Row.create({ space: 40 });
+                        Row.create({ space: 20 });
                         Row.width('100%');
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1800,7 +2034,7 @@ export class RobotArm3 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         TextInput.create({ text: this.data.step_xyz + ' mm' });
                         TextInput.type(InputType.Number);
-                        TextInput.width(120);
+                        TextInput.width(100);
                         TextInput.height(30);
                         TextInput.fontSize(12);
                         TextInput.fontWeight(FontWeight.Bold);
@@ -1809,14 +2043,20 @@ export class RobotArm3 extends ViewPU {
                         TextInput.backgroundColor('rgba(255, 255, 255, 0.2)');
                         TextInput.borderRadius(20);
                         TextInput.onChange((value: string) => {
-                            const num = parseInt(value, 10);
-                            // 步长必须是大于等于1的有效数字
-                            if (!isNaN(num) && num >= 1) {
+                            this.stepInputText_xyz = value;
+                        });
+                        TextInput.onSubmit((enterKey: EnterKeyType) => {
+                            const cleanValue = this.stepInputText_xyz.replace(/ mm$/, '').trim();
+                            const num = parseFloat(cleanValue);
+                            const decimalPart = cleanValue.split('.')[1] || '';
+                            if (!isNaN(num) && num > 0 && decimalPart.length <= 2) {
                                 this.data.step_xyz = num;
+                                this.stepInputText_xyz = num.toString();
                             }
                             else {
-                                // 如果输入不合法（如0、负数、文本），则恢复为1
                                 this.data.step_xyz = 5;
+                                this.stepInputText_xyz = '5';
+                                this.showSystemToast('输入无效！已恢复为 5 mm');
                             }
                         });
                     }, TextInput);
@@ -1827,6 +2067,10 @@ export class RobotArm3 extends ViewPU {
                         //控制x轴（左右）
                         Row.create();
                         Context.animation({ duration: 250, curve: Curve.EaseInOut });
+                        //控制x轴（左右）
+                        Row.enabled(!this.isMove);
+                        //控制x轴（左右）
+                        Row.opacity(this.isMove ? 0.5 : 1.0);
                         //控制x轴（左右）
                         Row.width(this.con_width);
                         //控制x轴（左右）
@@ -1882,7 +2126,7 @@ export class RobotArm3 extends ViewPU {
                         Row.alignItems(VerticalAlign.Center);
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create(this.data.xValue + ' mm');
+                        Text.create((this.data.xValue).toFixed(2) + ' mm');
                         Text.fontSize(this.button_icon_size);
                         Text.fontWeight(FontWeight.Bold);
                         Text.width(150);
@@ -1925,6 +2169,10 @@ export class RobotArm3 extends ViewPU {
                         //y控制（前后）
                         Row.create();
                         Context.animation({ duration: 250, curve: Curve.EaseInOut });
+                        //y控制（前后）
+                        Row.enabled(!this.isMove);
+                        //y控制（前后）
+                        Row.opacity(this.isMove ? 0.5 : 1.0);
                         //y控制（前后）
                         Row.width(this.con_width);
                         //y控制（前后）
@@ -1980,7 +2228,7 @@ export class RobotArm3 extends ViewPU {
                         Row.alignItems(VerticalAlign.Center);
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create(this.data.yValue + ' mm');
+                        Text.create((this.data.yValue).toFixed(2) + ' mm');
                         Text.fontSize(this.button_icon_size);
                         Text.fontWeight(FontWeight.Bold);
                         Text.width(150);
@@ -2023,6 +2271,10 @@ export class RobotArm3 extends ViewPU {
                         //z轴控制（上下）
                         Row.create();
                         Context.animation({ duration: 250, curve: Curve.EaseInOut });
+                        //z轴控制（上下）
+                        Row.enabled(!this.isMove);
+                        //z轴控制（上下）
+                        Row.opacity(this.isMove ? 0.5 : 1.0);
                         //z轴控制（上下）
                         Row.width(this.con_width);
                         //z轴控制（上下）
@@ -2078,7 +2330,7 @@ export class RobotArm3 extends ViewPU {
                         Row.alignItems(VerticalAlign.Center);
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create(this.data.zValue + ' mm');
+                        Text.create((this.data.zValue).toFixed(2) + ' mm');
                         Text.fontSize(this.button_icon_size);
                         Text.fontWeight(FontWeight.Bold);
                         Text.width(150);
@@ -2118,7 +2370,7 @@ export class RobotArm3 extends ViewPU {
                     //z轴控制（上下）
                     Row.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Row.create({ space: 40 });
+                        Row.create({ space: 20 });
                         Row.width('100%');
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -2138,7 +2390,7 @@ export class RobotArm3 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         TextInput.create({ text: this.data.step_r + '' });
                         TextInput.type(InputType.Number);
-                        TextInput.width(120);
+                        TextInput.width(100);
                         TextInput.height(30);
                         TextInput.fontSize(12);
                         TextInput.fontWeight(FontWeight.Bold);
@@ -2147,14 +2399,21 @@ export class RobotArm3 extends ViewPU {
                         TextInput.backgroundColor('rgba(255, 255, 255, 0.2)');
                         TextInput.borderRadius(20);
                         TextInput.onChange((value: string) => {
-                            const num = parseInt(value, 10);
-                            // 步长必须是大于等于1的有效数字
-                            if (!isNaN(num) && num >= 1) {
-                                this.data.step_xyz = num;
+                            this.stepInputText_r = value;
+                        });
+                        TextInput.onSubmit((enterKey: EnterKeyType) => {
+                            const cleanValue = this.stepInputText_r.replace(/ mm$/, '').trim();
+                            const num = parseFloat(cleanValue);
+                            const decimalPart = cleanValue.split('.')[1] || '';
+                            // 开始校验
+                            if (!isNaN(num) && num > 0 && decimalPart.length <= 2) {
+                                this.data.step_r = num;
+                                this.stepInputText_r = num.toString();
                             }
                             else {
-                                // 如果输入不合法（如0、负数、文本），则恢复为1
-                                this.data.step_xyz = 5;
+                                this.data.step_r = 5;
+                                this.stepInputText_r = '5';
+                                this.showSystemToast('输入无效！已恢复为 5 mm');
                             }
                         });
                     }, TextInput);
@@ -2165,6 +2424,10 @@ export class RobotArm3 extends ViewPU {
                         //r轴控制（角度）
                         Row.create();
                         Context.animation({ duration: 250, curve: Curve.EaseInOut });
+                        //r轴控制（角度）
+                        Row.enabled(!this.isMove);
+                        //r轴控制（角度）
+                        Row.opacity(this.isMove ? 0.5 : 1.0);
                         //r轴控制（角度）
                         Row.width(this.con_width);
                         //r轴控制（角度）
@@ -2220,7 +2483,7 @@ export class RobotArm3 extends ViewPU {
                         Row.alignItems(VerticalAlign.Center);
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create(this.data.rValue + ' °');
+                        Text.create((this.data.rValue).toFixed(2) + ' °');
                         Text.fontSize(this.button_icon_size);
                         Text.fontWeight(FontWeight.Bold);
                         Text.width(150);
@@ -2274,6 +2537,44 @@ export class RobotArm3 extends ViewPU {
                         Row.width('100%');
                         Row.justifyContent(FlexAlign.SpaceAround);
                     }, Row);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        //设置回零按钮
+                        Button.createWithLabel('回零');
+                        Context.animation({ duration: 250, curve: Curve.EaseInOut });
+                        //设置回零按钮
+                        Button.fontSize(this.catch_font_size);
+                        //设置回零按钮
+                        Button.fontWeight(FontWeight.Bold);
+                        //设置回零按钮
+                        Button.fontColor(Color.White);
+                        //设置回零按钮
+                        Button.width(this.catch_size_width);
+                        //设置回零按钮
+                        Button.height(this.catch_size_height);
+                        //设置回零按钮
+                        Button.borderRadius(20);
+                        //设置回零按钮
+                        Button.border({
+                            width: 1,
+                            color: 'rgba(255, 255, 255, 0.3)'
+                        });
+                        //设置回零按钮
+                        Button.backgroundColor('rgba(0, 200, 83, 0.5)');
+                        //设置回零按钮
+                        Button.borderRadius(30);
+                        //设置回零按钮
+                        Button.border({
+                            width: 1.5,
+                            color: 'rgba(255, 255, 255, 0.3)'
+                        });
+                        //设置回零按钮
+                        Button.backdropBlur(12);
+                        Context.animation(null);
+                        //设置回零按钮
+                        Button.shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' });
+                    }, Button);
+                    //设置回零按钮
+                    Button.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //抓取释放按钮
                         Button.createWithChild();
@@ -2342,38 +2643,6 @@ export class RobotArm3 extends ViewPU {
                     //抓取释放按钮
                     Button.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        //停止按钮
-                        Button.createWithLabel('停止');
-                        Context.animation({ duration: 250, curve: Curve.EaseInOut });
-                        //停止按钮
-                        Button.width(this.catch_size_width);
-                        //停止按钮
-                        Button.height(this.catch_size_height);
-                        //停止按钮
-                        Button.fontSize(this.catch_font_size);
-                        //停止按钮
-                        Button.fontColor(Color.White);
-                        //停止按钮
-                        Button.onClick(() => {
-                        });
-                        //停止按钮
-                        Button.backgroundColor('rgba(255, 255, 255, 0.2)');
-                        //停止按钮
-                        Button.borderRadius(30);
-                        //停止按钮
-                        Button.border({
-                            width: 1.5,
-                            color: 'rgba(255, 255, 255, 0.3)'
-                        });
-                        //停止按钮
-                        Button.backdropBlur(12);
-                        Context.animation(null);
-                        //停止按钮
-                        Button.shadow({ radius: 5, color: 'rgba(0,0,0,0.1)' });
-                    }, Button);
-                    //停止按钮
-                    Button.pop();
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //急停按钮
                         Button.createWithLabel('急停');
                         Context.animation({ duration: 250, curve: Curve.EaseInOut });
@@ -2387,9 +2656,10 @@ export class RobotArm3 extends ViewPU {
                         Button.fontColor(Color.White);
                         //急停按钮
                         Button.onClick(() => {
+                            this.setStop();
                         });
                         //急停按钮
-                        Button.backgroundColor('rgba(255, 255, 255, 0.2)');
+                        Button.backgroundColor('rgba(0, 200, 83, 0.5)');
                         //急停按钮
                         Button.borderRadius(30);
                         //急停按钮
@@ -2414,6 +2684,56 @@ export class RobotArm3 extends ViewPU {
         If.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             __Common__.create();
+            __Common__.position({ top: 10, right: 50 });
+        }, __Common__);
+        {
+            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                if (isInitialRender) {
+                    let componentCall = new 
+                    //刷新按钮
+                    ActionButton(this, {
+                        // 请替换为您的图标资源
+                        icon: { "id": 16777289, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        click: async () => {
+                            const is1 = await this.getNowPosition();
+                            const is2 = await this.getAlarms();
+                            const is3 = await this.getEndStatus();
+                            if (is1 && is2 && is3) {
+                                this.showSystemToast('刷新成功');
+                            }
+                            else {
+                                this.showSystemToast('刷新失败');
+                            }
+                        }
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm3.ets", line: 1545, col: 11 });
+                    ViewPU.create(componentCall);
+                    let paramsLambda = () => {
+                        return {
+                            // 请替换为您的图标资源
+                            icon: { "id": 16777289, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            click: async () => {
+                                const is1 = await this.getNowPosition();
+                                const is2 = await this.getAlarms();
+                                const is3 = await this.getEndStatus();
+                                if (is1 && is2 && is3) {
+                                    this.showSystemToast('刷新成功');
+                                }
+                                else {
+                                    this.showSystemToast('刷新失败');
+                                }
+                            }
+                        };
+                    };
+                    componentCall.paramsGenerator_ = paramsLambda;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(elmtId, {});
+                }
+            }, { name: "ActionButton" });
+        }
+        __Common__.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            __Common__.create();
             __Common__.position({ top: 10, right: 10 });
         }, __Common__);
         {
@@ -2425,21 +2745,31 @@ export class RobotArm3 extends ViewPU {
                         // 请替换为您的图标资源
                         icon: { "id": 16777231, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         click: () => {
-                            Context.animateTo({ duration: 800, curve: Curve.EaseInOut }, () => {
+                            Context.animateTo({ duration: 800, curve: Curve.EaseInOut }, async () => {
                                 this.data.isRegionAVisible = !this.data.isRegionAVisible;
                                 this.data.isInfoCardVisible = !this.data.isInfoCardVisible;
+                                if (!this.data.isInfoCardVisible) {
+                                    await this.getNowPosition();
+                                    await this.getAlarms();
+                                    await this.getEndStatus();
+                                }
                             });
                         }
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm3.ets", line: 1399, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm3.ets", line: 1562, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
                             // 请替换为您的图标资源
                             icon: { "id": 16777231, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             click: () => {
-                                Context.animateTo({ duration: 800, curve: Curve.EaseInOut }, () => {
+                                Context.animateTo({ duration: 800, curve: Curve.EaseInOut }, async () => {
                                     this.data.isRegionAVisible = !this.data.isRegionAVisible;
                                     this.data.isInfoCardVisible = !this.data.isInfoCardVisible;
+                                    if (!this.data.isInfoCardVisible) {
+                                        await this.getNowPosition();
+                                        await this.getAlarms();
+                                        await this.getEndStatus();
+                                    }
                                 });
                             }
                         };

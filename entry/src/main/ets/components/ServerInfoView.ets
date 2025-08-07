@@ -16,7 +16,6 @@ import {
   getNodeRFID5
 } from '../service/Request'
 import { ValueCard } from './ValueCard'
-import { promptAction } from '@kit.ArkUI';
 
 // 定义卡片的数据模型
 interface CardData {
@@ -39,12 +38,12 @@ export struct ServerInfoView {
 
   // VOC 传感器数据
   @State vocSensorData: CardData[] = [
-    { icon:$r('app.media.temperature'),title: '当前温度', value: '', unit: '°C' },
-    { icon:$r('app.media.humidity'),title: '当前湿度', value: '', unit: '%' },
     { icon:$r('app.media.gas'),title: 'VOC 浓度', value: '', unit: 'ppm' },
     { icon:$r('app.media.gas'),title: '甲醛浓度', value: '', unit: 'mg/m³' },
-    { icon:$r('app.media.gas'),title: '二氧化碳浓度', value: '', unit: 'ppm' }
-  ];
+    { icon:$r('app.media.gas'),title: '二氧化碳浓度', value: '', unit: 'ppm' },
+    { icon:$r('app.media.temperature'),title: '当前温度', value: '', unit: '°C' },
+    { icon:$r('app.media.humidity'),title: '当前湿度', value: '', unit: '%' }
+  ]
   private node_id_voc: string = ''
 
   // 噪声传感器数据
@@ -57,7 +56,7 @@ export struct ServerInfoView {
   @State redSensorData: CardData[] = [
     { icon:$r('app.media.status'),title: '检测状态', value: '', unit: '' },
     { icon:$r('app.media.num'),title: '检测次数', value: '', unit: '次' }
-  ];
+  ]
   private node_id_red_1: string = ''
   private node_id_red_2: string = ''
 
@@ -66,7 +65,7 @@ export struct ServerInfoView {
     { icon:$r('app.media.status'),title: '震动状态', value: '', unit: '' },
     { icon:$r('app.media.num'),title: '震动次数', value: '', unit: '次' },
     { icon:$r('app.media.num'),title: '脉冲总数', value: '', unit: '次' }
-  ];
+  ]
   private node_id_shark_1: string = ''
   private node_id_shark_2: string = ''
   private node_id_shark_3: string = ''
@@ -86,9 +85,9 @@ export struct ServerInfoView {
   private node_id_rfid_5: string = ''
 
   async startDataFetching() {
-    await this.onServersChange(); // 确保NodeID已加载
+    await this.onServersChange()
     if (this.server) {
-      await this.fetchAndUpdateData(); // 立即获取一次
+      await this.fetchAndUpdateData()
       if (this.timer === -1) { // 防止重复创建
         this.timer = setInterval(async () => {
           await this.fetchAndUpdateData();
@@ -108,7 +107,6 @@ export struct ServerInfoView {
   aboutToDisappear() {
     this.stopDataFetching();
   }
-
 
   async onServersChange(): Promise<void> {
     if (this.server && !this.hasLoaded) {
@@ -335,7 +333,7 @@ export struct ServerInfoView {
       // 当组件刚变得可见时
       if (currentRatio > 0 && !this.isCurrentlyVisible) {
         this.isCurrentlyVisible = true;
-        this.startDataFetching(); // 调用启动逻辑
+        this.startDataFetching()
       }
       // 当组件刚变得完全不可见时
       else if (currentRatio <= 0 && this.isCurrentlyVisible) {

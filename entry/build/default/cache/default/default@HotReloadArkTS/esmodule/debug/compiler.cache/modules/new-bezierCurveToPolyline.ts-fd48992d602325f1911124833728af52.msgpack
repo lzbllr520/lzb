@@ -1,0 +1,579 @@
+Ôr@Ÿªassertions¤code´customTransformCache¬dependencies¢id¤meta±moduleSideEffects¬originalCode±originalSourcemap«resolvedIds®sourcemapChainµsyntheticNamedExportsµtransformDependencies®transformFiles¨cacheAstÔrAÚ)õconst { sqrt, pow, ceil, abs } = Math;
+// åˆå§‹åŒ–æ¯æ¡æ›²çº¿çš„ç‚¹æ•°
+const defaultSegmentPointsNum = 50;
+/**
+ * æ›²çº¿çš„æ•°æ®ç»“æ„
+ * bezierCurve = [
+ *  // Starting point of the curve
+ *  [10, 10],
+ *  // BezierCurve segment data (controlPoint1, controlPoint2, endPoint)
+ *  [
+ *    [20, 20], [40, 20], [50, 10]
+ *  ],
+ *  ...
+ * ]
+ */
+function abstractBezierCurveToPolyline(bezierCurve, precision = 5) {
+    const segmentsNum = bezierCurve.length - 1;
+    const startPoint = bezierCurve[0];
+    const endPoint = bezierCurve[segmentsNum][2];
+    const segments = bezierCurve.slice(1);
+    const getSegmentTPointFuns = segments.map((seg, i) => {
+        let beginPoint = (i === 0) ? startPoint : segments[i - 1][2];
+        return createGetBezierCurveTPointFun(beginPoint, seg[0], seg[1], seg[2]);
+    });
+    // å°†æ›²çº¿åˆå§‹åŒ–ä¸ºæŠ˜çº¿
+    let segmentPointsNum = new Array(segmentsNum).fill(defaultSegmentPointsNum);
+    let segmentPoints = getSegmentPointsByNum(getSegmentTPointFuns, segmentPointsNum);
+    // è¿­ä»£è®¡ç®—å‡åŒ€åˆ†å¸ƒç‚¹
+    const result = calcUniformPointsByIteration(segmentPoints, getSegmentTPointFuns, segments, precision);
+    result.segmentPoints.push(endPoint);
+    return result;
+}
+/**
+ * @description  æ ¹æ®æ›²çº¿æ•°æ®ç”Ÿæˆä¸€ä¸ªé€šè¿‡å‚æ•° t è·å–å¯¹åº”ç‚¹çš„æ–¹æ³•
+ * @param {Array} beginPoint    è´å¡å°”æ›²çº¿çš„èµ·ç‚¹ã€‚[x, y]
+ * @param {Array} controlPoint1 è´å¡å°”æ›²çº¿çš„ç¬¬ä¸€ä¸ªæ§åˆ¶ç‚¹ã€‚[x, y]
+ * @param {Array} controlPoint2 è´å¡å°”æ›²çº¿çš„ç¬¬äºŒä¸ªæ§åˆ¶ç‚¹ã€‚[x, y]
+ * @param {Array} endPoint      è´å¡å°”æ›²çº¿çš„ç»ˆç‚¹ã€‚[x, y]
+ * @return {Function} é¢„æœŸçš„å‡½æ•°
+ */
+function createGetBezierCurveTPointFun(beginPoint, controlPoint1, controlPoint2, endPoint) {
+    return function (t) {
+        const tSubed1 = 1 - t;
+        const tSubed1Pow3 = pow(tSubed1, 3);
+        const tSubed1Pow2 = pow(tSubed1, 2);
+        const tPow3 = pow(t, 3);
+        const tPow2 = pow(t, 2);
+        return [
+            beginPoint[0] * tSubed1Pow3 + 3 * controlPoint1[0] * t * tSubed1Pow2 + 3 * controlPoint2[0] * tPow2 * tSubed1 + endPoint[0] * tPow3,
+            beginPoint[1] * tSubed1Pow3 + 3 * controlPoint1[1] * t * tSubed1Pow2 + 3 * controlPoint2[1] * tPow2 * tSubed1 + endPoint[1] * tPow3
+        ];
+    };
+}
+/**
+ * @description è®¡ç®—ä¸¤ç‚¹ä¹‹é—´çš„è·ç¦»
+ * @param {Array} point1 ç¬¬ä¸€ä¸ªç‚¹ã€‚[x, y]
+ * @param {Array} point2 ç¬¬äºŒä¸ªç‚¹ã€‚[x, y]
+ * @return {Number} ä¸¤ç‚¹ä¹‹é—´çš„é¢„æœŸè·ç¦»
+ */
+function getTwoPointDistance([ax, ay], [bx, by]) {
+    return sqrt(pow(ax - bx, 2) + pow(ay - by, 2));
+}
+/**
+ * @description è·å–æ•°å­—æ•°ç»„çš„æ€»å’Œ
+ * @param {Array<number>} nums ä¸€ä¸ªæ•°å­—æ•°ç»„
+ * @return {number} é¢„æœŸçš„æ€»å’Œ
+ */
+function getNumsSum(nums) {
+    return nums.reduce((sum, num) => sum + num, 0);
+}
+/**
+ * @description è·å–å¤šç»„ç‚¹ä¹‹é—´çš„è·ç¦»
+ * @param {Array<Array<[number, number]>>} segmentPoints å¤šç»„ç‚¹æ•°æ®ï¼Œæ¯ç»„åŒ…å«è‡³å°‘ä¸¤ä¸ªç‚¹ï¼Œæ¯ä¸ªç‚¹è¡¨ç¤ºä¸º [x, y]
+ * @return {Array<number>} å¤šç»„ç‚¹æ•°æ®ä¹‹é—´çš„è·ç¦»æ•°ç»„
+ */
+function getSegmentPointsDistance(segmentPoints) {
+    return segmentPoints.map((points, i) => {
+        return new Array(points.length - 1)
+            .fill(0)
+            .map((temp, j) => getTwoPointDistance(points[j], points[j + 1]));
+    });
+}
+/**
+ * @description è·å–å¤šç»„ç‚¹ä¹‹é—´çš„è·ç¦»
+ * @param {Array<Array<[number, number]>>} segmentPoints å¤šç»„ç‚¹æ•°æ®ï¼Œæ¯ç»„åŒ…å«è‡³å°‘ä¸¤ä¸ªç‚¹ï¼Œæ¯ä¸ªç‚¹è¡¨ç¤ºä¸º [x, y]
+ * @return {Array<number>} æ¯ç»„ç‚¹æ•°æ®ä¹‹é—´çš„è·ç¦»æ•°ç»„
+ */
+function getSegmentPointsByNum(getSegmentTPointFuns, segmentPointsNum) {
+    return getSegmentTPointFuns.map((getSegmentTPointFun, i) => {
+        const tGap = 1 / segmentPointsNum[i];
+        return new Array(segmentPointsNum[i])
+            .fill('')
+            .map((foo, j) => getSegmentTPointFun(j * tGap));
+    });
+}
+/**
+ * @description Get the sum of deviations between line segment and the average length
+ * @param {Array} segmentPointsDistance Segment length of polyline
+ * @param {Number} avgLength            Average length of the line segment
+ * @return {Number} Deviations
+ */
+function getAllDeviations(segmentPointsDistance, avgLength) {
+    return segmentPointsDistance
+        .map(seg => seg.map(s => abs(s - avgLength)))
+        .map(seg => getNumsSum(seg))
+        .reduce((total, v) => total + v, 0);
+}
+/**
+ * @description Calculate uniformly distributed points by iteratively
+ * @param {Array} segmentPoints        Multiple setd of points that make up a polyline
+ * @param {Array} getSegmentTPointFuns Functions of get a point on the curve with t
+ * @param {Array} segments             BezierCurve data
+ * @param {Number} precision           Calculation accuracy
+ * @return {Object} Calculation results and related data
+ * @return {Array}  Option.segmentPoints Point data that constitutes a polyline after calculation
+ * @return {Number} Option.cycles Number of iterations
+ * @return {Number} Option.rounds The number of recursions for the last iteration
+ */
+function calcUniformPointsByIteration(segmentPoints, getSegmentTPointFuns, segments, precision) {
+    // The number of loops for the current iteration
+    let rounds = 4;
+    // Number of iterations
+    let cycles = 1;
+    do {
+        // Recalculate the number of points per curve based on the last iteration data
+        let totalPointsNum = segmentPoints.reduce((total, seg) => total + seg.length, 0);
+        // Add last points of segment to calc exact segment length
+        segmentPoints.forEach((seg, i) => seg.push(segments[i][2]));
+        let segmentPointsDistance = getSegmentPointsDistance(segmentPoints);
+        let lineSegmentNum = segmentPointsDistance.reduce((total, seg) => total + seg.length, 0);
+        let segmentlength = segmentPointsDistance.map(seg => getNumsSum(seg));
+        let totalLength = getNumsSum(segmentlength);
+        let avgLength = totalLength / lineSegmentNum;
+        // Check if precision is reached
+        let allDeviations = getAllDeviations(segmentPointsDistance, avgLength);
+        if (allDeviations <= precision)
+            break;
+        totalPointsNum = ceil(avgLength / precision * totalPointsNum * 1.1);
+        const segmentPointsNum = segmentlength.map(length => ceil(length / totalLength * totalPointsNum));
+        // Calculate the points after redistribution
+        segmentPoints = getSegmentPointsByNum(getSegmentTPointFuns, segmentPointsNum);
+        totalPointsNum = segmentPoints.reduce((total, seg) => total + seg.length, 0);
+        let segmentPointsForLength = JSON.parse(JSON.stringify(segmentPoints));
+        segmentPointsForLength.forEach((seg, i) => seg.push(segments[i][2]));
+        segmentPointsDistance = getSegmentPointsDistance(segmentPointsForLength);
+        lineSegmentNum = segmentPointsDistance.reduce((total, seg) => total + seg.length, 0);
+        segmentlength = segmentPointsDistance.map(seg => getNumsSum(seg));
+        totalLength = getNumsSum(segmentlength);
+        avgLength = totalLength / lineSegmentNum;
+        const stepSize = 1 / totalPointsNum / 10;
+        // Recursively for each segment of the polyline
+        getSegmentTPointFuns.forEach((getSegmentTPointFun, i) => {
+            const currentSegmentPointsNum = segmentPointsNum[i];
+            const t = new Array(currentSegmentPointsNum).fill('').map((foo, j) => j / segmentPointsNum[i]);
+            // Repeated recursive offset
+            for (let r = 0; r < rounds; r++) {
+                if (!segmentPoints[i].length)
+                    break;
+                let distance = getSegmentPointsDistance([segmentPoints[i]])[0];
+                const deviations = distance.map(d => d - avgLength);
+                let offset = 0;
+                for (let j = 0; j < currentSegmentPointsNum; j++) {
+                    if (j === 0)
+                        return;
+                    offset += deviations[j - 1];
+                    t[j] -= stepSize * offset;
+                    if (t[j] > 1)
+                        t[j] = 1;
+                    if (t[j] < 0)
+                        t[j] = 0;
+                    segmentPoints[i][j] = getSegmentTPointFun(t[j]);
+                }
+            }
+        });
+        rounds *= 4;
+        cycles++;
+    } while (rounds <= 1025);
+    segmentPoints = segmentPoints.reduce((all, seg) => all.concat(seg), []);
+    return {
+        segmentPoints,
+        cycles,
+        rounds
+    };
+}
+/**
+ * @description Get the polyline corresponding to the Bezier curve
+ * @param {Array} bezierCurve BezierCurve data
+ * @param {Number} precision  Calculation accuracy. Recommended for 1-20. Default = 5
+ * @return {Array|Boolean} Point data that constitutes a polyline after calculation (Invalid input will return false)
+ */
+export function bezierCurveToPolyline(bezierCurve, precision = 5) {
+    if (!bezierCurve) {
+        console.error('bezierCurveToPolyline: Missing parameters!');
+        return false;
+    }
+    if (!(bezierCurve instanceof Array)) {
+        console.error('bezierCurveToPolyline: Parameter bezierCurve must be an array!');
+        return false;
+    }
+    if (typeof precision !== 'number') {
+        console.error('bezierCurveToPolyline: Parameter precision must be a number!');
+        return false;
+    }
+    const { segmentPoints } = abstractBezierCurveToPolyline(bezierCurve, precision);
+    return segmentPoints;
+}
+/**
+ * @description Get the bezier curve length
+ * @param {Array} bezierCurve bezierCurve data
+ * @param {Number} precision  calculation accuracy. Recommended for 5-10. Default = 5
+ * @return {Number|Boolean} BezierCurve length (Invalid input will return false)
+ */
+export function getBezierCurveLength(bezierCurve, precision = 5) {
+    if (!bezierCurve) {
+        console.error('getBezierCurveLength: Missing parameters!');
+        return false;
+    }
+    if (!(bezierCurve instanceof Array)) {
+        console.error('getBezierCurveLength: Parameter bezierCurve must be an array!');
+        return false;
+    }
+    if (typeof precision !== 'number') {
+        console.error('getBezierCurveLength: Parameter precision must be a number!');
+        return false;
+    }
+    const { segmentPoints } = abstractBezierCurveToPolyline(bezierCurve, precision);
+    // Calculate the total length of the points that make up the polyline
+    const pointsDistance = getSegmentPointsDistance([segmentPoints])[0];
+    const length = getNumsSum(pointsDistance);
+    return length;
+}
+export default bezierCurveToPolyline;
+//# sourceMappingURL=bezierCurveToPolyline.js.mapÂÙ˜D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@mcui+mccharts@2.8.9\oh_modules\@mcui\mccharts\src\main\ets\mcCore\bezierCurve\core\bezierCurveToPolyline.tsÔrB˜±isLocalDependency¯isNodeEntryFile§pkgPath§pkgNameªpkgVersion±belongProjectPath±dependencyPkgInfo¬shouldEmitJsÂÂÙZD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@mcui+mccharts@2.8.9\oh_modules\@mcui\mccharts®@mcui/mccharts¥2.8.9ºD:\apps\deveco\tzb2025jbgsÔrC’§pkgNameªpkgVersion®@mcui/mccharts¥2.8.9ÃÃÚ&„const { sqrt, pow, ceil, abs } = Math
+
+// åˆå§‹åŒ–æ¯æ¡æ›²çº¿çš„ç‚¹æ•°
+const defaultSegmentPointsNum = 50
+
+/**
+ * æ›²çº¿çš„æ•°æ®ç»“æ„
+ * bezierCurve = [
+ *  // Starting point of the curve
+ *  [10, 10],
+ *  // BezierCurve segment data (controlPoint1, controlPoint2, endPoint)
+ *  [
+ *    [20, 20], [40, 20], [50, 10]
+ *  ],
+ *  ...
+ * ]
+ */
+function abstractBezierCurveToPolyline (bezierCurve, precision = 5) {
+  const segmentsNum = bezierCurve.length - 1
+
+  const startPoint = bezierCurve[0]
+  const endPoint = bezierCurve[segmentsNum][2]
+
+  const segments = bezierCurve.slice(1)
+
+  const getSegmentTPointFuns = segments.map((seg: [number, number][], i) => {
+    let beginPoint = (i === 0) ? startPoint : segments[i - 1][2]
+
+    return createGetBezierCurveTPointFun(beginPoint, seg[0], seg[1], seg[2])
+  })
+
+  // å°†æ›²çº¿åˆå§‹åŒ–ä¸ºæŠ˜çº¿
+  let segmentPointsNum = new Array(segmentsNum).fill(defaultSegmentPointsNum)
+  let segmentPoints = getSegmentPointsByNum(getSegmentTPointFuns, segmentPointsNum)
+
+  // è¿­ä»£è®¡ç®—å‡åŒ€åˆ†å¸ƒç‚¹
+  const result = calcUniformPointsByIteration(segmentPoints, getSegmentTPointFuns, segments, precision)
+
+  result.segmentPoints.push(endPoint)
+
+  return result
+}
+
+
+/**
+ * @description  æ ¹æ®æ›²çº¿æ•°æ®ç”Ÿæˆä¸€ä¸ªé€šè¿‡å‚æ•° t è·å–å¯¹åº”ç‚¹çš„æ–¹æ³•
+ * @param {Array} beginPoint    è´å¡å°”æ›²çº¿çš„èµ·ç‚¹ã€‚[x, y]
+ * @param {Array} controlPoint1 è´å¡å°”æ›²çº¿çš„ç¬¬ä¸€ä¸ªæ§åˆ¶ç‚¹ã€‚[x, y]
+ * @param {Array} controlPoint2 è´å¡å°”æ›²çº¿çš„ç¬¬äºŒä¸ªæ§åˆ¶ç‚¹ã€‚[x, y]
+ * @param {Array} endPoint      è´å¡å°”æ›²çº¿çš„ç»ˆç‚¹ã€‚[x, y]
+ * @return {Function} é¢„æœŸçš„å‡½æ•°
+ */
+
+function createGetBezierCurveTPointFun (beginPoint, controlPoint1, controlPoint2, endPoint) {
+  return function (t) {
+    const tSubed1 = 1 - t
+
+    const tSubed1Pow3 = pow(tSubed1, 3)
+    const tSubed1Pow2 = pow(tSubed1, 2)
+
+    const tPow3 = pow(t, 3)
+    const tPow2 = pow(t, 2)
+
+    return [
+      beginPoint[0] * tSubed1Pow3 + 3 * controlPoint1[0] * t * tSubed1Pow2 + 3 * controlPoint2[0] * tPow2 * tSubed1 + endPoint[0] * tPow3,
+      beginPoint[1] * tSubed1Pow3 + 3 * controlPoint1[1] * t * tSubed1Pow2 + 3 * controlPoint2[1] * tPow2 * tSubed1 + endPoint[1] * tPow3
+    ]
+  }
+}
+
+
+/**
+ * @description è®¡ç®—ä¸¤ç‚¹ä¹‹é—´çš„è·ç¦»
+ * @param {Array} point1 ç¬¬ä¸€ä¸ªç‚¹ã€‚[x, y]
+ * @param {Array} point2 ç¬¬äºŒä¸ªç‚¹ã€‚[x, y]
+ * @return {Number} ä¸¤ç‚¹ä¹‹é—´çš„é¢„æœŸè·ç¦»
+ */
+function getTwoPointDistance ([ax, ay], [bx, by]) {
+  return sqrt(pow(ax - bx, 2) + pow(ay - by, 2))
+}
+
+/**
+ * @description è·å–æ•°å­—æ•°ç»„çš„æ€»å’Œ
+ * @param {Array<number>} nums ä¸€ä¸ªæ•°å­—æ•°ç»„
+ * @return {number} é¢„æœŸçš„æ€»å’Œ
+ */
+function getNumsSum (nums) {
+  return nums.reduce((sum, num) => sum + num, 0)
+}
+
+/**
+ * @description è·å–å¤šç»„ç‚¹ä¹‹é—´çš„è·ç¦»
+ * @param {Array<Array<[number, number]>>} segmentPoints å¤šç»„ç‚¹æ•°æ®ï¼Œæ¯ç»„åŒ…å«è‡³å°‘ä¸¤ä¸ªç‚¹ï¼Œæ¯ä¸ªç‚¹è¡¨ç¤ºä¸º [x, y]
+ * @return {Array<number>} å¤šç»„ç‚¹æ•°æ®ä¹‹é—´çš„è·ç¦»æ•°ç»„
+ */
+function getSegmentPointsDistance (segmentPoints) {
+  return segmentPoints.map((points, i) => {
+    return new Array(points.length - 1)
+      .fill(0)
+      .map((temp, j) => getTwoPointDistance(points[j], points[j + 1]))
+  })
+}
+
+/**
+ * @description è·å–å¤šç»„ç‚¹ä¹‹é—´çš„è·ç¦»
+ * @param {Array<Array<[number, number]>>} segmentPoints å¤šç»„ç‚¹æ•°æ®ï¼Œæ¯ç»„åŒ…å«è‡³å°‘ä¸¤ä¸ªç‚¹ï¼Œæ¯ä¸ªç‚¹è¡¨ç¤ºä¸º [x, y]
+ * @return {Array<number>} æ¯ç»„ç‚¹æ•°æ®ä¹‹é—´çš„è·ç¦»æ•°ç»„
+ */
+function getSegmentPointsByNum (getSegmentTPointFuns, segmentPointsNum) {
+  return getSegmentTPointFuns.map((getSegmentTPointFun, i) => {
+    const tGap = 1 / segmentPointsNum[i]
+
+    return new Array(segmentPointsNum[i])
+      .fill('')
+      .map((foo, j) => getSegmentTPointFun(j * tGap))
+  })
+}
+
+/**
+ * @description Get the sum of deviations between line segment and the average length
+ * @param {Array} segmentPointsDistance Segment length of polyline
+ * @param {Number} avgLength            Average length of the line segment
+ * @return {Number} Deviations
+ */
+function getAllDeviations (segmentPointsDistance, avgLength) {
+  return segmentPointsDistance
+    .map(seg => seg.map(s => abs(s - avgLength)))
+    .map(seg => getNumsSum(seg))
+    .reduce((total, v) => total + v, 0)
+}
+
+/**
+ * @description Calculate uniformly distributed points by iteratively
+ * @param {Array} segmentPoints        Multiple setd of points that make up a polyline
+ * @param {Array} getSegmentTPointFuns Functions of get a point on the curve with t
+ * @param {Array} segments             BezierCurve data
+ * @param {Number} precision           Calculation accuracy
+ * @return {Object} Calculation results and related data
+ * @return {Array}  Option.segmentPoints Point data that constitutes a polyline after calculation
+ * @return {Number} Option.cycles Number of iterations
+ * @return {Number} Option.rounds The number of recursions for the last iteration
+ */
+function calcUniformPointsByIteration (segmentPoints, getSegmentTPointFuns, segments, precision) {
+  // The number of loops for the current iteration
+  let rounds = 4
+
+  // Number of iterations
+  let cycles = 1
+
+  do {
+    // Recalculate the number of points per curve based on the last iteration data
+    let totalPointsNum = segmentPoints.reduce((total, seg) => total + seg.length, 0)
+
+    // Add last points of segment to calc exact segment length
+    segmentPoints.forEach((seg, i) => seg.push(segments[i][2]))
+
+    let segmentPointsDistance = getSegmentPointsDistance(segmentPoints)
+
+    let lineSegmentNum = segmentPointsDistance.reduce((total, seg) => total + seg.length, 0)
+
+    let segmentlength = segmentPointsDistance.map(seg => getNumsSum(seg))
+
+    let totalLength = getNumsSum(segmentlength)
+
+    let avgLength = totalLength / lineSegmentNum
+
+    // Check if precision is reached
+    let allDeviations = getAllDeviations(segmentPointsDistance, avgLength)
+
+    if (allDeviations <= precision) break
+
+    totalPointsNum = ceil(avgLength / precision * totalPointsNum * 1.1)
+
+    const segmentPointsNum = segmentlength.map(length => ceil(length / totalLength * totalPointsNum))
+
+    // Calculate the points after redistribution
+    segmentPoints = getSegmentPointsByNum(getSegmentTPointFuns, segmentPointsNum)
+
+    totalPointsNum = segmentPoints.reduce((total, seg) => total + seg.length, 0)
+
+    let segmentPointsForLength = JSON.parse(JSON.stringify(segmentPoints))
+
+    segmentPointsForLength.forEach((seg, i) => seg.push(segments[i][2]))
+
+    segmentPointsDistance = getSegmentPointsDistance(segmentPointsForLength)
+
+    lineSegmentNum = segmentPointsDistance.reduce((total, seg) => total + seg.length, 0)
+
+    segmentlength = segmentPointsDistance.map(seg => getNumsSum(seg))
+
+    totalLength = getNumsSum(segmentlength)
+
+    avgLength = totalLength / lineSegmentNum
+
+    const stepSize = 1 / totalPointsNum / 10
+
+    // Recursively for each segment of the polyline
+    getSegmentTPointFuns.forEach((getSegmentTPointFun, i) => {
+      const currentSegmentPointsNum = segmentPointsNum[i]
+
+      const t = new Array(currentSegmentPointsNum).fill('').map((foo, j) => j / segmentPointsNum[i])
+
+      // Repeated recursive offset
+      for (let r = 0; r < rounds; r++) {
+        if (!segmentPoints[i].length) break
+        let distance = getSegmentPointsDistance([segmentPoints[i]])[0]
+
+        const deviations = distance.map(d => d - avgLength)
+
+        let offset = 0
+
+        for (let j = 0; j < currentSegmentPointsNum; j++) {
+          if (j === 0) return
+
+          offset += deviations[j - 1]
+
+          t[j] -= stepSize * offset
+
+          if (t[j] > 1) t[j] = 1
+          if (t[j] < 0) t[j] = 0
+          segmentPoints[i][j] = getSegmentTPointFun(t[j])
+        }
+      }
+    })
+
+    rounds *= 4
+
+    cycles++
+  } while (rounds <= 1025)
+
+  segmentPoints = segmentPoints.reduce((all, seg) => all.concat(seg), [])
+
+  return {
+    segmentPoints,
+    cycles,
+    rounds
+  }
+}
+
+/**
+ * @description Get the polyline corresponding to the Bezier curve
+ * @param {Array} bezierCurve BezierCurve data
+ * @param {Number} precision  Calculation accuracy. Recommended for 1-20. Default = 5
+ * @return {Array|Boolean} Point data that constitutes a polyline after calculation (Invalid input will return false)
+ */
+export function bezierCurveToPolyline (bezierCurve, precision = 5) {
+  if (!bezierCurve) {
+    console.error('bezierCurveToPolyline: Missing parameters!')
+
+    return false
+  }
+
+  if (!(bezierCurve instanceof Array)) {
+    console.error('bezierCurveToPolyline: Parameter bezierCurve must be an array!')
+
+    return false
+  }
+
+  if (typeof precision !== 'number') {
+    console.error('bezierCurveToPolyline: Parameter precision must be a number!')
+
+    return false
+  }
+
+  const { segmentPoints } = abstractBezierCurveToPolyline(bezierCurve, precision)
+
+  return segmentPoints
+}
+
+/**
+ * @description Get the bezier curve length
+ * @param {Array} bezierCurve bezierCurve data
+ * @param {Number} precision  calculation accuracy. Recommended for 5-10. Default = 5
+ * @return {Number|Boolean} BezierCurve length (Invalid input will return false)
+ */
+export function getBezierCurveLength (bezierCurve, precision = 5) {
+  if (!bezierCurve) {
+    console.error('getBezierCurveLength: Missing parameters!')
+
+    return false
+  }
+
+  if (!(bezierCurve instanceof Array)) {
+    console.error('getBezierCurveLength: Parameter bezierCurve must be an array!')
+
+    return false
+  }
+
+  if (typeof precision !== 'number') {
+    console.error('getBezierCurveLength: Parameter precision must be a number!')
+
+    return false
+  }
+
+  const { segmentPoints } = abstractBezierCurveToPolyline(bezierCurve, precision)
+
+  // Calculate the total length of the points that make up the polyline
+  const pointsDistance = getSegmentPointsDistance([segmentPoints])[0]
+  const length = getNumsSum(pointsDistance)
+
+  return length
+}
+
+export default bezierCurveToPolyline
+ÀA“ÔrD–§version¤fileªsourceRoot§sources¥names¨mappings¸bezierCurveToPolyline.js ‘¸bezierCurveToPolyline.tsÜ è”    ”  ”  ”  ”  ”  ”  ”  ”  ”  ”  ”!  !”%  %”&  %’”   ” –”   ” ” ”   ”" "”# "‘”   ‘” ™”   ”	 	”& &”' (”2 3”4 5”= >”Ì@ ÌA”ÌA ÌBš” ”
+ ” ” ”# !”$ "”* (”- +”. ,”/ ,™” ”
+ ” ” ”"  ”# !”$ "”% #”& #œ” ”
+ ” ” ”  ”! ”, *”- +”. ,”/ -”0 .”1 .›” ”
+ ” ” ”  ”! ”& $”' %”( &”) '”* '” ”
+ ” ”! ”) '”* (”- +”. ,”/ -”2 ÌD”4 ÌF”5 ÌG”7 ÌI”9 ÌKÜ ” ” ” ” ” ” ”  ”! ”" ”# ”$  ”% !”/ +”0 ,”1 -”2 .”: 6”; 7”< 8”? ;”Ì@ <”ÌA =”ÌB >”ÌC ?”ÌD Ì@”ÌE Ì@Ü ” ” ”, (”- )”7 3”9 5”< 8”= 9”> :”? ;”ÌA =”ÌD Ì@”ÌE ÌA”ÌF ÌB”ÌG ÌC”ÌI ÌE”ÌL ÌH”ÌM ÌI”ÌN ÌJ”ÌO ÌK”ÌP ÌL”ÌQ ÌL”” ” ” ” ’” ” Ÿ”  ”  ”  ”  ”  ”$  "”%  #”0  .”1  /”2  0”6  4”7  5”ÌN  ÌL”ÌO  ÌM”ÌP  ÌM›” !” !” !” !”- !+”. !,”ÌB !Ì@”ÌD !ÌB”ÌT !ÌR”ÌU !ÌS”ÌV !ÌS’” #” #Ÿ” $”
+ $” $” $”/ $-”0 $.”= $;”? $=”ÌS $ÌQ”ÌU $ÌS”Ì] $Ì[”Ì_ $Ì]”Ìh $Ìf”Ìi $Ìg”Ìj $Ìgš” &”
+ &” &	” &” &” &” &”& &$”' &%”( &%”” (” (	” (” (’”  ) ” )‘”  , ‘” 3›”  5 ”	 5	”& 5&”' 5(”1 52”3 54”Ì@ 5ÌA”ÌB 5ÌC”ÌO 5ÌP”ÌQ 5ÌR”ÌY 5ÌZ”” 6” 6	” 6” 6˜” 7” 7
+” 7” 7” 7” 7” 7” 7›” 9” 9
+” 9” 9” 9”  9”' 9#”) 9%”* 9&”+ 9'”, 9'›” :” :
+” :” :” :”  :”' :#”) :%”* :&”+ :'”, :'›” <” <
+” <” <” <” <” <” <” <” <”  <›” =” =
+” =” =” =” =” =” =” =” =”  =’” ?” ?Ü $” Ì@” Ì@” Ì@” Ì@” Ì@” Ì@”' Ì@!”* Ì@$”+ Ì@%”. Ì@(”; Ì@5”< Ì@6”= Ì@7”> Ì@8”ÌA Ì@;”ÌB Ì@<”ÌE Ì@?”ÌP Ì@ÌJ”ÌS Ì@ÌM”ÌT Ì@ÌN”ÌW Ì@ÌQ”Ìd Ì@Ì^”Ìe Ì@Ì_”Ìf Ì@Ì`”Ìg Ì@Ìa”Ìj Ì@Ìd”Ìo Ì@Ìi”Ìr Ì@Ìl”Ìy Ì@Ìs”Ì| Ì@Ìv”Ì„ Ì@Ì~”Ì… Ì@Ì”Ì† Ì@Ì€”Ì‡ Ì@Ì”ÌŠ Ì@Ì„”Ì Ì@Ì‰Ü $” ÌA” ÌA” ÌA” ÌA” ÌA” ÌA”' ÌA!”* ÌA$”+ ÌA%”. ÌA(”; ÌA5”< ÌA6”= ÌA7”> ÌA8”ÌA ÌA;”ÌB ÌA<”ÌE ÌA?”ÌP ÌAÌJ”ÌS ÌAÌM”ÌT ÌAÌN”ÌW ÌAÌQ”Ìd ÌAÌ^”Ìe ÌAÌ_”Ìf ÌAÌ`”Ìg ÌAÌa”Ìj ÌAÌd”Ìo ÌAÌi”Ìr ÌAÌl”Ìy ÌAÌs”Ì| ÌAÌv”Ì„ ÌAÌ~”Ì… ÌAÌ”Ì† ÌAÌ€”Ì‡ ÌAÌ”ÌŠ ÌAÌ„”Ì ÌAÌ‰’”	 ÌB”
+ ÌB“” ÌC” ÌC” ÌC’”  ÌD ” ÌD‘”  ÌG ‘” ÌLŸ”  ÌM ”	 ÌM	” ÌM” ÌM” ÌM”  ÌM!”" ÌM#”$ ÌM%”% ÌM&”' ÌM(”( ÌM)”* ÌM+”, ÌM-”. ÌM/”/ ÌM0Ü ” ÌN” ÌN	” ÌN” ÌN” ÌN” ÌN” ÌN” ÌN” ÌN” ÌN” ÌN” ÌN”" ÌN ”% ÌN#”& ÌN$”( ÌN&”+ ÌN)”- ÌN+”/ ÌN-”0 ÌN.”1 ÌN/”2 ÌN0”3 ÌN0’”  ÌO ” ÌO‘”  ÌQ ‘” ÌU•”  ÌV ”	 ÌV	” ÌV” ÌV” ÌVÜ ” ÌW” ÌW	” ÌW” ÌW” ÌW” ÌW” ÌW” ÌW” ÌW”  ÌW”" ÌW ”$ ÌW"”% ÌW#”( ÌW&”+ ÌW)”. ÌW,”0 ÌW.”1 ÌW/”2 ÌW0”3 ÌW0’”  ÌX ” ÌX‘”  ÌZ ‘” Ì^•”  Ì_ ”	 Ì_	”! Ì_!”" Ì_#”/ Ì_0œ” Ì`” Ì`	” Ì`” Ì`” Ì`” Ì`” Ì`”$ Ì`"”& Ì`$”' Ì`%”) Ì`'”+ Ì`)›” Ìa” Ìa” Ìa” Ìa” Ìa” Ìa”  Ìa”& Ìa"”) Ìa%”* Ìa&”+ Ìa'•” Ìb” Ìb” Ìb” Ìb” ÌbÜ ” Ìc” Ìc
+” Ìc” Ìc” Ìc” Ìc” Ìc” Ìc” Ìc” Ìc”1 Ìc+”2 Ìc,”8 Ìc2”9 Ìc3”: Ìc4”; Ìc5”= Ìc7”ÌC Ìc=”ÌD Ìc>”ÌE Ìc?”ÌH ÌcÌB”ÌI ÌcÌC”ÌJ ÌcÌD”ÌK ÌcÌE”ÌL ÌcÌF”ÌM ÌcÌF”” Ìd” Ìd” Ìd” Ìd’”  Ìe ” Ìe‘”  Ìg ‘” Ìk—”  Ìl ”	 Ìl	” Ìl” Ìl ”3 Ìl4”5 Ìl6”ÌE ÌlÌFœ” Ìm” Ìm	” Ìm”  Ìm”# Ìm!”$ Ìm"”% Ìm#”8 Ìm6”: Ìm8”; Ìm9”= Ìm;”? Ìm=›” Ìn” Ìn
+” Ìn” Ìn” Ìn” Ìn”) Ìn%”* Ìn&”+ Ìn'”, Ìn(”- Ìn(š” Ìp” Ìp” Ìp” Ìp” Ìp”) Ìp%”* Ìp&”+ Ìp'”, Ìp(”- Ìp)•” Ìq” Ìq” Ìq” Ìq” ÌqÜ ” Ìr” Ìr
+” Ìr” Ìr” Ìr” Ìr” Ìr” Ìr” Ìr” Ìr”0 Ìr*”1 Ìr+”2 Ìr,”5 Ìr/”9 Ìr3”: Ìr4”; Ìr5”< Ìr5”” Ìs” Ìs” Ìs” Ìs’”  Ìt ” Ìt‘”  Ìv ‘” Ì{—”  Ì| ”	 Ì|	” Ì|” Ì|”/ Ì|0”1 Ì|2”: Ì|;“” Ì}” Ì}	”  Ì}Ü ”	 Ì~” Ì~” Ì~	” Ì~” Ì~” Ì~” Ì~” Ì~” Ì~” Ì~” Ì~” Ì~” Ì~”  Ì~”! Ì~”$ Ì~ ”% Ì~!”& Ì~"”) Ì~%”2 Ì~.”3 Ì~/”4 Ì~0”5 Ì~1œ”	 Ì” Ì” Ì	” Ì” Ì” Ì” Ì” Ì” Ì”" Ì”# Ì”$ Ì Ü ”	 Ì€” Ì€” Ì€” Ì€” Ì€” Ì€” Ì€” Ì€” Ì€” Ì€”# Ì€”& Ì€"”' Ì€#”) Ì€%”* Ì€&”+ Ì€'”, Ì€'’”  Ì ” Ì‘”  Ìƒ ‘” Ì›”  Ì ”	 Ì	”% Ì%”& Ì'”3 Ì4”5 Ì6”ÌI ÌÌJ”ÌK ÌÌL”ÌS ÌÌT”ÌU ÌÌV”Ì^ ÌÌ_’” Ì”4 Ì2–” Ì” Ì” Ì” Ì” Ì” Ì’” Ì’” Ì’–” Ì“” Ì“” Ì“” Ì“” Ì“” Ì“’” Ì•” Ì•’” Ì–”ÌV Ì–ÌRÜ ” Ì—” Ì—” Ì—” Ì—”* Ì—&”+ Ì—'”1 Ì—-”2 Ì—.”3 Ì—/”8 Ì—4”: Ì—6”= Ì—9”? Ì—;”ÌA Ì—=”ÌB Ì—>”ÌG Ì—ÌC”ÌJ Ì—ÌF”ÌM Ì—ÌI”ÌN Ì—ÌJ”ÌT Ì—ÌP”ÌV Ì—ÌR”ÌW Ì—ÌS”ÌX Ì—ÌT”ÌY Ì—ÌT’” Ì™”ÌB Ì™>Ü ” Ìš” Ìš” Ìš” Ìš” Ìš” Ìš”" Ìš”$ Ìš ”% Ìš!”' Ìš#”) Ìš%”* Ìš&”- Ìš)”. Ìš*”2 Ìš.”3 Ìš/”; Ìš7”< Ìš8”= Ìš9”> Ìš:”? Ìš;”Ì@ Ìš<”ÌA Ìš=”ÌB Ìš>”ÌC Ìš?”ÌD Ìš?™” Ìœ” Ìœ”! Ìœ”$ Ìœ ”< Ìœ8”= Ìœ9”ÌJ ÌœÌF”ÌK ÌœÌG”ÌL ÌœÌGÜ ” Ì” Ì” Ì” Ì”2 Ì.”3 Ì/”9 Ì5”: Ì6”; Ì7”Ì@ Ì<”ÌB Ì>”ÌE ÌÌA”ÌG ÌÌC”ÌI ÌÌE”ÌJ ÌÌF”ÌO ÌÌK”ÌR ÌÌN”ÌU ÌÌQ”ÌV ÌÌR”Ì\ ÌÌX”Ì^ ÌÌZ”Ì_ ÌÌ[”Ì` ÌÌ\”Ìa ÌÌ\Ü ” Ì ” Ì ” Ì ” Ì ”1 Ì -”2 Ì .”5 Ì 1”6 Ì 2”9 Ì 5”: Ì 6”< Ì 8”= Ì 9”ÌG Ì ÌC”ÌH Ì ÌD”ÌK Ì ÌG”ÌL Ì ÌH”ÌM Ì ÌI”ÌN Ì ÌI™” Ì¢” Ì¢” Ì¢” Ì¢”$ Ì¢ ”% Ì¢!”2 Ì¢.”3 Ì¢/”4 Ì¢/˜” Ì¤” Ì¤” Ì¤” Ì¤”# Ì¤”& Ì¤"”4 Ì¤0”5 Ì¤0’” Ì¦”( Ì¦$›” Ì§” Ì§” Ì§” Ì§”, Ì§(”- Ì§)”ÌB Ì§>”ÌD Ì§Ì@”ÌM Ì§ÌI”ÌN Ì§ÌJ”ÌO Ì§ÌJ•” Ì©” Ì©” Ì©” Ì©”& Ì©"’” Ì©$” Ì©)” Ì«” Ì«” Ì«” Ì«” Ì«”' Ì«#”* Ì«&”3 Ì«/”6 Ì«2”ÌD Ì«Ì@”ÌG Ì«ÌC”ÌJ Ì«ÌF”ÌK Ì«ÌG”ÌL Ì«ÌGÜ ” Ì­” Ì­
+” Ì­”! Ì­”. Ì­*”/ Ì­+”2 Ì­.”3 Ì­/”9 Ì­5”: Ì­6”< Ì­8”= Ì­9”ÌA Ì­=”ÌB Ì­>”ÌH Ì­ÌD”ÌK Ì­ÌG”ÌV Ì­ÌR”ÌY Ì­ÌU”Ìg Ì­Ìc”Ìh Ì­Ìd”Ìi Ì­Ìe”Ìj Ì­Ìe’” Ì¯”4 Ì¯0š” Ì°” Ì°” Ì°”- Ì°)”. Ì°*”ÌB Ì°>”ÌD Ì°Ì@”ÌT Ì°ÌP”ÌU Ì°ÌQ”ÌV Ì°ÌQÜ ” Ì²” Ì²” Ì²”& Ì²"”' Ì²#”- Ì²)”. Ì²*”/ Ì²+”4 Ì²0”6 Ì²2”9 Ì²5”; Ì²7”= Ì²9”> Ì²:”ÌC Ì²?”ÌF Ì²ÌB”ÌI Ì²ÌE”ÌJ Ì²ÌF”ÌP Ì²ÌL”ÌR Ì²ÌN”ÌS Ì²ÌO”ÌT Ì²ÌP”ÌU Ì²ÌPÜ ” Ì´” Ì´”" Ì´”% Ì´!”) Ì´%”* Ì´&”/ Ì´+”0 Ì´,”4 Ì´0”5 Ì´1”> Ì´:”? Ì´;”ÌL Ì´ÌH”ÌM Ì´ÌI”ÌN Ì´ÌJ”ÌO Ì´ÌJÜ ” Ì¶” Ì¶” Ì¶”& Ì¶"”' Ì¶#”( Ì¶$”+ Ì¶'”- Ì¶)”. Ì¶*”0 Ì¶,”2 Ì¶.”3 Ì¶/”6 Ì¶2”7 Ì¶3”; Ì¶7”< Ì¶8”ÌD Ì¶Ì@”ÌE Ì¶ÌA”ÌF Ì¶ÌB”ÌG Ì¶ÌC”ÌH Ì¶ÌD”ÌI Ì¶ÌE”ÌJ Ì¶ÌF”ÌK Ì¶ÌG”ÌL Ì¶ÌH”ÌM Ì¶ÌH˜” Ì¸” Ì¸”  Ì¸”8 Ì¸4”9 Ì¸5”ÌO Ì¸ÌK”ÌP Ì¸ÌL”ÌQ Ì¸ÌLÜ ” Ìº” Ìº” Ìº”. Ìº*”/ Ìº+”5 Ìº1”6 Ìº2”7 Ìº3”< Ìº8”> Ìº:”ÌA Ìº=”ÌC Ìº?”ÌE ÌºÌA”ÌF ÌºÌB”ÌK ÌºÌG”ÌN ÌºÌJ”ÌQ ÌºÌM”ÌR ÌºÌN”ÌX ÌºÌT”ÌZ ÌºÌV”Ì[ ÌºÌW”Ì\ ÌºÌX”Ì] ÌºÌXÜ ” Ì¼” Ì¼” Ì¼”- Ì¼)”. Ì¼*”1 Ì¼-”2 Ì¼.”5 Ì¼1”6 Ì¼2”8 Ì¼4”9 Ì¼5”ÌC Ì¼?”ÌD Ì¼Ì@”ÌG Ì¼ÌC”ÌH Ì¼ÌD”ÌI Ì¼ÌE”ÌJ Ì¼ÌE˜” Ì¾” Ì¾” Ì¾”  Ì¾”! Ì¾”. Ì¾*”/ Ì¾+”0 Ì¾+—” ÌÀ” ÌÀ” ÌÀ” ÌÀ”" ÌÀ”0 ÌÀ,”1 ÌÀ,š” ÌÂ” ÌÂ
+” ÌÂ” ÌÂ” ÌÂ” ÌÂ”+ ÌÂ'”. ÌÂ*”0 ÌÂ,”1 ÌÂ,’” ÌÄ”7 ÌÄ3›” ÌÅ” ÌÅ” ÌÅ”$ ÌÅ ”% ÌÅ!”& ÌÅ"”9 ÌÅ5”; ÌÅ7”< ÌÅ8”> ÌÅ:”Ì@ ÌÅ<™” ÌÆ” ÌÆ”) ÌÆ#”, ÌÆ&”< ÌÆ6”= ÌÆ7”> ÌÆ8”? ÌÆ9”Ì@ ÌÆ9Ü  ” ÌÈ” ÌÈ” ÌÈ” ÌÈ” ÌÈ” ÌÈ”  ÌÈ”7 ÌÈ1”8 ÌÈ2”9 ÌÈ3”= ÌÈ7”> ÌÈ8”Ì@ ÌÈ:”ÌA ÌÈ;”ÌB ÌÈ<”ÌE ÌÈ?”ÌF ÌÈÌ@”ÌG ÌÈÌA”ÌJ ÌÈÌD”ÌL ÌÈÌF”ÌM ÌÈÌG”ÌO ÌÈÌI”ÌQ ÌÈÌK”ÌR ÌÈÌL”ÌS ÌÈÌM”ÌV ÌÈÌP”Ìf ÌÈÌ`”Ìg ÌÈÌa”Ìh ÌÈÌb”Ìi ÌÈÌc”Ìj ÌÈÌd”Ìk ÌÈÌd’” ÌÊ”( ÌÊ"” ÌË” ÌË” ÌË” ÌË” ÌË” ÌË” ÌË” ÌË”  ÌË”& ÌË ”( ÌË"”) ÌË#”+ ÌË%”- ÌË'™” ÌÌ” ÌÌ” ÌÌ”" ÌÌ”# ÌÌ”$ ÌÌ”% ÌÌ”& ÌÌ”, ÌÌ$’” ÌÌ&” ÌÌ+Ü ” ÌÍ” ÌÍ” ÌÍ” ÌÍ”7 ÌÍ/”8 ÌÍ0”9 ÌÍ1”ÌF ÌÍ>”ÌG ÌÍ?”ÌH ÌÍÌ@”ÌI ÌÍÌA”ÌJ ÌÍÌB”ÌK ÌÍÌC”ÌL ÌÍÌD”ÌM ÌÍÌE”ÌN ÌÍÌF”ÌO ÌÍÌFÜ ” ÌÏ” ÌÏ”  ÌÏ”# ÌÏ”+ ÌÏ#”, ÌÏ$”/ ÌÏ'”0 ÌÏ(”1 ÌÏ)”2 ÌÏ*”4 ÌÏ,”5 ÌÏ-”6 ÌÏ.”9 ÌÏ1”ÌB ÌÏ:”ÌC ÌÏ;”ÌD ÌÏ;–” ÌÑ” ÌÑ” ÌÑ” ÌÑ” ÌÑ” ÌÑ” ÌÓ” ÌÓ” ÌÓ” ÌÓ” ÌÓ” ÌÓ”  ÌÓ”! ÌÓ”$ ÌÓ”; ÌÓ3”= ÌÓ5”> ÌÓ6”Ì@ ÌÓ8”ÌB ÌÓ:•” ÌÔ
+” ÌÔ” ÌÔ” ÌÔ” ÌÔ’” ÌÔ” ÌÔš” ÌÖ
+” ÌÖ” ÌÖ”( ÌÖ”) ÌÖ”* ÌÖ ”- ÌÖ#”. ÌÖ$”/ ÌÖ%”0 ÌÖ%š” ÌØ
+” ÌØ” ÌØ” ÌØ” ÌØ” ÌØ”$ ÌØ”' ÌØ”- ÌØ#”. ÌØ#˜” ÌÚ
+” ÌÚ” ÌÚ” ÌÚ” ÌÚ” ÌÚ” ÌÚ”  ÌÚ˜” ÌÚ” ÌÚ” ÌÚ” ÌÚ” ÌÚ” ÌÚ”  ÌÚ ”! ÌÚ ˜” ÌÛ
+” ÌÛ” ÌÛ” ÌÛ” ÌÛ” ÌÛ” ÌÛ”  ÌÛ˜” ÌÛ” ÌÛ” ÌÛ” ÌÛ” ÌÛ” ÌÛ”  ÌÛ ”! ÌÛ Ü ” ÌÜ
+”! ÌÜ”" ÌÜ”# ÌÜ”$ ÌÜ”% ÌÜ”& ÌÜ”' ÌÜ”* ÌÜ ”= ÌÜ3”> ÌÜ4”? ÌÜ5”Ì@ ÌÜ6”ÌA ÌÜ7”ÌB ÌÜ8”ÌC ÌÜ9”ÌD ÌÜ9‘” Ìİ	‘” ÌŞ”” Ìß”	 Ìß”
+ Ìß” Ìß•” Ìá” Ìá
+” Ìá” Ìá” Ìá”” Ìã” Ìã
+” Ìã” Ìã–” Ìä” Ìä” Ìä” Ìä” Ìä” ÌäÜ ” Ìæ” Ìæ” Ìæ”! Ìæ”" Ìæ ”( Ìæ&”) Ìæ'”* Ìæ(”- Ìæ+”/ Ìæ-”2 Ìæ0”4 Ìæ2”6 Ìæ4”7 Ìæ5”: Ìæ8”; Ìæ9”ÌA Ìæ?”ÌB ÌæÌ@”ÌE ÌæÌC”ÌF ÌæÌD”ÌH ÌæÌF”ÌJ ÌæÌH”ÌK ÌæÌI”ÌL ÌæÌI’” Ìè” Ìè	’” Ìé” Ìé’” Ìê” Ìê
+’” Ìë” Ìë
+’” Ìì” Ìì’”  Ìí ” Ìí‘”  Ìï ‘” Ìôš”  Ìõ ” Ìõ” Ìõ”% Ìõ%”& Ìõ'”1 Ìõ2”3 Ìõ4”< Ìõ=”? ÌõÌ@”Ì@ ÌõÌA•” Ìö” Ìö”	 Ìö” Ìö” Ìö˜” Ì÷” Ì÷” Ì÷” Ì÷” Ì÷”ÌB Ì÷>”ÌC Ì÷?”ÌD Ì÷?”” Ìù” Ìù” Ìù” Ìù‘” Ìú™” Ìü” Ìü”	 Ìü”
+ Ìü” Ìü”! Ìü”& Ìü$”' Ìü%”) Ìü'˜” Ìı” Ìı” Ìı” Ìı” Ìı”ÌV ÌıÌR”ÌW ÌıÌS”ÌX ÌıÌS”” Ìÿ” Ìÿ” Ìÿ” Ìÿ‘” Í —” Í” Í” Í” Í” Í”% Í#”' Í%˜” Í” Í” Í” Í” Í”ÌT ÍÌP”ÌU ÍÌQ”ÌV ÍÌQ”” Í” Í” Í” Í‘” Í” Í”
+ Í” Í
+” Í” Í” Í”; Í9”< Í:”ÌG ÍÌE”ÌI ÍÌG”ÌR ÍÌP”ÌS ÍÌQ”ÌT ÍÌQ”” Í
+” Í
+	” Í
+” Í
+’”  Í ” Í‘”  Í ‘” Íš”  Í ” Í” Í”$ Í$”% Í&”0 Í1”2 Í3”; Í<”> Í?”? ÍÌ@•” Í” Í”	 Í” Í” Í˜” Í” Í” Í” Í” Í”ÌA Í=”ÌB Í>”ÌC Í>”” Í” Í” Í” Í‘” Í™” Í” Í”	 Í”
+ Í” Í”! Í”& Í$”' Í%”) Í'˜” Í” Í” Í” Í” Í”ÌU ÍÌQ”ÌV ÍÌR”ÌW ÍÌR”” Í” Í” Í” Í‘” Í—” Í ” Í ” Í ” Í ” Í ”% Í #”' Í %˜” Í!” Í!” Í!” Í!” Í!”ÌS Í!ÌO”ÌT Í!ÌP”ÌU Í!ÌP”” Í#” Í#” Í#” Í#‘” Í$” Í&”
+ Í&” Í&
+” Í&” Í&” Í&”; Í&9”< Í&:”ÌG Í&ÌE”ÌI Í&ÌG”ÌR Í&ÌP”ÌS Í&ÌQ”ÌT Í&ÌQ’” Í(”ÌI Í(ÌG” Í)”
+ Í)” Í)” Í)”3 Í)1”4 Í)2”5 Í)3”ÌB Í)Ì@”ÌC Í)ÌA”ÌD Í)ÌB”ÌE Í)ÌC”ÌF Í)ÌD”ÌG Í)ÌE”ÌH Í)ÌE™” Í*”
+ Í*” Í*” Í*” Í*” Í*”, Í**”- Í*+”. Í*+”” Í,” Í,	” Í,” Í,’”  Í- ” Í-””  Í/ ” Í/”$ Í/$”% Í/$ÔrE–§version¤file§sources®sourcesContent¥names¨mappingsÀ‘À‘ÀÜ é‘”    ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”  	 ‘”  
+ ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”    ‘”  ! ‘”  " ‘”  # ‘”  $ ‘”  % ‘”  & ‘”  ' ‘”  ( ‘”  ) ‘”  * ‘”  + ‘”  , ‘”  - ‘”  . ‘”  / ‘”  0 ‘”  1 ‘”  2 ‘”  3 ‘”  4 ‘”  5 ‘”  6 ‘”  7 ‘”  8 ‘”  9 ‘”  : ‘”  ; ‘”  < ‘”  = ‘”  > ‘”  ? ‘”  Ì@ ‘”  ÌA ‘”  ÌB ‘”  ÌC ‘”  ÌD ‘”  ÌE ‘”  ÌF ‘”  ÌG ‘”  ÌH ‘”  ÌI ‘”  ÌJ ‘”  ÌK ‘”  ÌL ‘”  ÌM ‘”  ÌN ‘”  ÌO ‘”  ÌP ‘”  ÌQ ‘”  ÌR ‘”  ÌS ‘”  ÌT ‘”  ÌU ‘”  ÌV ‘”  ÌW ‘”  ÌX ‘”  ÌY ‘”  ÌZ ‘”  Ì[ ‘”  Ì\ ‘”  Ì] ‘”  Ì^ ‘”  Ì_ ‘”  Ì` ‘”  Ìa ‘”  Ìb ‘”  Ìc ‘”  Ìd ‘”  Ìe ‘”  Ìf ‘”  Ìg ‘”  Ìh ‘”  Ìi ‘”  Ìj ‘”  Ìk ‘”  Ìl ‘”  Ìm ‘”  Ìn ‘”  Ìo ‘”  Ìp ‘”  Ìq ‘”  Ìr ‘”  Ìs ‘”  Ìt ‘”  Ìu ‘”  Ìv ‘”  Ìw ‘”  Ìx ‘”  Ìy ‘”  Ìz ‘”  Ì{ ‘”  Ì| ‘”  Ì} ‘”  Ì~ ‘”  Ì ‘”  Ì€ ‘”  Ì ‘”  Ì‚ ‘”  Ìƒ ‘”  Ì„ ‘”  Ì… ‘”  Ì† ‘”  Ì‡ ‘”  Ìˆ ‘”  Ì‰ ‘”  ÌŠ ‘”  Ì‹ ‘”  ÌŒ ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì‘ ‘”  Ì’ ‘”  Ì“ ‘”  Ì” ‘”  Ì• ‘”  Ì– ‘”  Ì— ‘”  Ì˜ ‘”  Ì™ ‘”  Ìš ‘”  Ì› ‘”  Ìœ ‘”  Ì ‘”  Ì ‘”  ÌŸ ‘”  Ì  ‘”  Ì¡ ‘”  Ì¢ ‘”  Ì£ ‘”  Ì¤ ‘”  Ì¥ ‘”  Ì¦ ‘”  Ì§ ‘”  Ì¨ ‘”  Ì© ‘”  Ìª ‘”  Ì« ‘”  Ì¬ ‘”  Ì­ ‘”  Ì® ‘”  Ì¯ ‘”  Ì° ‘”  Ì± ‘”  Ì² ‘”  Ì³ ‘”  Ì´ ‘”  Ìµ ‘”  Ì¶ ‘”  Ì· ‘”  Ì¸ ‘”  Ì¹ ‘”  Ìº ‘”  Ì» ‘”  Ì¼ ‘”  Ì½ ‘”  Ì¾ ‘”  Ì¿ ‘”  ÌÀ ‘”  ÌÁ ‘”  ÌÂ ‘”  ÌÃ ‘”  ÌÄ ‘”  ÌÅ ‘”  ÌÆ ‘”  ÌÇ ‘”  ÌÈ ‘”  ÌÉ ‘”  ÌÊ ‘”  ÌË ‘”  ÌÌ ‘”  ÌÍ ‘”  ÌÎ ‘”  ÌÏ ‘”  ÌĞ ‘”  ÌÑ ‘”  ÌÒ ‘”  ÌÓ ‘”  ÌÔ ‘”  ÌÕ ‘”  ÌÖ ‘”  Ì× ‘”  ÌØ ‘”  ÌÙ ‘”  ÌÚ ‘”  ÌÛ ‘”  ÌÜ ‘”  Ìİ ‘”  ÌŞ ‘”  Ìß ‘”  Ìà ‘”  Ìá ‘”  Ìâ ‘”  Ìã ‘”  Ìä ‘”  Ìå ‘”  Ìæ ‘”  Ìç ‘”  Ìè ÔrF’§missing¦pluginÃ¦genAbcÂÔ  ÔrG”²dynamicImportCache¹exportAllDeclarationCache»exportNamedDeclarationCache«importCache’ÔrH–¤type¥start£end«declarationªspecifiers¦source¶ExportNamedDeclarationÍ ûÍ#sÔrI™¤type¥start£end¢idªexpression©generator¥async¦params¤body³FunctionDeclarationÍ!Í#sÔrJ”¤type¥start£end¤nameªIdentifierÍ!Í! µbezierCurveToPolylineÂÂÂ’JªIdentifierÍ!!Í!,«bezierCurveÔrK•¤type¥start£end¤left¥right±AssignmentPatternÍ!.Í!;JªIdentifierÍ!.Í!7©precisionÔrL•¤type¥start£end¥value£raw§LiteralÍ!:Í!;¡5ÔrM”¤type¥start£end¤body®BlockStatementÍ!=Í#s•ÔrN–¤type¥start£end¤testªconsequent©alternate«IfStatementÍ!DÍ!»ÔrO–¤type¥start£end¨operator¦prefix¨argument¯UnaryExpressionÍ!HÍ!T¡!ÃJªIdentifierÍ!IÍ!T«bezierCurveM®BlockStatementÍ!VÍ!»’ÔrP”¤type¥start£endªexpression³ExpressionStatementÍ!aÍ!ÔrQ–¤type¥start£end¦callee©arguments¨optional®CallExpressionÍ!aÍ!œÔrR—¤type¥start£end¦object¨property¨computed¨optional°MemberExpressionÍ!aÍ!nJªIdentifierÍ!aÍ!h§consoleJªIdentifierÍ!iÍ!n¥errorÂÂ‘L§LiteralÍ!oÍ!›Ù*bezierCurveToPolyline: Missing parameters!Ù,'bezierCurveToPolyline: Missing parameters!'ÂÔrS”¤type¥start£end¨argument¯ReturnStatementÍ!§Í!´L§LiteralÍ!®Í!³Â¥falseÀN«IfStatementÍ!ÁÍ"_O¯UnaryExpressionÍ!ÅÍ!ä¡!ÃÔrT–¤type¥start£end¤left¨operator¥right°BinaryExpressionÍ!ÇÍ!ãJªIdentifierÍ!ÇÍ!Ò«bezierCurveªinstanceofJªIdentifierÍ!ŞÍ!ã¥ArrayM®BlockStatementÍ!æÍ"_’P³ExpressionStatementÍ!ñÍ"AQ®CallExpressionÍ!ñÍ"@R°MemberExpressionÍ!ñÍ!şJªIdentifierÍ!ñÍ!ø§consoleJªIdentifierÍ!ùÍ!ş¥errorÂÂ‘L§LiteralÍ!ÿÍ"?Ù>bezierCurveToPolyline: Parameter bezierCurve must be an array!Ù@'bezierCurveToPolyline: Parameter bezierCurve must be an array!'ÂS¯ReturnStatementÍ"KÍ"XL§LiteralÍ"RÍ"WÂ¥falseÀN«IfStatementÍ"eÍ"ÿT°BinaryExpressionÍ"iÍ"†O¯UnaryExpressionÍ"iÍ"y¦typeofÃJªIdentifierÍ"pÍ"y©precision£!==L§LiteralÍ"~Í"†¦number¨'number'M®BlockStatementÍ"ˆÍ"ÿ’P³ExpressionStatementÍ"“Í"áQ®CallExpressionÍ"“Í"àR°MemberExpressionÍ"“Í" JªIdentifierÍ"“Í"š§consoleJªIdentifierÍ"›Í" ¥errorÂÂ‘L§LiteralÍ"¡Í"ßÙ<bezierCurveToPolyline: Parameter precision must be a number!Ù>'bezierCurveToPolyline: Parameter precision must be a number!'ÂS¯ReturnStatementÍ"ëÍ"øL§LiteralÍ"òÍ"÷Â¥falseÀÔrU•¤type¥start£end¬declarations¤kind³VariableDeclarationÍ#Í#U‘ÔrV•¤type¥start£end¢id¤init²VariableDeclaratorÍ#Í#TÔrW”¤type¥start£endªproperties­ObjectPatternÍ#Í#‘ÔrX™¤type¥start£end¦method©shorthand¨computed£key¤kind¥value¨PropertyÍ#Í#ÂÃÂJªIdentifierÍ#Í#­segmentPoints¤initJªIdentifierÍ#Í#­segmentPointsQ®CallExpressionÍ#Í#TJªIdentifierÍ#Í#<½abstractBezierCurveToPolyline’JªIdentifierÍ#=Í#H«bezierCurveJªIdentifierÍ#JÍ#S©precisionÂ¥constS¯ReturnStatementÍ#[Í#pJªIdentifierÍ#bÍ#o­segmentPointsÀH¶ExportNamedDeclarationÍ$…Í'·I³FunctionDeclarationÍ$ŒÍ'·JªIdentifierÍ$•Í$©´getBezierCurveLengthÂÂÂ’JªIdentifierÍ$ªÍ$µ«bezierCurveK±AssignmentPatternÍ$·Í$ÄJªIdentifierÍ$·Í$À©precisionL§LiteralÍ$ÃÍ$Ä¡5M®BlockStatementÍ$ÆÍ'·—N«IfStatementÍ$ÍÍ%CO¯UnaryExpressionÍ$ÑÍ$İ¡!ÃJªIdentifierÍ$ÒÍ$İ«bezierCurveM®BlockStatementÍ$ßÍ%C’P³ExpressionStatementÍ$êÍ%%Q®CallExpressionÍ$êÍ%$R°MemberExpressionÍ$êÍ$÷JªIdentifierÍ$êÍ$ñ§consoleJªIdentifierÍ$òÍ$÷¥errorÂÂ‘L§LiteralÍ$øÍ%#Ù)getBezierCurveLength: Missing parameters!Ù+'getBezierCurveLength: Missing parameters!'ÂS¯ReturnStatementÍ%/Í%<L§LiteralÍ%6Í%;Â¥falseÀN«IfStatementÍ%IÍ%æO¯UnaryExpressionÍ%MÍ%l¡!ÃT°BinaryExpressionÍ%OÍ%kJªIdentifierÍ%OÍ%Z«bezierCurveªinstanceofJªIdentifierÍ%fÍ%k¥ArrayM®BlockStatementÍ%nÍ%æ’P³ExpressionStatementÍ%yÍ%ÈQ®CallExpressionÍ%yÍ%ÇR°MemberExpressionÍ%yÍ%†JªIdentifierÍ%yÍ%€§consoleJªIdentifierÍ%Í%†¥errorÂÂ‘L§LiteralÍ%‡Í%ÆÙ=getBezierCurveLength: Parameter bezierCurve must be an array!Ù?'getBezierCurveLength: Parameter bezierCurve must be an array!'ÂS¯ReturnStatementÍ%ÒÍ%ßL§LiteralÍ%ÙÍ%ŞÂ¥falseÀN«IfStatementÍ%ìÍ&…T°BinaryExpressionÍ%ğÍ&O¯UnaryExpressionÍ%ğÍ& ¦typeofÃJªIdentifierÍ%÷Í& ©precision£!==L§LiteralÍ&Í&¦number¨'number'M®BlockStatementÍ&Í&…’P³ExpressionStatementÍ&Í&gQ®CallExpressionÍ&Í&fR°MemberExpressionÍ&Í&'JªIdentifierÍ&Í&!§consoleJªIdentifierÍ&"Í&'¥errorÂÂ‘L§LiteralÍ&(Í&eÙ;getBezierCurveLength: Parameter precision must be a number!Ù='getBezierCurveLength: Parameter precision must be a number!'ÂS¯ReturnStatementÍ&qÍ&~L§LiteralÍ&xÍ&}Â¥falseÀU³VariableDeclarationÍ&‹Í&Û‘V²VariableDeclaratorÍ&‘Í&ÚW­ObjectPatternÍ&‘Í&¢‘X¨PropertyÍ&“Í& ÂÃÂJªIdentifierÍ&“Í& ­segmentPoints¤initJªIdentifierÍ&“Í& ­segmentPointsQ®CallExpressionÍ&¥Í&ÚJªIdentifierÍ&¥Í&Â½abstractBezierCurveToPolyline’JªIdentifierÍ&ÃÍ&Î«bezierCurveJªIdentifierÍ&ĞÍ&Ù©precisionÂ¥constU³VariableDeclarationÍ',Í'p‘V²VariableDeclaratorÍ'2Í'oJªIdentifierÍ'2Í'@®pointsDistanceR°MemberExpressionÍ'CÍ'oQ®CallExpressionÍ'CÍ'lJªIdentifierÍ'CÍ'[¸getSegmentPointsDistance‘ÔrY”¤type¥start£end¨elements¯ArrayExpressionÍ'\Í'k‘JªIdentifierÍ']Í'j­segmentPointsÂL§LiteralÍ'mÍ'n ¡0ÃÂ¥constU³VariableDeclarationÍ'vÍ' ‘V²VariableDeclaratorÍ'|Í'ŸJªIdentifierÍ'|Í'‚¦lengthQ®CallExpressionÍ'…Í'ŸJªIdentifierÍ'…Í'ªgetNumsSum‘JªIdentifierÍ'Í'®pointsDistanceÂ¥constS¯ReturnStatementÍ'¦Í'´JªIdentifierÍ'­Í'³¦lengthÀ

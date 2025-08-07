@@ -779,7 +779,7 @@ export async function getRobotArmAlarms(serverId: string, node_id: string): Prom
     };
     try {
         const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
-        console.info(`【获取${serverId}服务的机械臂警报接口】获取成功`);
+        console.info(`【${responseData.data.data.value}获取${serverId}服务的机械臂警报接口】获取成功`);
         return responseData.data.data.value;
     }
     catch (error) {
@@ -1031,6 +1031,36 @@ export async function setStop(serverId: string, node_id: string): Promise<boolea
         }
         else {
             console.info(`设置【${serverId}服务的机械臂急停接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+//点按移动机械臂
+export async function setRobotArmMove(serverId: string, node_id: string, action: string): Promise<boolean | null> {
+    let requestData: RobotArmData = {
+        id: serverId,
+        node_id: node_id,
+        action: action
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`${action}【${serverId}服务的机械臂移动接口】获取成功`);
+        return responseData.data.code === 0;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【${serverId}服务的机械臂移动接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`清除【${serverId}服务的机械臂移动接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`清除【${serverId}服务的机械臂移动接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`清除【${serverId}服务的机械臂移动接口】捕获到未知错误:`, JSON.stringify(error));
         }
         return null;
     }

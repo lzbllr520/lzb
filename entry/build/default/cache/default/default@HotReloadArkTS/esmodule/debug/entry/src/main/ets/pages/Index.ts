@@ -49,6 +49,7 @@ import preferences from "@ohos:data.preferences";
 import promptAction from "@ohos:promptAction";
 import { getAllServers } from "@normalized:N&&&entry/src/main/ets/service/Request&";
 import type { Server } from '../model/ServerState';
+import { Environment } from "@normalized:N&&&entry/src/main/ets/view/Enviroment&";
 //日志接口
 interface LogEntry {
     id: number;
@@ -606,7 +607,7 @@ class MainPage extends ViewPU {
             this.observeComponentCreation2((elmtId, isInitialRender) => {
                 if (isInitialRender) {
                     let componentCall = new 
-                    // 主控台
+                    //环境数据
                     NavigationItem(this, {
                         index: 0,
                         current: this.currentPage,
@@ -616,7 +617,7 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 303, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 304, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -648,9 +649,51 @@ class MainPage extends ViewPU {
             this.observeComponentCreation2((elmtId, isInitialRender) => {
                 if (isInitialRender) {
                     let componentCall = new 
-                    // 设备管理
+                    // 主控台
                     NavigationItem(this, {
                         index: 1,
+                        current: this.currentPage,
+                        icon: { "id": 16777290, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        selectedIcon: { "id": 16777291, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        text: '环境数据',
+                        currentPage: this.__currentPage,
+                        showSidebar: this.showSidebar,
+                        onNavigate: this.handleNavigation.bind(this)
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 316, col: 11 });
+                    ViewPU.create(componentCall);
+                    let paramsLambda = () => {
+                        return {
+                            index: 1,
+                            current: this.currentPage,
+                            icon: { "id": 16777290, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            selectedIcon: { "id": 16777291, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                            text: '环境数据',
+                            currentPage: this.currentPage,
+                            showSidebar: this.showSidebar,
+                            onNavigate: this.handleNavigation.bind(this)
+                        };
+                    };
+                    componentCall.paramsGenerator_ = paramsLambda;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(elmtId, {
+                        index: 1,
+                        current: this.currentPage,
+                        icon: { "id": 16777290, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        selectedIcon: { "id": 16777291, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
+                        text: '环境数据',
+                        showSidebar: this.showSidebar
+                    });
+                }
+            }, { name: "NavigationItem" });
+        }
+        {
+            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                if (isInitialRender) {
+                    let componentCall = new 
+                    // 设备管理
+                    NavigationItem(this, {
+                        index: 2,
                         current: this.currentPage,
                         icon: { "id": 16777237, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         selectedIcon: { "id": 16777238, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
@@ -658,11 +701,11 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 315, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 328, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
-                            index: 1,
+                            index: 2,
                             current: this.currentPage,
                             icon: { "id": 16777237, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             selectedIcon: { "id": 16777238, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
@@ -676,7 +719,7 @@ class MainPage extends ViewPU {
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(elmtId, {
-                        index: 1,
+                        index: 2,
                         current: this.currentPage,
                         icon: { "id": 16777237, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         selectedIcon: { "id": 16777238, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
@@ -692,7 +735,7 @@ class MainPage extends ViewPU {
                     let componentCall = new 
                     // 任务日志
                     NavigationItem(this, {
-                        index: 2,
+                        index: 3,
                         current: this.currentPage,
                         icon: { "id": 16777269, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         selectedIcon: { "id": 16777270, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
@@ -700,11 +743,11 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 327, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 340, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
-                            index: 2,
+                            index: 3,
                             current: this.currentPage,
                             icon: { "id": 16777269, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             selectedIcon: { "id": 16777270, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
@@ -718,7 +761,7 @@ class MainPage extends ViewPU {
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(elmtId, {
-                        index: 2,
+                        index: 3,
                         current: this.currentPage,
                         icon: { "id": 16777269, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         selectedIcon: { "id": 16777270, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
@@ -734,7 +777,7 @@ class MainPage extends ViewPU {
                     let componentCall = new 
                     // 知识库
                     NavigationItem(this, {
-                        index: 3,
+                        index: 4,
                         current: this.currentPage,
                         icon: { "id": 16777235, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         selectedIcon: { "id": 16777236, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
@@ -742,11 +785,11 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 339, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 352, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
-                            index: 3,
+                            index: 4,
                             current: this.currentPage,
                             icon: { "id": 16777235, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             selectedIcon: { "id": 16777236, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
@@ -760,7 +803,7 @@ class MainPage extends ViewPU {
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(elmtId, {
-                        index: 3,
+                        index: 4,
                         current: this.currentPage,
                         icon: { "id": 16777235, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         selectedIcon: { "id": 16777236, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
@@ -776,7 +819,7 @@ class MainPage extends ViewPU {
                     let componentCall = new 
                     // 系统设置
                     NavigationItem(this, {
-                        index: 4,
+                        index: 5,
                         current: this.currentPage,
                         icon: { "id": 16777265, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         selectedIcon: { "id": 16777266, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
@@ -784,11 +827,11 @@ class MainPage extends ViewPU {
                         currentPage: this.__currentPage,
                         showSidebar: this.showSidebar,
                         onNavigate: this.handleNavigation.bind(this)
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 351, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 364, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
-                            index: 4,
+                            index: 5,
                             current: this.currentPage,
                             icon: { "id": 16777265, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                             selectedIcon: { "id": 16777266, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
@@ -802,7 +845,7 @@ class MainPage extends ViewPU {
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(elmtId, {
-                        index: 4,
+                        index: 5,
                         current: this.currentPage,
                         icon: { "id": 16777265, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         selectedIcon: { "id": 16777266, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
@@ -835,7 +878,6 @@ class MainPage extends ViewPU {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
                                 let componentCall = new MasterStation(this, {
-                                    servers: this.servers ?? [],
                                     conveyorData1: this.__conveyorData1,
                                     conveyorData2: this.__conveyorData2,
                                     dollyData: this.__dollyData,
@@ -844,11 +886,10 @@ class MainPage extends ViewPU {
                                     robot3Data: this.__robot3Data,
                                     addLog: this.addLog.bind(this),
                                     isLineRunning: this.__isLineRunning
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 383, col: 13 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 396, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
-                                        servers: this.servers ?? [],
                                         conveyorData1: this.conveyorData1,
                                         conveyorData2: this.conveyorData2,
                                         dollyData: this.dollyData,
@@ -862,9 +903,7 @@ class MainPage extends ViewPU {
                                 componentCall.paramsGenerator_ = paramsLambda;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(elmtId, {
-                                    servers: this.servers ?? []
-                                });
+                                this.updateStateVarsOfChildByElmtId(elmtId, {});
                             }
                         }, { name: "MasterStation" });
                     }
@@ -872,6 +911,31 @@ class MainPage extends ViewPU {
             }
             else if (this.currentPage === 1) {
                 this.ifElseBranchUpdateFunction(1, () => {
+                    {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new Environment(this, {
+                                    servers: this.servers ?? []
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 407, col: 13 });
+                                ViewPU.create(componentCall);
+                                let paramsLambda = () => {
+                                    return {
+                                        servers: this.servers ?? []
+                                    };
+                                };
+                                componentCall.paramsGenerator_ = paramsLambda;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                    servers: this.servers ?? []
+                                });
+                            }
+                        }, { name: "Environment" });
+                    }
+                });
+            }
+            else if (this.currentPage === 1) {
+                this.ifElseBranchUpdateFunction(2, () => {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
@@ -891,7 +955,7 @@ class MainPage extends ViewPU {
                                         this.deviceManagerIndex = index;
                                     },
                                     servers: this.servers
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 395, col: 13 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 411, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -924,14 +988,14 @@ class MainPage extends ViewPU {
                 });
             }
             else if (this.currentPage === 2) {
-                this.ifElseBranchUpdateFunction(2, () => {
+                this.ifElseBranchUpdateFunction(3, () => {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
                                 let componentCall = new TaskLog(this, {
                                     allLogItems: this.allLogItems,
                                     clearAllLogs: this.clearAllLogs.bind(this)
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 413, col: 13 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 429, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -951,11 +1015,11 @@ class MainPage extends ViewPU {
                 });
             }
             else if (this.currentPage === 3) {
-                this.ifElseBranchUpdateFunction(3, () => {
+                this.ifElseBranchUpdateFunction(4, () => {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new DataStatics(this, {}, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 418, col: 13 });
+                                let componentCall = new DataStatics(this, {}, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 434, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {};
@@ -970,14 +1034,14 @@ class MainPage extends ViewPU {
                 });
             }
             else {
-                this.ifElseBranchUpdateFunction(4, () => {
+                this.ifElseBranchUpdateFunction(5, () => {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
                                 let componentCall = new SystemSetting(this, {
                                     addLog: this.addLog.bind(this),
                                     avatar: this.__userAvatar
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 420, col: 13 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 436, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -1145,7 +1209,7 @@ class NavigationItem extends ViewPU {
                 curve: Curve.EaseInOut // 动画曲线
             });
             Column.width('85%');
-            Column.height(this.showSidebar ? 90 : 60);
+            Column.height(this.showSidebar ? 70 : 50);
             Column.justifyContent(FlexAlign.Center);
             Column.alignItems(HorizontalAlign.Center);
             Column.borderRadius(15);

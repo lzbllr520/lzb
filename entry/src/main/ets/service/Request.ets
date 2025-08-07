@@ -786,7 +786,7 @@ export async function getRobotArmAlarms(serverId:string,node_id:string): Promise
       '/opcua/browse-nodes',
       requestData
     );
-    console.info(`【获取${serverId}服务的机械臂警报接口】获取成功`)
+    console.info(`【${responseData.data.data.value}获取${serverId}服务的机械臂警报接口】获取成功`)
     return responseData.data.data.value
   } catch (error) {
     if (error instanceof AxiosError) {
@@ -1051,7 +1051,7 @@ export async function setRobotArmMove(serverId:string,node_id:string,action:stri
       '/opcua/browse-nodes',
       requestData
     );
-    console.info(`【${serverId}服务的机械臂移动接口】获取成功`)
+    console.info(`${action}【${serverId}服务的机械臂移动接口】获取成功`)
     return responseData.data.code===0
   } catch (error) {
     if (error instanceof AxiosError) {

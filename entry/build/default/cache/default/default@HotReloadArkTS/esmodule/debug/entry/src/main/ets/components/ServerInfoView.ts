@@ -47,11 +47,11 @@ export class ServerInfoView extends ViewPU {
         this.__hasLoaded = new ObservedPropertySimplePU(false, this, "hasLoaded");
         this.timer = -1;
         this.__vocSensorData = new ObservedPropertyObjectPU([
-            { icon: { "id": 16777283, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, title: '当前温度', value: '', unit: '°C' },
-            { icon: { "id": 16777282, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, title: '当前湿度', value: '', unit: '%' },
             { icon: { "id": 16777281, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, title: 'VOC 浓度', value: '', unit: 'ppm' },
             { icon: { "id": 16777281, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, title: '甲醛浓度', value: '', unit: 'mg/m³' },
-            { icon: { "id": 16777281, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, title: '二氧化碳浓度', value: '', unit: 'ppm' }
+            { icon: { "id": 16777281, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, title: '二氧化碳浓度', value: '', unit: 'ppm' },
+            { icon: { "id": 16777283, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, title: '当前温度', value: '', unit: '°C' },
+            { icon: { "id": 16777282, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, title: '当前湿度', value: '', unit: '%' }
         ], this, "vocSensorData");
         this.node_id_voc = '';
         this.__voiceSensorData = new ObservedPropertyObjectPU([
@@ -251,9 +251,9 @@ export class ServerInfoView extends ViewPU {
     private node_id_rfid_4: string;
     private node_id_rfid_5: string;
     async startDataFetching() {
-        await this.onServersChange(); // 确保NodeID已加载
+        await this.onServersChange();
         if (this.server) {
-            await this.fetchAndUpdateData(); // 立即获取一次
+            await this.fetchAndUpdateData();
             if (this.timer === -1) { // 防止重复创建
                 this.timer = setInterval(async () => {
                     await this.fetchAndUpdateData();
@@ -416,7 +416,7 @@ export class ServerInfoView extends ViewPU {
                 // 当组件刚变得可见时
                 if (currentRatio > 0 && !this.isCurrentlyVisible) {
                     this.isCurrentlyVisible = true;
-                    this.startDataFetching(); // 调用启动逻辑
+                    this.startDataFetching();
                 }
                 // 当组件刚变得完全不可见时
                 else if (currentRatio <= 0 && this.isCurrentlyVisible) {
@@ -469,7 +469,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 270, col: 28 });
+                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 268, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -516,7 +516,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 281, col: 28 });
+                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 279, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -563,7 +563,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 292, col: 28 });
+                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 290, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -610,7 +610,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 303, col: 28 });
+                                    let componentCall = new ValueCard(this, { title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 301, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -656,7 +656,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 314, col: 28 });
+                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 312, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {

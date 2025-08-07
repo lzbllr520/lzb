@@ -17,6 +17,7 @@ import promptAction from '@ohos.promptAction';
 import { getAllServers } from '../service/Request'
 
 import {Server} from '../model/ServerState'
+import { Environment } from '../view/Enviroment'
 
 //日志接口
 interface LogEntry {
@@ -299,7 +300,7 @@ struct MainPage {
               })
           }
 
-          // 主控台
+          //环境数据
           NavigationItem({
             index: 0,
             current: this.currentPage,
@@ -311,9 +312,21 @@ struct MainPage {
             onNavigate: this.handleNavigation.bind(this)
           })
 
-          // 设备管理
+          // 主控台
           NavigationItem({
             index: 1,
+            current: this.currentPage,
+            icon: $r("app.media.environment"),
+            selectedIcon:$r("app.media.environment_active"),
+            text: '环境数据',
+            currentPage: $currentPage,
+            showSidebar: this.showSidebar,
+            onNavigate: this.handleNavigation.bind(this)
+          })
+
+          // 设备管理
+          NavigationItem({
+            index: 2,
             current: this.currentPage,
             icon: $r('app.media.device'),
             selectedIcon:$r("app.media.device_active"),
@@ -325,7 +338,7 @@ struct MainPage {
 
           // 任务日志
           NavigationItem({
-            index: 2,
+            index: 3,
             current: this.currentPage,
             icon: $r('app.media.task'),
             selectedIcon:$r("app.media.task_active"),
@@ -337,7 +350,7 @@ struct MainPage {
 
           // 知识库
           NavigationItem({
-            index: 3,
+            index: 4,
             current: this.currentPage,
             icon: $r('app.media.data'),
             selectedIcon:$r("app.media.data_active"),
@@ -349,7 +362,7 @@ struct MainPage {
 
           // 系统设置
           NavigationItem({
-            index: 4,
+            index: 5,
             current: this.currentPage,
             icon: $r('app.media.setting'),
             selectedIcon:$r("app.media.setting_active"),
@@ -379,9 +392,8 @@ struct MainPage {
 
         // 内容区域
         Column() {
-          if (this.currentPage === 0) {
+          if (this.currentPage===0){
             MasterStation({
-              servers:this.servers??[],
               conveyorData1:this.conveyorData1,
               conveyorData2:this.conveyorData2,
               dollyData:this.dollyData,
@@ -390,6 +402,10 @@ struct MainPage {
               robot3Data:this.robot3Data,
               addLog: this.addLog.bind(this),
               isLineRunning:this.isLineRunning
+            })
+          } else if (this.currentPage === 1) {
+            Environment({
+              servers:this.servers??[]
             })
           } else if (this.currentPage === 1) {
             DeviceManager({
@@ -475,7 +491,7 @@ struct NavigationItem {
       }
     }
     .width('85%')
-    .height(this.showSidebar ? 90 : 60)
+    .height(this.showSidebar ? 70 : 50)
     .justifyContent(FlexAlign.Center)
     .alignItems(HorizontalAlign.Center)
     .borderRadius(15)
