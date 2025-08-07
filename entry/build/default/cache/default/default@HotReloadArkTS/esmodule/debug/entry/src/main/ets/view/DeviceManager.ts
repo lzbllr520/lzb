@@ -2,6 +2,7 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
 interface DeviceManager_Params {
+    isLoading?: boolean;
     addLog?: (level: 'info' | 'warning' | 'error', message: string, shouldSave: boolean) => void;
     currentIndex?: number;
     conveyorData1?: ConveyorState;
@@ -36,16 +37,18 @@ import { Dolly } from "@normalized:N&&&entry/src/main/ets/view/device/Dolly&";
 import { RobotArm1 } from "@normalized:N&&&entry/src/main/ets/view/device/RobotArm1&";
 import { RobotArm2 } from "@normalized:N&&&entry/src/main/ets/view/device/RobotArm2&";
 import { RobotArm3 } from "@normalized:N&&&entry/src/main/ets/view/device/RobotArm3&";
-import type { Server, Node, Data } from '../model/ServerState';
+import type { Server, Data } from '../model/ServerState';
 import { getNodeOther, getNodeStart } from "@normalized:N&&&entry/src/main/ets/service/Request&";
+import promptAction from "@ohos:promptAction";
 export class DeviceManager extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
         if (typeof paramsLambda === "function") {
             this.paramsGenerator_ = paramsLambda;
         }
+        this.__isLoading = new ObservedPropertySimplePU(true, this, "isLoading");
         this.addLog = () => { };
-        this.__currentIndex = new SynchedPropertySimpleTwoWayPU(params.currentIndex, this, "currentIndex");
+        this.__currentIndex = new ObservedPropertySimplePU(0, this, "currentIndex");
         this.__conveyorData1 = new SynchedPropertyObjectTwoWayPU(params.conveyorData1, this, "conveyorData1");
         this.__conveyorData2 = new SynchedPropertyObjectTwoWayPU(params.conveyorData2, this, "conveyorData2");
         this.__dollyData = new SynchedPropertyObjectTwoWayPU(params.dollyData, this, "dollyData");
@@ -81,8 +84,14 @@ export class DeviceManager extends ViewPU {
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params: DeviceManager_Params) {
+        if (params.isLoading !== undefined) {
+            this.isLoading = params.isLoading;
+        }
         if (params.addLog !== undefined) {
             this.addLog = params.addLog;
+        }
+        if (params.currentIndex !== undefined) {
+            this.currentIndex = params.currentIndex;
         }
         if (params.tabArray !== undefined) {
             this.tabArray = params.tabArray;
@@ -130,6 +139,7 @@ export class DeviceManager extends ViewPU {
         this.__servers.reset(params.servers);
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__isLoading.purgeDependencyOnElmtId(rmElmtId);
         this.__currentIndex.purgeDependencyOnElmtId(rmElmtId);
         this.__conveyorData1.purgeDependencyOnElmtId(rmElmtId);
         this.__conveyorData2.purgeDependencyOnElmtId(rmElmtId);
@@ -149,6 +159,7 @@ export class DeviceManager extends ViewPU {
         this.__data5.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
+        this.__isLoading.aboutToBeDeleted();
         this.__currentIndex.aboutToBeDeleted();
         this.__conveyorData1.aboutToBeDeleted();
         this.__conveyorData2.aboutToBeDeleted();
@@ -169,8 +180,16 @@ export class DeviceManager extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
+    //加载标志位
+    private __isLoading: ObservedPropertySimplePU<boolean>;
+    get isLoading() {
+        return this.__isLoading.get();
+    }
+    set isLoading(newValue: boolean) {
+        this.__isLoading.set(newValue);
+    }
     private addLog: (level: 'info' | 'warning' | 'error', message: string, shouldSave: boolean) => void;
-    private __currentIndex: SynchedPropertySimpleTwoWayPU<number>;
+    private __currentIndex: ObservedPropertySimplePU<number>;
     get currentIndex() {
         return this.__currentIndex.get();
     }
@@ -301,69 +320,57 @@ export class DeviceManager extends ViewPU {
         this.__data5.set(newValue);
     }
     async onServersChange(): Promise<void> {
-        if (this.servers && this.servers.length > 0) {
-            this.servers.forEach(async (item: Server) => {
-                if (item.id === 'server2') {
-                    const nodes1: Node[] | null = await getNodeStart(item.id);
-                    if (nodes1 && nodes1.length > 0) {
-                        const nodes2: Node[] | null = await getNodeOther(item.id, nodes1[3].node_id);
-                        if (nodes2 && nodes2.length > 0) {
-                            this.data1 = {
-                                id: item.id,
-                                node_id: nodes2[3].node_id
-                            };
+        // 如果没有服务，直接结束加载
+        if (!this.servers || this.servers.length === 0) {
+            this.isLoading = false;
+            return;
+        }
+        this.isLoading = true; // 开始加载
+        try {
+            // 使用 Promise.all 来并行处理所有服务器的节点查找请求
+            // map 会返回一个 Promise 数组，Promise.all 会等待所有 Promise 完成
+            await Promise.all(this.servers.map(async (item: Server) => {
+                const serverId = item.id;
+                // 统一处理获取节点的逻辑
+                const fetchNode = async (nodeIndex: number) => {
+                    const nodes1 = await getNodeStart(serverId);
+                    if (nodes1 && nodes1.length > 3) {
+                        const nodes2 = await getNodeOther(serverId, nodes1[3].node_id);
+                        if (nodes2 && nodes2.length > nodeIndex) {
+                            return {
+                                id: serverId,
+                                node_id: nodes2[nodeIndex].node_id
+                            } as Data;
                         }
                     }
+                    return null;
+                };
+                switch (serverId) {
+                    case 'server2': // 传送带1
+                        this.data1 = await fetchNode(3) ?? { id: '', node_id: '' };
+                        break;
+                    case 'server5': // 传送带2
+                        this.data2 = await fetchNode(3) ?? { id: '', node_id: '' };
+                        break;
+                    case 'server1': // 机械臂1
+                        this.data3 = await fetchNode(2) ?? { id: '', node_id: '' };
+                        break;
+                    case 'server3': // 机械臂2
+                        this.data4 = await fetchNode(2) ?? { id: '', node_id: '' };
+                        break;
+                    case 'server4': // 机械臂3
+                        this.data5 = await fetchNode(2) ?? { id: '', node_id: '' };
+                        break;
                 }
-                else if (item.id === 'server5') {
-                    const nodes1: Node[] | null = await getNodeStart(item.id);
-                    if (nodes1 && nodes1.length > 0) {
-                        const nodes2: Node[] | null = await getNodeOther(item.id, nodes1[3].node_id);
-                        if (nodes2 && nodes2.length > 0) {
-                            this.data2 = {
-                                id: item.id,
-                                node_id: nodes2[3].node_id
-                            };
-                        }
-                    }
-                }
-                else if (item.id === 'server1') {
-                    const nodes1: Node[] | null = await getNodeStart(item.id);
-                    if (nodes1 && nodes1.length > 0) {
-                        const nodes2: Node[] | null = await getNodeOther(item.id, nodes1[3].node_id);
-                        if (nodes2 && nodes2.length > 0) {
-                            this.data3 = {
-                                id: item.id,
-                                node_id: nodes2[2].node_id
-                            };
-                        }
-                    }
-                }
-                else if (item.id === 'server3') {
-                    const nodes1: Node[] | null = await getNodeStart(item.id);
-                    if (nodes1 && nodes1.length > 0) {
-                        const nodes2: Node[] | null = await getNodeOther(item.id, nodes1[3].node_id);
-                        if (nodes2 && nodes2.length > 0) {
-                            this.data4 = {
-                                id: item.id,
-                                node_id: nodes2[2].node_id
-                            };
-                        }
-                    }
-                }
-                else if (item.id === 'server4') {
-                    const nodes1: Node[] | null = await getNodeStart(item.id);
-                    if (nodes1 && nodes1.length > 0) {
-                        const nodes2: Node[] | null = await getNodeOther(item.id, nodes1[3].node_id);
-                        if (nodes2 && nodes2.length > 0) {
-                            this.data5 = {
-                                id: item.id,
-                                node_id: nodes2[2].node_id
-                            };
-                        }
-                    }
-                }
-            });
+            }));
+        }
+        catch (error) {
+            // 增加错误处理
+            promptAction.showToast({ message: '加载设备信息结点失败' });
+        }
+        finally {
+            //无论成功还是失败，最后都要结束加载状态
+            this.isLoading = false;
         }
     }
     aboutToAppear(): void {
@@ -458,7 +465,14 @@ export class DeviceManager extends ViewPU {
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Stack.create();
+            Stack.width('100%');
+            Stack.height('100%');
+        }, Stack);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create({ space: 0 });
+            Column.enabled(!this.isLoading);
+            Column.opacity(this.isLoading ? 0.6 : 1);
             Column.width('100%');
             Column.height('100%');
         }, Column);
@@ -527,7 +541,7 @@ export class DeviceManager extends ViewPU {
                                     data: this.__dollyData,
                                     addLog: this.addLog,
                                     avatar: this.__dollyAvatar
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 235, col: 11 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 235, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -557,7 +571,7 @@ export class DeviceManager extends ViewPU {
                                     // 因为只有在 currentIndex === 1 时才会渲染，所以 isActive 恒为 true
                                     isActive: true,
                                     node: this.data1
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 241, col: 11 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 241, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -594,7 +608,7 @@ export class DeviceManager extends ViewPU {
                                     // 因为只有在 currentIndex === 2 时才会渲染，所以 isActive 恒为 true
                                     isActive: true,
                                     node: this.data2
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 250, col: 11 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 250, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -629,7 +643,7 @@ export class DeviceManager extends ViewPU {
                                     addLog: this.addLog,
                                     avatar: this.__robotArmAvatar,
                                     node: this.data3
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 259, col: 11 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 259, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -660,7 +674,7 @@ export class DeviceManager extends ViewPU {
                                     addLog: this.addLog,
                                     avatar: this.__robotArmAvatar,
                                     node: this.data4
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 266, col: 11 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 266, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -691,7 +705,7 @@ export class DeviceManager extends ViewPU {
                                     addLog: this.addLog,
                                     avatar: this.__robotArmAvatar,
                                     node: this.data5
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 273, col: 11 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/DeviceManager.ets", line: 273, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -722,6 +736,45 @@ export class DeviceManager extends ViewPU {
         // 内容区域：直接使用 if/else if 结构，不再通过 @Builder 调用
         Column.pop();
         Column.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            if (this.isLoading) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Column.create();
+                        Column.width('100%');
+                        Column.height('100%');
+                        Column.justifyContent(FlexAlign.Center);
+                        Column.backgroundColor('rgba(0, 0, 0, 0.4)');
+                        Column.onClick(() => {
+                            // 添加一个空的onClick事件，可以阻止点击穿透到下层UI
+                        });
+                    }, Column);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        // 加载动画 (转圈)
+                        Progress.create({ type: ProgressType.Ring, value: 0 });
+                        // 加载动画 (转圈)
+                        Progress.width(60);
+                        // 加载动画 (转圈)
+                        Progress.color(Color.White);
+                    }, Progress);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create('设备信息加载中...');
+                        Text.fontColor(Color.White);
+                        Text.fontWeight(FontWeight.Bold);
+                        Text.fontSize(30);
+                    }, Text);
+                    Text.pop();
+                    Column.pop();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+        Stack.pop();
     }
     rerender() {
         this.updateDirtyElements();

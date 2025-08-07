@@ -407,9 +407,8 @@ struct MainPage {
             Environment({
               servers:this.servers??[]
             })
-          } else if (this.currentPage === 1) {
+          } else if (this.currentPage === 2) {
             DeviceManager({
-              currentIndex: this.deviceManagerIndex,
               conveyorData1:this.conveyorData1,
               conveyorData2:this.conveyorData2,
               dollyData:this.dollyData,
@@ -425,12 +424,12 @@ struct MainPage {
               },
               servers:this.servers
             })
-          } else if (this.currentPage === 2) {
+          } else if (this.currentPage === 3) {
             TaskLog({
               allLogItems: this.allLogItems,
               clearAllLogs: this.clearAllLogs.bind(this)
             })
-          } else if (this.currentPage === 3) {
+          } else if (this.currentPage === 4) {
             DataStatics()
           } else {
             SystemSetting({

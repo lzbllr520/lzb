@@ -11,7 +11,7 @@ export class RobotArmState {
   zzValue:number=0
   rValue:number=0
   rrValue:number=0
-  jumpValue:number=0
+  jumpValue:number=50
 
   //持久化界面动画执行信息
   isInfoCardVisible: boolean = false
@@ -24,5 +24,8 @@ export class RobotArmState {
 
   step_xyz:number=5
   step_r:number=5
+  step_jump:number=5
+  step_zz:number=5
+  step_rr:number=5
 
 }

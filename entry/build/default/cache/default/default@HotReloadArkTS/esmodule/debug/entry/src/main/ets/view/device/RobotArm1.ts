@@ -7,11 +7,15 @@ interface ActionButton_Params {
     isPressed?: boolean;
 }
 interface RobotArm1_Params {
+    redrawTrigger?: number;
     addLog?: (level: 'info' | 'warning' | 'error', message: string, shouldSave: boolean) => void;
     data?: RobotArmState;
     avatar?: Resource;
     stepInputText_xyz?: string;
     stepInputText_r?: string;
+    stepInputText_jump?: string;
+    stepInputText_zz?: string;
+    stepInputText_rr?: string;
     button_icon_size?: number;
     button_size?: number;
     catch_size_height?: number;
@@ -41,6 +45,7 @@ interface RobotArm1_Params {
     node_id_stop?: string;
     node_id_nowPosition?: string;
     node_id_move?: string;
+    node_id_jump?: string;
     isCatch?: boolean;
     isMove?: boolean;
     node?: Data;
@@ -54,20 +59,24 @@ interface RobotArm1_Params {
 import type { RobotArmState } from '../../model/RobotArmState';
 import { RoboticArmWorkRangeView } from "@normalized:N&&&entry/src/main/ets/components/RoboticArmWorkRangeView&";
 import type { Node, Data } from '../../model/ServerState';
-import { clearEndAble, clearRobotArmAlarms, endControl, getEndStatus, getNodeOther, getRobotArmAlarms, getRobotArmNowPosition, getRobotArmTime, getRobotArmUid, setEndAble, setRobotArmMove, setStop, setToStart } from "@normalized:N&&&entry/src/main/ets/service/Request&";
+import { clearEndAble, clearRobotArmAlarms, endControl, getEndStatus, getNodeOther, getRobotArmAlarms, getRobotArmNowPosition, getRobotArmTime, getRobotArmUid, jumpRobotArmMove, setEndAble, setRobotArmMove, setStop, setToStart } from "@normalized:N&&&entry/src/main/ets/service/Request&";
 export class RobotArm1 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
         if (typeof paramsLambda === "function") {
             this.paramsGenerator_ = paramsLambda;
         }
+        this.__redrawTrigger = new ObservedPropertySimplePU(0, this, "redrawTrigger");
         this.addLog = () => { };
         this.__data = new SynchedPropertyObjectTwoWayPU(params.data, this, "data");
         this.__avatar = new SynchedPropertyObjectTwoWayPU(params.avatar, this, "avatar");
         this.__stepInputText_xyz = new ObservedPropertySimplePU('5', this, "stepInputText_xyz");
-        this.__stepInputText_r = new ObservedPropertySimplePU('5'
+        this.__stepInputText_r = new ObservedPropertySimplePU('5', this, "stepInputText_r");
+        this.__stepInputText_jump = new ObservedPropertySimplePU('5', this, "stepInputText_jump");
+        this.__stepInputText_zz = new ObservedPropertySimplePU('5', this, "stepInputText_zz");
+        this.__stepInputText_rr = new ObservedPropertySimplePU('5'
         // 基础信息卡片和控制卡片联动动画控制器
-        , this, "stepInputText_r");
+        , this, "stepInputText_rr");
         this.__button_icon_size = new ObservedPropertySimplePU(25, this, "button_icon_size");
         this.__button_size = new ObservedPropertySimplePU(40, this, "button_size");
         this.__catch_size_height = new ObservedPropertySimplePU(40, this, "catch_size_height");
@@ -119,8 +128,11 @@ export class RobotArm1 extends ViewPU {
         //机械臂移动
         , this, "node_id_nowPosition");
         this.__node_id_move = new ObservedPropertySimplePU(''
-        //是否抓取
+        //机械臂jump移动
         , this, "node_id_move");
+        this.__node_id_jump = new ObservedPropertySimplePU(''
+        //是否抓取
+        , this, "node_id_jump");
         this.__isCatch = new ObservedPropertySimplePU(false
         //是否点击移动
         , this, "isCatch");
@@ -137,6 +149,9 @@ export class RobotArm1 extends ViewPU {
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params: RobotArm1_Params) {
+        if (params.redrawTrigger !== undefined) {
+            this.redrawTrigger = params.redrawTrigger;
+        }
         if (params.addLog !== undefined) {
             this.addLog = params.addLog;
         }
@@ -145,6 +160,15 @@ export class RobotArm1 extends ViewPU {
         }
         if (params.stepInputText_r !== undefined) {
             this.stepInputText_r = params.stepInputText_r;
+        }
+        if (params.stepInputText_jump !== undefined) {
+            this.stepInputText_jump = params.stepInputText_jump;
+        }
+        if (params.stepInputText_zz !== undefined) {
+            this.stepInputText_zz = params.stepInputText_zz;
+        }
+        if (params.stepInputText_rr !== undefined) {
+            this.stepInputText_rr = params.stepInputText_rr;
         }
         if (params.button_icon_size !== undefined) {
             this.button_icon_size = params.button_icon_size;
@@ -233,6 +257,9 @@ export class RobotArm1 extends ViewPU {
         if (params.node_id_move !== undefined) {
             this.node_id_move = params.node_id_move;
         }
+        if (params.node_id_jump !== undefined) {
+            this.node_id_jump = params.node_id_jump;
+        }
         if (params.isCatch !== undefined) {
             this.isCatch = params.isCatch;
         }
@@ -265,10 +292,14 @@ export class RobotArm1 extends ViewPU {
         this.__node.reset(params.node);
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__redrawTrigger.purgeDependencyOnElmtId(rmElmtId);
         this.__data.purgeDependencyOnElmtId(rmElmtId);
         this.__avatar.purgeDependencyOnElmtId(rmElmtId);
         this.__stepInputText_xyz.purgeDependencyOnElmtId(rmElmtId);
         this.__stepInputText_r.purgeDependencyOnElmtId(rmElmtId);
+        this.__stepInputText_jump.purgeDependencyOnElmtId(rmElmtId);
+        this.__stepInputText_zz.purgeDependencyOnElmtId(rmElmtId);
+        this.__stepInputText_rr.purgeDependencyOnElmtId(rmElmtId);
         this.__button_icon_size.purgeDependencyOnElmtId(rmElmtId);
         this.__button_size.purgeDependencyOnElmtId(rmElmtId);
         this.__catch_size_height.purgeDependencyOnElmtId(rmElmtId);
@@ -297,6 +328,7 @@ export class RobotArm1 extends ViewPU {
         this.__node_id_stop.purgeDependencyOnElmtId(rmElmtId);
         this.__node_id_nowPosition.purgeDependencyOnElmtId(rmElmtId);
         this.__node_id_move.purgeDependencyOnElmtId(rmElmtId);
+        this.__node_id_jump.purgeDependencyOnElmtId(rmElmtId);
         this.__isCatch.purgeDependencyOnElmtId(rmElmtId);
         this.__isMove.purgeDependencyOnElmtId(rmElmtId);
         this.__node.purgeDependencyOnElmtId(rmElmtId);
@@ -308,10 +340,14 @@ export class RobotArm1 extends ViewPU {
         this.__isPreviewVisible.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
+        this.__redrawTrigger.aboutToBeDeleted();
         this.__data.aboutToBeDeleted();
         this.__avatar.aboutToBeDeleted();
         this.__stepInputText_xyz.aboutToBeDeleted();
         this.__stepInputText_r.aboutToBeDeleted();
+        this.__stepInputText_jump.aboutToBeDeleted();
+        this.__stepInputText_zz.aboutToBeDeleted();
+        this.__stepInputText_rr.aboutToBeDeleted();
         this.__button_icon_size.aboutToBeDeleted();
         this.__button_size.aboutToBeDeleted();
         this.__catch_size_height.aboutToBeDeleted();
@@ -340,6 +376,7 @@ export class RobotArm1 extends ViewPU {
         this.__node_id_stop.aboutToBeDeleted();
         this.__node_id_nowPosition.aboutToBeDeleted();
         this.__node_id_move.aboutToBeDeleted();
+        this.__node_id_jump.aboutToBeDeleted();
         this.__isCatch.aboutToBeDeleted();
         this.__isMove.aboutToBeDeleted();
         this.__node.aboutToBeDeleted();
@@ -351,6 +388,13 @@ export class RobotArm1 extends ViewPU {
         this.__isPreviewVisible.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
+    }
+    private __redrawTrigger: ObservedPropertySimplePU<number>;
+    get redrawTrigger() {
+        return this.__redrawTrigger.get();
+    }
+    set redrawTrigger(newValue: number) {
+        this.__redrawTrigger.set(newValue);
     }
     private addLog: (level: 'info' | 'warning' | 'error', message: string, shouldSave: boolean) => void;
     private __data: SynchedPropertySimpleOneWayPU<RobotArmState>;
@@ -380,6 +424,27 @@ export class RobotArm1 extends ViewPU {
     }
     set stepInputText_r(newValue: string) {
         this.__stepInputText_r.set(newValue);
+    }
+    private __stepInputText_jump: ObservedPropertySimplePU<string>;
+    get stepInputText_jump() {
+        return this.__stepInputText_jump.get();
+    }
+    set stepInputText_jump(newValue: string) {
+        this.__stepInputText_jump.set(newValue);
+    }
+    private __stepInputText_zz: ObservedPropertySimplePU<string>;
+    get stepInputText_zz() {
+        return this.__stepInputText_zz.get();
+    }
+    set stepInputText_zz(newValue: string) {
+        this.__stepInputText_zz.set(newValue);
+    }
+    private __stepInputText_rr: ObservedPropertySimplePU<string>;
+    get stepInputText_rr() {
+        return this.__stepInputText_rr.get();
+    }
+    set stepInputText_rr(newValue: string) {
+        this.__stepInputText_rr.set(newValue);
     }
     // 基础信息卡片和控制卡片联动动画控制器
     private __button_icon_size: ObservedPropertySimplePU<number>;
@@ -591,6 +656,14 @@ export class RobotArm1 extends ViewPU {
     set node_id_move(newValue: string) {
         this.__node_id_move.set(newValue);
     }
+    //机械臂jump移动
+    private __node_id_jump: ObservedPropertySimplePU<string>;
+    get node_id_jump() {
+        return this.__node_id_jump.get();
+    }
+    set node_id_jump(newValue: string) {
+        this.__node_id_jump.set(newValue);
+    }
     //是否抓取
     private __isCatch: ObservedPropertySimplePU<boolean>;
     get isCatch() {
@@ -668,6 +741,8 @@ export class RobotArm1 extends ViewPU {
                     this.node_id_stop = control[2].node_id;
                     //机械臂移动控制node_id
                     this.node_id_move = control[3].node_id;
+                    //机械臂jump移动控制node_id
+                    this.node_id_jump = control[4].node_id;
                     //获取当前位姿
                     this.node_id_nowPosition = control[1].node_id;
                     const nowPositions: number[] | null = await getRobotArmNowPosition(this.node.id, control[1].node_id);
@@ -675,8 +750,11 @@ export class RobotArm1 extends ViewPU {
                         //获取当前位姿成功，然后进行回显
                         this.data.xValue = parseFloat(nowPositions[0].toFixed(2));
                         this.data.yValue = parseFloat(nowPositions[1].toFixed(2));
+                        this.data.currentPos = { x: parseFloat(nowPositions[0].toFixed(2)), y: parseFloat(nowPositions[1].toFixed(2)) };
                         this.data.zValue = parseFloat(nowPositions[2].toFixed(2));
+                        this.data.zzValue = parseFloat(nowPositions[2].toFixed(2));
                         this.data.rValue = parseFloat(nowPositions[3].toFixed(2));
+                        this.data.rrValue = parseFloat(nowPositions[3].toFixed(2));
                     }
                 }
             }
@@ -715,7 +793,6 @@ export class RobotArm1 extends ViewPU {
         if (this.node.id && this.node.node_id && this.node_id_endAbled) {
             const endStatus: boolean[] | null = await getEndStatus(this.node.id, this.node_id_endAbled);
             if (endStatus && endStatus.length > 0) {
-                this.showSystemToast('获取使能状态成功');
                 if (endStatus[0] === true && endStatus[1] === false) {
                     //有使能(还未抓取)
                     this.endAbled = true;
@@ -809,11 +886,14 @@ export class RobotArm1 extends ViewPU {
         if (this.node.id && this.node.node_id && this.node_id_nowPosition) {
             const nowPositions: number[] | null = await getRobotArmNowPosition(this.node.id, this.node_id_nowPosition);
             if (nowPositions && nowPositions.length > 0) {
-                //获取当前位姿成功，然后进行回显
                 this.data.xValue = parseFloat(nowPositions[0].toFixed(2));
+                this.data.currentPos = { x: parseFloat(nowPositions[0].toFixed(2)), y: parseFloat(nowPositions[1].toFixed(2)) };
                 this.data.yValue = parseFloat(nowPositions[1].toFixed(2));
                 this.data.zValue = parseFloat(nowPositions[2].toFixed(2));
+                this.data.zzValue = parseFloat(nowPositions[2].toFixed(2));
                 this.data.rValue = parseFloat(nowPositions[3].toFixed(2));
+                this.data.rrValue = parseFloat(nowPositions[3].toFixed(2));
+                this.redrawTrigger++;
                 return true;
             }
             else {
@@ -836,6 +916,18 @@ export class RobotArm1 extends ViewPU {
             }
         }
     }
+    //机械臂jump移动
+    async setJumpMove(x: string, y: string, z: string, r: string, h: string): Promise<void> {
+        if (this.node.id && this.node.node_id && this.node_id_jump) {
+            const isSet: boolean | null = await jumpRobotArmMove(this.node.id, this.node_id_move, `${x} ${y} ${z} ${r} ${h}`);
+            if (isSet) {
+                this.showSystemToast('移动成功');
+            }
+            else {
+                this.showSystemToast('移动失败');
+            }
+        }
+    }
     async aboutToAppear(): Promise<void> {
         await this.onNodeChange();
         const is1 = await this.getNowPosition();
@@ -846,6 +938,20 @@ export class RobotArm1 extends ViewPU {
         }
         else {
             this.showSystemToast('初始化失败');
+        }
+    }
+    private async handleWorkRangeClick(): Promise<void> {
+        const x = this.data.currentPos.x;
+        const y = this.data.currentPos.y;
+        const z = this.data.zzValue;
+        const r = this.data.rrValue;
+        const h = this.data.jumpValue;
+        const isJump: boolean | null = await jumpRobotArmMove(this.node.id, this.node_id_jump, `${x} ${y} ${z} ${r} ${h}`);
+        if (isJump) {
+            this.showSystemToast('移动成功');
+        }
+        else {
+            this.showSystemToast('移动失败');
         }
     }
     aboutToDisappear() {
@@ -910,22 +1016,28 @@ export class RobotArm1 extends ViewPU {
         this.setMove(this.data.xValue + '', this.data.yValue + '', this.data.zValue + '', this.data.rValue + '');
     }
     private increaseSpeedJump() {
-        this.data.jumpValue++;
+        let result = this.data.jumpValue + this.data.step_jump;
+        this.data.jumpValue = parseFloat(result.toFixed(2));
     }
     private decreaseSpeedJump() {
-        this.data.jumpValue--;
+        let result = this.data.jumpValue - this.data.step_jump;
+        this.data.jumpValue = parseFloat(result.toFixed(2));
     }
     private increaseSpeedZZ() {
-        this.data.zzValue++;
+        let result = this.data.zzValue + this.data.step_zz;
+        this.data.zzValue = parseFloat(result.toFixed(2));
     }
     private decreaseSpeedZZ() {
-        this.data.zzValue--;
+        let result = this.data.zzValue - this.data.step_zz;
+        this.data.zzValue = parseFloat(result.toFixed(2));
     }
     private increaseSpeedRR() {
-        this.data.rrValue++;
+        let result = this.data.rrValue + this.data.step_rr;
+        this.data.rrValue = parseFloat(result.toFixed(2));
     }
     private decreaseSpeedRR() {
-        this.data.rrValue--;
+        let result = this.data.rrValue - this.data.step_rr;
+        this.data.rrValue = parseFloat(result.toFixed(2));
     }
     // 用于控制按钮按压动画的状态
     private __isPressed: ObservedPropertySimplePU<boolean>;
@@ -1450,6 +1562,8 @@ export class RobotArm1 extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Stack.create();
+                        Stack.enabled(this.alarms === 0);
+                        Stack.opacity(this.alarms === 0 ? 1 : 0.5);
                         Stack.width('30%');
                         Stack.height('100%');
                         Stack.clip(true);
@@ -1477,7 +1591,7 @@ export class RobotArm1 extends ViewPU {
                         });
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Row.create();
+                        Row.create({ space: 5 });
                         Row.width('100%');
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1485,6 +1599,46 @@ export class RobotArm1 extends ViewPU {
                         Text.fontColor(Color.White);
                     }, Text);
                     Text.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        //步长设置
+                        Row.create();
+                    }, Row);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create('设置步长(mm)：');
+                        Text.fontColor(Color.White);
+                    }, Text);
+                    Text.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        TextInput.create({ text: this.data.step_jump + ' mm' });
+                        TextInput.type(InputType.Number);
+                        TextInput.width(100);
+                        TextInput.height(25);
+                        TextInput.fontSize(12);
+                        TextInput.fontWeight(FontWeight.Bold);
+                        TextInput.fontColor(Color.White);
+                        TextInput.textAlign(TextAlign.Center);
+                        TextInput.backgroundColor('rgba(255, 255, 255, 0.2)');
+                        TextInput.borderRadius(20);
+                        TextInput.onChange((value: string) => {
+                            this.stepInputText_jump = value;
+                        });
+                        TextInput.onSubmit((enterKey: EnterKeyType) => {
+                            const cleanValue = this.stepInputText_jump.replace(/ mm$/, '').trim();
+                            const num = parseFloat(cleanValue);
+                            const decimalPart = cleanValue.split('.')[1] || '';
+                            if (!isNaN(num) && num > 0 && decimalPart.length <= 2) {
+                                this.data.step_jump = num;
+                                this.stepInputText_jump = num.toString();
+                            }
+                            else {
+                                this.data.step_jump = 5;
+                                this.stepInputText_jump = '5';
+                                this.showSystemToast('输入无效！已恢复为 5 mm');
+                            }
+                        });
+                    }, TextInput);
+                    //步长设置
+                    Row.pop();
                     Row.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //jump高度控制
@@ -1542,7 +1696,7 @@ export class RobotArm1 extends ViewPU {
                         Row.alignItems(VerticalAlign.Center);
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create(this.data.jumpValue + ' mm');
+                        Text.create((this.data.jumpValue).toFixed(2) + ' mm');
                         Text.fontSize(this.button_icon_size2);
                         Text.fontWeight(FontWeight.Bold);
                         Text.width(100);
@@ -1589,6 +1743,46 @@ export class RobotArm1 extends ViewPU {
                         Text.fontColor(Color.White);
                     }, Text);
                     Text.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        //步长设置
+                        Row.create({ space: 5 });
+                    }, Row);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create('设置步长(mm)：');
+                        Text.fontColor(Color.White);
+                    }, Text);
+                    Text.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        TextInput.create({ text: this.data.step_zz + ' mm' });
+                        TextInput.type(InputType.Number);
+                        TextInput.width(100);
+                        TextInput.height(25);
+                        TextInput.fontSize(12);
+                        TextInput.fontWeight(FontWeight.Bold);
+                        TextInput.fontColor(Color.White);
+                        TextInput.textAlign(TextAlign.Center);
+                        TextInput.backgroundColor('rgba(255, 255, 255, 0.2)');
+                        TextInput.borderRadius(20);
+                        TextInput.onChange((value: string) => {
+                            this.stepInputText_zz = value;
+                        });
+                        TextInput.onSubmit((enterKey: EnterKeyType) => {
+                            const cleanValue = this.stepInputText_zz.replace(/ mm$/, '').trim();
+                            const num = parseFloat(cleanValue);
+                            const decimalPart = cleanValue.split('.')[1] || '';
+                            if (!isNaN(num) && num > 0 && decimalPart.length <= 2) {
+                                this.data.step_zz = num;
+                                this.stepInputText_zz = num.toString();
+                            }
+                            else {
+                                this.data.step_zz = 5;
+                                this.stepInputText_zz = '5';
+                                this.showSystemToast('输入无效！已恢复为 5 mm');
+                            }
+                        });
+                    }, TextInput);
+                    //步长设置
+                    Row.pop();
                     Row.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
@@ -1640,7 +1834,7 @@ export class RobotArm1 extends ViewPU {
                         Row.alignItems(VerticalAlign.Center);
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create(this.data.zzValue + ' mm');
+                        Text.create((this.data.zzValue).toFixed(2) + ' mm');
                         Text.fontSize(this.button_icon_size2);
                         Text.fontWeight(FontWeight.Bold);
                         Text.width(100);
@@ -1687,6 +1881,46 @@ export class RobotArm1 extends ViewPU {
                         Text.fontColor(Color.White);
                     }, Text);
                     Text.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        //步长设置
+                        Row.create({ space: 5 });
+                    }, Row);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create('设置步长(mm)：');
+                        Text.fontColor(Color.White);
+                    }, Text);
+                    Text.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        TextInput.create({ text: this.data.step_rr + ' mm' });
+                        TextInput.type(InputType.Number);
+                        TextInput.width(100);
+                        TextInput.height(25);
+                        TextInput.fontSize(12);
+                        TextInput.fontWeight(FontWeight.Bold);
+                        TextInput.fontColor(Color.White);
+                        TextInput.textAlign(TextAlign.Center);
+                        TextInput.backgroundColor('rgba(255, 255, 255, 0.2)');
+                        TextInput.borderRadius(20);
+                        TextInput.onChange((value: string) => {
+                            this.stepInputText_rr = value;
+                        });
+                        TextInput.onSubmit((enterKey: EnterKeyType) => {
+                            const cleanValue = this.stepInputText_rr.replace(/ mm$/, '').trim();
+                            const num = parseFloat(cleanValue);
+                            const decimalPart = cleanValue.split('.')[1] || '';
+                            if (!isNaN(num) && num > 0 && decimalPart.length <= 2) {
+                                this.data.step_rr = num;
+                                this.stepInputText_rr = num.toString();
+                            }
+                            else {
+                                this.data.step_rr = 5;
+                                this.stepInputText_rr = '5';
+                                this.showSystemToast('输入无效！已恢复为 5 mm');
+                            }
+                        });
+                    }, TextInput);
+                    //步长设置
+                    Row.pop();
                     Row.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
@@ -1738,7 +1972,7 @@ export class RobotArm1 extends ViewPU {
                         Row.alignItems(VerticalAlign.Center);
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create(this.data.rrValue + ' °');
+                        Text.create((this.data.rrValue).toFixed(2) + ' °');
                         Text.fontSize(this.button_icon_size2);
                         Text.fontWeight(FontWeight.Bold);
                         Text.width(100);
@@ -1951,6 +2185,8 @@ export class RobotArm1 extends ViewPU {
                             offsetX: 0,
                             offsetY: 0
                         });
+                        Stack.enabled(this.alarms === 0);
+                        Stack.opacity(this.alarms === 0 ? 1 : 0.5);
                         Stack.clip(true);
                     }, Stack);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1964,18 +2200,24 @@ export class RobotArm1 extends ViewPU {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
                                 let componentCall = new RoboticArmWorkRangeView(this, {
-                                    data: this.__data
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 1053, col: 17 });
+                                    data: this.__data,
+                                    onTargetSelected: this.handleWorkRangeClick.bind(this),
+                                    redrawTrigger: this.redrawTrigger
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 1200, col: 17 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
-                                        data: this.data
+                                        data: this.data,
+                                        onTargetSelected: this.handleWorkRangeClick.bind(this),
+                                        redrawTrigger: this.redrawTrigger
                                     };
                                 };
                                 componentCall.paramsGenerator_ = paramsLambda;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                    redrawTrigger: this.redrawTrigger
+                                });
                             }
                         }, { name: "RoboticArmWorkRangeView" });
                     }
@@ -2552,6 +2794,10 @@ export class RobotArm1 extends ViewPU {
                         //设置回零按钮
                         Button.height(this.catch_size_height);
                         //设置回零按钮
+                        Button.onClick(() => {
+                            this.setToStart();
+                        });
+                        //设置回零按钮
                         Button.borderRadius(20);
                         //设置回零按钮
                         Button.border({
@@ -2684,7 +2930,7 @@ export class RobotArm1 extends ViewPU {
         If.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             __Common__.create();
-            __Common__.position({ top: 10, right: 50 });
+            __Common__.position({ top: 10, right: 60 });
         }, __Common__);
         {
             this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -2705,7 +2951,7 @@ export class RobotArm1 extends ViewPU {
                                 this.showSystemToast('刷新失败');
                             }
                         }
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 1545, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 1699, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -2749,13 +2995,19 @@ export class RobotArm1 extends ViewPU {
                                 this.data.isRegionAVisible = !this.data.isRegionAVisible;
                                 this.data.isInfoCardVisible = !this.data.isInfoCardVisible;
                                 if (!this.data.isInfoCardVisible) {
-                                    await this.getNowPosition();
-                                    await this.getAlarms();
-                                    await this.getEndStatus();
+                                    const is1 = await this.getNowPosition();
+                                    const is2 = await this.getAlarms();
+                                    const is3 = await this.getEndStatus();
+                                    if (is1 && is2 && is3) {
+                                        this.showSystemToast('初始化成功');
+                                    }
+                                    else {
+                                        this.showSystemToast('初始化失败');
+                                    }
                                 }
                             });
                         }
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 1562, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/RobotArm1.ets", line: 1716, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -2766,9 +3018,15 @@ export class RobotArm1 extends ViewPU {
                                     this.data.isRegionAVisible = !this.data.isRegionAVisible;
                                     this.data.isInfoCardVisible = !this.data.isInfoCardVisible;
                                     if (!this.data.isInfoCardVisible) {
-                                        await this.getNowPosition();
-                                        await this.getAlarms();
-                                        await this.getEndStatus();
+                                        const is1 = await this.getNowPosition();
+                                        const is2 = await this.getAlarms();
+                                        const is3 = await this.getEndStatus();
+                                        if (is1 && is2 && is3) {
+                                            this.showSystemToast('初始化成功');
+                                        }
+                                        else {
+                                            this.showSystemToast('初始化失败');
+                                        }
                                     }
                                 });
                             }

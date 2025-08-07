@@ -934,13 +934,12 @@ class MainPage extends ViewPU {
                     }
                 });
             }
-            else if (this.currentPage === 1) {
+            else if (this.currentPage === 2) {
                 this.ifElseBranchUpdateFunction(2, () => {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
                                 let componentCall = new DeviceManager(this, {
-                                    currentIndex: this.__deviceManagerIndex,
                                     conveyorData1: this.__conveyorData1,
                                     conveyorData2: this.__conveyorData2,
                                     dollyData: this.__dollyData,
@@ -959,7 +958,6 @@ class MainPage extends ViewPU {
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
-                                        currentIndex: this.deviceManagerIndex,
                                         conveyorData1: this.conveyorData1,
                                         conveyorData2: this.conveyorData2,
                                         dollyData: this.dollyData,
@@ -987,7 +985,7 @@ class MainPage extends ViewPU {
                     }
                 });
             }
-            else if (this.currentPage === 2) {
+            else if (this.currentPage === 3) {
                 this.ifElseBranchUpdateFunction(3, () => {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -995,7 +993,7 @@ class MainPage extends ViewPU {
                                 let componentCall = new TaskLog(this, {
                                     allLogItems: this.allLogItems,
                                     clearAllLogs: this.clearAllLogs.bind(this)
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 429, col: 13 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 428, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -1014,12 +1012,12 @@ class MainPage extends ViewPU {
                     }
                 });
             }
-            else if (this.currentPage === 3) {
+            else if (this.currentPage === 4) {
                 this.ifElseBranchUpdateFunction(4, () => {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new DataStatics(this, {}, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 434, col: 13 });
+                                let componentCall = new DataStatics(this, {}, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 433, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {};
@@ -1041,7 +1039,7 @@ class MainPage extends ViewPU {
                                 let componentCall = new SystemSetting(this, {
                                     addLog: this.addLog.bind(this),
                                     avatar: this.__userAvatar
-                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 436, col: 13 });
+                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/pages/Index.ets", line: 435, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {

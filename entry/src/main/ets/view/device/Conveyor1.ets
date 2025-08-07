@@ -53,13 +53,14 @@ export struct Conveyor1 {
     if (this.node.id&&this.node.node_id&&this.getSpeedNode){
       const res:AxiosResponse|null=await getConveyorSpeed(this.node.id,this.getSpeedNode)
       if (!res) {
-        promptAction.showToast({message:'首次获取传送带速度失败'})
+        promptAction.showToast({message:'初始化失败'})
       }else if (res.data.code!==0){
-        promptAction.showToast({message:'首次获取传送带速度失败'})
+        promptAction.showToast({message:'初始化失败'})
       }else {
         if (res.data.data.value>0) {
           this.data.statusText='运行中'
           this.data.speedValue=this.rawSpeedToPercentage(res.data.data.value)
+          promptAction.showToast({message:`初始化成功`})
         }
       }
     }

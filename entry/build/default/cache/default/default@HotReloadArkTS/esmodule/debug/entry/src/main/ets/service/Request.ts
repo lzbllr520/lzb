@@ -534,7 +534,7 @@ export async function getConveyorSpeed(serverId: string, node_id: string): Promi
     };
     try {
         const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
-        console.info(`【获取${serverId}服务的传送带速度接口】获取成功`);
+        console.info(`${responseData.data.data.value}【获取${serverId}服务的传送带速度接口】获取成功`);
         return responseData;
     }
     catch (error) {
@@ -569,7 +569,7 @@ export async function setConveyorSpeed(serverId: string, node_id: string, action
     };
     try {
         const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
-        console.info(`【设置${serverId}服务的传送带速度接口】获取成功`);
+        console.info(`${action}【设置${serverId}服务的传送带速度接口】获取成功`);
         return responseData;
     }
     catch (error) {
@@ -1053,14 +1053,44 @@ export async function setRobotArmMove(serverId: string, node_id: string, action:
                 console.info(`【${serverId}服务的机械臂移动接口】服务器响应错误:`, error.response.status, error.response.data);
             }
             else {
-                console.info(`清除【${serverId}服务的机械臂移动接口】网络或请求设置错误:`, error.message);
+                console.info(`【${serverId}服务的机械臂移动接口】网络或请求设置错误:`, error.message);
             }
         }
         else if (error instanceof Error) {
-            console.info(`清除【${serverId}服务的机械臂移动接口】捕获到普通错误:`, error.message);
+            console.info(`【${serverId}服务的机械臂移动接口】捕获到普通错误:`, error.message);
         }
         else {
-            console.info(`清除【${serverId}服务的机械臂移动接口】捕获到未知错误:`, JSON.stringify(error));
+            console.info(`【${serverId}服务的机械臂移动接口】捕获到未知错误:`, JSON.stringify(error));
+        }
+        return null;
+    }
+}
+//jump移动
+export async function jumpRobotArmMove(serverId: string, node_id: string, action: string): Promise<boolean | null> {
+    let requestData: RobotArmData = {
+        id: serverId,
+        node_id: node_id,
+        action: action
+    };
+    try {
+        const responseData: AxiosResponse = await authAPI.post('/opcua/browse-nodes', requestData);
+        console.info(`${action}【${serverId}服务的机械臂jump移动接口】获取成功`);
+        return responseData.data.code === 0;
+    }
+    catch (error) {
+        if (error instanceof AxiosError) {
+            if (error.response) {
+                console.info(`【${serverId}服务的机械臂jump移动接口】服务器响应错误:`, error.response.status, error.response.data);
+            }
+            else {
+                console.info(`【${serverId}服务的机械臂jump移动接口】网络或请求设置错误:`, error.message);
+            }
+        }
+        else if (error instanceof Error) {
+            console.info(`【${serverId}服务的机械臂jump移动接口】捕获到普通错误:`, error.message);
+        }
+        else {
+            console.info(`【${serverId}服务的机械臂jump移动接口】捕获到未知错误:`, JSON.stringify(error));
         }
         return null;
     }

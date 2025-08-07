@@ -1,4 +1,4 @@
-import { RobotArmState } from '../../model/RobotArmState'
+import { RobotArmState,Point } from '../../model/RobotArmState'
 import { RoboticArmWorkRangeView } from '../../components/RoboticArmWorkRangeView'
 import { Server, Node,Data } from '../../model/ServerState'
 import {
@@ -9,6 +9,7 @@ import {
   getNodeOther, getRobotArmAlarms,
   getRobotArmNowPosition,
   getRobotArmTime, getRobotArmUid,
+  jumpRobotArmMove,
   setEndAble,
   setRobotArmMove,
   setStop,
@@ -17,6 +18,8 @@ import {
 @Component
 export struct RobotArm3 {
 
+  @State redrawTrigger: number = 0;
+
   addLog: (level: 'info' | 'warning' | 'error', message: string,shouldSave:boolean) => void = () => {};
 
   @Link data:RobotArmState;
@@ -24,6 +27,10 @@ export struct RobotArm3 {
 
   @State stepInputText_xyz: string = '5'
   @State stepInputText_r: string = '5'
+  @State stepInputText_jump:string='5'
+  @State stepInputText_zz:string='5'
+  @State stepInputText_rr:string='5'
+
 
   // 基础信息卡片和控制卡片联动动画控制器
   @State button_icon_size:number=25
@@ -69,6 +76,8 @@ export struct RobotArm3 {
   @State node_id_nowPosition:string=''
   //机械臂移动
   @State node_id_move:string=''
+  //机械臂jump移动
+  @State node_id_jump:string=''
   //是否抓取
   @State isCatch:boolean=false
   //是否点击移动
@@ -128,15 +137,20 @@ export struct RobotArm3 {
           this.node_id_stop=control[2].node_id
           //机械臂移动控制node_id
           this.node_id_move=control[3].node_id
+          //机械臂jump移动控制node_id
+          this.node_id_jump=control[4].node_id
           //获取当前位姿
           this.node_id_nowPosition=control[1].node_id
           const nowPositions:number[]|null=await getRobotArmNowPosition(this.node.id,control[1].node_id)
           if (nowPositions&&nowPositions.length>0) {
             //获取当前位姿成功，然后进行回显
-            this.data.xValue = parseFloat(nowPositions[0].toFixed(2));
-            this.data.yValue = parseFloat(nowPositions[1].toFixed(2));
-            this.data.zValue = parseFloat(nowPositions[2].toFixed(2));
-            this.data.rValue = parseFloat(nowPositions[3].toFixed(2));
+            this.data.xValue = parseFloat(nowPositions[0].toFixed(2))
+            this.data.yValue = parseFloat(nowPositions[1].toFixed(2))
+            this.data.currentPos={x:parseFloat(nowPositions[0].toFixed(2)),y:parseFloat(nowPositions[1].toFixed(2))}
+            this.data.zValue = parseFloat(nowPositions[2].toFixed(2))
+            this.data.zzValue=parseFloat(nowPositions[2].toFixed(2))
+            this.data.rValue = parseFloat(nowPositions[3].toFixed(2))
+            this.data.rrValue=parseFloat(nowPositions[3].toFixed(2))
           }
         }
       }
@@ -175,7 +189,6 @@ export struct RobotArm3 {
     if (this.node.id&&this.node.node_id&&this.node_id_endAbled){
       const endStatus:boolean[]|null=await getEndStatus(this.node.id,this.node_id_endAbled)
       if (endStatus&&endStatus.length>0) {
-        this.showSystemToast('获取使能状态成功')
         if (endStatus[0]===true&&endStatus[1]===false) {
           //有使能(还未抓取)
           this.endAbled=true
@@ -265,11 +278,14 @@ export struct RobotArm3 {
     if (this.node.id&&this.node.node_id&&this.node_id_nowPosition){
       const nowPositions:number[]|null=await getRobotArmNowPosition(this.node.id,this.node_id_nowPosition)
       if (nowPositions&&nowPositions.length>0) {
-        //获取当前位姿成功，然后进行回显
-        this.data.xValue = parseFloat(nowPositions[0].toFixed(2));
-        this.data.yValue = parseFloat(nowPositions[1].toFixed(2));
-        this.data.zValue = parseFloat(nowPositions[2].toFixed(2));
-        this.data.rValue = parseFloat(nowPositions[3].toFixed(2));
+        this.data.xValue = parseFloat(nowPositions[0].toFixed(2))
+        this.data.currentPos={x:parseFloat(nowPositions[0].toFixed(2)),y:parseFloat(nowPositions[1].toFixed(2))}
+        this.data.yValue = parseFloat(nowPositions[1].toFixed(2))
+        this.data.zValue = parseFloat(nowPositions[2].toFixed(2))
+        this.data.zzValue=parseFloat(nowPositions[2].toFixed(2))
+        this.data.rValue = parseFloat(nowPositions[3].toFixed(2))
+        this.data.rrValue=parseFloat(nowPositions[3].toFixed(2))
+        this.redrawTrigger++;
         return true
       }else {
         return false
@@ -291,6 +307,18 @@ export struct RobotArm3 {
     }
   }
 
+  //机械臂jump移动
+  async setJumpMove(x:string,y:string,z:string,r:string,h:string):Promise<void>{
+    if (this.node.id&&this.node.node_id&&this.node_id_jump){
+      const isSet:boolean|null=await jumpRobotArmMove(this.node.id,this.node_id_move,`${x} ${y} ${z} ${r} ${h}`)
+      if (isSet) {
+        this.showSystemToast('移动成功')
+      }else {
+        this.showSystemToast('移动失败')
+      }
+    }
+  }
+
   async aboutToAppear(): Promise<void> {
     await this.onNodeChange()
     const is1= await this.getNowPosition()
@@ -300,6 +328,20 @@ export struct RobotArm3 {
       this.showSystemToast('初始化成功')
     }else {
       this.showSystemToast('初始化失败')
+    }
+  }
+
+  private async handleWorkRangeClick(): Promise<void>{
+    const x=this.data.currentPos.x
+    const y=this.data.currentPos.y
+    const z=this.data.zzValue
+    const r=this.data.rrValue
+    const h=this.data.jumpValue
+    const isJump:boolean|null=await jumpRobotArmMove(this.node.id,this.node_id_jump,`${x} ${y} ${z} ${r} ${h}`)
+    if (isJump) {
+      this.showSystemToast('移动成功')
+    }else {
+      this.showSystemToast('移动失败')
     }
   }
 
@@ -369,24 +411,30 @@ export struct RobotArm3 {
   }
 
   private increaseSpeedJump() {
-    this.data.jumpValue++
+    let result = this.data.jumpValue + this.data.step_jump
+    this.data.jumpValue = parseFloat(result.toFixed(2))
   }
   private decreaseSpeedJump() {
-    this.data.jumpValue--
+    let result = this.data.jumpValue - this.data.step_jump
+    this.data.jumpValue = parseFloat(result.toFixed(2))
   }
 
   private increaseSpeedZZ() {
-    this.data.zzValue++
+    let result = this.data.zzValue + this.data.step_zz
+    this.data.zzValue = parseFloat(result.toFixed(2))
   }
   private decreaseSpeedZZ() {
-    this.data.zzValue--
+    let result = this.data.zzValue - this.data.step_zz
+    this.data.zzValue = parseFloat(result.toFixed(2))
   }
 
   private increaseSpeedRR() {
-    this.data.rrValue++
+    let result = this.data.rrValue + this.data.step_rr
+    this.data.rrValue = parseFloat(result.toFixed(2))
   }
   private decreaseSpeedRR() {
-    this.data.rrValue--
+    let result = this.data.rrValue - this.data.step_rr
+    this.data.rrValue = parseFloat(result.toFixed(2))
   }
 
   // 用于控制按钮按压动画的状态
@@ -722,9 +770,42 @@ export struct RobotArm3 {
         }else {
           Stack() {
             Column() {
-              Row(){
+              Row({space:5}){
                 Text('抬起高度控制：')
                   .fontColor(Color.White)
+
+                //步长设置
+                Row(){
+                  Text('设置步长(mm)：')
+                    .fontColor(Color.White)
+                  TextInput({ text: this.data.step_jump + ' mm' })
+                    .type(InputType.Number)
+                    .width(100)
+                    .height(25)
+                    .fontSize(12)
+                    .fontWeight(FontWeight.Bold)
+                    .fontColor(Color.White)
+                    .textAlign(TextAlign.Center)
+                    .backgroundColor('rgba(255, 255, 255, 0.2)')
+                    .borderRadius(20)
+                    .onChange((value: string) => {
+                      this.stepInputText_jump = value;
+                    })
+                    .onSubmit((enterKey: EnterKeyType) => {
+                      const cleanValue = this.stepInputText_jump.replace(/ mm$/, '').trim();
+                      const num = parseFloat(cleanValue);
+                      const decimalPart = cleanValue.split('.')[1] || '';
+                      if (!isNaN(num) && num > 0 && decimalPart.length <= 2) {
+                        this.data.step_jump = num;
+                        this.stepInputText_jump = num.toString();
+                      } else {
+                        this.data.step_jump = 5;
+                        this.stepInputText_jump = '5';
+                        this.showSystemToast('输入无效！已恢复为 5 mm');
+                      }
+                    })
+                }
+
               }
               .width('100%')
               //jump高度控制
@@ -748,7 +829,7 @@ export struct RobotArm3 {
                 }
 
                 Row() {
-                  Text(this.data.jumpValue+' mm')
+                  Text((this.data.jumpValue).toFixed(2)+' mm')
                     .fontSize(this.button_icon_size2)
                     .fontWeight(FontWeight.Bold)
                     .width(100)
@@ -795,6 +876,38 @@ export struct RobotArm3 {
               Row(){
                 Text('方位控制：')
                   .fontColor(Color.White)
+                //步长设置
+                Row({space:5}){
+                  Text('设置步长(mm)：')
+                    .fontColor(Color.White)
+                  TextInput({ text: this.data.step_zz + ' mm' })
+                    .type(InputType.Number)
+                    .width(100)
+                    .height(25)
+                    .fontSize(12)
+                    .fontWeight(FontWeight.Bold)
+                    .fontColor(Color.White)
+                    .textAlign(TextAlign.Center)
+                    .backgroundColor('rgba(255, 255, 255, 0.2)')
+                    .borderRadius(20)
+                    .onChange((value: string) => {
+                      this.stepInputText_zz = value;
+                    })
+                    .onSubmit((enterKey: EnterKeyType) => {
+                      const cleanValue = this.stepInputText_zz.replace(/ mm$/, '').trim();
+                      const num = parseFloat(cleanValue);
+                      const decimalPart = cleanValue.split('.')[1] || '';
+                      if (!isNaN(num) && num > 0 && decimalPart.length <= 2) {
+                        this.data.step_zz = num;
+                        this.stepInputText_zz = num.toString();
+                      } else {
+                        this.data.step_zz = 5;
+                        this.stepInputText_zz = '5';
+                        this.showSystemToast('输入无效！已恢复为 5 mm');
+                      }
+                    })
+                }
+
               }
               .width('100%')
               Row() {
@@ -818,7 +931,7 @@ export struct RobotArm3 {
 
                 //数值显示
                 Row() {
-                  Text(this.data.zzValue+' mm')
+                  Text((this.data.zzValue).toFixed(2)+' mm')
                     .fontSize(this.button_icon_size2)
                     .fontWeight(FontWeight.Bold)
                     .width(100)
@@ -865,6 +978,39 @@ export struct RobotArm3 {
               Row(){
                 Text('角度控制：')
                   .fontColor(Color.White)
+
+                //步长设置
+                Row({space:5}){
+                  Text('设置步长(mm)：')
+                    .fontColor(Color.White)
+                  TextInput({ text: this.data.step_rr + ' mm' })
+                    .type(InputType.Number)
+                    .width(100)
+                    .height(25)
+                    .fontSize(12)
+                    .fontWeight(FontWeight.Bold)
+                    .fontColor(Color.White)
+                    .textAlign(TextAlign.Center)
+                    .backgroundColor('rgba(255, 255, 255, 0.2)')
+                    .borderRadius(20)
+                    .onChange((value: string) => {
+                      this.stepInputText_rr = value;
+                    })
+                    .onSubmit((enterKey: EnterKeyType) => {
+                      const cleanValue = this.stepInputText_rr.replace(/ mm$/, '').trim();
+                      const num = parseFloat(cleanValue);
+                      const decimalPart = cleanValue.split('.')[1] || '';
+                      if (!isNaN(num) && num > 0 && decimalPart.length <= 2) {
+                        this.data.step_rr = num;
+                        this.stepInputText_rr = num.toString();
+                      } else {
+                        this.data.step_rr = 5;
+                        this.stepInputText_rr = '5';
+                        this.showSystemToast('输入无效！已恢复为 5 mm');
+                      }
+                    })
+                }
+
               }
               .width('100%')
               Row() {
@@ -888,7 +1034,7 @@ export struct RobotArm3 {
 
                 //数值显示
                 Row() {
-                  Text(this.data.rrValue+' °')
+                  Text((this.data.rrValue).toFixed(2)+' °')
                     .fontSize(this.button_icon_size2)
                     .fontWeight(FontWeight.Bold)
                     .width(100)
@@ -1036,7 +1182,8 @@ export struct RobotArm3 {
               offsetY: 0
             })
           }
-          //宽度使用动态状态变量
+          .enabled(this.alarms===0)
+          .opacity(this.alarms===0 ? 1:0.5)
           .width('30%')
           .height('100%')
           .clip(true)
@@ -1051,7 +1198,9 @@ export struct RobotArm3 {
             Stack() {
               Column() {
                 RoboticArmWorkRangeView({
-                  data:this.data
+                  data:this.data,
+                  onTargetSelected:this.handleWorkRangeClick.bind(this),
+                  redrawTrigger: this.redrawTrigger
                 })
               }
               .width('100%')
@@ -1074,6 +1223,8 @@ export struct RobotArm3 {
               offsetX: 0,
               offsetY: 0
             })
+            .enabled(this.alarms===0)
+            .opacity(this.alarms===0 ? 1:0.5)
             .clip(true)
           } else {
             // 原有的控制面板UI
@@ -1438,6 +1589,9 @@ export struct RobotArm3 {
                   .fontColor(Color.White)
                   .width(this.catch_size_width) // 按钮宽度
                   .height(this.catch_size_height)   // 按钮高度
+                  .onClick(()=>{
+                    this.setToStart()
+                  })
                   .borderRadius(20)
                   .border({
                     width: 1,
@@ -1556,7 +1710,7 @@ export struct RobotArm3 {
               }
             }
           })
-            .position({top:10,right:50})
+            .position({top:10,right:60})
 
           //切换按钮
           ActionButton({
@@ -1567,9 +1721,14 @@ export struct RobotArm3 {
                 this.data.isRegionAVisible=!this.data.isRegionAVisible
                 this.data.isInfoCardVisible=!this.data.isInfoCardVisible
                 if (!this.data.isInfoCardVisible) {
-                  await this.getNowPosition()
-                  await this.getAlarms()
-                  await this.getEndStatus()
+                  const is1= await this.getNowPosition()
+                  const is2= await this.getAlarms()
+                  const is3= await this.getEndStatus()
+                  if (is1&&is2&&is3) {
+                    this.showSystemToast('初始化成功')
+                  }else {
+                    this.showSystemToast('初始化失败')
+                  }
                 }
               });
             }
