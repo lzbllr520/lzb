@@ -1,6 +1,3 @@
-import { ConveyorState } from '../model/ConveyorState'
-import { DollyState } from '../model/DollyState'
-import { RobotArmState } from '../model/RobotArmState'
 import { promptAction } from '@kit.ArkUI'
 
 @Component
@@ -9,13 +6,6 @@ export struct MasterStation {
   @Link isLineRunning: boolean
 
   addLog: (level: 'info' | 'warning' | 'error', message: string,shouldSave:boolean) => void = () => {};
-
-  @Link conveyorData1:ConveyorState;
-  @Link conveyorData2:ConveyorState;
-  @Link dollyData:DollyState;
-  @Link robot1Data: RobotArmState;
-  @Link robot2Data: RobotArmState;
-  @Link robot3Data: RobotArmState;
 
   //停止产线函数
   private stopLine() {

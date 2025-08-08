@@ -36,40 +36,7 @@ const KEY_LOG_ITEMS = 'all_log_items';
 struct MainPage {
   //处理页面跳转函数
   handleNavigation(index: number) {
-    // 检查是否要跳转到设备管理(index: 1) 且 产线正在运行
-    if (index === 1 && this.isLineRunning) {
-      AlertDialog.show({
-        title: '操作提示',
-        message: '产线正在运行，关闭产线运行才可对设备进行单独操作。',
-        alignment: DialogAlignment.Center, // 弹窗居中显示
-        autoCancel: true, // 点击弹窗外部区域不可关闭，强制用户点击按钮
-        buttons: [
-          {
-            value: '确定', // 按钮显示的文字
-            action: () => {
-              //无需做任何操作
-            }
-          }
-        ]
-      });
-    } else if (index===1&&this.servers?.length===0) {
-      AlertDialog.show({
-        title: '操作提示',
-        message: '没有可用服务对象，无法对设备进行操作管理',
-        alignment: DialogAlignment.Center,
-        autoCancel: true,
-        buttons: [
-          {
-            value: '确定',
-            action: () => {
-              //无需做任何操作
-            }
-          }
-        ]
-      });
-    }else {
       this.currentPage = index;
-    }
   }
 
   //保存日志函数
@@ -394,12 +361,6 @@ struct MainPage {
         Column() {
           if (this.currentPage===0){
             MasterStation({
-              conveyorData1:this.conveyorData1,
-              conveyorData2:this.conveyorData2,
-              dollyData:this.dollyData,
-              robot1Data:this.robot1Data,
-              robot2Data:this.robot2Data,
-              robot3Data:this.robot3Data,
               addLog: this.addLog.bind(this),
               isLineRunning:this.isLineRunning
             })

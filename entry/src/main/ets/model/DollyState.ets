@@ -3,5 +3,4 @@ export class DollyState {
   xValue: number = 0;
   yValue: number = 0;
   statusText: string = '离线中';
-  loadText: string = '无物品';
 }

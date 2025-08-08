@@ -505,30 +505,6 @@ export struct Conveyor2 {
             .justifyContent(FlexAlign.Center)
             .alignItems(VerticalAlign.Center)
 
-            //传送带负载状态
-            Row(){
-              Text('负载：')
-                .fontWeight(FontWeight.Bold)
-                .fontSize(20)
-                .fontColor(Color.White)
-              Text(this.data.loadText)
-                .fontColor(Color.White)
-              if (this.data.loadText==='有物品'){
-                Image($r('app.media.close_box'))
-                  .width(20)
-                  .height(20)
-                  .margin({left:10})
-              }else {
-                Image($r('app.media.open_box'))
-                  .width(20)
-                  .height(20)
-                  .margin({left:10})
-              }
-            }
-            .width('100%')
-            .justifyContent(FlexAlign.Center)
-            .alignItems(VerticalAlign.Center)
-
             //控制按钮 (已添加点击和悬浮动画)
             Row() {
               if (this.data.statusText === '运行中') {

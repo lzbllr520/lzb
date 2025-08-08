@@ -410,30 +410,6 @@ export struct Dolly {
                 .justifyContent(FlexAlign.Center)
                 .alignItems(VerticalAlign.Center)
 
-                //小车负载状态
-                Row(){
-                  Text('负载：')
-                    .fontWeight(FontWeight.Bold)
-                    .fontSize(20)
-                    .fontColor(Color.White)
-                  Text(this.data.loadText)
-                    .fontColor(Color.White)
-                  if (this.data.loadText==='有物品'){
-                    Image($r('app.media.close_box'))
-                      .width(20)
-                      .height(20)
-                      .margin({ left:10 })
-                  }else {
-                    Image($r('app.media.open_box'))
-                      .width(20)
-                      .height(20)
-                      .margin({ left:10 })
-                  }
-                }
-                .width('100%')
-                .justifyContent(FlexAlign.Center)
-                .alignItems(VerticalAlign.Center)
-
                 //控制启动按钮
                 Row() {
                   if (this.data.statusText === '运行中'||this.data.statusText === '空闲中') {
