@@ -626,54 +626,6 @@ export class Dolly extends ViewPU {
                     //小车运行状态
                     Row.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        //小车负载状态
-                        Row.create();
-                        //小车负载状态
-                        Row.width('100%');
-                        //小车负载状态
-                        Row.justifyContent(FlexAlign.Center);
-                        //小车负载状态
-                        Row.alignItems(VerticalAlign.Center);
-                    }, Row);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create('负载：');
-                        Text.fontWeight(FontWeight.Bold);
-                        Text.fontSize(20);
-                        Text.fontColor(Color.White);
-                    }, Text);
-                    Text.pop();
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create(this.data.loadText);
-                        Text.fontColor(Color.White);
-                    }, Text);
-                    Text.pop();
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        If.create();
-                        if (this.data.loadText === '有物品') {
-                            this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create({ "id": 16777232, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                                    Image.width(20);
-                                    Image.height(20);
-                                    Image.margin({ left: 10 });
-                                }, Image);
-                            });
-                        }
-                        else {
-                            this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create({ "id": 16777257, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                                    Image.width(20);
-                                    Image.height(20);
-                                    Image.margin({ left: 10 });
-                                }, Image);
-                            });
-                        }
-                    }, If);
-                    If.pop();
-                    //小车负载状态
-                    Row.pop();
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         //控制启动按钮
                         Row.create();
                         Context.animation({ duration: 150, curve: Curve.EaseOut });
@@ -872,7 +824,7 @@ export class Dolly extends ViewPU {
                                 }
                             });
                         }
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 552, col: 13 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 528, col: 13 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -931,7 +883,7 @@ export class Dolly extends ViewPU {
                         icon: { "id": 16777242, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         onPress: () => { this.startMove('向左'); },
                         onRelease: () => { this.stopMove('向左'); }
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 580, col: 17 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 556, col: 17 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -958,7 +910,7 @@ export class Dolly extends ViewPU {
                         icon: { "id": 16777243, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         onPress: () => { this.startMove('向右'); },
                         onRelease: () => { this.stopMove('向右'); }
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 587, col: 17 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 563, col: 17 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -997,7 +949,7 @@ export class Dolly extends ViewPU {
                         icon: { "id": 16777245, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         onPress: () => { this.startMove('向前'); },
                         onRelease: () => { this.stopMove('向前'); }
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 600, col: 17 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 576, col: 17 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -1024,7 +976,7 @@ export class Dolly extends ViewPU {
                         icon: { "id": 16777244, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         onPress: () => { this.startMove('停止'); },
                         onRelease: () => { this.stopMove('停止'); }
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 607, col: 17 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 583, col: 17 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -1051,7 +1003,7 @@ export class Dolly extends ViewPU {
                         icon: { "id": 16777240, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" },
                         onPress: () => { this.startMove('向后'); },
                         onRelease: () => { this.stopMove('向后'); }
-                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 614, col: 17 });
+                    }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Dolly.ets", line: 590, col: 17 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {

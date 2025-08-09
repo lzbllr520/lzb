@@ -3,8 +3,8 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 }
 interface ServerInfoView_Params {
     server?: Server | null;
+    isActive?: boolean;
     isCurrentlyVisible?: boolean;
-    hasLoaded?: boolean;
     timer?: number;
     vocSensorData?: CardData[];
     node_id_voc?: string;
@@ -27,6 +27,7 @@ interface ServerInfoView_Params {
 import type { Server, Node } from '../model/ServerState';
 import { getNodeStart, getNodeOther, getNodeEn, getNodeVoice, getNodeShark1, getNodeShark2, getNodeShark3, getNodeRed1, getNodeRed2, getNodeRFID1, getNodeRFID2, getNodeRFID3, getNodeRFID4, getNodeRFID5 } from "@normalized:N&&&entry/src/main/ets/service/Request&";
 import { ValueCard } from "@normalized:N&&&entry/src/main/ets/components/ValueCard&";
+import promptAction from "@ohos:promptAction";
 // 定义卡片的数据模型
 interface CardData {
     icon: Resource;
@@ -41,10 +42,8 @@ export class ServerInfoView extends ViewPU {
             this.paramsGenerator_ = paramsLambda;
         }
         this.__server = new SynchedPropertyObjectOneWayPU(params.server, this, "server");
-        this.__isCurrentlyVisible = new ObservedPropertySimplePU(false
-        // 标志位，表示只加载一次
-        , this, "isCurrentlyVisible");
-        this.__hasLoaded = new ObservedPropertySimplePU(false, this, "hasLoaded");
+        this.__isActive = new SynchedPropertySimpleOneWayPU(params.isActive, this, "isActive");
+        this.__isCurrentlyVisible = new ObservedPropertySimplePU(false, this, "isCurrentlyVisible");
         this.timer = -1;
         this.__vocSensorData = new ObservedPropertyObjectPU([
             { icon: { "id": 16777281, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" }, title: 'VOC 浓度', value: '', unit: 'ppm' },
@@ -86,14 +85,15 @@ export class ServerInfoView extends ViewPU {
         this.node_id_rfid_5 = '';
         this.setInitiallyProvidedValue(params);
         this.declareWatch("server", this.onServersChange);
+        this.declareWatch("isActive", this.onActiveChange);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params: ServerInfoView_Params) {
+        if (params.isActive === undefined) {
+            this.__isActive.set(false);
+        }
         if (params.isCurrentlyVisible !== undefined) {
             this.isCurrentlyVisible = params.isCurrentlyVisible;
-        }
-        if (params.hasLoaded !== undefined) {
-            this.hasLoaded = params.hasLoaded;
         }
         if (params.timer !== undefined) {
             this.timer = params.timer;
@@ -152,11 +152,12 @@ export class ServerInfoView extends ViewPU {
     }
     updateStateVars(params: ServerInfoView_Params) {
         this.__server.reset(params.server);
+        this.__isActive.reset(params.isActive);
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
         this.__server.purgeDependencyOnElmtId(rmElmtId);
+        this.__isActive.purgeDependencyOnElmtId(rmElmtId);
         this.__isCurrentlyVisible.purgeDependencyOnElmtId(rmElmtId);
-        this.__hasLoaded.purgeDependencyOnElmtId(rmElmtId);
         this.__vocSensorData.purgeDependencyOnElmtId(rmElmtId);
         this.__voiceSensorData.purgeDependencyOnElmtId(rmElmtId);
         this.__redSensorData.purgeDependencyOnElmtId(rmElmtId);
@@ -165,8 +166,8 @@ export class ServerInfoView extends ViewPU {
     }
     aboutToBeDeleted() {
         this.__server.aboutToBeDeleted();
+        this.__isActive.aboutToBeDeleted();
         this.__isCurrentlyVisible.aboutToBeDeleted();
-        this.__hasLoaded.aboutToBeDeleted();
         this.__vocSensorData.aboutToBeDeleted();
         this.__voiceSensorData.aboutToBeDeleted();
         this.__redSensorData.aboutToBeDeleted();
@@ -182,20 +183,31 @@ export class ServerInfoView extends ViewPU {
     set server(newValue: Server | null) {
         this.__server.set(newValue);
     }
+    private __isActive: SynchedPropertySimpleOneWayPU<boolean>;
+    get isActive() {
+        return this.__isActive.get();
+    }
+    set isActive(newValue: boolean) {
+        this.__isActive.set(newValue);
+    }
+    onActiveChange() {
+        if (this.isActive) {
+            // 当组件被激活时
+            promptAction.showToast({ message: `服务器 ${this.server?.id} 进入`, bottom: '50%' });
+            this.startDataFetching();
+        }
+        else {
+            // 当组件变为非激活状态时
+            promptAction.showToast({ message: `服务器 ${this.server?.id} 离开` });
+            this.stopDataFetching();
+        }
+    }
     private __isCurrentlyVisible: ObservedPropertySimplePU<boolean>;
     get isCurrentlyVisible() {
         return this.__isCurrentlyVisible.get();
     }
     set isCurrentlyVisible(newValue: boolean) {
         this.__isCurrentlyVisible.set(newValue);
-    }
-    // 标志位，表示只加载一次
-    private __hasLoaded: ObservedPropertySimplePU<boolean>;
-    get hasLoaded() {
-        return this.__hasLoaded.get();
-    }
-    set hasLoaded(newValue: boolean) {
-        this.__hasLoaded.set(newValue);
     }
     private timer: number;
     // VOC 传感器数据
@@ -257,7 +269,7 @@ export class ServerInfoView extends ViewPU {
             if (this.timer === -1) { // 防止重复创建
                 this.timer = setInterval(async () => {
                     await this.fetchAndUpdateData();
-                }, 5000);
+                }, 8000);
             }
         }
     }
@@ -272,13 +284,17 @@ export class ServerInfoView extends ViewPU {
         this.stopDataFetching();
     }
     async onServersChange(): Promise<void> {
-        if (this.server && !this.hasLoaded) {
+        if (this.server) {
             const nodes1: Node[] | null = await getNodeStart(this.server.id);
             if (nodes1 && nodes1.length > 0) {
                 const nodes2: Node[] | null = await getNodeOther(this.server.id, nodes1[3].node_id);
                 if (nodes2 && nodes2.length > 0) {
                     // RFID读卡器
-                    const rfidNodes: Node[] | null = await getNodeOther(this.server.id, nodes2[4].node_id);
+                    let index = 4;
+                    if (this.server.id === 'server1' || this.server.id === 'server4') {
+                        index = 6;
+                    }
+                    const rfidNodes: Node[] | null = await getNodeOther(this.server.id, nodes2[index].node_id);
                     if (rfidNodes && rfidNodes.length > 0) {
                         this.node_id_rfid_1 = rfidNodes[1].node_id;
                         this.node_id_rfid_2 = rfidNodes[2].node_id;
@@ -321,7 +337,6 @@ export class ServerInfoView extends ViewPU {
                     }
                 }
             }
-            this.hasLoaded = true;
         }
     }
     async fetchAndUpdateData() {
@@ -415,11 +430,13 @@ export class ServerInfoView extends ViewPU {
             Column.onVisibleAreaChange([0.0, 1.0], (isVisible: boolean, currentRatio: number) => {
                 // 当组件刚变得可见时
                 if (currentRatio > 0 && !this.isCurrentlyVisible) {
+                    promptAction.showToast({ message: '进入界面', bottom: '50%' });
                     this.isCurrentlyVisible = true;
                     this.startDataFetching();
                 }
                 // 当组件刚变得完全不可见时
                 else if (currentRatio <= 0 && this.isCurrentlyVisible) {
+                    promptAction.showToast({ message: '离开界面' });
                     this.isCurrentlyVisible = false;
                     this.stopDataFetching(); // 调用停止逻辑
                 }
@@ -469,7 +486,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 268, col: 28 });
+                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 282, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -516,7 +533,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 279, col: 28 });
+                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 293, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -563,7 +580,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 290, col: 28 });
+                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 304, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -610,7 +627,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 301, col: 28 });
+                                    let componentCall = new ValueCard(this, { title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 315, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -656,7 +673,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 312, col: 28 });
+                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 326, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {

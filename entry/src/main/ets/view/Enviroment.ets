@@ -34,7 +34,10 @@ export struct Environment {
                 (server: Server, index: number) => {
                   TabContent() {
                     Column() {
-                      ServerInfoView({ server: server })
+                      ServerInfoView({
+                          server: server,
+                        isActive: this.currentIndex === index
+                        })
                     }
                     .width('100%')
                     .height('100%')

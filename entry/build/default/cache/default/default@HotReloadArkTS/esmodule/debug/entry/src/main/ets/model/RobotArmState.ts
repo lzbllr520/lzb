@@ -15,9 +15,7 @@ export class RobotArmState {
     isInfoCardVisible: boolean = false;
     controlCardWidth: string = '60%';
     isRegionAVisible: boolean = false;
-    // 提升后的“逻辑”坐标 (用于Canvas内部计算和动画)
     currentPos: Point = { x: 0, y: 0 };
-    targetPos: Point = { x: 0, y: 0 };
     step_xyz: number = 5;
     step_r: number = 5;
     step_jump: number = 5;

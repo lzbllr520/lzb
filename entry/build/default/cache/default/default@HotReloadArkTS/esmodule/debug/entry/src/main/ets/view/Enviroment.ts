@@ -123,18 +123,23 @@ export class Environment extends ViewPU {
                                     {
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             if (isInitialRender) {
-                                                let componentCall = new ServerInfoView(this, { server: server }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/Enviroment.ets", line: 37, col: 23 });
+                                                let componentCall = new ServerInfoView(this, {
+                                                    server: server,
+                                                    isActive: this.currentIndex === index
+                                                }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/Enviroment.ets", line: 37, col: 23 });
                                                 ViewPU.create(componentCall);
                                                 let paramsLambda = () => {
                                                     return {
-                                                        server: server
+                                                        server: server,
+                                                        isActive: this.currentIndex === index
                                                     };
                                                 };
                                                 componentCall.paramsGenerator_ = paramsLambda;
                                             }
                                             else {
                                                 this.updateStateVarsOfChildByElmtId(elmtId, {
-                                                    server: server
+                                                    server: server,
+                                                    isActive: this.currentIndex === index
                                                 });
                                             }
                                         }, { name: "ServerInfoView" });

@@ -16,6 +16,7 @@ import {
   getNodeRFID5
 } from '../service/Request'
 import { ValueCard } from './ValueCard'
+import { promptAction } from '@kit.ArkUI';
 
 // 定义卡片的数据模型
 interface CardData {
@@ -30,10 +31,17 @@ export struct ServerInfoView {
 
   @Prop @Watch('onServersChange') server: Server | null
 
-  @State private isCurrentlyVisible: boolean = false
+  @Prop @Watch('onActiveChange') isActive: boolean = false
 
-  // 标志位，表示只加载一次
-  @State private hasLoaded: boolean = false;
+  onActiveChange() {
+    if (this.isActive) {
+      this.startDataFetching()
+    } else {
+      this.stopDataFetching()
+    }
+  }
+
+  @State private isCurrentlyVisible: boolean = false
   private timer: number = -1;
 
   // VOC 传感器数据
@@ -91,7 +99,7 @@ export struct ServerInfoView {
       if (this.timer === -1) { // 防止重复创建
         this.timer = setInterval(async () => {
           await this.fetchAndUpdateData();
-        }, 5000);
+        }, 8000);
       }
     }
   }
@@ -109,13 +117,17 @@ export struct ServerInfoView {
   }
 
   async onServersChange(): Promise<void> {
-    if (this.server && !this.hasLoaded) {
+    if (this.server) {
       const nodes1: Node[] | null = await getNodeStart(this.server.id)
       if (nodes1 && nodes1.length > 0) {
         const nodes2: Node[] | null = await getNodeOther(this.server.id, nodes1[3].node_id)
         if (nodes2 && nodes2.length > 0) {
           // RFID读卡器
-          const rfidNodes: Node[] | null = await getNodeOther(this.server.id, nodes2[4].node_id);
+          let index=4
+          if(this.server.id==='server1'||this.server.id==='server4'){
+            index=6
+          }
+          const rfidNodes: Node[] | null = await getNodeOther(this.server.id, nodes2[index].node_id);
           if (rfidNodes && rfidNodes.length > 0) {
             this.node_id_rfid_1 = rfidNodes[1].node_id
             this.node_id_rfid_2 = rfidNodes[2].node_id
@@ -159,13 +171,11 @@ export struct ServerInfoView {
           }
         }
       }
-      this.hasLoaded = true;
     }
   }
 
   async fetchAndUpdateData() {
     if (!this.server) return;
-
     //获取VOC传感器数据
     if (this.node_id_voc) {
       const data: number[] | null = await getNodeEn(this.server.id, this.node_id_voc);

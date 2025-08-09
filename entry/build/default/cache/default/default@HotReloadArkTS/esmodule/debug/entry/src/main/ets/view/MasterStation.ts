@@ -4,16 +4,7 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 interface MasterStation_Params {
     isLineRunning?: boolean;
     addLog?: (level: 'info' | 'warning' | 'error', message: string, shouldSave: boolean) => void;
-    conveyorData1?: ConveyorState;
-    conveyorData2?: ConveyorState;
-    dollyData?: DollyState;
-    robot1Data?: RobotArmState;
-    robot2Data?: RobotArmState;
-    robot3Data?: RobotArmState;
 }
-import type { ConveyorState } from '../model/ConveyorState';
-import type { DollyState } from '../model/DollyState';
-import type { RobotArmState } from '../model/RobotArmState';
 import promptAction from "@ohos:promptAction";
 export class MasterStation extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
@@ -23,12 +14,6 @@ export class MasterStation extends ViewPU {
         }
         this.__isLineRunning = new SynchedPropertySimpleTwoWayPU(params.isLineRunning, this, "isLineRunning");
         this.addLog = () => { };
-        this.__conveyorData1 = new SynchedPropertyObjectTwoWayPU(params.conveyorData1, this, "conveyorData1");
-        this.__conveyorData2 = new SynchedPropertyObjectTwoWayPU(params.conveyorData2, this, "conveyorData2");
-        this.__dollyData = new SynchedPropertyObjectTwoWayPU(params.dollyData, this, "dollyData");
-        this.__robot1Data = new SynchedPropertyObjectTwoWayPU(params.robot1Data, this, "robot1Data");
-        this.__robot2Data = new SynchedPropertyObjectTwoWayPU(params.robot2Data, this, "robot2Data");
-        this.__robot3Data = new SynchedPropertyObjectTwoWayPU(params.robot3Data, this, "robot3Data");
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
@@ -41,21 +26,9 @@ export class MasterStation extends ViewPU {
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
         this.__isLineRunning.purgeDependencyOnElmtId(rmElmtId);
-        this.__conveyorData1.purgeDependencyOnElmtId(rmElmtId);
-        this.__conveyorData2.purgeDependencyOnElmtId(rmElmtId);
-        this.__dollyData.purgeDependencyOnElmtId(rmElmtId);
-        this.__robot1Data.purgeDependencyOnElmtId(rmElmtId);
-        this.__robot2Data.purgeDependencyOnElmtId(rmElmtId);
-        this.__robot3Data.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
         this.__isLineRunning.aboutToBeDeleted();
-        this.__conveyorData1.aboutToBeDeleted();
-        this.__conveyorData2.aboutToBeDeleted();
-        this.__dollyData.aboutToBeDeleted();
-        this.__robot1Data.aboutToBeDeleted();
-        this.__robot2Data.aboutToBeDeleted();
-        this.__robot3Data.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -67,48 +40,6 @@ export class MasterStation extends ViewPU {
         this.__isLineRunning.set(newValue);
     }
     private addLog: (level: 'info' | 'warning' | 'error', message: string, shouldSave: boolean) => void;
-    private __conveyorData1: SynchedPropertySimpleOneWayPU<ConveyorState>;
-    get conveyorData1() {
-        return this.__conveyorData1.get();
-    }
-    set conveyorData1(newValue: ConveyorState) {
-        this.__conveyorData1.set(newValue);
-    }
-    private __conveyorData2: SynchedPropertySimpleOneWayPU<ConveyorState>;
-    get conveyorData2() {
-        return this.__conveyorData2.get();
-    }
-    set conveyorData2(newValue: ConveyorState) {
-        this.__conveyorData2.set(newValue);
-    }
-    private __dollyData: SynchedPropertySimpleOneWayPU<DollyState>;
-    get dollyData() {
-        return this.__dollyData.get();
-    }
-    set dollyData(newValue: DollyState) {
-        this.__dollyData.set(newValue);
-    }
-    private __robot1Data: SynchedPropertySimpleOneWayPU<RobotArmState>;
-    get robot1Data() {
-        return this.__robot1Data.get();
-    }
-    set robot1Data(newValue: RobotArmState) {
-        this.__robot1Data.set(newValue);
-    }
-    private __robot2Data: SynchedPropertySimpleOneWayPU<RobotArmState>;
-    get robot2Data() {
-        return this.__robot2Data.get();
-    }
-    set robot2Data(newValue: RobotArmState) {
-        this.__robot2Data.set(newValue);
-    }
-    private __robot3Data: SynchedPropertySimpleOneWayPU<RobotArmState>;
-    get robot3Data() {
-        return this.__robot3Data.get();
-    }
-    set robot3Data(newValue: RobotArmState) {
-        this.__robot3Data.set(newValue);
-    }
     //停止产线函数
     private stopLine() {
         AlertDialog.show({

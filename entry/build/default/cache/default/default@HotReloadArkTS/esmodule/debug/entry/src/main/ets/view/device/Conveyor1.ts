@@ -265,15 +265,16 @@ export class Conveyor1 extends ViewPU {
         if (this.node.id && this.node.node_id && this.getSpeedNode) {
             const res: AxiosResponse | null = await getConveyorSpeed(this.node.id, this.getSpeedNode);
             if (!res) {
-                promptAction.showToast({ message: '首次获取传送带速度失败' });
+                promptAction.showToast({ message: '初始化失败' });
             }
             else if (res.data.code !== 0) {
-                promptAction.showToast({ message: '首次获取传送带速度失败' });
+                promptAction.showToast({ message: '初始化失败' });
             }
             else {
                 if (res.data.data.value > 0) {
                     this.data.statusText = '运行中';
                     this.data.speedValue = this.rawSpeedToPercentage(res.data.data.value);
+                    promptAction.showToast({ message: `初始化成功` });
                 }
             }
         }
@@ -832,54 +833,6 @@ export class Conveyor1 extends ViewPU {
         //传送带速度
         Row.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            //传送带负载状态
-            Row.create();
-            //传送带负载状态
-            Row.width('100%');
-            //传送带负载状态
-            Row.justifyContent(FlexAlign.Center);
-            //传送带负载状态
-            Row.alignItems(VerticalAlign.Center);
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create('负载：');
-            Text.fontWeight(FontWeight.Bold);
-            Text.fontSize(20);
-            Text.fontColor(Color.White);
-        }, Text);
-        Text.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create(this.data.loadText);
-            Text.fontColor(Color.White);
-        }, Text);
-        Text.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            If.create();
-            if (this.data.loadText === '有物品') {
-                this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777232, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                        Image.width(20);
-                        Image.height(20);
-                        Image.margin({ left: 10 });
-                    }, Image);
-                });
-            }
-            else {
-                this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create({ "id": 16777257, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
-                        Image.width(20);
-                        Image.height(20);
-                        Image.margin({ left: 10 });
-                    }, Image);
-                });
-            }
-        }, If);
-        If.pop();
-        //传送带负载状态
-        Row.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
             //控制按钮 (已添加点击和悬浮动画)
             Row.create();
             Context.animation({ duration: 150, curve: Curve.EaseOut });
@@ -1071,7 +1024,7 @@ export class Conveyor1 extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new McGaugeChart(this, { options: this.chartOptions }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Conveyor1.ets", line: 664, col: 13 });
+                                let componentCall = new McGaugeChart(this, { options: this.chartOptions }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/view/device/Conveyor1.ets", line: 640, col: 13 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
