@@ -27,7 +27,6 @@ interface ServerInfoView_Params {
 import type { Server, Node } from '../model/ServerState';
 import { getNodeStart, getNodeOther, getNodeEn, getNodeVoice, getNodeShark1, getNodeShark2, getNodeShark3, getNodeRed1, getNodeRed2, getNodeRFID1, getNodeRFID2, getNodeRFID3, getNodeRFID4, getNodeRFID5 } from "@normalized:N&&&entry/src/main/ets/service/Request&";
 import { ValueCard } from "@normalized:N&&&entry/src/main/ets/components/ValueCard&";
-import promptAction from "@ohos:promptAction";
 // 定义卡片的数据模型
 interface CardData {
     icon: Resource;
@@ -192,13 +191,9 @@ export class ServerInfoView extends ViewPU {
     }
     onActiveChange() {
         if (this.isActive) {
-            // 当组件被激活时
-            promptAction.showToast({ message: `服务器 ${this.server?.id} 进入`, bottom: '50%' });
             this.startDataFetching();
         }
         else {
-            // 当组件变为非激活状态时
-            promptAction.showToast({ message: `服务器 ${this.server?.id} 离开` });
             this.stopDataFetching();
         }
     }
@@ -430,13 +425,11 @@ export class ServerInfoView extends ViewPU {
             Column.onVisibleAreaChange([0.0, 1.0], (isVisible: boolean, currentRatio: number) => {
                 // 当组件刚变得可见时
                 if (currentRatio > 0 && !this.isCurrentlyVisible) {
-                    promptAction.showToast({ message: '进入界面', bottom: '50%' });
                     this.isCurrentlyVisible = true;
                     this.startDataFetching();
                 }
                 // 当组件刚变得完全不可见时
                 else if (currentRatio <= 0 && this.isCurrentlyVisible) {
-                    promptAction.showToast({ message: '离开界面' });
                     this.isCurrentlyVisible = false;
                     this.stopDataFetching(); // 调用停止逻辑
                 }
@@ -486,7 +479,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 282, col: 28 });
+                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 278, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -533,7 +526,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 293, col: 28 });
+                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 289, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -580,7 +573,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 304, col: 28 });
+                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 300, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -627,7 +620,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 315, col: 28 });
+                                    let componentCall = new ValueCard(this, { title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 311, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -673,7 +666,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 326, col: 28 });
+                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 322, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {

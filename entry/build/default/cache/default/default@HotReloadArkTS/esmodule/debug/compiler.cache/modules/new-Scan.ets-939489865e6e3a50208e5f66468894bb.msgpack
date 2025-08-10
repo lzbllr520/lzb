@@ -1,0 +1,820 @@
+Ôr@Ÿªassertions¤code´customTransformCache¬dependencies¢id¤meta±moduleSideEffects¬originalCode±originalSourcemap«resolvedIds®sourcemapChainµsyntheticNamedExportsµtransformDependencies®transformFiles¨cacheAstÔrAÚEif (!("finalizeConstruction" in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+}
+import camera from "@ohos.multimedia.camera";
+import abilityAccessCtrl from "@ohos.abilityAccessCtrl";
+import router from "@ohos.router";
+import promptAction from "@ohos.promptAction";
+class Scan extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.xcomponentController = new XComponentController();
+        this.surfaceId = '';
+        this.cameraManager = undefined;
+        this.cameraInput = undefined;
+        this.previewOutput = undefined;
+        this.session = undefined;
+        this.isCameraInitialized = false;
+        this.canvasContext = new CanvasRenderingContext2D();
+        this.__scanLineTop = new ObservedPropertySimplePU(-124, this, "scanLineTop");
+        this.__isAnimating = new ObservedPropertySimplePU(false, this, "isAnimating");
+        this.setInitiallyProvidedValue(params);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params) {
+        if (params.xcomponentController !== undefined) {
+            this.xcomponentController = params.xcomponentController;
+        }
+        if (params.surfaceId !== undefined) {
+            this.surfaceId = params.surfaceId;
+        }
+        if (params.cameraManager !== undefined) {
+            this.cameraManager = params.cameraManager;
+        }
+        if (params.cameraInput !== undefined) {
+            this.cameraInput = params.cameraInput;
+        }
+        if (params.previewOutput !== undefined) {
+            this.previewOutput = params.previewOutput;
+        }
+        if (params.session !== undefined) {
+            this.session = params.session;
+        }
+        if (params.isCameraInitialized !== undefined) {
+            this.isCameraInitialized = params.isCameraInitialized;
+        }
+        if (params.canvasContext !== undefined) {
+            this.canvasContext = params.canvasContext;
+        }
+        if (params.scanLineTop !== undefined) {
+            this.scanLineTop = params.scanLineTop;
+        }
+        if (params.isAnimating !== undefined) {
+            this.isAnimating = params.isAnimating;
+        }
+    }
+    updateStateVars(params) {
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__scanLineTop.purgeDependencyOnElmtId(rmElmtId);
+        this.__isAnimating.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.__scanLineTop.aboutToBeDeleted();
+        this.__isAnimating.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    get scanLineTop() {
+        return this.__scanLineTop.get();
+    }
+    set scanLineTop(newValue) {
+        this.__scanLineTop.set(newValue);
+    }
+    get isAnimating() {
+        return this.__isAnimating.get();
+    }
+    set isAnimating(newValue) {
+        this.__isAnimating.set(newValue);
+    }
+    async aboutToAppear() {
+        await this.checkAndRequestPermissions();
+        setTimeout(() => {
+            if (this.isAnimating) {
+                this.handleScanSuccess();
+            }
+        }, 6000);
+    }
+    async aboutToDisappear() {
+        await this.releaseCamera();
+    }
+    // ... (çœç•¥éƒ¨åˆ†æœªä¿®æ”¹çš„å‡½æ•°: checkAndRequestPermissions, initCamera, releaseCamera, handleScanSuccess, goBack)
+    // ... The unchanged functions from your code go here.
+    // ç”³è¯·ç›¸æœºæƒé™
+    async checkAndRequestPermissions() {
+        // æ¨¡æ‹Ÿæ‰«ç åªéœ€è¦ç›¸æœºæƒé™
+        const permissionList = ['ohos.permission.CAMERA'];
+        const context = getContext(this);
+        const atManager = abilityAccessCtrl.createAtManager();
+        try {
+            const data = await atManager.requestPermissionsFromUser(context, permissionList);
+            let allGranted = true;
+            data.authResults.forEach(result => {
+                if (result !== abilityAccessCtrl.GrantStatus.PERMISSION_GRANTED) {
+                    allGranted = false;
+                }
+            });
+            if (allGranted) {
+                console.info('ç›¸æœºæƒé™å·²æˆäºˆï¼Œå‡†å¤‡åˆå§‹åŒ–ç›¸æœºã€‚');
+                const abilityContext = getContext(this);
+                this.cameraManager = camera.getCameraManager(abilityContext);
+                // å¦‚æœsurfaceIdå·²å‡†å¤‡å¥½ï¼Œåˆ™åˆå§‹åŒ–ç›¸æœº
+                if (this.surfaceId) {
+                    await this.initCamera();
+                }
+            }
+            else {
+                console.error('ç›¸æœºæƒé™è¢«æ‹’ç»ã€‚');
+                promptAction.showToast({ message: 'éœ€è¦ç›¸æœºæƒé™æ‰èƒ½è¿›è¡Œæ‰«ç ' });
+                this.goBack();
+            }
+        }
+        catch (error) {
+            console.error(`ç”³è¯·æƒé™æ—¶å‘ç”Ÿå¼‚å¸¸: ${JSON.stringify(error)}`);
+        }
+    }
+    // åˆå§‹åŒ–ç›¸æœºï¼ˆä»…é¢„è§ˆï¼‰
+    async initCamera() {
+        if (this.isCameraInitialized || !this.surfaceId || !this.cameraManager) {
+            console.warn('åˆå§‹åŒ–æ¡ä»¶ä¸æ»¡è¶³æˆ–å·²åˆå§‹åŒ–ï¼Œè·³è¿‡ã€‚');
+            return;
+        }
+        this.isCameraInitialized = true;
+        console.info('å¼€å§‹åˆå§‹åŒ–ç›¸æœº...');
+        try {
+            const cameras = this.cameraManager.getSupportedCameras();
+            if (cameras.length === 0) {
+                console.error('No camera device supported.');
+                return;
+            }
+            // ä¼˜å…ˆä½¿ç”¨åç½®æ‘„åƒå¤´
+            const cameraDevice = cameras.find(cam => cam.cameraPosition === camera.CameraPosition.CAMERA_POSITION_BACK) ?? cameras[0];
+            this.cameraInput = this.cameraManager.createCameraInput(cameraDevice);
+            await this.cameraInput.open();
+            const outputCapability = this.cameraManager.getSupportedOutputCapability(cameraDevice, camera.SceneMode.NORMAL_PHOTO);
+            // ä½¿ç”¨é»˜è®¤çš„é¢„è§ˆé…ç½®
+            const previewProfile = outputCapability.previewProfiles[0];
+            this.previewOutput = this.cameraManager.createPreviewOutput(previewProfile, this.surfaceId);
+            this.session = this.cameraManager.createSession(camera.SceneMode.NORMAL_PHOTO);
+            if (this.session === undefined) {
+                console.error("åˆ›å»ºä¼šè¯å¤±è´¥");
+                return;
+            }
+            this.session.beginConfig();
+            this.session.addInput(this.cameraInput);
+            this.session.addOutput(this.previewOutput);
+            await this.session.commitConfig();
+            await this.session.start();
+            // å¯åŠ¨æ‰«æçº¿åŠ¨ç”»
+            this.isAnimating = true;
+            console.info('ä¼šè¯å·²å¯åŠ¨ï¼Œé¢„è§ˆåº”è¯¥å¯è§äº†ï¼');
+        }
+        catch (error) {
+            const err = error;
+            console.error(`ç›¸æœºåˆå§‹åŒ–å¤±è´¥ï¼Œé”™è¯¯ç : ${err.code}, ä¿¡æ¯: ${err.message}`);
+            this.isCameraInitialized = false;
+        }
+    }
+    // é‡Šæ”¾ç›¸æœºèµ„æº
+    async releaseCamera() {
+        console.info('å¼€å§‹é‡Šæ”¾ç›¸æœºèµ„æº...');
+        // åœæ­¢åŠ¨ç”»
+        this.isAnimating = false;
+        this.isCameraInitialized = false;
+        try {
+            if (this.session) {
+                await this.session.stop();
+                this.session.release();
+                this.session = undefined;
+            }
+            if (this.cameraInput) {
+                await this.cameraInput.close();
+                this.cameraInput = undefined;
+            }
+            if (this.previewOutput) {
+                await this.previewOutput.release();
+                this.previewOutput = undefined;
+            }
+        }
+        catch (error) {
+            console.error(`é‡Šæ”¾ç›¸æœºèµ„æºå¤±è´¥: ${JSON.stringify(error)}`);
+        }
+    }
+    // æ¨¡æ‹Ÿæ‰«ç æˆåŠŸåçš„å¤„ç†
+    async handleScanSuccess() {
+        await this.releaseCamera(); // é‡Šæ”¾ç›¸æœº
+        promptAction.showToast({ message: 'å…¥åº“æˆåŠŸï¼', bottom: '50%' });
+        // å»¶è¿Ÿ1ç§’åè¿”å›ï¼Œè®©ç”¨æˆ·èƒ½çœ‹åˆ°æç¤º
+        setTimeout(() => {
+            this.goBack();
+        }, 1000);
+    }
+    // è¿”å›ä¸Šä¸€é¡µ
+    goBack() {
+        router.back();
+    }
+    // --- ã€æ–°å¢éƒ¨åˆ†ã€‘ ä½¿ç”¨Canvasç»˜åˆ¶å››ä¸ªè§’ ---
+    ScanCorners(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Canvas.create(this.canvasContext);
+            Canvas.width(250);
+            Canvas.height(250);
+            Canvas.onReady(() => {
+                // --- å¯è‡ªå®šä¹‰å‚æ•° ---
+                const cornerLength = 20; // è§’çš„è¾¹é•¿
+                const lineWidth = 4; // çº¿çš„å®½åº¦
+                const lineColor = '#00FF00'; // çº¿çš„é¢œè‰²ï¼ˆç»¿è‰²ï¼‰
+                // --------------------
+                const size = 250; // ç”»å¸ƒå°ºå¯¸
+                const ctx = this.canvasContext;
+                // è®¾ç½®çº¿æ®µæ ·å¼
+                ctx.lineWidth = lineWidth;
+                ctx.strokeStyle = lineColor;
+                // æ¸…é™¤æ—§çš„ç»˜åˆ¶ï¼ˆå¦‚æœéœ€è¦é‡ç»˜ï¼‰
+                ctx.clearRect(0, 0, size, size);
+                // ç»˜åˆ¶å·¦ä¸Šè§’
+                ctx.beginPath();
+                ctx.moveTo(cornerLength, 0);
+                ctx.lineTo(0, 0);
+                ctx.lineTo(0, cornerLength);
+                ctx.stroke();
+                // ç»˜åˆ¶å³ä¸Šè§’
+                ctx.beginPath();
+                ctx.moveTo(size - cornerLength, 0);
+                ctx.lineTo(size, 0);
+                ctx.lineTo(size, cornerLength);
+                ctx.stroke();
+                // ç»˜åˆ¶å·¦ä¸‹è§’
+                ctx.beginPath();
+                ctx.moveTo(0, size - cornerLength);
+                ctx.lineTo(0, size);
+                ctx.lineTo(cornerLength, size);
+                ctx.stroke();
+                // ç»˜åˆ¶å³ä¸‹è§’
+                ctx.beginPath();
+                ctx.moveTo(size - cornerLength, size);
+                ctx.lineTo(size, size);
+                ctx.lineTo(size, size - cornerLength);
+                ctx.stroke();
+            });
+        }, Canvas);
+        Canvas.pop();
+    }
+    // --- ã€ä¿®æ”¹éƒ¨åˆ†ã€‘ ScanBoxæ„å»ºå™¨ ---
+    ScanBox(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Stack.create();
+            Stack.width(250);
+            Stack.height(250);
+        }, Stack);
+        // 1. ä½¿ç”¨Canvasç»˜åˆ¶å››ä¸ªè§’ä½œä¸ºåº•å±‚
+        this.ScanCorners.bind(this)();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            // 2. åŠ¨ç”»æ‰«æçº¿å åŠ åœ¨ä¸Šé¢
+            if (this.isAnimating) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Rect.create();
+                        Context.animation({
+                            duration: 2000,
+                            curve: Curve.EaseInOut,
+                            iterations: -1,
+                            playMode: PlayMode.Normal,
+                            onFinish: () => {
+                                const start = this.scanLineTop;
+                                this.scanLineTop = start === 0 ? 248 : 0;
+                            }
+                        });
+                        Rect.width('98%');
+                        Rect.height(3);
+                        Rect.fill(Color.Green);
+                        Rect.shadow({ radius: 10, color: Color.Green });
+                        Rect.offset({ x: 0, y: this.scanLineTop });
+                        Rect.onAppear(() => {
+                            this.scanLineTop = 124;
+                        });
+                        Context.animation(null);
+                    }, Rect);
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+        Stack.pop();
+    }
+    // --- buildæ–¹æ³• (ä¿æŒä¸å˜) ---
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Stack.create({ alignContent: Alignment.TopStart });
+            Stack.width('100%');
+            Stack.height('100%');
+            Stack.backgroundColor(Color.Black);
+        }, Stack);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // 1. ç›¸æœºå®æ—¶é¢„è§ˆä½œä¸ºèƒŒæ™¯
+            XComponent.create({
+                id: 'scan_preview_xcomponent',
+                type: 'surface',
+                controller: this.xcomponentController
+            }, "com.my.myapplication/entry");
+            // 1. ç›¸æœºå®æ—¶é¢„è§ˆä½œä¸ºèƒŒæ™¯
+            XComponent.onLoad(async () => {
+                this.surfaceId = this.xcomponentController.getXComponentSurfaceId();
+                if (this.cameraManager) {
+                    await this.initCamera();
+                }
+            });
+            // 1. ç›¸æœºå®æ—¶é¢„è§ˆä½œä¸ºèƒŒæ™¯
+            XComponent.width('100%');
+            // 1. ç›¸æœºå®æ—¶é¢„è§ˆä½œä¸ºèƒŒæ™¯
+            XComponent.height('100%');
+        }, XComponent);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // 2. æ‰«ç UIé®ç½©å±‚
+            Column.create();
+            // 2. æ‰«ç UIé®ç½©å±‚
+            Column.width('100%');
+            // 2. æ‰«ç UIé®ç½©å±‚
+            Column.height('100%');
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // ä¸Šéƒ¨é®ç½©
+            Rect.create();
+            // ä¸Šéƒ¨é®ç½©
+            Rect.fill('rgba(0, 0, 0, 0.6)');
+            // ä¸Šéƒ¨é®ç½©
+            Rect.layoutWeight(1);
+            // ä¸Šéƒ¨é®ç½©
+            Rect.width('100%');
+        }, Rect);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // ä¸­é—´é€æ˜åŒºåŸŸå’Œå·¦å³é®ç½©
+            Row.create();
+            // ä¸­é—´é€æ˜åŒºåŸŸå’Œå·¦å³é®ç½©
+            Row.width('100%');
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Rect.create();
+            Rect.fill('rgba(0, 0, 0, 0.6)');
+            Rect.layoutWeight(1);
+            Rect.height(250);
+        }, Rect);
+        this.ScanBox.bind(this)();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Rect.create();
+            Rect.fill('rgba(0, 0, 0, 0.6)');
+            Rect.layoutWeight(1);
+            Rect.height(250);
+        }, Rect);
+        // ä¸­é—´é€æ˜åŒºåŸŸå’Œå·¦å³é®ç½©
+        Row.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // ä¸‹éƒ¨é®ç½©å’Œæç¤ºæ–‡å­—
+            Column.create();
+            // ä¸‹éƒ¨é®ç½©å’Œæç¤ºæ–‡å­—
+            Column.width('100%');
+            // ä¸‹éƒ¨é®ç½©å’Œæç¤ºæ–‡å­—
+            Column.layoutWeight(1);
+            // ä¸‹éƒ¨é®ç½©å’Œæç¤ºæ–‡å­—
+            Column.backgroundColor('rgba(0, 0, 0, 0.6)');
+            // ä¸‹éƒ¨é®ç½©å’Œæç¤ºæ–‡å­—
+            Column.justifyContent(FlexAlign.Start);
+            // ä¸‹éƒ¨é®ç½©å’Œæç¤ºæ–‡å­—
+            Column.alignItems(HorizontalAlign.Center);
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('å°†äºŒç»´ç /æ¡å½¢ç å¯¹å‡†æ‰«ææ¡†');
+            Text.fontSize(16);
+            Text.fontColor(Color.White);
+            Text.margin({ top: 20 });
+        }, Text);
+        Text.pop();
+        // ä¸‹éƒ¨é®ç½©å’Œæç¤ºæ–‡å­—
+        Column.pop();
+        // 2. æ‰«ç UIé®ç½©å±‚
+        Column.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            // 3. é¡¶éƒ¨è¿”å›æŒ‰é’®ï¼Œè¦†ç›–åœ¨æœ€ä¸Šå±‚
+            Row.create();
+            // 3. é¡¶éƒ¨è¿”å›æŒ‰é’®ï¼Œè¦†ç›–åœ¨æœ€ä¸Šå±‚
+            Row.width('100%');
+            // 3. é¡¶éƒ¨è¿”å›æŒ‰é’®ï¼Œè¦†ç›–åœ¨æœ€ä¸Šå±‚
+            Row.justifyContent(FlexAlign.Start);
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Button.createWithChild({ type: ButtonType.Circle });
+            Button.width(40);
+            Button.height(40);
+            Button.backgroundColor(Color.Black);
+            Button.opacity(0.4);
+            Button.onClick(() => this.goBack());
+        }, Button);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Image.create({ "id": 16777250, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+            Image.width(24);
+            Image.height(24);
+            Image.fillColor(Color.White);
+        }, Image);
+        Button.pop();
+        // 3. é¡¶éƒ¨è¿”å›æŒ‰é’®ï¼Œè¦†ç›–åœ¨æœ€ä¸Šå±‚
+        Row.pop();
+        Stack.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+    static getEntryName() {
+        return "Scan";
+    }
+}
+registerNamedRoute(() => new Scan(undefined, {}), "", { bundleName: "com.my.myapplication", moduleName: "entry", pagePath: "pages/Scan", pageFullPath: "entry/src/main/ets/pages/Scan", integratedHsp: "false", moduleType: "followWithHap" });
+//# sourceMappingURL=Scan.js.mapÂ”Ù‡ hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.multimedia.camera.d.tsÙ‡ hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.abilityAccessCtrl.d.tsÙ| hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.router.d.tsÙ‚ hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.promptAction.d.tsÙ<D:\apps\deveco\tzb2025jbgs\entry\src\main\ets\pages\Scan.etsÔrBšªmoduleName±isLocalDependency¯isNodeEntryFile§pkgPath±belongProjectPath§pkgNameªpkgVersion±dependencyPkgInfo°belongModulePath¬shouldEmitJs¥entryÃÂÙ D:\apps\deveco\tzb2025jbgs\entryºD:\apps\deveco\tzb2025jbgs¥entry¥1.0.0Ô  Ù D:\apps\deveco\tzb2025jbgs\entryÃÃÚ'%import { camera } from '@kit.CameraKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { common, abilityAccessCtrl, Permissions } from '@kit.AbilityKit';
+import { router } from '@kit.ArkUI';
+import { promptAction } from '@kit.ArkUI';
+
+@Entry
+@Component
+struct Scan {
+  // --- ç›¸æœºé¢„è§ˆæ‰€éœ€å¯¹è±¡ ---
+  private xcomponentController: XComponentController = new XComponentController();
+  private surfaceId: string = '';
+  private cameraManager?: camera.CameraManager;
+  private cameraInput?: camera.CameraInput;
+  private previewOutput?: camera.PreviewOutput;
+  private session?: camera.Session;
+  private isCameraInitialized: boolean = false;
+
+  // Canvas 2Dæ¸²æŸ“ä¸Šä¸‹æ–‡
+  private canvasContext: CanvasRenderingContext2D = new CanvasRenderingContext2D();
+
+  // --- çŠ¶æ€ç®¡ç† ---
+  @State scanLineTop: number = -124;
+  @State isAnimating: boolean = false;
+
+  async aboutToAppear() {
+    await this.checkAndRequestPermissions();
+    setTimeout(() => {
+      if (this.isAnimating) {
+        this.handleScanSuccess();
+      }
+    }, 6000)
+  }
+
+  async aboutToDisappear() {
+    await this.releaseCamera();
+  }
+
+  // ... (çœç•¥éƒ¨åˆ†æœªä¿®æ”¹çš„å‡½æ•°: checkAndRequestPermissions, initCamera, releaseCamera, handleScanSuccess, goBack)
+  // ... The unchanged functions from your code go here.
+  // ç”³è¯·ç›¸æœºæƒé™
+  async checkAndRequestPermissions(): Promise<void> {
+    // æ¨¡æ‹Ÿæ‰«ç åªéœ€è¦ç›¸æœºæƒé™
+    const permissionList: Array<Permissions> = ['ohos.permission.CAMERA'];
+    const context = getContext(this) as common.UIAbilityContext;
+    const atManager = abilityAccessCtrl.createAtManager();
+    try {
+      const data = await atManager.requestPermissionsFromUser(context, permissionList);
+      let allGranted = true;
+      data.authResults.forEach(result => {
+        if (result !== abilityAccessCtrl.GrantStatus.PERMISSION_GRANTED) {
+          allGranted = false;
+        }
+      });
+
+      if (allGranted) {
+        console.info('ç›¸æœºæƒé™å·²æˆäºˆï¼Œå‡†å¤‡åˆå§‹åŒ–ç›¸æœºã€‚');
+        const abilityContext = getContext(this) as common.UIAbilityContext;
+        this.cameraManager = camera.getCameraManager(abilityContext);
+        // å¦‚æœsurfaceIdå·²å‡†å¤‡å¥½ï¼Œåˆ™åˆå§‹åŒ–ç›¸æœº
+        if (this.surfaceId) {
+          await this.initCamera();
+        }
+      } else {
+        console.error('ç›¸æœºæƒé™è¢«æ‹’ç»ã€‚');
+        promptAction.showToast({ message: 'éœ€è¦ç›¸æœºæƒé™æ‰èƒ½è¿›è¡Œæ‰«ç ' });
+        this.goBack();
+      }
+    } catch (error) {
+      console.error(`ç”³è¯·æƒé™æ—¶å‘ç”Ÿå¼‚å¸¸: ${JSON.stringify(error)}`);
+    }
+  }
+
+  // åˆå§‹åŒ–ç›¸æœºï¼ˆä»…é¢„è§ˆï¼‰
+  async initCamera() {
+    if (this.isCameraInitialized || !this.surfaceId || !this.cameraManager) {
+      console.warn('åˆå§‹åŒ–æ¡ä»¶ä¸æ»¡è¶³æˆ–å·²åˆå§‹åŒ–ï¼Œè·³è¿‡ã€‚');
+      return;
+    }
+    this.isCameraInitialized = true;
+    console.info('å¼€å§‹åˆå§‹åŒ–ç›¸æœº...');
+
+    try {
+      const cameras = this.cameraManager.getSupportedCameras();
+      if (cameras.length === 0) {
+        console.error('No camera device supported.');
+        return;
+      }
+      // ä¼˜å…ˆä½¿ç”¨åç½®æ‘„åƒå¤´
+      const cameraDevice = cameras.find(cam => cam.cameraPosition === camera.CameraPosition.CAMERA_POSITION_BACK) ?? cameras[0];
+
+      this.cameraInput = this.cameraManager.createCameraInput(cameraDevice);
+      await this.cameraInput.open();
+
+      const outputCapability = this.cameraManager.getSupportedOutputCapability(cameraDevice, camera.SceneMode.NORMAL_PHOTO);
+      // ä½¿ç”¨é»˜è®¤çš„é¢„è§ˆé…ç½®
+      const previewProfile = outputCapability.previewProfiles[0];
+      this.previewOutput = this.cameraManager.createPreviewOutput(previewProfile, this.surfaceId);
+
+      this.session = this.cameraManager.createSession(camera.SceneMode.NORMAL_PHOTO);
+      if (this.session === undefined) {
+        console.error("åˆ›å»ºä¼šè¯å¤±è´¥");
+        return;
+      }
+      this.session.beginConfig();
+      this.session.addInput(this.cameraInput);
+      this.session.addOutput(this.previewOutput);
+      await this.session.commitConfig();
+      await this.session.start();
+
+      // å¯åŠ¨æ‰«æçº¿åŠ¨ç”»
+      this.isAnimating = true;
+      console.info('ä¼šè¯å·²å¯åŠ¨ï¼Œé¢„è§ˆåº”è¯¥å¯è§äº†ï¼');
+
+    } catch (error) {
+      const err = error as BusinessError;
+      console.error(`ç›¸æœºåˆå§‹åŒ–å¤±è´¥ï¼Œé”™è¯¯ç : ${err.code}, ä¿¡æ¯: ${err.message}`);
+      this.isCameraInitialized = false;
+    }
+  }
+
+  // é‡Šæ”¾ç›¸æœºèµ„æº
+  async releaseCamera() {
+    console.info('å¼€å§‹é‡Šæ”¾ç›¸æœºèµ„æº...');
+    // åœæ­¢åŠ¨ç”»
+    this.isAnimating = false;
+    this.isCameraInitialized = false;
+    try {
+      if (this.session) {
+        await this.session.stop();
+        this.session.release();
+        this.session = undefined;
+      }
+      if (this.cameraInput) {
+        await this.cameraInput.close();
+        this.cameraInput = undefined;
+      }
+      if (this.previewOutput) {
+        await this.previewOutput.release();
+        this.previewOutput = undefined;
+      }
+    } catch (error) {
+      console.error(`é‡Šæ”¾ç›¸æœºèµ„æºå¤±è´¥: ${JSON.stringify(error)}`);
+    }
+  }
+
+  // æ¨¡æ‹Ÿæ‰«ç æˆåŠŸåçš„å¤„ç†
+  async handleScanSuccess() {
+    await this.releaseCamera(); // é‡Šæ”¾ç›¸æœº
+    promptAction.showToast({ message: 'å…¥åº“æˆåŠŸï¼' ,bottom:'50%'});
+    // å»¶è¿Ÿ1ç§’åè¿”å›ï¼Œè®©ç”¨æˆ·èƒ½çœ‹åˆ°æç¤º
+    setTimeout(() => {
+      this.goBack();
+    }, 1000);
+  }
+
+  // è¿”å›ä¸Šä¸€é¡µ
+  goBack(): void {
+    router.back();
+  }
+
+
+  // --- ã€æ–°å¢éƒ¨åˆ†ã€‘ ä½¿ç”¨Canvasç»˜åˆ¶å››ä¸ªè§’ ---
+  @Builder ScanCorners() {
+    Canvas(this.canvasContext)
+      .width(250)
+      .height(250)
+      .onReady(() => {
+        // --- å¯è‡ªå®šä¹‰å‚æ•° ---
+        const cornerLength: number = 20; // è§’çš„è¾¹é•¿
+        const lineWidth: number = 4;      // çº¿çš„å®½åº¦
+        const lineColor: string = '#00FF00'; // çº¿çš„é¢œè‰²ï¼ˆç»¿è‰²ï¼‰
+        // --------------------
+
+        const size = 250; // ç”»å¸ƒå°ºå¯¸
+        const ctx = this.canvasContext;
+
+        // è®¾ç½®çº¿æ®µæ ·å¼
+        ctx.lineWidth = lineWidth;
+        ctx.strokeStyle = lineColor;
+
+        // æ¸…é™¤æ—§çš„ç»˜åˆ¶ï¼ˆå¦‚æœéœ€è¦é‡ç»˜ï¼‰
+        ctx.clearRect(0, 0, size, size);
+
+        // ç»˜åˆ¶å·¦ä¸Šè§’
+        ctx.beginPath();
+        ctx.moveTo(cornerLength, 0);
+        ctx.lineTo(0, 0);
+        ctx.lineTo(0, cornerLength);
+        ctx.stroke();
+
+        // ç»˜åˆ¶å³ä¸Šè§’
+        ctx.beginPath();
+        ctx.moveTo(size - cornerLength, 0);
+        ctx.lineTo(size, 0);
+        ctx.lineTo(size, cornerLength);
+        ctx.stroke();
+
+        // ç»˜åˆ¶å·¦ä¸‹è§’
+        ctx.beginPath();
+        ctx.moveTo(0, size - cornerLength);
+        ctx.lineTo(0, size);
+        ctx.lineTo(cornerLength, size);
+        ctx.stroke();
+
+        // ç»˜åˆ¶å³ä¸‹è§’
+        ctx.beginPath();
+        ctx.moveTo(size - cornerLength, size);
+        ctx.lineTo(size, size);
+        ctx.lineTo(size, size - cornerLength);
+        ctx.stroke();
+      })
+  }
+
+  // --- ã€ä¿®æ”¹éƒ¨åˆ†ã€‘ ScanBoxæ„å»ºå™¨ ---
+  @Builder ScanBox() {
+    Stack() {
+      // 1. ä½¿ç”¨Canvasç»˜åˆ¶å››ä¸ªè§’ä½œä¸ºåº•å±‚
+      this.ScanCorners()
+
+      // 2. åŠ¨ç”»æ‰«æçº¿å åŠ åœ¨ä¸Šé¢
+      if (this.isAnimating) {
+        Rect()
+          .width('98%')
+          .height(3)
+          .fill(Color.Green)
+          .shadow({ radius: 10, color: Color.Green })
+          .offset({ x: 0, y: this.scanLineTop })
+          .onAppear(() => {
+            this.scanLineTop = 124;
+          })
+          .animation({
+            duration: 2000,
+            curve: Curve.EaseInOut,
+            iterations: -1,
+            playMode: PlayMode.Normal,
+            onFinish: () => {
+              const start = this.scanLineTop;
+              this.scanLineTop = start === 0 ? 248 : 0;
+            }
+          })
+      }
+    }
+    .width(250)
+    .height(250)
+  }
+
+  // --- buildæ–¹æ³• (ä¿æŒä¸å˜) ---
+  build() {
+    Stack({ alignContent: Alignment.TopStart }) {
+      // 1. ç›¸æœºå®æ—¶é¢„è§ˆä½œä¸ºèƒŒæ™¯
+      XComponent({
+        id: 'scan_preview_xcomponent',
+        type: 'surface',
+        controller: this.xcomponentController
+      })
+        .onLoad(async () => {
+          this.surfaceId = this.xcomponentController.getXComponentSurfaceId();
+          if (this.cameraManager) {
+            await this.initCamera();
+          }
+        })
+        .width('100%')
+        .height('100%')
+
+      // 2. æ‰«ç UIé®ç½©å±‚
+      Column() {
+        // ä¸Šéƒ¨é®ç½©
+        Rect().fill('rgba(0, 0, 0, 0.6)').layoutWeight(1).width('100%')
+
+        // ä¸­é—´é€æ˜åŒºåŸŸå’Œå·¦å³é®ç½©
+        Row() {
+          Rect().fill('rgba(0, 0, 0, 0.6)').layoutWeight(1).height(250)
+          this.ScanBox()
+          Rect().fill('rgba(0, 0, 0, 0.6)').layoutWeight(1).height(250)
+        }.width('100%')
+
+        // ä¸‹éƒ¨é®ç½©å’Œæç¤ºæ–‡å­—
+        Column() {
+          Text('å°†äºŒç»´ç /æ¡å½¢ç å¯¹å‡†æ‰«ææ¡†')
+            .fontSize(16)
+            .fontColor(Color.White)
+            .margin({ top: 20 })
+        }
+        .width('100%')
+        .layoutWeight(1)
+        .backgroundColor('rgba(0, 0, 0, 0.6)')
+        .justifyContent(FlexAlign.Start)
+        .alignItems(HorizontalAlign.Center)
+      }
+      .width('100%')
+      .height('100%')
+
+      // 3. é¡¶éƒ¨è¿”å›æŒ‰é’®ï¼Œè¦†ç›–åœ¨æœ€ä¸Šå±‚
+      Row() {
+        Button({ type: ButtonType.Circle }) {
+          Image($r('app.media.left_arrow')).width(24).height(24).fillColor(Color.White)
+        }
+        .width(40).height(40).backgroundColor(Color.Black).opacity(0.4)
+        .onClick(() => this.goBack())
+      }
+      .width('100%')
+      .justifyContent(FlexAlign.Start)
+    }
+    .width('100%')
+    .height('100%')
+    .backgroundColor(Color.Black)
+  }
+}ÀÔrC”·@ohos.multimedia.camera·@ohos.abilityAccessCtrl¬@ohos.router²@ohos.promptActionÔrD—ªassertions¨external¢id¤meta±moduleSideEffectsªresolvedByµsyntheticNamedExportsAÃÙ‡ hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.multimedia.camera.d.tsAÃªoh-resolveÂDAÃÙ‡ hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.abilityAccessCtrl.d.tsAÃªoh-resolveÂDAÃÙ| hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.router.d.tsAÃªoh-resolveÂDAÃÙ‚ hvigor_ignore_D:_apps_deveco_devecostudio-windows-5.1.0.828_DevEco Studio_sdk_default_openharmony_ets_api_@ohos.promptAction.d.tsAÃªoh-resolveÂ“ÔrE–§version¤fileªsourceRoot§sources¥names¨mappings§Scan.js ‘¨Scan.etsÜ£–”    ”  	”  ”  ”,  '”-  (–”   ” ” "” 7”7 ÌH”8 ÌI–”   ” 	” ” ”! #”" $–”   ” 	” ” ”- )”. *’” ”
+ ‘”  ””$ 
+7”( 
+;”< 
+ÌO”> 
+ÌQ’” ”  ’”# )”( .”” 4”! 8”9 ÌP”; ÌR“”: ”;  ”> #’”:  ”? %‘” *’” 	” ’” 	” ’” 	” ’” 	” ”” ”	 ”
+ ” —” ” 
+” ” ”- )”/ +”0 ,•” ” ” ” ” –” ” 
+” ” ”  ”" –” ” ” ”& ”(  ”) !‘” –” ”	 ” ” ” ” ’”  ”  ”” "”	 "”
+ "” "—” #” #
+” #” #”  #”" #”# #’” $” $’” &”Ìi &Ìg’” '”: '8’” (” (”” )”	 )”
+ )”$ )"’” *” *˜” +” +
+” +” +/”  +0”8 +ÌH”9 +ÌI”: +ÌJ™” ,” ,
+” ,” ,”" ,”# ,”' ,#”( ,?”) ,Ì@™” -” -
+” -” -”+ -'”, -(”; -7”= -9”> -:’” .” .” /” /” /” /” /”( /"”) /#”ÌC /=”ÌD />”ÌK /ÌE”ÌM /ÌG”Ì[ /ÌU”Ì\ /ÌV”Ì] /ÌW–” 0” 0
+” 0” 0”! 0”" 0š” 1” 1
+” 1” 1” 1”$ 1”% 1”+ 1%”, 1&”. 1(š” 2” 2” 2” 2”0 2(”1 2)”< 24”= 25”ÌO 2ÌG”ÌQ 2ÌI•” 3
+” 3”! 3”& 3”' 3‘” 4	”” 5” 5” 5” 5	”” 7” 7
+” 7” 7˜” 8” 8” 8” 8” 8”/ 8'”0 8(”1 8)™” 9” 9”$ 9”' 9”1 9)”2 9*”6 9.”7 9ÌJ”8 9ÌKœ” :” :” :”" :”% :”+ :#”, :$”< :4”= :5”ÌK :ÌC”ÌL :ÌD”ÌM :ÌE’” ;”) ;!–” <” <” <” <”" <”$ <—” =
+” =” =” =”) =”+ =!”, ="‘” >	‘” ?‘” ?˜” Ì@” Ì@” Ì@” Ì@” Ì@”( Ì@ ”) Ì@!”* Ì@"œ” ÌA” ÌA” ÌA”& ÌA”' ÌA”) ÌA!”0 ÌA(”2 ÌA*”Ì@ ÌA8”ÌB ÌA:”ÌC ÌA;”ÌD ÌA<–” ÌB” ÌB” ÌB” ÌB” ÌB” ÌB‘” ÌC‘”	 ÌD”” ÌD” ÌD” ÌD” ÌDŸ” ÌE” ÌE” ÌE” ÌE” ÌE”( ÌE"”, ÌE&”- ÌE'”6 ÌE0”7 ÌE1”< ÌE6”= ÌE7”? ÌE9”Ì@ ÌE:”ÌA ÌE;‘”	 ÌF’” ÌG” ÌG’” ÌI” ÌI”” ÌJ”	 ÌJ”
+ ÌJ” ÌJÜ ” ÌK” ÌK” ÌK” ÌK”$ ÌK ”( ÌK$”) ÌK%”- ÌK)”. ÌK*”7 ÌK3”; ÌK7”< ÌK8”Ì@ ÌK<”ÌA ÌK=”ÌN ÌKÌJ”ÌP ÌKÌL˜” ÌL” ÌL” ÌL” ÌL” ÌL”, ÌL&”- ÌL'”. ÌL(’” ÌM” ÌM‘”	 ÌN—” ÌO” ÌO” ÌO	”  ÌO”# ÌO”' ÌO#”( ÌO$˜” ÌP” ÌP” ÌP” ÌP” ÌP”! ÌP”" ÌP”# ÌP’” ÌR” ÌR›” ÌS” ÌS” ÌS” ÌS”  ÌS”! ÌS”. ÌS(”/ ÌS)”ÌB ÌS<”ÌD ÌS>”ÌE ÌS?˜” ÌT” ÌT
+” ÌT” ÌT” ÌT”# ÌT”$ ÌT”& ÌT ˜” ÌU” ÌU” ÌU” ÌU” ÌU”; ÌU3”< ÌU4”= ÌU5’” ÌV” ÌV‘” ÌW’” ÌX” ÌXÜ ” ÌY” ÌY” ÌY”! ÌY”( ÌY"”) ÌY#”- ÌY'”. ÌY(”1 ÌY+”2 ÌY,”4 ÌY.”5 ÌY/”8 ÌY2”9 ÌY3”ÌG ÌYÌA”ÌL ÌYÌF”ÌR ÌYÌL”ÌS ÌYÌM”Ìa ÌYÌ[”Ìb ÌYÌ\”Ìv ÌYÌp”Ìw ÌYÌq”Ì{ ÌYÌu”Ì‚ ÌYÌ|”Ìƒ ÌYÌ}”Ì„ ÌYÌ~”Ì… ÌYÌ”Ì† ÌYÌ€” Ì[” Ì[
+” Ì[” Ì[” Ì[”# Ì[”$ Ì[”1 Ì[+”2 Ì[,”ÌC Ì[=”ÌD Ì[>”ÌP Ì[ÌJ”ÌQ Ì[ÌK”ÌR Ì[ÌL™” Ì\” Ì\” Ì\” Ì\”" Ì\”# Ì\”' Ì\!”) Ì\#”* Ì\$Ü ” Ì^” Ì^”" Ì^”% Ì^”) Ì^#”* Ì^$”7 Ì^1”8 Ì^2”ÌT Ì^ÌN”ÌU Ì^ÌO”Ìa Ì^Ì[”Ìc Ì^Ì]”Ìi Ì^Ìc”Ìj Ì^Ìd”Ìs Ì^Ìm”Ìt Ì^Ìn”Ì€ Ì^Ìz”Ì Ì^Ì{”Ì‚ Ì^Ì|’” Ì_” Ì_›” Ì`” Ì`”  Ì`”# Ì`”3 Ì`-”4 Ì`.”ÌC Ì`=”ÌD Ì`>”ÌE Ì`?”ÌF Ì`Ì@”ÌG Ì`ÌAÜ ” Ìa” Ìa
+” Ìa” Ìa”! Ìa”% Ìa”& Ìa ”3 Ìa-”4 Ìa.”ÌG ÌaÌA”ÌH ÌaÌB”ÌV ÌaÌP”ÌX ÌaÌR”Ì\ ÌaÌV”Ì] ÌaÌW”Ìf ÌaÌ`”Ìg ÌaÌa”Ìh ÌaÌbÜ ” Ìc” Ìc
+” Ìc” Ìc” Ìc” Ìc”  Ìc”- Ìc'”. Ìc(”; Ìc5”< Ìc6”ÌB Ìc<”ÌC Ìc=”ÌL ÌcÌF”ÌM ÌcÌG”ÌY ÌcÌS”ÌZ ÌcÌT”Ì[ ÌcÌU˜” Ìd” Ìd
+” Ìd” Ìd” Ìd”! Ìd”* Ìd$”, Ìd&˜” Ìe” Ìe” Ìe” Ìe” Ìe”& Ìe”' Ìe”( Ìe ’” Ìf” Ìf‘” Ìg˜” Ìh” Ìh
+” Ìh” Ìh” Ìh”$ Ìh”& Ìh ”' Ìh!œ” Ìi” Ìi
+” Ìi” Ìi” Ìi”! Ìi”" Ìi”& Ìi ”' Ìi!”2 Ìi,”3 Ìi-”4 Ìi.œ” Ìj” Ìj
+” Ìj” Ìj” Ìj”" Ìj”# Ìj”' Ìj!”( Ìj"”5 Ìj/”6 Ìj0”7 Ìj1™” Ìk” Ìk” Ìk” Ìk” Ìk” Ìk”+ Ìk%”- Ìk'”. Ìk(™” Ìl” Ìl” Ìl” Ìl” Ìl” Ìl”$ Ìl”& Ìl ”' Ìl!’” Ìn” Ìn—” Ìo” Ìo
+” Ìo” Ìo” Ìo”# Ìo”$ Ìo˜” Ìp” Ìp” Ìp” Ìp” Ìp”) Ìp#”* Ìp$”+ Ìp%‘”	 Ìr”” Ìr” Ìr” Ìr” Ìr–” Ìs” Ìs” Ìs” Ìs” Ìs(” Ìs)Ü ” Ìt” Ìt” Ìt” Ìt” Ìt”* Ìt$”- Ìt'”. Ìt(”2 Ìt,”; Ìt5”> Ìt8”? Ìt9”ÌF ÌtÌ@”ÌH ÌtÌB”ÌI ÌtÌC”ÌJ ÌtÌD—” Ìu” Ìu
+” Ìu”$ Ìu”' Ìu!”, Ìu&”- Ìu'‘”	 Ìv’” Ìw” Ìw’” Ìy” Ìy”” Ìz”	 Ìz”
+ Ìz” Ìz˜” Ì{” Ì{” Ì{” Ì{” Ì{”" Ì{”# Ì{”$ Ì{ ’” Ì|” Ì|—” Ì}” Ì}” Ì}	” Ì}” Ì}”  Ì}”! Ì}—” Ì~” Ì~” Ì~	”  Ì~”# Ì~”( Ì~$”) Ì~%’” Ì” Ì–” Ì€” Ì€
+” Ì€” Ì€” Ì€” Ì€™” Ì” Ì” Ì” Ì”" Ì”# Ì”' Ì”) Ì!”* Ì"˜” Ì‚” Ì‚” Ì‚” Ì‚” Ì‚”$ Ì‚”& Ì‚”' Ì‚—” Ìƒ” Ìƒ” Ìƒ” Ìƒ” Ìƒ”( Ìƒ ”) Ìƒ!‘” Ì„–” Ì…” Ì…
+” Ì…” Ì…”  Ì…”" Ì…™” Ì†” Ì†” Ì†” Ì†”& Ì†”' Ì†”, Ì†$”. Ì†&”/ Ì†'—” Ì‡” Ì‡” Ì‡”  Ì‡”# Ì‡”, Ì‡$”- Ì‡%‘” Ìˆ–” Ì‰” Ì‰
+” Ì‰” Ì‰”" Ì‰”$ Ì‰™” ÌŠ” ÌŠ” ÌŠ” ÌŠ”( ÌŠ ”) ÌŠ!”0 ÌŠ(”2 ÌŠ*”3 ÌŠ+—” Ì‹” Ì‹” Ì‹”" Ì‹”% Ì‹”. Ì‹&”/ Ì‹'‘” ÌŒ‘”	 Ì”” Ì” Ì” Ì” ÌŸ” Ì” Ì” Ì” Ì” Ì”' Ì!”+ Ì%”, Ì&”5 Ì/”6 Ì0”; Ì5”< Ì6”> Ì8”? Ì9”Ì@ Ì:‘”	 Ì’” Ì” Ì’” Ì’” Ì’”” Ì“”	 Ì“”
+ Ì“” Ì“™” Ì”” Ì”
+” Ì”” Ì””  Ì””" Ì””# Ì””$ Ì” ”+ Ì”'Ü ” Ì•” Ì•” Ì•” Ì•” Ì•”! Ì•”( Ì•$”* Ì•&”1 Ì•-”3 Ì•/”9 Ì•5”; Ì•6”Ì@ Ì•;”ÌB Ì•<”ÌC Ì•=”ÌD Ì•>’” Ì–” Ì–•” Ì—” Ì—” Ì—” Ì—” Ì—–” Ì˜” Ì˜
+” Ì˜” Ì˜” Ì˜” Ì˜–” Ì™”	 Ì™” Ì™” Ì™” Ì™” Ì™’” Ìš” Ìš’” Ìœ” Ìœ
+’” Ì”
+ Ì–” Ì” Ì
+” Ì” Ì” Ì” Ì’” ÌŸ” ÌŸ’” Ì¢”# Ì¢!’” Ì£” Ì£–” Ì¤” Ì¤
+” Ì¤” Ì¤” Ì¤”, Ì¤–” Ì¤” Ì¤
+” Ì¥” Ì¥” Ì¥” Ì¥–” Ì¤” Ì¤
+” Ì¦” Ì¦” Ì¦” Ì¦—” Ì¤” Ì¤
+” Ì§” Ì§” Ì§” Ì§”  Ì§’” Ì¨”! Ì¨˜” Ì©” Ì©”" Ì©”% Ì©%”' Ì©'”( Ì©(”) Ì©)”0 Ì©0˜” Ìª” Ìª” Ìª”" Ìª"”# Ìª#”$ Ìª$”% Ìª*”, Ìª1˜” Ì«” Ì«” Ì«”" Ì«"”+ Ì«+”, Ì«,”- Ì«-”8 Ì«8’” Ì¬”' Ì¬˜” Ì®” Ì®” Ì®” Ì®”  Ì®”! Ì®”" Ì®”) Ì®!˜” Ì¯” Ì¯” Ì¯” Ì¯”  Ì¯”! Ì¯”. Ì¯&”/ Ì¯'’” Ì±” Ì±—” Ì²” Ì²” Ì²” Ì²”  Ì²”) Ì²!”* Ì²"—” Ì³” Ì³” Ì³” Ì³”" Ì³”+ Ì³#”, Ì³$’” Ìµ”! Ìµ” Ì¶” Ì¶” Ì¶” Ì¶” Ì¶” Ì¶”! Ì¶”" Ì¶”$ Ì¶”( Ì¶ ”* Ì¶"”. Ì¶&”/ Ì¶'”0 Ì¶(’” Ì¸” Ì¸–” Ì¹” Ì¹” Ì¹” Ì¹” Ì¹”  Ì¹š” Ìº” Ìº” Ìº” Ìº” Ìº”' Ìº”) Ìº!”* Ìº"”+ Ìº#”, Ìº$š” Ì»” Ì»” Ì»” Ì»” Ì»” Ì»” Ì»” Ì»”  Ì»”! Ì»š” Ì¼” Ì¼” Ì¼” Ì¼” Ì¼” Ì¼” Ì¼”* Ì¼"”+ Ì¼#”, Ì¼$–” Ì½” Ì½” Ì½” Ì½” Ì½” Ì½’” Ì¿” Ì¿–” ÌÀ” ÌÀ” ÌÀ” ÌÀ” ÌÀ”  ÌÀœ” ÌÁ” ÌÁ” ÌÁ” ÌÁ” ÌÁ” ÌÁ”" ÌÁ”. ÌÁ&”0 ÌÁ(”1 ÌÁ)”2 ÌÁ*”3 ÌÁ+š” ÌÂ” ÌÂ” ÌÂ” ÌÂ” ÌÂ” ÌÂ”! ÌÂ”" ÌÂ”# ÌÂ”$ ÌÂš” ÌÃ” ÌÃ” ÌÃ” ÌÃ” ÌÃ” ÌÃ”! ÌÃ”- ÌÃ%”. ÌÃ&”/ ÌÃ'–” ÌÄ” ÌÄ” ÌÄ” ÌÄ” ÌÄ” ÌÄ’” ÌÆ” ÌÆ–” ÌÇ” ÌÇ” ÌÇ” ÌÇ” ÌÇ”  ÌÇœ” ÌÈ” ÌÈ” ÌÈ” ÌÈ” ÌÈ” ÌÈ” ÌÈ”" ÌÈ”% ÌÈ”1 ÌÈ)”2 ÌÈ*”3 ÌÈ+š” ÌÉ” ÌÉ” ÌÉ” ÌÉ” ÌÉ” ÌÉ” ÌÉ”" ÌÉ”# ÌÉ”$ ÌÉš” ÌÊ” ÌÊ” ÌÊ” ÌÊ” ÌÊ”' ÌÊ”) ÌÊ!”- ÌÊ%”. ÌÊ&”/ ÌÊ'–” ÌË” ÌË” ÌË” ÌË” ÌË” ÌË’” ÌÍ” ÌÍ–” ÌÎ” ÌÎ” ÌÎ” ÌÎ” ÌÎ”  ÌÎœ” ÌÏ” ÌÏ” ÌÏ” ÌÏ” ÌÏ” ÌÏ”" ÌÏ”. ÌÏ&”0 ÌÏ(”4 ÌÏ,”5 ÌÏ-”6 ÌÏ.š” ÌĞ” ÌĞ” ÌĞ” ÌĞ” ÌĞ” ÌĞ”! ÌĞ”% ÌĞ”& ÌĞ”' ÌĞœ” ÌÑ” ÌÑ” ÌÑ” ÌÑ” ÌÑ” ÌÑ”! ÌÑ”% ÌÑ”( ÌÑ ”4 ÌÑ,”5 ÌÑ-”6 ÌÑ.–” ÌÒ” ÌÒ” ÌÒ” ÌÒ” ÌÒ” ÌÒ’” ÌÓ” ÌÓ’” Ì¤” Ì¤
+‘” ÌÔ’” ÌÖ”  ÌÖ’” Ì×” Ì×’” ÌØ” ÌØ	–” ÌØ” ÌØ	” Ìó” Ìó
+” Ìó” Ìó–” ÌØ” ÌØ	” Ìô” Ìô” Ìô” Ìô’” ÌÙ” ÌÙ•” ÌÚ” ÌÚ
+” ÌÚ” ÌÚ”% ÌÚ’” ÌÜ” ÌÜ–” Ìİ” Ìİ
+” Ìİ” Ìİ”  Ìİ”" Ìİ’” ÌŞ” ÌŞ“”  Ìç”) Ìç”* Ìç”” Ìè”$ Ìè”& Ìè”* Ìè–” Ìé”! Ìé”# Ìé”( Ìé”) Ìé”2 Ìé"•” Ìê”& Ìê”( Ìê”) Ìê”* Ìê–” Ìë”$ Ìë”& Ìë”. Ìë”/ Ìë”5 Ìë%•” Ìì”$ Ìì”& Ìì”) Ìì”+ Ìì˜”  Ìí”& Ìí”+ Ìí”. Ìí”2 Ìí ”3 Ìí!”> Ìí,”? Ìí-Ü ”  Ìî”$ Ìî”% Ìî”0 Ìî”3 Ìî!”8 Ìî&”= Ìî+”> Ìî,”? Ìî-”Ì@ Ìî.”ÌA Ìî/”ÌD Ìî2”ÌE Ìî3”ÌF Ìî4”ÌG Ìî5”ÌH Ìî6”ÌI Ìî7’” Ìï” Ìï‘” Ìğ–” ÌŞ” ÌŞ” Ìß”" Ìß”# Ìß”( Ìß–” ÌŞ” ÌŞ” Ìà”# Ìà”$ Ìà”% Ìà˜” ÌŞ” ÌŞ” Ìá”! Ìá”" Ìá”' Ìá”( Ìá”- ÌáÜ ” ÌŞ” ÌŞ” Ìâ”# Ìâ”$ Ìâ”& Ìâ”, Ìâ”. Ìâ”0 Ìâ”2 Ìâ ”7 Ìâ%”9 Ìâ'”> Ìâ,”? Ìâ-”ÌD Ìâ2”ÌF Ìâ4Ü ” ÌŞ” ÌŞ” Ìã”# Ìã”$ Ìã”& Ìã”' Ìã”) Ìã”* Ìã”, Ìã”- Ìã”/ Ìã”3 Ìã!”4 Ìã"”? Ìã-”ÌA Ìã/—” ÌŞ” ÌŞ” Ìä”% Ìä”& Ìä”) Ìä”+ Ìä—” Ìå”  Ìå”! Ìå”, Ìå”/ Ìå”2 Ìå"”3 Ìå#’” Ìæ
+” Ìæ’”  Ìç”) Ìç‘” Ìñ‘” Ìñ’” ÌØ” ÌØ	‘” Ìõ’” Ì÷” Ì÷‘” Ìøš” Ìù” Ìù	” Ìù
+” Ìù”' Ìù”) Ìù”2 Ìù#”3 Ìù$”; Ìù,”= Ìù.–” Ìù” Ìù	” Í0” Í0
+” Í0” Í0–” Ìù” Ìù	” Í1” Í1” Í1” Í1˜” Ìù” Ìù	” Í2”! Í2”" Í2”' Í2”( Í2”- Í2 ’” Ìú” Ìú“” Ìû” Ìû” Ìû”” Ìü” Ìü
+” Ìü”- Ìü%”” Ìı” Ìı” Ìı” Ìı–” Ìş” Ìş” Ìş”  Ìş”! Ìş”5 Ìş-‘” Ìÿ’” Ìú” Ìú˜” Ìû” Ìû” Í 	” Í ” Í ”# Í ”' Í ”) Í œ” Í
+” Í” Í” Í”! Í”% Í”& Í ”: Í4”; Í5”ÌQ ÍÌK”ÌS ÍÌM”ÌT ÍÌN–” Í
+” Í” Í” Í”& Í ”( Í"—” Í” Í” Í” Í”) Í!”+ Í#”, Í$‘” Í’” Í” Í	’” Ìú” Ìú–” Ìû” Ìû” Í	” Í” Í”# Í’” Ìú” Ìú–” Ìû” Ìû” Í	” Í” Í”$ Í’” Í	” Í	’” Í
+” Í
+’” Í	” Í	–” Í
+” Í
+” Í"” Í"” Í"” Í"’” Í	” Í	–” Í
+” Í
+” Í#” Í#” Í#”  Í#’” Í” Í’” Í” Í’” Í” Í–” Í” Í” Í” Í” Í”* Í(’” Í” Í–” Í” Í” Í*” Í6” Í7” Í8’” Í” Í–” Í” Í” Í:” Í?” ÍÌ@” ÍÌF’” Í” Í’” Í” Í’” Í” Í–” Í” Í” Í
+” Í” Í” Í’” Í
+” Í–” Í
+” Í” Í” Í” Í”* Í*–” Í
+” Í” Í,” Í8” Í9” Í:–” Í
+” Í” Í<” ÍÌB” ÍÌC” ÍÌF•” Í
+” Í” Í” Í”! Í’” Í
+” Í–” Í
+” Í” Í” Í” Í”* Í*–” Í
+” Í” Í,” Í8” Í9” Í:–” Í
+” Í” Í<” ÍÌB” ÍÌC” ÍÌF’” Í” Í’” Í” Í’” Í” Í’” Í” Í’” Í” Í–” Í” Í” Í	” Í” Í” Í’” Í” Í–” Í” Í” Í	” Í”  Í”! Í’” Í” Í–” Í” Í” Í	”" Í”# Í”7 Í-’” Í” Í˜” Í” Í” Í	”! Í”" Í”+ Í!”, Í"”1 Í'’” Í” Í˜” Í” Í” Í 	” Í ” Í ”- Í #”. Í $”4 Í *”” Í
+” Í” Í”' Í–” Í
+” Í” Í” Í” Í” Í˜” Í
+” Í” Í” Í” Í”  Í”! Í”& Í"š” Í
+” Í” Í” Í” Í” Í” Í” Í”! Í”# Í’” Í
+” Í’” Í” Í’” Í” Í’” Í	” Í	’” Í
+” Í
+’” Í%” Í%’” Í&” Í&	’” Í%” Í%–” Í&” Í&	” Í-” Í-” Í-” Í-’” Í%” Í%˜” Í&” Í&	” Í.” Í.” Í.”( Í.”) Í. ”. Í.%š” Í'” Í'”# Í'”% Í'”) Í'”+ Í'”5 Í'!”6 Í'"”< Í'(”> Í'*–” Í'” Í'” Í*	” Í*” Í*” Í*–” Í'” Í'” Í*” Í*” Í*” Í*˜” Í'” Í'” Í*”" Í*-”# Í*.”( Í*3”) Í*4”. Í*9–” Í'” Í'” Í*;” Í*ÌB” Í*ÌC” Í*ÌFœ” Í'” Í'” Í+	” Í+” Í+” Í+”  Í+”! Í+”% Í+”& Í+”, Í+"”. Í+$’” Í(
+” Í(–” Í(
+” Í(” Í(,” Í(1” Í(2” Í(4–” Í(
+” Í(” Í(6” Í(<” Í(=” Í(?˜” Í(
+” Í(” Í(ÌA” Í(ÌJ” Í(ÌK”! Í(ÌP”" Í(ÌQ”' Í(ÌV’” Í'” Í'’” Í%” Í%’” Í&” Í&	’” Ìù” Ìù	‘” Í3ÔrF–§version¤file§sources®sourcesContent¥names¨mappingsÀ‘À‘ÀÜ¬‘”    ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”  	 ‘”  
+ ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”    ‘”  ! ‘”  " ‘”  # ‘”  $ ‘”  % ‘”  & ‘”  ' ‘”  ( ‘”  ) ‘”  * ‘”  + ‘”  , ‘”  - ‘”  . ‘”  / ‘”  0 ‘”  1 ‘”  2 ‘”  3 ‘”  4 ‘”  5 ‘”  6 ‘”  7 ‘”  8 ‘”  9 ‘”  : ‘”  ; ‘”  < ‘”  = ‘”  > ‘”  ? ‘”  Ì@ ‘”  ÌA ‘”  ÌB ‘”  ÌC ‘”  ÌD ‘”  ÌE ‘”  ÌF ‘”  ÌG ‘”  ÌH ‘”  ÌI ‘”  ÌJ ‘”  ÌK ‘”  ÌL ‘”  ÌM ‘”  ÌN ‘”  ÌO ‘”  ÌP ‘”  ÌQ ‘”  ÌR ‘”  ÌS ‘”  ÌT ‘”  ÌU ‘”  ÌV ‘”  ÌW ‘”  ÌX ‘”  ÌY ‘”  ÌZ ‘”  Ì[ ‘”  Ì\ ‘”  Ì] ‘”  Ì^ ‘”  Ì_ ‘”  Ì` ‘”  Ìa ‘”  Ìb ‘”  Ìc ‘”  Ìd ‘”  Ìe ‘”  Ìf ‘”  Ìg ‘”  Ìh ‘”  Ìi ‘”  Ìj ‘”  Ìk ‘”  Ìl ‘”  Ìm ‘”  Ìn ‘”  Ìo ‘”  Ìp ‘”  Ìq ‘”  Ìr ‘”  Ìs ‘”  Ìt ‘”  Ìu ‘”  Ìv ‘”  Ìw ‘”  Ìx ‘”  Ìy ‘”  Ìz ‘”  Ì{ ‘”  Ì| ‘”  Ì} ‘”  Ì~ ‘”  Ì ‘”  Ì€ ‘”  Ì ‘”  Ì‚ ‘”  Ìƒ ‘”  Ì„ ‘”  Ì… ‘”  Ì† ‘”  Ì‡ ‘”  Ìˆ ‘”  Ì‰ ‘”  ÌŠ ‘”  Ì‹ ‘”  ÌŒ ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì‘ ‘”  Ì’ ‘”  Ì“ ‘”  Ì” ‘”  Ì• ‘”  Ì– ‘”  Ì— ‘”  Ì˜ ‘”  Ì™ ‘”  Ìš ‘”  Ì› ‘”  Ìœ ‘”  Ì ‘”  Ì ‘”  ÌŸ ‘”  Ì  ‘”  Ì¡ ‘”  Ì¢ ‘”  Ì£ ‘”  Ì¤ ‘”  Ì¥ ‘”  Ì¦ ‘”  Ì§ ‘”  Ì¨ ‘”  Ì© ‘”  Ìª ‘”  Ì« ‘”  Ì¬ ‘”  Ì­ ‘”  Ì® ‘”  Ì¯ ‘”  Ì° ‘”  Ì± ‘”  Ì² ‘”  Ì³ ‘”  Ì´ ‘”  Ìµ ‘”  Ì¶ ‘”  Ì· ‘”  Ì¸ ‘”  Ì¹ ‘”  Ìº ‘”  Ì» ‘”  Ì¼ ‘”  Ì½ ‘”  Ì¾ ‘”  Ì¿ ‘”  ÌÀ ‘”  ÌÁ ‘”  ÌÂ ‘”  ÌÃ ‘”  ÌÄ ‘”  ÌÅ ‘”  ÌÆ ‘”  ÌÇ ‘”  ÌÈ ‘”  ÌÉ ‘”  ÌÊ ‘”  ÌË ‘”  ÌÌ ‘”  ÌÍ ‘”  ÌÎ ‘”  ÌÏ ‘”  ÌĞ ‘”  ÌÑ ‘”  ÌÒ ‘”  ÌÓ ‘”  ÌÔ ‘”  ÌÕ ‘”  ÌÖ ‘”  Ì× ‘”  ÌØ ‘”  ÌÙ ‘”  ÌÚ ‘”  ÌÛ ‘”  ÌÜ ‘”  Ìİ ‘”  ÌŞ ‘”  Ìß ‘”  Ìà ‘”  Ìá ‘”  Ìâ ‘”  Ìã ‘”  Ìä ‘”  Ìå ‘”  Ìæ ‘”  Ìç ‘”  Ìè ‘”  Ìé ‘”  Ìê ‘”  Ìë ‘”  Ìì ‘”  Ìí ‘”  Ìî ‘”  Ìï ‘”  Ìğ ‘”  Ìñ ‘”  Ìò ‘”  Ìó ‘”  Ìô ‘”  Ìõ ‘”  Ìö ‘”  Ì÷ ‘”  Ìø ‘”  Ìù ‘”  Ìú ‘”  Ìû ‘”  Ìü ‘”  Ìı ‘”  Ìş ‘”  Ìÿ ‘”  Í  ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í	 ‘”  Í
+ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í  ‘”  Í! ‘”  Í" ‘”  Í# ‘”  Í$ ‘”  Í% ‘”  Í& ‘”  Í' ‘”  Í( ‘”  Í) ‘”  Í* ‘”  Í+ ‘”  Í, ‘”  Í- ‘”  Í. ‘”  Í/ ‘”  Í0 ‘”  Í1 ‘”  Í2 ‘”  Í3 ‘”  Í4 ‘”  Í5 ‘”  Í6 ‘”  Í7 ‘”  Í8 ‘”  Í9 ‘”  Í: ‘”  Í; ‘”  Í< ‘”  Í= ‘”  Í> ‘”  Í? ‘”  Í@ ‘”  ÍA ‘”  ÍB ‘”  ÍC ‘”  ÍD ‘”  ÍE ‘”  ÍF ‘”  ÍG ‘”  ÍH ‘”  ÍI ‘”  ÍJ ‘”  ÍK ‘”  ÍL ‘”  ÍM ‘”  ÍN ‘”  ÍO ‘”  ÍP ‘”  ÍQ ‘”  ÍR ‘”  ÍS ‘”  ÍT ‘”  ÍU ‘”  ÍV ‘”  ÍW ‘”  ÍX ‘”  ÍY ‘”  ÍZ ‘”  Í[ ‘”  Í\ ‘”  Í] ‘”  Í^ ‘”  Í_ ‘”  Í` ‘”  Ía ‘”  Íb ‘”  Íc ‘”  Íd ‘”  Íe ‘”  Íf ‘”  Íg ‘”  Íh ‘”  Íi ‘”  Íj ‘”  Ík ‘”  Íl ‘”  Ím ‘”  Ín ‘”  Ío ‘”  Íp ‘”  Íq ‘”  Ír ‘”  Ís ‘”  Ít ‘”  Íu ‘”  Ív ‘”  Íw ‘”  Íx ‘”  Íy ‘”  Íz ‘”  Í{ ‘”  Í| ‘”  Í} ‘”  Í~ ‘”  Í ‘”  Í€ ‘”  Í ‘”  Í‚ ‘”  Íƒ ‘”  Í„ ‘”  Í… ‘”  Í† ‘”  Í‡ ‘”  Íˆ ‘”  Í‰ ‘”  ÍŠ ‘”  Í‹ ‘”  ÍŒ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í‘ ‘”  Í’ ‘”  Í“ ‘”  Í” ‘”  Í• ‘”  Í– ‘”  Í— ‘”  Í˜ ‘”  Í™ ‘”  Íš ‘”  Í› ‘”  Íœ ‘”  Í ‘”  Í ‘”  ÍŸ ‘”  Í  ‘”  Í¡ ‘”  Í¢ ‘”  Í£ ‘”  Í¤ ‘”  Í¥ ‘”  Í¦ ‘”  Í§ ‘”  Í¨ ‘”  Í© ‘”  Íª ‘”  Í« ÔrG’§missing¦pluginÃ¦genAbcÂÔ  ÔrH”²dynamicImportCache¹exportAllDeclarationCache»exportNamedDeclarationCache«importCache”ÔrI•¤type¥start£endªspecifiers¦source±ImportDeclarationÌ€Ì­‘ÔrJ”¤type¥start£end¥local¶ImportDefaultSpecifierÌ‡ÌÔrK”¤type¥start£end¤nameªIdentifierÌ‡Ì¦cameraÔrL•¤type¥start£end¥value£raw§LiteralÌ“Ì¬·@ohos.multimedia.camera¹"@ohos.multimedia.camera"I±ImportDeclarationÌ¯Ìç‘J¶ImportDefaultSpecifierÌ¶ÌÇKªIdentifierÌ¶ÌÇ±abilityAccessCtrlL§LiteralÌÍÌæ·@ohos.abilityAccessCtrl¹"@ohos.abilityAccessCtrl"I±ImportDeclarationÌéÍ‘J¶ImportDefaultSpecifierÌğÌöKªIdentifierÌğÌö¦routerL§LiteralÌüÍ
+¬@ohos.router®"@ohos.router"I±ImportDeclarationÍÍ;‘J¶ImportDefaultSpecifierÍÍ KªIdentifierÍÍ ¬promptActionL§LiteralÍ&Í:²@ohos.promptAction´"@ohos.promptAction"

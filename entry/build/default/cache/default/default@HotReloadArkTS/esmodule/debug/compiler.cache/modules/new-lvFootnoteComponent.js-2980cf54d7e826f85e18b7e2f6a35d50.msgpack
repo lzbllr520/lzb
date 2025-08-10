@@ -1,0 +1,661 @@
+Ôr@Ÿªassertions¤code´customTransformCache¬dependencies¢id¤meta±moduleSideEffects¬originalCode±originalSourcemap«resolvedIds®sourcemapChainµsyntheticNamedExportsµtransformDependencies®transformFiles¨cacheAstÔrAÚØif (!("finalizeConstruction" in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+}
+import { lvLink } from '../domain/LvLink';
+import { lvText } from '../domain/LvText';
+import { mdRegister } from './common';
+import { SP_TYPE } from './constant';
+import { lvFootnoteController } from './controller/lvFootnoteController';
+function f3(item) {
+    const s3 = /\[([^\]]+)\]\(([^)]+)\)/;
+    const match = item.match(s3) || [];
+    let content = "";
+    let t3 = "";
+    let u3 = "";
+    if (match.length > 0) {
+        content = match[1].slice(1);
+        if ((match[2].indexOf('"') !== -1) || (match[2].indexOf(`'`) !== -1)) {
+            t3 = match[2].slice(0, match[2].indexOf('"') || match[2].indexOf(`'`));
+        }
+        else {
+            t3 = match[2];
+        }
+        const v3 = match[2].match(/"([^"]+)"/) || [];
+        if (v3.length > 0) {
+            u3 = v3[1];
+        }
+    }
+    return { content: content, m1: t3, n1: u3 };
+}
+export class lvFootnoteView extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.e1 = new ObservedPropertyObjectPU(lvFootnoteController, this, "footnoteController");
+        this.h1 = new ObservedPropertyObjectPU(null, this, "dialogController");
+        this.g1 = new ObservedPropertyObjectPU(lvText, this, "nText");
+        this.t1 = new ObservedPropertyObjectPU(lvLink, this, "nLink");
+        this.setInitiallyProvidedValue(params);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params) {
+        if (params.footnoteController !== undefined) {
+            this.footnoteController = params.footnoteController;
+        }
+        if (params.dialogController !== undefined) {
+            this.dialogController = params.dialogController;
+        }
+        if (params.nText !== undefined) {
+            this.nText = params.nText;
+        }
+        if (params.nLink !== undefined) {
+            this.nLink = params.nLink;
+        }
+    }
+    updateStateVars(params) {
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.e1.purgeDependencyOnElmtId(rmElmtId);
+        this.h1.purgeDependencyOnElmtId(rmElmtId);
+        this.g1.purgeDependencyOnElmtId(rmElmtId);
+        this.t1.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.e1.aboutToBeDeleted();
+        this.h1.aboutToBeDeleted();
+        this.g1.aboutToBeDeleted();
+        this.t1.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    get footnoteController() {
+        return this.e1.get();
+    }
+    set footnoteController(newValue) {
+        this.e1.set(newValue);
+    }
+    get dialogController() {
+        return this.h1.get();
+    }
+    set dialogController(newValue) {
+        this.h1.set(newValue);
+    }
+    get nText() {
+        return this.g1.get();
+    }
+    set nText(newValue) {
+        this.g1.set(newValue);
+    }
+    get nLink() {
+        return this.t1.get();
+    }
+    set nLink(newValue) {
+        this.t1.set(newValue);
+    }
+    openUrl(uri) {
+        if (mdRegister.HandleHyperlink(uri)) {
+            this.nLink.setLinkUrl(uri);
+            this.dialogController?.open();
+        }
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            if (this.footnoteController.getFootnoteList()) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Column.create();
+                        Column.alignItems(HorizontalAlign.Start);
+                        Column.margin({ top: 30, bottom: 10 });
+                    }, Column);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        ForEach.create();
+                        const forEachItemGenFunction = (_item, r3) => {
+                            const item = _item;
+                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                If.create();
+                                if (item) {
+                                    this.ifElseBranchUpdateFunction(0, () => {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Row.create();
+                                            Row.alignItems(VerticalAlign.Top);
+                                        }, Row);
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Text.create(`[${r3 + 1}]`);
+                                            Text.fontColor("#ff9b9b9b");
+                                            Text.fontSize(13);
+                                            Text.width(30);
+                                            Text.lineHeight(this.nText.getTextLineHeight());
+                                            Text.fontWeight(FontWeight.Lighter);
+                                        }, Text);
+                                        Text.pop();
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Row.create();
+                                            Row.layoutWeight(1);
+                                        }, Row);
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Text.create();
+                                            Text.lineHeight(this.nText.getTextLineHeight());
+                                            Text.fontSize(this.nText.getTextSize());
+                                        }, Text);
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Span.create((f3(item).n1 || f3(item).content) + ": ");
+                                            Span.fontColor("#F56C6C");
+                                        }, Span);
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Span.create(f3(item).m1);
+                                            Span.fontColor(this.nText.getTextColor());
+                                            Span.fontStyle(FontStyle.Italic);
+                                            Span.onClick(() => {
+                                                if (f3(item).m1.trim().slice(0, 4) == "http") {
+                                                    this.openUrl(f3(item).m1.trim());
+                                                }
+                                            });
+                                        }, Span);
+                                        Text.pop();
+                                        Row.pop();
+                                        Row.pop();
+                                    });
+                                }
+                                else {
+                                    this.ifElseBranchUpdateFunction(1, () => {
+                                    });
+                                }
+                            }, If);
+                            If.pop();
+                        };
+                        this.forEachUpdateFunction(elmtId, this.footnoteController.getFootnoteList().split(SP_TYPE.SPK), forEachItemGenFunction, undefined, true, false);
+                    }, ForEach);
+                    ForEach.pop();
+                    Column.pop();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+Â•Ù˜D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\domain\LvLink.jsÙ˜D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\domain\LvText.jsÙD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\common\index.jsÙŸD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\constant\index.jsÙ°D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\controller\lvFootnoteController.jsÙ¤D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvFootnoteComponent.jsÔrB˜±isLocalDependency¯isNodeEntryFile§pkgPath§pkgNameªpkgVersion±belongProjectPath±dependencyPkgInfo¨commonjsÂÂÙgD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in´@luvi/lv-markdown-in¦2.0.15ºD:\apps\deveco\tzb2025jbgsÔrC’§pkgNameªpkgVersion´@luvi/lv-markdown-in¦2.0.15ÔrD’¯hasNamedExportsªisCommonJSÃÂÃÚØif (!("finalizeConstruction" in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+}
+import { lvLink } from '../domain/LvLink';
+import { lvText } from '../domain/LvText';
+import { mdRegister } from './common';
+import { SP_TYPE } from './constant';
+import { lvFootnoteController } from './controller/lvFootnoteController';
+function f3(item) {
+    const s3 = /\[([^\]]+)\]\(([^)]+)\)/;
+    const match = item.match(s3) || [];
+    let content = "";
+    let t3 = "";
+    let u3 = "";
+    if (match.length > 0) {
+        content = match[1].slice(1);
+        if ((match[2].indexOf('"') !== -1) || (match[2].indexOf(`'`) !== -1)) {
+            t3 = match[2].slice(0, match[2].indexOf('"') || match[2].indexOf(`'`));
+        }
+        else {
+            t3 = match[2];
+        }
+        const v3 = match[2].match(/"([^"]+)"/) || [];
+        if (v3.length > 0) {
+            u3 = v3[1];
+        }
+    }
+    return { content: content, m1: t3, n1: u3 };
+}
+export class lvFootnoteView extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.e1 = new ObservedPropertyObjectPU(lvFootnoteController, this, "footnoteController");
+        this.h1 = new ObservedPropertyObjectPU(null, this, "dialogController");
+        this.g1 = new ObservedPropertyObjectPU(lvText, this, "nText");
+        this.t1 = new ObservedPropertyObjectPU(lvLink, this, "nLink");
+        this.setInitiallyProvidedValue(params);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params) {
+        if (params.footnoteController !== undefined) {
+            this.footnoteController = params.footnoteController;
+        }
+        if (params.dialogController !== undefined) {
+            this.dialogController = params.dialogController;
+        }
+        if (params.nText !== undefined) {
+            this.nText = params.nText;
+        }
+        if (params.nLink !== undefined) {
+            this.nLink = params.nLink;
+        }
+    }
+    updateStateVars(params) {
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.e1.purgeDependencyOnElmtId(rmElmtId);
+        this.h1.purgeDependencyOnElmtId(rmElmtId);
+        this.g1.purgeDependencyOnElmtId(rmElmtId);
+        this.t1.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.e1.aboutToBeDeleted();
+        this.h1.aboutToBeDeleted();
+        this.g1.aboutToBeDeleted();
+        this.t1.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    get footnoteController() {
+        return this.e1.get();
+    }
+    set footnoteController(newValue) {
+        this.e1.set(newValue);
+    }
+    get dialogController() {
+        return this.h1.get();
+    }
+    set dialogController(newValue) {
+        this.h1.set(newValue);
+    }
+    get nText() {
+        return this.g1.get();
+    }
+    set nText(newValue) {
+        this.g1.set(newValue);
+    }
+    get nLink() {
+        return this.t1.get();
+    }
+    set nLink(newValue) {
+        this.t1.set(newValue);
+    }
+    openUrl(uri) {
+        if (mdRegister.HandleHyperlink(uri)) {
+            this.nLink.setLinkUrl(uri);
+            this.dialogController?.open();
+        }
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            if (this.footnoteController.getFootnoteList()) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Column.create();
+                        Column.alignItems(HorizontalAlign.Start);
+                        Column.margin({ top: 30, bottom: 10 });
+                    }, Column);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        ForEach.create();
+                        const forEachItemGenFunction = (_item, r3) => {
+                            const item = _item;
+                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                If.create();
+                                if (item) {
+                                    this.ifElseBranchUpdateFunction(0, () => {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Row.create();
+                                            Row.alignItems(VerticalAlign.Top);
+                                        }, Row);
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Text.create(`[${r3 + 1}]`);
+                                            Text.fontColor("#ff9b9b9b");
+                                            Text.fontSize(13);
+                                            Text.width(30);
+                                            Text.lineHeight(this.nText.getTextLineHeight());
+                                            Text.fontWeight(FontWeight.Lighter);
+                                        }, Text);
+                                        Text.pop();
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Row.create();
+                                            Row.layoutWeight(1);
+                                        }, Row);
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Text.create();
+                                            Text.lineHeight(this.nText.getTextLineHeight());
+                                            Text.fontSize(this.nText.getTextSize());
+                                        }, Text);
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Span.create((f3(item).n1 || f3(item).content) + ": ");
+                                            Span.fontColor("#F56C6C");
+                                        }, Span);
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Span.create(f3(item).m1);
+                                            Span.fontColor(this.nText.getTextColor());
+                                            Span.fontStyle(FontStyle.Italic);
+                                            Span.onClick(() => {
+                                                if (f3(item).m1.trim().slice(0, 4) == "http") {
+                                                    this.openUrl(f3(item).m1.trim());
+                                                }
+                                            });
+                                        }, Span);
+                                        Text.pop();
+                                        Row.pop();
+                                        Row.pop();
+                                    });
+                                }
+                                else {
+                                    this.ifElseBranchUpdateFunction(1, () => {
+                                    });
+                                }
+                            }, If);
+                            If.pop();
+                        };
+                        this.forEachUpdateFunction(elmtId, this.footnoteController.getFootnoteList().split(SP_TYPE.SPK), forEachItemGenFunction, undefined, true, false);
+                    }, ForEach);
+                    ForEach.pop();
+                    Column.pop();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+ÔrE•§version¨mappings¥names§sources®sourcesContentÜ º‘”    ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”  	 ‘”  
+ ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”    ‘”  ! ‘”  " ‘”  # ‘”  $ ‘”  % ‘”  & ‘”  ' ‘”  ( ‘”  ) ‘”  * ‘”  + ‘”  , ‘”  - ‘”  . ‘”  / ‘”  0 ‘”  1 ‘”  2 ‘”  3 ‘”  4 ‘”  5 ‘”  6 ‘”  7 ‘”  8 ‘”  9 ‘”  : ‘”  ; ‘”  < ‘”  = ‘”  > ‘”  ? ‘”  Ì@ ‘”  ÌA ‘”  ÌB ‘”  ÌC ‘”  ÌD ‘”  ÌE ‘”  ÌF ‘”  ÌG ‘”  ÌH ‘”  ÌI ‘”  ÌJ ‘”  ÌK ‘”  ÌL ‘”  ÌM ‘”  ÌN ‘”  ÌO ‘”  ÌP ‘”  ÌQ ‘”  ÌR ‘”  ÌS ‘”  ÌT ‘”  ÌU ‘”  ÌV ‘”  ÌW ‘”  ÌX ‘”  ÌY ‘”  ÌZ ‘”  Ì[ ‘”  Ì\ ‘”  Ì] ‘”  Ì^ ‘”  Ì_ ‘”  Ì` ‘”  Ìa ‘”  Ìb ‘”  Ìc ‘”  Ìd ‘”  Ìe ‘”  Ìf ‘”  Ìg ‘”  Ìh ‘”  Ìi ‘”  Ìj ‘”  Ìk ‘”  Ìl ‘”  Ìm ‘”  Ìn ‘”  Ìo ‘”  Ìp ‘”  Ìq ‘”  Ìr ‘”  Ìs ‘”  Ìt ‘”  Ìu ‘”  Ìv ‘”  Ìw ‘”  Ìx ‘”  Ìy ‘”  Ìz ‘”  Ì{ ‘”  Ì| ‘”  Ì} ‘”  Ì~ ‘”  Ì ‘”  Ì€ ‘”  Ì ‘”  Ì‚ ‘”  Ìƒ ‘”  Ì„ ‘”  Ì… ‘”  Ì† ‘”  Ì‡ ‘”  Ìˆ ‘”  Ì‰ ‘”  ÌŠ ‘”  Ì‹ ‘”  ÌŒ ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì‘ ‘”  Ì’ ‘”  Ì“ ‘”  Ì” ‘”  Ì• ‘”  Ì– ‘”  Ì— ‘”  Ì˜ ‘”  Ì™ ‘”  Ìš ‘”  Ì› ‘”  Ìœ ‘”  Ì ‘”  Ì ‘”  ÌŸ ‘”  Ì  ‘”  Ì¡ ‘”  Ì¢ ‘”  Ì£ ‘”  Ì¤ ‘”  Ì¥ ‘”  Ì¦ ‘”  Ì§ ‘”  Ì¨ ‘”  Ì© ‘”  Ìª ‘”  Ì« ‘”  Ì¬ ‘”  Ì­ ‘”  Ì® ‘”  Ì¯ ‘”  Ì° ‘”  Ì± ‘”  Ì² ‘”  Ì³ ‘”  Ì´ ‘”  Ìµ ‘”  Ì¶ ‘”  Ì· ‘”  Ì¸ ‘Ù¤D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\lvFootnoteComponent.js‘ÚØif (!("finalizeConstruction" in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+}
+import { lvLink } from '../domain/LvLink';
+import { lvText } from '../domain/LvText';
+import { mdRegister } from './common';
+import { SP_TYPE } from './constant';
+import { lvFootnoteController } from './controller/lvFootnoteController';
+function f3(item) {
+    const s3 = /\[([^\]]+)\]\(([^)]+)\)/;
+    const match = item.match(s3) || [];
+    let content = "";
+    let t3 = "";
+    let u3 = "";
+    if (match.length > 0) {
+        content = match[1].slice(1);
+        if ((match[2].indexOf('"') !== -1) || (match[2].indexOf(`'`) !== -1)) {
+            t3 = match[2].slice(0, match[2].indexOf('"') || match[2].indexOf(`'`));
+        }
+        else {
+            t3 = match[2];
+        }
+        const v3 = match[2].match(/"([^"]+)"/) || [];
+        if (v3.length > 0) {
+            u3 = v3[1];
+        }
+    }
+    return { content: content, m1: t3, n1: u3 };
+}
+export class lvFootnoteView extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.e1 = new ObservedPropertyObjectPU(lvFootnoteController, this, "footnoteController");
+        this.h1 = new ObservedPropertyObjectPU(null, this, "dialogController");
+        this.g1 = new ObservedPropertyObjectPU(lvText, this, "nText");
+        this.t1 = new ObservedPropertyObjectPU(lvLink, this, "nLink");
+        this.setInitiallyProvidedValue(params);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params) {
+        if (params.footnoteController !== undefined) {
+            this.footnoteController = params.footnoteController;
+        }
+        if (params.dialogController !== undefined) {
+            this.dialogController = params.dialogController;
+        }
+        if (params.nText !== undefined) {
+            this.nText = params.nText;
+        }
+        if (params.nLink !== undefined) {
+            this.nLink = params.nLink;
+        }
+    }
+    updateStateVars(params) {
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.e1.purgeDependencyOnElmtId(rmElmtId);
+        this.h1.purgeDependencyOnElmtId(rmElmtId);
+        this.g1.purgeDependencyOnElmtId(rmElmtId);
+        this.t1.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.e1.aboutToBeDeleted();
+        this.h1.aboutToBeDeleted();
+        this.g1.aboutToBeDeleted();
+        this.t1.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    get footnoteController() {
+        return this.e1.get();
+    }
+    set footnoteController(newValue) {
+        this.e1.set(newValue);
+    }
+    get dialogController() {
+        return this.h1.get();
+    }
+    set dialogController(newValue) {
+        this.h1.set(newValue);
+    }
+    get nText() {
+        return this.g1.get();
+    }
+    set nText(newValue) {
+        this.g1.set(newValue);
+    }
+    get nLink() {
+        return this.t1.get();
+    }
+    set nLink(newValue) {
+        this.t1.set(newValue);
+    }
+    openUrl(uri) {
+        if (mdRegister.HandleHyperlink(uri)) {
+            this.nLink.setLinkUrl(uri);
+            this.dialogController?.open();
+        }
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            if (this.footnoteController.getFootnoteList()) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Column.create();
+                        Column.alignItems(HorizontalAlign.Start);
+                        Column.margin({ top: 30, bottom: 10 });
+                    }, Column);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        ForEach.create();
+                        const forEachItemGenFunction = (_item, r3) => {
+                            const item = _item;
+                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                If.create();
+                                if (item) {
+                                    this.ifElseBranchUpdateFunction(0, () => {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Row.create();
+                                            Row.alignItems(VerticalAlign.Top);
+                                        }, Row);
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Text.create(`[${r3 + 1}]`);
+                                            Text.fontColor("#ff9b9b9b");
+                                            Text.fontSize(13);
+                                            Text.width(30);
+                                            Text.lineHeight(this.nText.getTextLineHeight());
+                                            Text.fontWeight(FontWeight.Lighter);
+                                        }, Text);
+                                        Text.pop();
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Row.create();
+                                            Row.layoutWeight(1);
+                                        }, Row);
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Text.create();
+                                            Text.lineHeight(this.nText.getTextLineHeight());
+                                            Text.fontSize(this.nText.getTextSize());
+                                        }, Text);
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Span.create((f3(item).n1 || f3(item).content) + ": ");
+                                            Span.fontColor("#F56C6C");
+                                        }, Span);
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Span.create(f3(item).m1);
+                                            Span.fontColor(this.nText.getTextColor());
+                                            Span.fontStyle(FontStyle.Italic);
+                                            Span.onClick(() => {
+                                                if (f3(item).m1.trim().slice(0, 4) == "http") {
+                                                    this.openUrl(f3(item).m1.trim());
+                                                }
+                                            });
+                                        }, Span);
+                                        Text.pop();
+                                        Row.pop();
+                                        Row.pop();
+                                    });
+                                }
+                                else {
+                                    this.ifElseBranchUpdateFunction(1, () => {
+                                    });
+                                }
+                            }, If);
+                            If.pop();
+                        };
+                        this.forEachUpdateFunction(elmtId, this.footnoteController.getFootnoteList().split(SP_TYPE.SPK), forEachItemGenFunction, undefined, true, false);
+                    }, ForEach);
+                    ForEach.pop();
+                    Column.pop();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+ÔrF•°../domain/LvLink°../domain/LvText¨./commonª./constantÙ!./controller/lvFootnoteControllerÔrG—ªassertions¨external¢id¤meta±moduleSideEffectsªresolvedByµsyntheticNamedExportsAÂÙ˜D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\domain\LvLink.jsAÃªoh-resolveÂGAÂÙ˜D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\domain\LvText.jsAÃªoh-resolveÂGAÂÙD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\common\index.jsAÃªoh-resolveÂGAÂÙŸD:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\constant\index.jsAÃªoh-resolveÂGAÂÙ°D:\apps\deveco\tzb2025jbgs\oh_modules\.ohpm\@luvi+lv-markdown-in@2.0.15\oh_modules\@luvi\lv-markdown-in\src\main\ets\lv-markdown-in\lib\utils\controller\lvFootnoteController.jsAÃªoh-resolveÂ‘ÔrH’§missing¦pluginÃ¦genAbcÂÔ  ÔrI”²dynamicImportCache¹exportAllDeclarationCache»exportNamedDeclarationCache«importCache‘ÔrJ–¤type¥start£end«declarationªspecifiers¦source¶ExportNamedDeclarationÍÙÍ×ÔrK–¤type¥start£end¢idªsuperClass¤body°ClassDeclarationÍàÍ×ÔrL”¤type¥start£end¤nameªIdentifierÍæÍô®lvFootnoteViewLªIdentifierÍıÍ¦ViewPUÔrM”¤type¥start£end¤body©ClassBodyÍÍ×Ü ÔrN˜¤type¥start£end¦static¨computed£key¤kind¥value°MethodDefinitionÍ
+Í¬ÂÂLªIdentifierÍ
+Í«constructor«constructorÔrO™¤type¥start£end¢idªexpression©generator¥async¦params¤body²FunctionExpressionÍÍ¬ÀÂÂÂ–LªIdentifierÍÍ¦parentLªIdentifierÍÍ$¦paramsLªIdentifierÍ&Í4®__localStorageÔrP•¤type¥start£end¤left¥right±AssignmentPatternÍ6ÍALªIdentifierÍ6Í<¦elmtIdÔrQ–¤type¥start£end¨operator¦prefix¨argument¯UnaryExpressionÍ?ÍA¡-ÃÔrR•¤type¥start£end¥value£raw§LiteralÍ@ÍA¡1P±AssignmentPatternÍCÍ[LªIdentifierÍCÍO¬paramsLambdaLªIdentifierÍRÍ[©undefinedLªIdentifierÍ]Íf©extraInfoM®BlockStatementÍhÍ¬˜ÔrS”¤type¥start£endªexpression³ExpressionStatementÍrÍ£ÔrT–¤type¥start£end¦callee©arguments¨optional®CallExpressionÍrÍ¢ÔrU“¤type¥start£end¥SuperÍrÍw”LªIdentifierÍxÍ~¦parentLªIdentifierÍ€Í®__localStorageLªIdentifierÍÍ–¦elmtIdLªIdentifierÍ˜Í¡©extraInfoÂÔrV–¤type¥start£end¤testªconsequent©alternate«IfStatementÍ¬ÍÔrW–¤type¥start£end¤left¨operator¥right°BinaryExpressionÍ°ÍÒQ¯UnaryExpressionÍ°ÍÃ¦typeofÃLªIdentifierÍ·ÍÃ¬paramsLambda£===R§LiteralÍÈÍÒ¨functionª"function"M®BlockStatementÍÔÍ‘S³ExpressionStatementÍâÍÔrX–¤type¥start£end¨operator¤left¥right´AssignmentExpressionÍâÍ¡=ÔrY—¤type¥start£end¦object¨property¨computed¨optional°MemberExpressionÍâÍ÷U®ThisExpressionÍâÍæLªIdentifierÍçÍ÷°paramsGenerator_ÂÂLªIdentifierÍúÍ¬paramsLambdaÀS³ExpressionStatementÍÍsX´AssignmentExpressionÍÍr¡=Y°MemberExpressionÍÍ!U®ThisExpressionÍÍLªIdentifierÍÍ!¢e1ÂÂÔrZ•¤type¥start£end¦callee©arguments­NewExpressionÍ$ÍrLªIdentifierÍ(Í@¸ObservedPropertyObjectPU“LªIdentifierÍAÍU´lvFootnoteControllerU®ThisExpressionÍWÍ[R§LiteralÍ]Íq²footnoteController´"footnoteController"S³ExpressionStatementÍ|ÍÃX´AssignmentExpressionÍ|ÍÂ¡=Y°MemberExpressionÍ|ÍƒU®ThisExpressionÍ|Í€LªIdentifierÍÍƒ¢h1ÂÂZ­NewExpressionÍ†ÍÂLªIdentifierÍŠÍ¢¸ObservedPropertyObjectPU“R§LiteralÍ£Í§À¤nullU®ThisExpressionÍ©Í­R§LiteralÍ¯ÍÁ°dialogController²"dialogController"S³ExpressionStatementÍÌÍ
+X´AssignmentExpressionÍÌÍ	¡=Y°MemberExpressionÍÌÍÓU®ThisExpressionÍÌÍĞLªIdentifierÍÑÍÓ¢g1ÂÂZ­NewExpressionÍÖÍ	LªIdentifierÍÚÍò¸ObservedPropertyObjectPU“LªIdentifierÍóÍù¦lvTextU®ThisExpressionÍûÍÿR§LiteralÍÍ¥nText§"nText"S³ExpressionStatementÍÍQX´AssignmentExpressionÍÍP¡=Y°MemberExpressionÍÍU®ThisExpressionÍÍLªIdentifierÍÍ¢t1ÂÂZ­NewExpressionÍÍPLªIdentifierÍ!Í9¸ObservedPropertyObjectPU“LªIdentifierÍ:Í@¦lvLinkU®ThisExpressionÍBÍFR§LiteralÍHÍO¥nLink§"nLink"S³ExpressionStatementÍZÍT®CallExpressionÍZÍ€Y°MemberExpressionÍZÍxU®ThisExpressionÍZÍ^LªIdentifierÍ_Íx¹setInitiallyProvidedValueÂÂ‘LªIdentifierÍyÍ¦paramsÂS³ExpressionStatementÍŠÍ¦T®CallExpressionÍŠÍ¥Y°MemberExpressionÍŠÍ£U®ThisExpressionÍŠÍLªIdentifierÍÍ£´finalizeConstructionÂÂÂN°MethodDefinitionÍ±ÍÂÂLªIdentifierÍ±ÍÊ¹setInitiallyProvidedValue¦methodO²FunctionExpressionÍÊÍÀÂÂÂ‘LªIdentifierÍËÍÑ¦paramsM®BlockStatementÍÓÍ”V«IfStatementÍİÍVW°BinaryExpressionÍáÍY°MemberExpressionÍáÍúLªIdentifierÍáÍç¦paramsLªIdentifierÍèÍú²footnoteControllerÂÂ£!==LªIdentifierÍÿÍ©undefinedM®BlockStatementÍ
+ÍV‘S³ExpressionStatementÍÍLX´AssignmentExpressionÍÍK¡=Y°MemberExpressionÍÍ/U®ThisExpressionÍÍLªIdentifierÍÍ/²footnoteControllerÂÂY°MemberExpressionÍ2ÍKLªIdentifierÍ2Í8¦paramsLªIdentifierÍ9ÍK²footnoteControllerÂÂÀV«IfStatementÍ_ÍÒW°BinaryExpressionÍcÍˆY°MemberExpressionÍcÍzLªIdentifierÍcÍi¦paramsLªIdentifierÍjÍz°dialogControllerÂÂ£!==LªIdentifierÍÍˆ©undefinedM®BlockStatementÍŠÍÒ‘S³ExpressionStatementÍ˜ÍÈX´AssignmentExpressionÍ˜ÍÇ¡=Y°MemberExpressionÍ˜Í­U®ThisExpressionÍ˜ÍœLªIdentifierÍÍ­°dialogControllerÂÂY°MemberExpressionÍ°ÍÇLªIdentifierÍ°Í¶¦paramsLªIdentifierÍ·ÍÇ°dialogControllerÂÂÀV«IfStatementÍÛÍ-W°BinaryExpressionÍßÍùY°MemberExpressionÍßÍëLªIdentifierÍßÍå¦paramsLªIdentifierÍæÍë¥nTextÂÂ£!==LªIdentifierÍğÍù©undefinedM®BlockStatementÍûÍ-‘S³ExpressionStatementÍ	Í#X´AssignmentExpressionÍ	Í"¡=Y°MemberExpressionÍ	ÍU®ThisExpressionÍ	ÍLªIdentifierÍÍ¥nTextÂÂY°MemberExpressionÍÍ"LªIdentifierÍÍ¦paramsLªIdentifierÍÍ"¥nTextÂÂÀV«IfStatementÍ6ÍˆW°BinaryExpressionÍ:ÍTY°MemberExpressionÍ:ÍFLªIdentifierÍ:Í@¦paramsLªIdentifierÍAÍF¥nLinkÂÂ£!==LªIdentifierÍKÍT©undefinedM®BlockStatementÍVÍˆ‘S³ExpressionStatementÍdÍ~X´AssignmentExpressionÍdÍ}¡=Y°MemberExpressionÍdÍnU®ThisExpressionÍdÍhLªIdentifierÍiÍn¥nLinkÂÂY°MemberExpressionÍqÍ}LªIdentifierÍqÍw¦paramsLªIdentifierÍxÍ}¥nLinkÂÂÀN°MethodDefinitionÍ“Í²ÂÂLªIdentifierÍ“Í¢¯updateStateVars¦methodO²FunctionExpressionÍ¢Í²ÀÂÂÂ‘LªIdentifierÍ£Í©¦paramsM®BlockStatementÍ«Í²N°MethodDefinitionÍ·Í	¶ÂÂLªIdentifierÍ·ÍØÙ!purgeVariableDependenciesOnElmtId¦methodO²FunctionExpressionÍØÍ	¶ÀÂÂÂ‘LªIdentifierÍÙÍá¨rmElmtIdM®BlockStatementÍãÍ	¶”S³ExpressionStatementÍíÍ	T®CallExpressionÍíÍ	Y°MemberExpressionÍíÍ	Y°MemberExpressionÍíÍôU®ThisExpressionÍíÍñLªIdentifierÍòÍô¢e1ÂÂLªIdentifierÍõÍ	·purgeDependencyOnElmtIdÂÂ‘LªIdentifierÍ	Í	¨rmElmtIdÂS³ExpressionStatementÍ	 Í	JT®CallExpressionÍ	 Í	IY°MemberExpressionÍ	 Í	?Y°MemberExpressionÍ	 Í	'U®ThisExpressionÍ	 Í	$LªIdentifierÍ	%Í	'¢h1ÂÂLªIdentifierÍ	(Í	?·purgeDependencyOnElmtIdÂÂ‘LªIdentifierÍ	@Í	H¨rmElmtIdÂS³ExpressionStatementÍ	SÍ	}T®CallExpressionÍ	SÍ	|Y°MemberExpressionÍ	SÍ	rY°MemberExpressionÍ	SÍ	ZU®ThisExpressionÍ	SÍ	WLªIdentifierÍ	XÍ	Z¢g1ÂÂLªIdentifierÍ	[Í	r·purgeDependencyOnElmtIdÂÂ‘LªIdentifierÍ	sÍ	{¨rmElmtIdÂS³ExpressionStatementÍ	†Í	°T®CallExpressionÍ	†Í	¯Y°MemberExpressionÍ	†Í	¥Y°MemberExpressionÍ	†Í	U®ThisExpressionÍ	†Í	ŠLªIdentifierÍ	‹Í	¢t1ÂÂLªIdentifierÍ	Í	¥·purgeDependencyOnElmtIdÂÂ‘LªIdentifierÍ	¦Í	®¨rmElmtIdÂN°MethodDefinitionÍ	»Í
+ÃÂÂLªIdentifierÍ	»Í	Ë°aboutToBeDeleted¦methodO²FunctionExpressionÍ	ËÍ
+ÃÀÂÂÂM®BlockStatementÍ	ÎÍ
+Ã–S³ExpressionStatementÍ	ØÍ	óT®CallExpressionÍ	ØÍ	òY°MemberExpressionÍ	ØÍ	ğY°MemberExpressionÍ	ØÍ	ßU®ThisExpressionÍ	ØÍ	ÜLªIdentifierÍ	İÍ	ß¢e1ÂÂLªIdentifierÍ	àÍ	ğ°aboutToBeDeletedÂÂÂS³ExpressionStatementÍ	üÍ
+T®CallExpressionÍ	üÍ
+Y°MemberExpressionÍ	üÍ
+Y°MemberExpressionÍ	üÍ
+U®ThisExpressionÍ	üÍ
+ LªIdentifierÍ
+Í
+¢h1ÂÂLªIdentifierÍ
+Í
+°aboutToBeDeletedÂÂÂS³ExpressionStatementÍ
+ Í
+;T®CallExpressionÍ
+ Í
+:Y°MemberExpressionÍ
+ Í
+8Y°MemberExpressionÍ
+ Í
+'U®ThisExpressionÍ
+ Í
+$LªIdentifierÍ
+%Í
+'¢g1ÂÂLªIdentifierÍ
+(Í
+8°aboutToBeDeletedÂÂÂS³ExpressionStatementÍ
+DÍ
+_T®CallExpressionÍ
+DÍ
+^Y°MemberExpressionÍ
+DÍ
+\Y°MemberExpressionÍ
+DÍ
+KU®ThisExpressionÍ
+DÍ
+HLªIdentifierÍ
+IÍ
+K¢t1ÂÂLªIdentifierÍ
+LÍ
+\°aboutToBeDeletedÂÂÂS³ExpressionStatementÍ
+hÍ
+”T®CallExpressionÍ
+hÍ
+“Y°MemberExpressionÍ
+hÍ
+†T®CallExpressionÍ
+hÍ
+Y°MemberExpressionÍ
+hÍ
+}LªIdentifierÍ
+hÍ
+y±SubscriberManagerLªIdentifierÍ
+zÍ
+}£GetÂÂÂLªIdentifierÍ
+€Í
+†¦deleteÂÂ‘T®CallExpressionÍ
+‡Í
+’Y°MemberExpressionÍ
+‡Í
+U®ThisExpressionÍ
+‡Í
+‹LªIdentifierÍ
+ŒÍ
+¤id__ÂÂÂÂS³ExpressionStatementÍ
+Í
+½T®CallExpressionÍ
+Í
+¼Y°MemberExpressionÍ
+Í
+ºU®ThisExpressionÍ
+Í
+¡LªIdentifierÍ
+¢Í
+º¸aboutToBeDeletedInternalÂÂÂN°MethodDefinitionÍ
+ÈÍÂÂLªIdentifierÍ
+ÌÍ
+Ş²footnoteController£getO²FunctionExpressionÍ
+ŞÍÀÂÂÂM®BlockStatementÍ
+áÍ‘Ôr[”¤type¥start£end¨argument¯ReturnStatementÍ
+ëÍ T®CallExpressionÍ
+òÍ
+ÿY°MemberExpressionÍ
+òÍ
+ıY°MemberExpressionÍ
+òÍ
+ùU®ThisExpressionÍ
+òÍ
+öLªIdentifierÍ
+÷Í
+ù¢e1ÂÂLªIdentifierÍ
+úÍ
+ı£getÂÂÂN°MethodDefinitionÍÍRÂÂLªIdentifierÍÍ!²footnoteController£setO²FunctionExpressionÍ!ÍRÀÂÂÂ‘LªIdentifierÍ"Í*¨newValueM®BlockStatementÍ,ÍR‘S³ExpressionStatementÍ6ÍLT®CallExpressionÍ6ÍKY°MemberExpressionÍ6ÍAY°MemberExpressionÍ6Í=U®ThisExpressionÍ6Í:LªIdentifierÍ;Í=¢e1ÂÂLªIdentifierÍ>ÍA£setÂÂ‘LªIdentifierÍBÍJ¨newValueÂN°MethodDefinitionÍWÍ“ÂÂLªIdentifierÍ[Ík°dialogController£getO²FunctionExpressionÍkÍ“ÀÂÂÂM®BlockStatementÍnÍ“‘[¯ReturnStatementÍxÍT®CallExpressionÍÍŒY°MemberExpressionÍÍŠY°MemberExpressionÍÍ†U®ThisExpressionÍÍƒLªIdentifierÍ„Í†¢h1ÂÂLªIdentifierÍ‡ÍŠ£getÂÂÂN°MethodDefinitionÍ˜ÍİÂÂLªIdentifierÍœÍ¬°dialogController£setO²FunctionExpressionÍ¬ÍİÀÂÂÂ‘LªIdentifierÍ­Íµ¨newValueM®BlockStatementÍ·Íİ‘S³ExpressionStatementÍÁÍ×T®CallExpressionÍÁÍÖY°MemberExpressionÍÁÍÌY°MemberExpressionÍÁÍÈU®ThisExpressionÍÁÍÅLªIdentifierÍÆÍÈ¢h1ÂÂLªIdentifierÍÉÍÌ£setÂÂ‘LªIdentifierÍÍÍÕ¨newValueÂN°MethodDefinitionÍâÍÂÂLªIdentifierÍæÍë¥nText£getO²FunctionExpressionÍëÍÀÂÂÂM®BlockStatementÍîÍ‘[¯ReturnStatementÍøÍT®CallExpressionÍÿÍY°MemberExpressionÍÿÍ
+Y°MemberExpressionÍÿÍU®ThisExpressionÍÿÍLªIdentifierÍÍ¢g1ÂÂLªIdentifierÍÍ
+£getÂÂÂN°MethodDefinitionÍÍRÂÂLªIdentifierÍÍ!¥nText£setO²FunctionExpressionÍ!ÍRÀÂÂÂ‘LªIdentifierÍ"Í*¨newValueM®BlockStatementÍ,ÍR‘S³ExpressionStatementÍ6ÍLT®CallExpressionÍ6ÍKY°MemberExpressionÍ6ÍAY°MemberExpressionÍ6Í=U®ThisExpressionÍ6Í:LªIdentifierÍ;Í=¢g1ÂÂLªIdentifierÍ>ÍA£setÂÂ‘LªIdentifierÍBÍJ¨newValueÂN°MethodDefinitionÍWÍˆÂÂLªIdentifierÍ[Í`¥nLink£getO²FunctionExpressionÍ`ÍˆÀÂÂÂM®BlockStatementÍcÍˆ‘[¯ReturnStatementÍmÍ‚T®CallExpressionÍtÍY°MemberExpressionÍtÍY°MemberExpressionÍtÍ{U®ThisExpressionÍtÍxLªIdentifierÍyÍ{¢t1ÂÂLªIdentifierÍ|Í£getÂÂÂN°MethodDefinitionÍÍÇÂÂLªIdentifierÍ‘Í–¥nLink£setO²FunctionExpressionÍ–ÍÇÀÂÂÂ‘LªIdentifierÍ—ÍŸ¨newValueM®BlockStatementÍ¡ÍÇ‘S³ExpressionStatementÍ«ÍÁT®CallExpressionÍ«ÍÀY°MemberExpressionÍ«Í¶Y°MemberExpressionÍ«Í²U®ThisExpressionÍ«Í¯LªIdentifierÍ°Í²¢t1ÂÂLªIdentifierÍ³Í¶£setÂÂ‘LªIdentifierÍ·Í¿¨newValueÂN°MethodDefinitionÍÌÍlÂÂLªIdentifierÍÌÍÓ§openUrl¦methodO²FunctionExpressionÍÓÍlÀÂÂÂ‘LªIdentifierÍÔÍ×£uriM®BlockStatementÍÙÍl‘V«IfStatementÍãÍfT®CallExpressionÍçÍY°MemberExpressionÍçÍLªIdentifierÍçÍñªmdRegisterLªIdentifierÍòÍ¯HandleHyperlinkÂÂ‘LªIdentifierÍÍ£uriÂM®BlockStatementÍÍf’S³ExpressionStatementÍÍ1T®CallExpressionÍÍ0Y°MemberExpressionÍÍ+Y°MemberExpressionÍÍ U®ThisExpressionÍÍLªIdentifierÍÍ ¥nLinkÂÂLªIdentifierÍ!Í+ªsetLinkUrlÂÂ‘LªIdentifierÍ,Í/£uriÂS³ExpressionStatementÍ>Í\S¯ChainExpressionÍ>Í[T®CallExpressionÍ>Í[Y°MemberExpressionÍ>ÍYY°MemberExpressionÍ>ÍSU®ThisExpressionÍ>ÍBLªIdentifierÍCÍS°dialogControllerÂÂLªIdentifierÍUÍY¤openÂÃÂÀN°MethodDefinitionÍqÍšÂÂLªIdentifierÍqÍ~­initialRender¦methodO²FunctionExpressionÍ~ÍšÀÂÂÂM®BlockStatementÍÍš’S³ExpressionStatementÍ‹Í‚T®CallExpressionÍ‹ÍY°MemberExpressionÍ‹Í©U®ThisExpressionÍ‹ÍLªIdentifierÍÍ©¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍªÍ|ÀÂÂÂ’LªIdentifierÍ«Í±¦elmtIdLªIdentifierÍ³ÍÂ¯isInitialRenderM®BlockStatementÍÇÍ|’S³ExpressionStatementÍÕÍáT®CallExpressionÍÕÍàY°MemberExpressionÍÕÍŞLªIdentifierÍÕÍ×¢IfLªIdentifierÍØÍŞ¦createÂÂÂV«IfStatementÍîÍrT®CallExpressionÍòÍY°MemberExpressionÍòÍY°MemberExpressionÍòÍ	U®ThisExpressionÍòÍöLªIdentifierÍ÷Í	²footnoteControllerÂÂLªIdentifierÍ
+Í¯getFootnoteListÂÂÂM®BlockStatementÍÍ‘S³ExpressionStatementÍ/ÍôT®CallExpressionÍ/ÍóY°MemberExpressionÍ/ÍNU®ThisExpressionÍ/Í3LªIdentifierÍ4ÍNºifElseBranchUpdateFunctionÂÂ’R§LiteralÍOÍP ¡0O·ArrowFunctionExpressionÍRÍòÀÂÂÂM®BlockStatementÍXÍò”S³ExpressionStatementÍnÍvT®CallExpressionÍnÍuY°MemberExpressionÍnÍŒU®ThisExpressionÍnÍrLªIdentifierÍsÍŒ¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍÍlÀÂÂÂ’LªIdentifierÍÍ”¦elmtIdLªIdentifierÍ–Í¥¯isInitialRenderM®BlockStatementÍªÍl“S³ExpressionStatementÍÄÍÔT®CallExpressionÍÄÍÓY°MemberExpressionÍÄÍÑLªIdentifierÍÄÍÊ¦ColumnLªIdentifierÍËÍÑ¦createÂÂÂS³ExpressionStatementÍíÍT®CallExpressionÍíÍY°MemberExpressionÍíÍşLªIdentifierÍíÍó¦ColumnLªIdentifierÍôÍşªalignItemsÂÂ‘Y°MemberExpressionÍÿÍLªIdentifierÍÿÍ¯HorizontalAlignLªIdentifierÍÍ¥StartÂÂÂS³ExpressionStatementÍ/ÍVT®CallExpressionÍ/ÍUY°MemberExpressionÍ/Í<LªIdentifierÍ/Í5¦ColumnLªIdentifierÍ6Í<¦marginÂÂ‘Ôr\”¤type¥start£endªproperties°ObjectExpressionÍ=ÍT’Ôr]™¤type¥start£end¦method©shorthand¨computed£key¥value¤kind¨PropertyÍ?ÍFÂÂÂLªIdentifierÍ?ÍB£topR§LiteralÍDÍF¢30¤init]¨PropertyÍHÍRÂÂÂLªIdentifierÍHÍN¦bottomR§LiteralÍPÍR
+¢10¤initÂLªIdentifierÍnÍt¦ColumnÂS³ExpressionStatementÍ‹Í›T®CallExpressionÍ‹ÍšY°MemberExpressionÍ‹Í©U®ThisExpressionÍ‹ÍLªIdentifierÍÍ©¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍªÍÀÂÂÂ’LªIdentifierÍ«Í±¦elmtIdLªIdentifierÍ³ÍÂ¯isInitialRenderM®BlockStatementÍÇÍ“S³ExpressionStatementÍáÍòT®CallExpressionÍáÍñY°MemberExpressionÍáÍïLªIdentifierÍáÍè§ForEachLªIdentifierÍéÍï¦createÂÂÂÔr^•¤type¥start£end¬declarations¤kind³VariableDeclarationÍÍĞ‘Ôr_•¤type¥start£end¢id¤init²VariableDeclaratorÍÍÏLªIdentifierÍÍ'¶forEachItemGenFunctionO·ArrowFunctionExpressionÍ*ÍÏÀÂÂÂ’LªIdentifierÍ+Í0¥_itemLªIdentifierÍ2Í4¢r3M®BlockStatementÍ9ÍÏ“^³VariableDeclarationÍWÍj‘_²VariableDeclaratorÍ]ÍiLªIdentifierÍ]Ía¤itemLªIdentifierÍdÍi¥_item¥constS³ExpressionStatementÍ‡ÍT®CallExpressionÍ‡ÍY°MemberExpressionÍ‡Í¥U®ThisExpressionÍ‡Í‹LªIdentifierÍŒÍ¥¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍ¦Í‰ÀÂÂÂ’LªIdentifierÍ§Í­¦elmtIdLªIdentifierÍ¯Í¾¯isInitialRenderM®BlockStatementÍÃÍ‰’S³ExpressionStatementÍåÍñT®CallExpressionÍåÍğY°MemberExpressionÍåÍîLªIdentifierÍåÍç¢IfLªIdentifierÍèÍî¦createÂÂÂV«IfStatementÍÍkLªIdentifierÍÍ¤itemM®BlockStatementÍÍ«‘S³ExpressionStatementÍBÍ‰T®CallExpressionÍBÍˆY°MemberExpressionÍBÍaU®ThisExpressionÍBÍFLªIdentifierÍGÍaºifElseBranchUpdateFunctionÂÂ’R§LiteralÍbÍc ¡0O·ArrowFunctionExpressionÍeÍ‡ÀÂÂÂM®BlockStatementÍkÍ‡šS³ExpressionStatementÍ•ÍŒT®CallExpressionÍ•Í‹Y°MemberExpressionÍ•Í³U®ThisExpressionÍ•Í™LªIdentifierÍšÍ³¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍ´Í…ÀÂÂÂ’LªIdentifierÍµÍ»¦elmtIdLªIdentifierÍ½ÍÌ¯isInitialRenderM®BlockStatementÍÑÍ…’S³ExpressionStatementÍÿÍT®CallExpressionÍÿÍY°MemberExpressionÍÿÍ	LªIdentifierÍÿÍ£RowLªIdentifierÍÍ	¦createÂÂÂS³ExpressionStatementÍ9Í[T®CallExpressionÍ9ÍZY°MemberExpressionÍ9ÍGLªIdentifierÍ9Í<£RowLªIdentifierÍ=ÍGªalignItemsÂÂ‘Y°MemberExpressionÍHÍYLªIdentifierÍHÍU­VerticalAlignLªIdentifierÍVÍY£TopÂÂÂLªIdentifierÍ‡ÍŠ£RowÂS³ExpressionStatementÍµÍŞT®CallExpressionÍµÍİY°MemberExpressionÍµÍÓU®ThisExpressionÍµÍ¹LªIdentifierÍºÍÓ¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍÔÍÖÀÂÂÂ’LªIdentifierÍÕÍÛ¦elmtIdLªIdentifierÍİÍì¯isInitialRenderM®BlockStatementÍñÍÖ–S³ExpressionStatementÍÍ:T®CallExpressionÍÍ9Y°MemberExpressionÍÍ*LªIdentifierÍÍ#¤TextLªIdentifierÍ$Í*¦createÂÂ‘Ôr`•¤type¥start£end«expressions¦quasis¯TemplateLiteralÍ+Í8‘W°BinaryExpressionÍ/Í5LªIdentifierÍ/Í1¢r3¡+R§LiteralÍ4Í5¡1’Ôra•¤type¥start£end¥value¤tail¯TemplateElementÍ,Í-Ôrb’£raw¦cooked¡[¡[Âa¯TemplateElementÍ6Í7b¡]¡]ÃÂS³ExpressionStatementÍgÍƒT®CallExpressionÍgÍ‚Y°MemberExpressionÍgÍuLªIdentifierÍgÍk¤TextLªIdentifierÍlÍu©fontColorÂÂ‘R§LiteralÍvÍ©#ff9b9b9b«"#ff9b9b9b"ÂS³ExpressionStatementÍ°ÍÂT®CallExpressionÍ°ÍÁY°MemberExpressionÍ°Í½LªIdentifierÍ°Í´¤TextLªIdentifierÍµÍ½¨fontSizeÂÂ‘R§LiteralÍ¾ÍÀ¢13ÂS³ExpressionStatementÍïÍşT®CallExpressionÍïÍıY°MemberExpressionÍïÍùLªIdentifierÍïÍó¤TextLªIdentifierÍôÍù¥widthÂÂ‘R§LiteralÍúÍü¢30ÂS³ExpressionStatementÍ+Í[T®CallExpressionÍ+ÍZY°MemberExpressionÍ+Í:LªIdentifierÍ+Í/¤TextLªIdentifierÍ0Í:ªlineHeightÂÂ‘T®CallExpressionÍ;ÍYY°MemberExpressionÍ;ÍWY°MemberExpressionÍ;ÍEU®ThisExpressionÍ;Í?LªIdentifierÍ@ÍE¥nTextÂÂLªIdentifierÍFÍW±getTextLineHeightÂÂÂÂS³ExpressionStatementÍˆÍ¬T®CallExpressionÍˆÍ«Y°MemberExpressionÍˆÍ—LªIdentifierÍˆÍŒ¤TextLªIdentifierÍÍ—ªfontWeightÂÂ‘Y°MemberExpressionÍ˜ÍªLªIdentifierÍ˜Í¢ªFontWeightLªIdentifierÍ£Íª§LighterÂÂÂLªIdentifierÍØÍÜ¤TextÂS³ExpressionStatementÍÍT®CallExpressionÍÍY°MemberExpressionÍÍLªIdentifierÍÍ¤TextLªIdentifierÍÍ£popÂÂÂS³ExpressionStatementÍ;Í$T®CallExpressionÍ;Í#Y°MemberExpressionÍ;ÍYU®ThisExpressionÍ;Í?LªIdentifierÍ@ÍY¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍZÍÀÂÂÂ’LªIdentifierÍ[Ía¦elmtIdLªIdentifierÍcÍr¯isInitialRenderM®BlockStatementÍwÍ’S³ExpressionStatementÍ¥Í²T®CallExpressionÍ¥Í±Y°MemberExpressionÍ¥Í¯LªIdentifierÍ¥Í¨£RowLªIdentifierÍ©Í¯¦createÂÂÂS³ExpressionStatementÍßÍóT®CallExpressionÍßÍòY°MemberExpressionÍßÍïLªIdentifierÍßÍâ£RowLªIdentifierÍãÍï¬layoutWeightÂÂ‘R§LiteralÍğÍñ¡1ÂLªIdentifierÍÍ"£RowÂS³ExpressionStatementÍMÍ©T®CallExpressionÍMÍ¨Y°MemberExpressionÍMÍkU®ThisExpressionÍMÍQLªIdentifierÍRÍk¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍlÍ¡ÀÂÂÂ’LªIdentifierÍmÍs¦elmtIdLªIdentifierÍuÍ„¯isInitialRenderM®BlockStatementÍ‰Í¡“S³ExpressionStatementÍ·ÍÅT®CallExpressionÍ·ÍÄY°MemberExpressionÍ·ÍÂLªIdentifierÍ·Í»¤TextLªIdentifierÍ¼ÍÂ¦createÂÂÂS³ExpressionStatementÍòÍ"T®CallExpressionÍòÍ!Y°MemberExpressionÍòÍLªIdentifierÍòÍö¤TextLªIdentifierÍ÷ÍªlineHeightÂÂ‘T®CallExpressionÍÍ Y°MemberExpressionÍÍY°MemberExpressionÍÍU®ThisExpressionÍÍLªIdentifierÍÍ¥nTextÂÂLªIdentifierÍÍ±getTextLineHeightÂÂÂÂS³ExpressionStatementÍOÍwT®CallExpressionÍOÍvY°MemberExpressionÍOÍ\LªIdentifierÍOÍS¤TextLªIdentifierÍTÍ\¨fontSizeÂÂ‘T®CallExpressionÍ]ÍuY°MemberExpressionÍ]ÍsY°MemberExpressionÍ]ÍgU®ThisExpressionÍ]ÍaLªIdentifierÍbÍg¥nTextÂÂLªIdentifierÍhÍs«getTextSizeÂÂÂÂLªIdentifierÍ£Í§¤TextÂS³ExpressionStatementÍÒÍëT®CallExpressionÍÒÍêY°MemberExpressionÍÒÍğU®ThisExpressionÍÒÍÖLªIdentifierÍ×Íğ¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍñÍãÀÂÂÂ’LªIdentifierÍòÍø¦elmtIdLªIdentifierÍúÍ	¯isInitialRenderM®BlockStatementÍÍã’S³ExpressionStatementÍ<ÍrT®CallExpressionÍ<ÍqY°MemberExpressionÍ<ÍGLªIdentifierÍ<Í@¤SpanLªIdentifierÍAÍG¦createÂÂ‘W°BinaryExpressionÍHÍpW±LogicalExpressionÍIÍhY°MemberExpressionÍIÍTT®CallExpressionÍIÍQLªIdentifierÍIÍK¢f3‘LªIdentifierÍLÍP¤itemÂLªIdentifierÍRÍT¢n1ÂÂ¢||Y°MemberExpressionÍXÍhT®CallExpressionÍXÍ`LªIdentifierÍXÍZ¢f3‘LªIdentifierÍ[Í_¤itemÂLªIdentifierÍaÍh§contentÂÂ¡+R§LiteralÍlÍp¢: ¤": "ÂS³ExpressionStatementÍŸÍ¹T®CallExpressionÍŸÍ¸Y°MemberExpressionÍŸÍ­LªIdentifierÍŸÍ£¤SpanLªIdentifierÍ¤Í­©fontColorÂÂ‘R§LiteralÍ®Í·§#F56C6C©"#F56C6C"ÂLªIdentifierÍåÍé¤SpanÂS³ExpressionStatementÍÍÇT®CallExpressionÍÍÆY°MemberExpressionÍÍ2U®ThisExpressionÍÍLªIdentifierÍÍ2¹observeComponentCreation2ÂÂ’O·ArrowFunctionExpressionÍ3Í¿ÀÂÂÂ’LªIdentifierÍ4Í:¦elmtIdLªIdentifierÍ<ÍK¯isInitialRenderM®BlockStatementÍPÍ¿”S³ExpressionStatementÍ~Í—T®CallExpressionÍ~Í–Y°MemberExpressionÍ~Í‰LªIdentifierÍ~Í‚¤SpanLªIdentifierÍƒÍ‰¦createÂÂ‘Y°MemberExpressionÍŠÍ•T®CallExpressionÍŠÍ’LªIdentifierÍŠÍŒ¢f3‘LªIdentifierÍÍ‘¤itemÂLªIdentifierÍ“Í•¢m1ÂÂÂS³ExpressionStatementÍÄÍîT®CallExpressionÍÄÍíY°MemberExpressionÍÄÍÒLªIdentifierÍÄÍÈ¤SpanLªIdentifierÍÉÍÒ©fontColorÂÂ‘T®CallExpressionÍÓÍìY°MemberExpressionÍÓÍêY°MemberExpressionÍÓÍİU®ThisExpressionÍÓÍ×LªIdentifierÍØÍİ¥nTextÂÂLªIdentifierÍŞÍê¬getTextColorÂÂÂÂS³ExpressionStatementÍÍ<T®CallExpressionÍÍ;Y°MemberExpressionÍÍ)LªIdentifierÍÍ¤SpanLªIdentifierÍ Í)©fontStyleÂÂ‘Y°MemberExpressionÍ*Í:LªIdentifierÍ*Í3©FontStyleLªIdentifierÍ4Í:¦ItalicÂÂÂS³ExpressionStatementÍiÍ•T®CallExpressionÍiÍ”Y°MemberExpressionÍiÍuLªIdentifierÍiÍm¤SpanLªIdentifierÍnÍu§onClickÂÂ‘O·ArrowFunctionExpressionÍvÍ“ÀÂÂÂM®BlockStatementÍ|Í“‘V«IfStatementÍ®ÍeW°BinaryExpressionÍ²ÍÚT®CallExpressionÍ²ÍĞY°MemberExpressionÍ²ÍÊT®CallExpressionÍ²ÍÄY°MemberExpressionÍ²ÍÂY°MemberExpressionÍ²Í½T®CallExpressionÍ²ÍºLªIdentifierÍ²Í´¢f3‘LªIdentifierÍµÍ¹¤itemÂLªIdentifierÍ»Í½¢m1ÂÂLªIdentifierÍ¾ÍÂ¤trimÂÂÂLªIdentifierÍÅÍÊ¥sliceÂÂ’R§LiteralÍËÍÌ ¡0R§LiteralÍÎÍÏ¡4Â¢==R§LiteralÍÔÍÚ¤http¦"http"M®BlockStatementÍÜÍe‘S³ExpressionStatementÍÍ3T®CallExpressionÍÍ2Y°MemberExpressionÍÍU®ThisExpressionÍÍLªIdentifierÍÍ§openUrlÂÂ‘T®CallExpressionÍÍ1Y°MemberExpressionÍÍ/Y°MemberExpressionÍÍ*T®CallExpressionÍÍ'LªIdentifierÍÍ!¢f3‘LªIdentifierÍ"Í&¤itemÂLªIdentifierÍ(Í*¢m1ÂÂLªIdentifierÍ+Í/¤trimÂÂÂÂÀÂLªIdentifierÍÁÍÅ¤SpanÂS³ExpressionStatementÍğÍûT®CallExpressionÍğÍúY°MemberExpressionÍğÍøLªIdentifierÍğÍô¤TextLªIdentifierÍõÍø£popÂÂÂS³ExpressionStatementÍ$Í.T®CallExpressionÍ$Í-Y°MemberExpressionÍ$Í+LªIdentifierÍ$Í'£RowLªIdentifierÍ(Í+£popÂÂÂS³ExpressionStatementÍWÍaT®CallExpressionÍWÍ`Y°MemberExpressionÍWÍ^LªIdentifierÍWÍZ£RowLªIdentifierÍ[Í^£popÂÂÂÂM®BlockStatementÍÑÍk‘S³ExpressionStatementÍ÷ÍIT®CallExpressionÍ÷ÍHY°MemberExpressionÍ÷ÍU®ThisExpressionÍ÷ÍûLªIdentifierÍüÍºifElseBranchUpdateFunctionÂÂ’R§LiteralÍÍ¡1O·ArrowFunctionExpressionÍÍGÀÂÂÂM®BlockStatementÍ ÍGÂLªIdentifierÍ‹Í¢IfÂS³ExpressionStatementÍ¬ÍµT®CallExpressionÍ¬Í´Y°MemberExpressionÍ¬Í²LªIdentifierÍ¬Í®¢IfLªIdentifierÍ¯Í²£popÂÂÂ¥constS³ExpressionStatementÍéÍzT®CallExpressionÍéÍyY°MemberExpressionÍéÍU®ThisExpressionÍéÍíLªIdentifierÍîÍµforEachUpdateFunctionÂÂ–LªIdentifierÍÍ
+¦elmtIdT®CallExpressionÍÍHY°MemberExpressionÍÍ;T®CallExpressionÍÍ5Y°MemberExpressionÍÍ3Y°MemberExpressionÍÍ#U®ThisExpressionÍÍLªIdentifierÍÍ#²footnoteControllerÂÂLªIdentifierÍ$Í3¯getFootnoteListÂÂÂLªIdentifierÍ6Í;¥splitÂÂ‘Y°MemberExpressionÍ<ÍGLªIdentifierÍ<ÍC§SP_TYPELªIdentifierÍDÍG£SPKÂÂÂLªIdentifierÍJÍ`¶forEachItemGenFunctionLªIdentifierÍbÍk©undefinedR§LiteralÍmÍqÃ¤trueR§LiteralÍsÍxÂ¥falseÂLªIdentifierÍ’Í™§ForEachÂS³ExpressionStatementÍ°Í¾T®CallExpressionÍ°Í½Y°MemberExpressionÍ°Í»LªIdentifierÍ°Í·§ForEachLªIdentifierÍ¸Í»£popÂÂÂS³ExpressionStatementÍÓÍàT®CallExpressionÍÓÍßY°MemberExpressionÍÓÍİLªIdentifierÍÓÍÙ¦ColumnLªIdentifierÍÚÍİ£popÂÂÂÂM®BlockStatementÍÍr‘S³ExpressionStatementÍ&ÍdT®CallExpressionÍ&ÍcY°MemberExpressionÍ&ÍEU®ThisExpressionÍ&Í*LªIdentifierÍ+ÍEºifElseBranchUpdateFunctionÂÂ’R§LiteralÍFÍG¡1O·ArrowFunctionExpressionÍIÍbÀÂÂÂM®BlockStatementÍOÍbÂLªIdentifierÍ~Í€¢IfÂS³ExpressionStatementÍ‹Í”T®CallExpressionÍ‹Í“Y°MemberExpressionÍ‹Í‘LªIdentifierÍ‹Í¢IfLªIdentifierÍÍ‘£popÂÂÂN°MethodDefinitionÍŸÍÕÂÂLªIdentifierÍŸÍ§¨rerender¦methodO²FunctionExpressionÍ§ÍÕÀÂÂÂM®BlockStatementÍªÍÕ‘S³ExpressionStatementÍ´ÍÏT®CallExpressionÍ´ÍÎY°MemberExpressionÍ´ÍÌU®ThisExpressionÍ´Í¸LªIdentifierÍ¹ÍÌ³updateDirtyElementsÂÂÂÀ•Ôrc•¤type¥start£endªspecifiers¦source±ImportDeclarationÌ}Ì§‘Ôrd•¤type¥start£end¨imported¥local¯ImportSpecifierÌ†ÌŒLªIdentifierÌ†ÌŒ¦lvLinkLªIdentifierÌ†ÌŒ¦lvLinkR§LiteralÌ”Ì¦°../domain/LvLink²'../domain/LvLink'c±ImportDeclarationÌ¨ÌÒ‘d¯ImportSpecifierÌ±Ì·LªIdentifierÌ±Ì·¦lvTextLªIdentifierÌ±Ì·¦lvTextR§LiteralÌ¿ÌÑ°../domain/LvText²'../domain/LvText'c±ImportDeclarationÌÓÌù‘d¯ImportSpecifierÌÜÌæLªIdentifierÌÜÌæªmdRegisterLªIdentifierÌÜÌæªmdRegisterR§LiteralÌîÌø¨./commonª'./common'c±ImportDeclarationÌúÍ‘d¯ImportSpecifierÍÍ
+LªIdentifierÍÍ
+§SP_TYPELªIdentifierÍÍ
+§SP_TYPER§LiteralÍÍª./constant¬'./constant'c±ImportDeclarationÍ Íi‘d¯ImportSpecifierÍ)Í=LªIdentifierÍ)Í=´lvFootnoteControllerLªIdentifierÍ)Í=´lvFootnoteControllerR§LiteralÍEÍhÙ!./controller/lvFootnoteControllerÙ#'./controller/lvFootnoteController'

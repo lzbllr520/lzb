@@ -78,6 +78,9 @@ export class SystemSetting extends ViewPU {
     openCamera() {
         router.pushUrl({ url: 'pages/Camera' });
     }
+    openScan() {
+        router.pushUrl(({ url: 'pages/Scan' }));
+    }
     logout() {
         AlertDialog.show({
             title: '操作确认',
@@ -217,6 +220,30 @@ export class SystemSetting extends ViewPU {
         }, Blank);
         // 添加一个灵活的空白填充，将右侧的按钮推到最右边
         Blank.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            //扫码按钮
+            Button.createWithChild({ type: ButtonType.Circle, stateEffect: true });
+            //扫码按钮
+            Button.width(50);
+            //扫码按钮
+            Button.height(50);
+            //扫码按钮
+            Button.margin({ right: 20 });
+            //扫码按钮
+            Button.backgroundColor('rgba(255, 255, 255, 0.2)');
+            //扫码按钮
+            Button.onClick(() => {
+                this.openScan();
+            });
+        }, Button);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Image.create({ "id": 16777292, "type": 20000, params: [], "bundleName": "com.my.myapplication", "moduleName": "entry" });
+            Image.width(28);
+            Image.height(28);
+            Image.fillColor(Color.White);
+        }, Image);
+        //扫码按钮
+        Button.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             //相机按钮
             Button.createWithChild({ type: ButtonType.Circle, stateEffect: true });

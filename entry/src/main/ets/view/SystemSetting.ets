@@ -21,6 +21,10 @@ export struct SystemSetting {
     router.pushUrl({url:'pages/Camera'})
   }
 
+  openScan(){
+    router.pushUrl(({url:'pages/Scan'}))
+  }
+
   logout() {
     AlertDialog.show({
       title: '操作确认',
@@ -132,6 +136,21 @@ export struct SystemSetting {
 
         // 添加一个灵活的空白填充，将右侧的按钮推到最右边
         Blank()
+
+        //扫码按钮
+        Button({ type: ButtonType.Circle, stateEffect: true }) {
+          Image($r('app.media.sacn'))
+            .width(28)
+            .height(28)
+            .fillColor(Color.White)
+        }
+        .width(50)
+        .height(50)
+        .margin({right:20})
+        .backgroundColor('rgba(255, 255, 255, 0.2)')
+        .onClick(() => {
+          this.openScan()
+        })
 
         //相机按钮
         Button({ type: ButtonType.Circle, stateEffect: true }) {
