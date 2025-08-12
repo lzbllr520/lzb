@@ -123,8 +123,8 @@ export struct ServerInfoView {
         const nodes2: Node[] | null = await getNodeOther(this.server.id, nodes1[3].node_id)
         if (nodes2 && nodes2.length > 0) {
           // RFID读卡器
-          let index=4
-          if(this.server.id==='server1'||this.server.id==='server4'){
+          let index=5
+          if (this.server.id==='server1'||this.server.id==='server4'){
             index=6
           }
           const rfidNodes: Node[] | null = await getNodeOther(this.server.id, nodes2[index].node_id);

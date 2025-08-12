@@ -524,6 +524,7 @@ export struct Dolly {
 
             //地图位置
 
+
             //全屏按钮
             ActionButton({
               icon: $r('app.media.full_screen'),

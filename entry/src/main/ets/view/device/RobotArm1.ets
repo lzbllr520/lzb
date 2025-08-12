@@ -59,13 +59,9 @@ export struct RobotArm1 {
   @State uid:string=''
   //设备警报
   @State alarms:number=0
-  @State node_id_alarms:string=''
-  private alarmTimer: number = -1
   //使能
   @State endAbled:boolean=false
   @State node_id_endAbled:string=''
-  //清除警报
-  @State node_id_clearAlarms:string=''
   //末端执行
   @State node_id_end:string=''
   //设置回零
@@ -108,14 +104,6 @@ export struct RobotArm1 {
             this.showSystemToast('获取uid失败')
           }
         }
-        //获取警报node_id
-        const alarmsNodes:Node[]|null=await getNodeOther(this.node.id,nodes[2].node_id)
-        if (alarmsNodes&&alarmsNodes.length>0) {
-          //获取是否存在警报和警报信息
-          this.node_id_alarms=alarmsNodes[1].node_id
-          //获取清除警报node_id
-          this.node_id_clearAlarms=alarmsNodes[4].node_id
-        }
         //获取末端执行node_id
         const endNodes1:Node[]|null=await getNodeOther(this.node.id,nodes[5].node_id)
         if (endNodes1&&endNodes1.length>0) {
@@ -153,33 +141,6 @@ export struct RobotArm1 {
             this.data.rrValue=parseFloat(nowPositions[3].toFixed(2))
           }
         }
-      }
-    }
-  }
-
-  //获取警报
-  async getAlarms(): Promise<boolean>{
-    if (this.node.id&&this.node.node_id&&this.node_id_alarms) {
-      const num:number|null=await getRobotArmAlarms(this.node.id,this.node_id_alarms)
-      if (num!==null) {
-        this.alarms=num
-        return true
-      }else {
-        return false
-      }
-    }else {
-      return false
-    }
-  }
-
-  //清除警报
-  async clearAlarms():Promise<void>{
-    if (this.node.id&&this.node.node_id&&this.node_id_clearAlarms) {
-      const isClear:boolean|null=await clearRobotArmAlarms(this.node.id,this.node_id_clearAlarms)
-      if (isClear) {
-        this.showSystemToast('清除警报成功')
-      }else {
-        this.showSystemToast('清除警报失败')
       }
     }
   }
@@ -322,9 +283,8 @@ export struct RobotArm1 {
   async aboutToAppear(): Promise<void> {
     await this.onNodeChange()
     const is1= await this.getNowPosition()
-    const is2= await this.getAlarms()
-    const is3 =await this.getEndStatus()
-    if (is1&&is2&&is3) {
+    const is2 =await this.getEndStatus()
+    if (is1&&is2) {
       this.showSystemToast('初始化成功')
     }else {
       this.showSystemToast('初始化失败')
@@ -731,7 +691,7 @@ export struct RobotArm1 {
                     y: this.getScaleValue()
                   })
                     .onClick(()=>{
-                      this.clearAlarms()
+
                     })
                   //动画曲线作用于所有变化的属性（scale, shadow, opacity）
                   .animation({ duration: 150, curve: Curve.EaseOut })
@@ -1701,9 +1661,8 @@ export struct RobotArm1 {
             icon: $r('app.media.refresh'),
             click: async() => {
               const is1= await this.getNowPosition()
-              const is2= await this.getAlarms()
-              const is3= await this.getEndStatus()
-              if (is1&&is2&&is3) {
+              const is2= await this.getEndStatus()
+              if (is1&&is2) {
                 this.showSystemToast('刷新成功')
               }else {
                 this.showSystemToast('刷新失败')
@@ -1722,9 +1681,8 @@ export struct RobotArm1 {
                 this.data.isInfoCardVisible=!this.data.isInfoCardVisible
                 if (!this.data.isInfoCardVisible) {
                   const is1= await this.getNowPosition()
-                  const is2= await this.getAlarms()
-                  const is3= await this.getEndStatus()
-                  if (is1&&is2&&is3) {
+                  const is2= await this.getEndStatus()
+                  if (is1&&is2) {
                     this.showSystemToast('初始化成功')
                   }else {
                     this.showSystemToast('初始化失败')

@@ -285,9 +285,12 @@ export class ServerInfoView extends ViewPU {
                 const nodes2: Node[] | null = await getNodeOther(this.server.id, nodes1[3].node_id);
                 if (nodes2 && nodes2.length > 0) {
                     // RFID读卡器
-                    let index = 4;
-                    if (this.server.id === 'server1' || this.server.id === 'server4') {
+                    let index = 5;
+                    if (this.server.id === 'server1') {
                         index = 6;
+                    }
+                    if (this.server.id === 'server4') {
+                        index = 7;
                     }
                     const rfidNodes: Node[] | null = await getNodeOther(this.server.id, nodes2[index].node_id);
                     if (rfidNodes && rfidNodes.length > 0) {
@@ -479,7 +482,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 278, col: 28 });
+                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 281, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -526,7 +529,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 289, col: 28 });
+                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 292, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -573,7 +576,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 300, col: 28 });
+                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 303, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -620,7 +623,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 311, col: 28 });
+                                    let componentCall = new ValueCard(this, { title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 314, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -666,7 +669,7 @@ export class ServerInfoView extends ViewPU {
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 322, col: 28 });
+                                    let componentCall = new ValueCard(this, { icon: item.icon, title: item.title, value: item.value, unit: item.unit }, undefined, elmtId, () => { }, { page: "entry/src/main/ets/components/ServerInfoView.ets", line: 325, col: 28 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
